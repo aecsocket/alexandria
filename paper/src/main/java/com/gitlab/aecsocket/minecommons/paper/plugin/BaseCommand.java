@@ -100,7 +100,7 @@ public class BaseCommand<P extends BasePlugin<P>> {
         CommandSender sender = ctx.getSender();
         Locale locale = locale(sender);
         sender.sendMessage(localize(locale, "chat.reload.start"));
-        plugin.load();
+        plugin.reload();
         sender.sendMessage(localize(locale, "chat.reload.end"));
     }
 }

@@ -7,6 +7,7 @@ import com.gitlab.aecsocket.minecommons.core.Text;
 import com.gitlab.aecsocket.minecommons.core.serializers.Serializers;
 import com.gitlab.aecsocket.minecommons.core.translation.LocalizerLoader;
 import com.gitlab.aecsocket.minecommons.core.translation.MiniMessageLocalizer;
+import com.gitlab.aecsocket.minecommons.paper.serializers.PaperSerializers;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
@@ -15,7 +16,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.server.ServerLoadEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.spongepowered.configurate.BasicConfigurationNode;
 import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.ConfigurationOptions;
@@ -86,7 +89,7 @@ public abstract class BasePlugin<S extends BasePlugin<S>> extends JavaPlugin imp
 
     protected void configOptionsDefaults(TypeSerializerCollection.Builder serializers, ObjectMapper.Factory.Builder mapperFactory) {
         mapperFactory.defaultNamingScheme(NamingSchemes.SNAKE_CASE);
-        serializers.registerAll(Serializers.SERIALIZERS);
+        serializers.registerAll(PaperSerializers.SERIALIZERS);
     }
 
     public Logging logging() { return logging; }
@@ -104,11 +107,13 @@ public abstract class BasePlugin<S extends BasePlugin<S>> extends JavaPlugin imp
 
     @EventHandler
     public boolean serverLoad(ServerLoadEvent event) {
-        configOptions = configOptions.serializers(serializers -> {
-            ObjectMapper.Factory.Builder mapperFactory = ObjectMapper.factoryBuilder();
-            configOptionsDefaults(serializers, mapperFactory);
-            serializers.registerAnnotatedObjects(mapperFactory.build());
-        });
+        TypeSerializerCollection.Builder serializers = TypeSerializerCollection.defaults().childBuilder();
+
+        ObjectMapper.Factory.Builder mapperFactory = ObjectMapper.factoryBuilder();
+        configOptionsDefaults(serializers, mapperFactory);
+        serializers.registerAnnotatedObjects(mapperFactory.build());
+
+        configOptions = configOptions.serializers(serializers.build());
         return load();
     }
 
@@ -139,6 +144,14 @@ public abstract class BasePlugin<S extends BasePlugin<S>> extends JavaPlugin imp
         });
 
         return true;
+    }
+
+    /**
+     * Cleans up current state, and {@link #load()}s data.
+     * @return If the process did not experience severe errors.
+     */
+    public boolean reload() {
+        return load();
     }
 
     /**
@@ -272,5 +285,13 @@ public abstract class BasePlugin<S extends BasePlugin<S>> extends JavaPlugin imp
      */
     public NamespacedKey key(String key) {
         return keys.computeIfAbsent(key, k -> new NamespacedKey(this, k));
+    }
+
+    /**
+     * Creates a new {@link BasicConfigurationNode} using this plugin's {@link #configOptions}.
+     * @return The node.
+     */
+    public ConfigurationNode newNode() {
+        return BasicConfigurationNode.root(configOptions);
     }
 }

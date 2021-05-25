@@ -1,4 +1,4 @@
-package com.gitlab.aecsocket.minecommons.inputs;
+package com.gitlab.aecsocket.minecommons.paper.inputs;
 
 import com.gitlab.aecsocket.minecommons.core.event.Cancellable;
 import com.gitlab.aecsocket.minecommons.core.event.EventDispatcher;

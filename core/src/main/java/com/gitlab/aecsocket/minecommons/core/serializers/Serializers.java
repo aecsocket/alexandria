@@ -2,6 +2,8 @@ package com.gitlab.aecsocket.minecommons.core.serializers;
 
 import com.gitlab.aecsocket.minecommons.core.Logging;
 import com.gitlab.aecsocket.minecommons.core.translation.Translation;
+import net.kyori.adventure.serializer.configurate4.ConfigurateComponentSerializer;
+import net.kyori.adventure.text.Component;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
 import org.spongepowered.configurate.serialize.TypeSerializerCollection;
@@ -24,6 +26,7 @@ public final class Serializers {
             .register(Logging.Level.class, LoggingLevelSerializer.INSTANCE)
             .register(Locale.class, LocaleSerializer.INSTANCE)
             .register(Translation.class, TranslationSerializer.INSTANCE)
+            .registerAll(ConfigurateComponentSerializer.configurate().serializers())
             .build();
 
     /**

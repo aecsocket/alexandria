@@ -1,4 +1,4 @@
-package com.gitlab.aecsocket.minecommons.inputs;
+package com.gitlab.aecsocket.minecommons.paper.inputs;
 
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;

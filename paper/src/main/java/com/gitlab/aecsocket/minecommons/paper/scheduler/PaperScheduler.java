@@ -1,4 +1,4 @@
-package com.gitlab.aecsocket.minecommons.scheduler;
+package com.gitlab.aecsocket.minecommons.paper.scheduler;
 
 import com.gitlab.aecsocket.minecommons.core.Ticks;
 import com.gitlab.aecsocket.minecommons.core.scheduler.Scheduler;

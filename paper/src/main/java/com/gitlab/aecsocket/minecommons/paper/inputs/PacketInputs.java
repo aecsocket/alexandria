@@ -1,4 +1,4 @@
-package com.gitlab.aecsocket.minecommons.inputs;
+package com.gitlab.aecsocket.minecommons.paper.inputs;
 
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.events.ListeningWhitelist;
