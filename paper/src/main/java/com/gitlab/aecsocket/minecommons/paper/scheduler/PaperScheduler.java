@@ -45,7 +45,7 @@ public final class PaperScheduler implements Scheduler {
     @Override
     public void run(Task task) {
         long start = System.currentTimeMillis();
-        schedule(() -> runnable(task, start, start, Ticks.ticks(task.interval()), 0), Ticks.ticks(task.interval()));
+        schedule(() -> runnable(task, start, start, Ticks.ticks(task.interval()), 0), Ticks.ticks(task.delay()));
     }
 
     @Override
