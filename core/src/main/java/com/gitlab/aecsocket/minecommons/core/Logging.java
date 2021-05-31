@@ -16,7 +16,7 @@ public final class Logging {
      * A logging level, determining the style and priority of a logging message.
      */
     public record Level(String name, int level, String prefix, String bgColor, String fgColor, String textColor) {
-        public static final Level DEBUG = new Level("debug", -2, "DBG", "44", "39", "37");
+        public static final Level DEBUG = new Level("debug", -2, "DBG", "100", "37", "90");
         public static final Level VERBOSE = new Level("verbose", -1, "VRB", "44", "39", "37");
         public static final Level INFO = new Level("info", 0, "INF", "42", "30", "39");
         public static final Level WARNING = new Level("warning", 1, "WRN", "43", "30", "33");

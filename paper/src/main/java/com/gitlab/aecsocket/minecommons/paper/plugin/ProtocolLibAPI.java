@@ -6,17 +6,21 @@ import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.injector.netty.WirePacket;
+import com.comphenix.protocol.wrappers.EnumWrappers;
 import com.comphenix.protocol.wrappers.WrappedDataWatcher;
+import com.comphenix.protocol.wrappers.WrappedGameProfile;
 import com.comphenix.protocol.wrappers.WrappedWatchableObject;
+import com.gitlab.aecsocket.minecommons.core.CollectionBuilder;
 import com.gitlab.aecsocket.minecommons.core.Logging;
 import com.gitlab.aecsocket.minecommons.core.serializers.Serializers;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.EquipmentSlot;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 
@@ -24,6 +28,18 @@ import java.util.logging.Level;
  * Utility class for managing packets using a ProtocolLib {@link ProtocolManager}.
  */
 public final class ProtocolLibAPI {
+    /**
+     * A map of Bukkit {@link EquipmentSlot}s to protocol {@link EnumWrappers.ItemSlot}s.
+     */
+    public static final BiMap<EquipmentSlot, EnumWrappers.ItemSlot> SLOTS = HashBiMap.create(CollectionBuilder.map(new HashMap<EquipmentSlot, EnumWrappers.ItemSlot>())
+            .put(EquipmentSlot.HAND, EnumWrappers.ItemSlot.MAINHAND)
+            .put(EquipmentSlot.OFF_HAND, EnumWrappers.ItemSlot.OFFHAND)
+            .put(EquipmentSlot.HEAD, EnumWrappers.ItemSlot.HEAD)
+            .put(EquipmentSlot.CHEST, EnumWrappers.ItemSlot.CHEST)
+            .put(EquipmentSlot.LEGS, EnumWrappers.ItemSlot.LEGS)
+            .put(EquipmentSlot.FEET, EnumWrappers.ItemSlot.FEET)
+            .build());
+
     private final BasePlugin<?> plugin;
     private final ProtocolManager manager;
 
@@ -61,6 +77,35 @@ public final class ProtocolLibAPI {
         result.add(target);
         return result;
     }
+
+    /**
+     * Gets a Bukkit angle as its protocol representation.
+     * @param ang The Bukkit angle.
+     * @return The protocol angle.
+     */
+    public byte protocolAngle(float ang) { return (byte) (ang * 256 / 360); }
+
+    /**
+     *
+     * Gets a protocol angle as its Bukkit representation.
+     * @param ang The protocol angle.
+     * @return The Bukkit angle.
+     */
+    public float bukkitAngle(byte ang) { return (ang * 360f) / 256; }
+
+    /**
+     * Gets a Bukkit distance delta as its protocol representation.
+     * @param delta The Bukkit distance.
+     * @return The protocol distance.
+     */
+    public short protocolDelta(float delta) { return (short) (delta * 4096); }
+
+    /**
+     * Gets a protocol distance delta as its Bukkit representation.
+     * @param delta The protocol distance.
+     * @return The Bukkit distance.
+     */
+    public float bukkitDelta(short delta) { return delta / 4096f; }
 
     /**
      * Sends a packet, catching exceptions and forwarding them to {@link BasePlugin#log(Logging.Level, Throwable, String, Object...)}.
@@ -151,4 +196,15 @@ public final class ProtocolLibAPI {
      * @return The builder.
      */
     public static WatcherObjectsBuilder watcherObjects() { return new WatcherObjectsBuilder(); }
+
+    /**
+     * Copies an existing game profile, with a new random UUID.
+     * @param existing The existing profile.
+     * @return The new profile.
+     */
+    public static WrappedGameProfile withRandomUUID(WrappedGameProfile existing) {
+        WrappedGameProfile result = new WrappedGameProfile(UUID.randomUUID(), existing.getName());
+        result.getProperties().putAll(existing.getProperties());
+        return result;
+    }
 }

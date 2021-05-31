@@ -1,7 +1,7 @@
 package com.gitlab.aecsocket.minecommons.paper.serializers;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
@@ -20,7 +20,7 @@ public class LocationSerializer implements TypeSerializer<Location> {
     public void serialize(Type type, @Nullable Location obj, ConfigurationNode node) throws SerializationException {
         if (obj == null) node.set(null);
         else {
-            node.node("world").set(obj.getWorld().getName());
+            node.node("world").set(obj.getWorld());
             node.node("x").set(obj.getX());
             node.node("y").set(obj.getY());
             node.node("z").set(obj.getZ());
@@ -32,7 +32,7 @@ public class LocationSerializer implements TypeSerializer<Location> {
     @Override
     public Location deserialize(Type type, ConfigurationNode node) throws SerializationException {
         return new Location(
-                Bukkit.getWorld(node.node("world").getString("")),
+                node.node("world").get(World.class),
                 node.node("x").getDouble(),
                 node.node("y").getDouble(),
                 node.node("z").getDouble(),

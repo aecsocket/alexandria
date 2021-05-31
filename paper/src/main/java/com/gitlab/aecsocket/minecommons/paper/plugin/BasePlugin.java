@@ -8,6 +8,7 @@ import com.gitlab.aecsocket.minecommons.core.serializers.Serializers;
 import com.gitlab.aecsocket.minecommons.core.translation.LocalizerLoader;
 import com.gitlab.aecsocket.minecommons.core.translation.MiniMessageLocalizer;
 import com.gitlab.aecsocket.minecommons.paper.serializers.PaperSerializers;
+import com.gitlab.aecsocket.minecommons.paper.serializers.protocol.ProtocolSerializers;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
@@ -41,7 +42,7 @@ public abstract class BasePlugin<S extends BasePlugin<S>> extends JavaPlugin imp
     /** The path to the directory storing language files. */
     public static final String PATH_LANG = "lang";
     /** The default resources that are saved to the plugin's data folder. */
-    public static final Collection<String> DEFAULT_RESOURCES = CollectionBuilder.set(new HashSet<String>())
+    public static final Set<String> DEFAULT_RESOURCES = CollectionBuilder.set(new HashSet<String>())
             .add(PATH_SETTINGS)
             .add(PATH_LANG + "/default_en-US.conf")
             .add(PATH_LANG + "/en-US.conf")
@@ -89,7 +90,10 @@ public abstract class BasePlugin<S extends BasePlugin<S>> extends JavaPlugin imp
 
     protected void configOptionsDefaults(TypeSerializerCollection.Builder serializers, ObjectMapper.Factory.Builder mapperFactory) {
         mapperFactory.defaultNamingScheme(NamingSchemes.SNAKE_CASE);
+        serializers.registerAll(Serializers.SERIALIZERS);
         serializers.registerAll(PaperSerializers.SERIALIZERS);
+        if (protocol != null)
+            serializers.registerAll(ProtocolSerializers.SERIALIZERS);
     }
 
     public Logging logging() { return logging; }
@@ -162,6 +166,15 @@ public abstract class BasePlugin<S extends BasePlugin<S>> extends JavaPlugin imp
     public File file(String path) { return new File(getDataFolder(), path); }
 
     /**
+     * Creates a builder for a HOCON loader, using this plugin's configuration options.
+     * @return The loader builder.
+     */
+    public HoconConfigurationLoader.Builder loaderBuilder() {
+        return HoconConfigurationLoader.builder()
+                .defaultOptions(configOptions);
+    }
+
+    /**
      * Builds a new configuration loader from a file, using this plugin's configuration options.
      * <p>
      * By default uses a {@link HoconConfigurationLoader}.
@@ -169,9 +182,8 @@ public abstract class BasePlugin<S extends BasePlugin<S>> extends JavaPlugin imp
      * @return The loader.
      */
     public ConfigurationLoader<?> loader(File file) {
-        return HoconConfigurationLoader.builder()
+        return loaderBuilder()
                 .file(file)
-                .defaultOptions(configOptions)
                 .build();
     }
 
@@ -285,13 +297,5 @@ public abstract class BasePlugin<S extends BasePlugin<S>> extends JavaPlugin imp
      */
     public NamespacedKey key(String key) {
         return keys.computeIfAbsent(key, k -> new NamespacedKey(this, k));
-    }
-
-    /**
-     * Creates a new {@link BasicConfigurationNode} using this plugin's {@link #configOptions}.
-     * @return The node.
-     */
-    public ConfigurationNode newNode() {
-        return BasicConfigurationNode.root(configOptions);
     }
 }
