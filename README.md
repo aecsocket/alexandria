@@ -32,3 +32,7 @@ Dependency
     <version>1.0-SNAPSHOT</version>
 </dependency>
 ```
+
+### API
+
+Every class has extensive Javadoc documentation on its usage. Javadocs not hosted yet.
