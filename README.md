@@ -16,4 +16,19 @@ Platforms:
 
 ### Coordinates
 
-TODO
+Repository
+```xml
+<repository>
+    <id>jitpack.io</id>
+    <url>https://jitpack.io</url>
+</repository>
+```
+
+Dependency
+```xml
+<dependency>
+    <groupId>com.gitlab.aecsocket</groupId>
+    <artifactId>minecommons</artifactId>
+    <version>1.0-SNAPSHOT</version>
+</dependency>
+```
