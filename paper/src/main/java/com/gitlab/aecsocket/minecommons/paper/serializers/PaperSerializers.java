@@ -3,6 +3,7 @@ package com.gitlab.aecsocket.minecommons.paper.serializers;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.util.Vector;
 import org.spongepowered.configurate.serialize.TypeSerializerCollection;
 
 /**
@@ -18,5 +19,6 @@ public final class PaperSerializers {
             .register(ItemStack.class, ItemStackSerializer.INSTANCE)
             .register(World.class, WorldSerializer.INSTANCE)
             .register(Location.class, LocationSerializer.INSTANCE)
+            .register(Vector.class, VectorSerializer.INSTANCE)
             .build();
 }
