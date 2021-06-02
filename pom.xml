@@ -61,7 +61,22 @@
             <id>sonatype-oss-snapshots</id>
             <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
         </repository>
+        <repository>
+            <id>gitlab-maven</id>
+            <url>https://gitlab.com/api/v4/projects/27049637/packages/maven</url>
+        </repository>
     </repositories>
+
+    <distributionManagement>
+        <repository>
+            <id>gitlab-maven</id>
+            <url>https://gitlab.com/api/v4/projects/27049637/packages/maven/url>
+        </repository>
+        <snapshotRepository>
+            <id>gitlab-maven</id>
+            <url>https://gitlab.com/api/v4/projects/27049637/packages/maven/url>
+        </snapshotRepository>
+    </distributionManagement>
 
     <build>
         <defaultGoal>clean install</defaultGoal>
