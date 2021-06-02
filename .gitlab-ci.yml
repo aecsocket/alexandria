@@ -1,4 +1,4 @@
-image: "maven:latest"
+image: "maven:3-alpine"
 
 cache:
   paths:
@@ -9,7 +9,7 @@ variables:
 
 build:
   script:
-    - "apt-get update && apt-get install -y jq"
+    - "apk update && apk add jq"
     - "version='1.16.5'"
     - "build=$(curl https://papermc.io/api/v2/projects/paper/versions/1.16.5 | jq '.builds[-1]')"
     - "curl --output paperclip.jar https://papermc.io/api/v2/projects/paper/versions/1.16.5/builds/${build}/downloads/paper-${version}-${build}.jar"
