@@ -12,7 +12,6 @@ Platforms:
 ### Dependencies
 
 * [Java >=16](https://adoptopenjdk.net/?variant=openjdk16&jvmVariant=hotspot)
-* [Paper >=1.16.5](https://papermc.io/)
 
 ### Coordinates
 
@@ -32,6 +31,10 @@ Dependency
     <version>[VERSION]</version>
 </dependency>
 ```
+
+Modules:
+* `core` Core, platform-agnostic utilities
+* `paper` [Paper >=1.16.5](https://papermc.io/) platform-specific utilities
 
 ### API
 
