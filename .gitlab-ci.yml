@@ -17,4 +17,4 @@ build:
     - "mvn package -B"
   artifacts:
     paths:
-      - "*/target"
+      - "*target"

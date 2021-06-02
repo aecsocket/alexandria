@@ -19,17 +19,17 @@ Platforms:
 Repository
 ```xml
 <repository>
-    <id>jitpack.io</id>
-    <url>https://jitpack.io</url>
+    <id>gitlab-maven-minecommons</id>
+    <url>https://gitlab.com/api/v4/projects/27049637/packages/maven</url>
 </repository>
 ```
 
 Dependency
 ```xml
 <dependency>
-    <groupId>com.gitlab.aecsocket</groupId>
-    <artifactId>minecommons</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <groupId>com.gitlab.aecsocket.minecommons</groupId>
+    <artifactId>minecommons-[MODULE]</artifactId>
+    <version>[VERSION]</version>
 </dependency>
 ```
 
