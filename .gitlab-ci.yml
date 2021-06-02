@@ -1,4 +1,4 @@
-image: "maven:latest-alpine"
+image: "maven:alpine"
 
 cache:
   paths:
