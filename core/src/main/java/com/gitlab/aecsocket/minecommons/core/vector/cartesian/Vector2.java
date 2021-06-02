@@ -5,6 +5,9 @@ import com.gitlab.aecsocket.minecommons.core.Validation;
 import com.gitlab.aecsocket.minecommons.core.vector.polar.Coord2;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
+import static java.lang.Math.*;
+import static com.gitlab.aecsocket.minecommons.core.Numbers.*;
+
 /**
  * An immutable (x, y) double value pair, using the Cartesian coordinate system.
  */
@@ -58,7 +61,7 @@ public record Vector2(double x, double y) {
      * @param o The other vector.
      * @return The resulting vector.
      */
-    public Vector2 add(@NonNull Vector2 o) { return add(o.x(), o.y()); }
+    public Vector2 add(@NonNull Vector2 o) { return add(o.x, o.y); }
 
 
     /**
@@ -104,7 +107,7 @@ public record Vector2(double x, double y) {
      * @param o The other vector.
      * @return The resulting vector.
      */
-    public Vector2 multiply(@NonNull Vector2 o) { return multiply(o.x(), o.y()); }
+    public Vector2 multiply(@NonNull Vector2 o) { return multiply(o.x, o.y); }
 
 
     /**
@@ -127,7 +130,31 @@ public record Vector2(double x, double y) {
      * @param o The other vector.
      * @return The resulting vector.
      */
-    public Vector2 divide(@NonNull Vector2 o) { return multiply(o.x(), o.y()); }
+    public Vector2 divide(@NonNull Vector2 o) { return multiply(o.x, o.y); }
+
+    /**
+     * Negates all components.
+     * @return The resulting vector.
+     */
+    public Vector2 neg() { return new Vector2(-x, -y); }
+
+    /**
+     * Applies {@link Math#abs(double)} on all components.
+     * @return The resulting vector.
+     */
+    public Vector2 abs() { return new Vector2(Math.abs(x), Math.abs(y)); }
+
+    /**
+     * Gets the smallest component of this vector.
+     * @return The component.
+     */
+    public double minComponent() { return Math.min(x, y); }
+
+    /**
+     * Gets the largest component of this vector.
+     * @return The component.
+     */
+    public double maxComponent() { return Math.max(x, y); }
 
     /**
      * Normalizes this vector so that its length equals 1.
@@ -146,7 +173,7 @@ public record Vector2(double x, double y) {
      * @param f The interpolation factor.
      * @return The interpolated vector.
      */
-    public @NonNull Vector2 lerp(@NonNull Vector2 o, float f) {
+    public @NonNull Vector2 lerp(@NonNull Vector2 o, double f) {
         return new Vector2(
                 x + (o.x() - x) * f,
                 y + (o.y() - y) * f
@@ -157,34 +184,51 @@ public record Vector2(double x, double y) {
      * Gets the Manhattan length of this vector, equivalent to {@code abs(x) + abs(y)}.
      * @return The Manhattan length.
      */
-    public double manhattanLength() { return Math.abs(x()) + Math.abs(y()); }
+    public double manhattanLength() { return Math.abs(x) + Math.abs(y); }
 
     /**
-     * Gets the length of this vector, equivalent to {@code sqrt(x^2 + y^2)}. May be expensive.
+     * Gets the squared length of this vector, equivalent to {@code x^2 + y^2}.
+     * Less expensive than {@link #length()}.
      * @return The length.
      */
-    public double length() { return Math.sqrt(Numbers.sqr(x()) + Numbers.sqr(y())); }
+    public double sqrLength() { return sqr(x) + sqr(y); }
+
+    /**
+     * Gets the length of this vector, equivalent to {@code sqrt(x^2 + y^2)}.
+     * Expensive, may prefer to use {@link #sqrLength()}.
+     * @return The length.
+     */
+    public double length() { return sqrt(sqrLength()); }
 
     /**
      * Gets the Manhattan distance between this vector and another, equivalent to {@code abs(x1 - x2) + abs(y1 - y2)}.
      * @param o The other vector.
      * @return The Manhattan distance.
      */
-    public double manhattanDistance(Vector2 o) { return Math.abs(x() - o.x()) + Math.abs(y() - o.y()); }
+    public double manhattanDistance(Vector2 o) { return Math.abs(x - o.x) + Math.abs(y - o.y); }
 
     /**
-     * Gets the distance between this vector and another, equivalent to {@code sqrt((x1 - x2)^2 + (y1 - y2)^2)}.
+     * Gets the squared distance between this vector and another, equivalent to {@code (x1 - x2)^2 + (y1 - y2)^2 + (z1 - z2)^2}.
+     * Less expensive than {@link #distance(Vector2)}.
      * @param o The other vector.
      * @return The distance.
      */
-    public double distance(Vector2 o) { return Math.sqrt(Numbers.sqr(x() - o.x()) + Numbers.sqr(y() - o.y())); }
+    public double sqrDistance(Vector2 o) { return sqr(x - o.x) + sqr(y - o.y); }
+
+    /**
+     * Gets the distance between this vector and another, equivalent to {@code sqrt((x1 - x2)^2 + (y1 - y2)^2)}.
+     * Expensive, may prefer to use {@link #sqrDistance(Vector2)}.
+     * @param o The other vector.
+     * @return The distance.
+     */
+    public double distance(Vector2 o) { return sqrt(sqrDistance(o)); }
 
     /**
      * Gets the dot product of this vector and another, equivalent to {@code (x1 * x2) + (y1 * y2)}.
      * @param o The other vector.
      * @return The dot product.
      */
-    public double dot(Vector2 o) { return (x() * o.x()) + (y() * o.y()); }
+    public double dot(Vector2 o) { return (x * o.x) + (y * o.y); }
 
     /**
      * Gets the angle between this vector and another, in radians.
@@ -192,21 +236,21 @@ public record Vector2(double x, double y) {
      * @return The angle.
      */
     public double angle(Vector2 o) {
-        double dot = Numbers.clamp(dot(o) / (length() * o.length()), -1, 1);
-        return Math.acos(dot);
+        double dot = clamp(dot(o) / (length() * o.length()), -1, 1);
+        return acos(dot);
     }
 
     /**
      * Gets the polar radius component.
      * @return The component.
      */
-    public double polarR() { return Math.sqrt(Numbers.sqr(x()) + Numbers.sqr(y())); }
+    public double polarR() { return sqrt(sqr(x) + sqr(y)); }
 
     /**
      * Gets the polar ang component.
      * @return The component.
      */
-    public double polarAng() { return Math.atan2(y(), x()); }
+    public double polarAng() { return atan2(y, x); }
 
     /**
      * Converts this to the polar coordinate system.
@@ -216,5 +260,5 @@ public record Vector2(double x, double y) {
         return new Coord2(polarR(), polarAng());
     }
 
-    @Override public String toString() { return "%f, %f".formatted(x, y); }
+    @Override public String toString() { return "(%s, %s)".formatted(Double.toString(x), Double.toString(y)); }
 }

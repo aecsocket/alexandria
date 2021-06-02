@@ -14,6 +14,42 @@ public final class Numbers {
     public static double sqr(double v) { return v * v; }
 
     /**
+     * Checks if a value is between a minimum and a maximum, inclusive.
+     * @param v The value.
+     * @param min The minimum.
+     * @param max The maximum.
+     * @return The result.
+     */
+    public static boolean in(int v, int min, int max) { return v >= min && v <= max; }
+
+    /**
+     * Checks if a value is between a minimum and a maximum, inclusive.
+     * @param v The value.
+     * @param min The minimum.
+     * @param max The maximum.
+     * @return The result.
+     */
+    public static boolean in(long v, long min, long max) { return v >= min && v <= max; }
+
+    /**
+     * Checks if a value is between a minimum and a maximum, inclusive.
+     * @param v The value.
+     * @param min The minimum.
+     * @param max The maximum.
+     * @return The result.
+     */
+    public static boolean in(float v, float min, float max) { return v >= min && v <= max; }
+
+    /**
+     * Checks if a value is between a minimum and a maximum, inclusive.
+     * @param v The value.
+     * @param min The minimum.
+     * @param max The maximum.
+     * @return The result.
+     */
+    public static boolean in(double v, double min, double max) { return v >= min && v <= max; }
+
+    /**
      * Clamps a value between the minimum and maximum.
      * @param v The value.
      * @param min The minimum.

@@ -54,6 +54,11 @@ public final class TaskContext {
     public void cancelled(boolean cancelled) { this.cancelled = cancelled; }
 
     /**
+     * Sets this task to be cancelled.
+     */
+    public void cancel() { cancelled = true; }
+
+    /**
      * Runs another task using this context.
      * <p>
      * Does not affect the super-context's (this instance) cancelled status.

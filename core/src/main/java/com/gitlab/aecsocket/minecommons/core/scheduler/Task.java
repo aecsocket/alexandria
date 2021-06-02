@@ -16,6 +16,18 @@ public record Task(Action action, long delay, long interval) {
     }
 
     /**
+     * Creates a repeating task with a set interval and delay.
+     * @param action The action to run.
+     * @param interval The interval in milliseconds.
+     * @param delay The delay.
+     * @return The task.
+     */
+    public static Task repeating(Action action, long interval, long delay) {
+        Validation.greaterThan("interval", interval, 0);
+        return new Task(action, delay, interval);
+    }
+
+    /**
      * Creates a repeating task with a set interval.
      * @param action The action to run.
      * @param interval The interval in milliseconds.
