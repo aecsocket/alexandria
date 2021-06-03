@@ -1,5 +1,8 @@
 package com.gitlab.aecsocket.minecommons.core;
 
+import com.gitlab.aecsocket.minecommons.core.vector.cartesian.Vector3;
+import net.kyori.adventure.text.Component;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.StringJoiner;
