@@ -28,18 +28,6 @@ import java.util.logging.Level;
  * Utility class for managing packets using a ProtocolLib {@link ProtocolManager}.
  */
 public final class ProtocolLibAPI {
-    /**
-     * A map of Bukkit {@link EquipmentSlot}s to protocol {@link EnumWrappers.ItemSlot}s.
-     */
-    public static final BiMap<EquipmentSlot, EnumWrappers.ItemSlot> SLOTS = HashBiMap.create(CollectionBuilder.map(new HashMap<EquipmentSlot, EnumWrappers.ItemSlot>())
-            .put(EquipmentSlot.HAND, EnumWrappers.ItemSlot.MAINHAND)
-            .put(EquipmentSlot.OFF_HAND, EnumWrappers.ItemSlot.OFFHAND)
-            .put(EquipmentSlot.HEAD, EnumWrappers.ItemSlot.HEAD)
-            .put(EquipmentSlot.CHEST, EnumWrappers.ItemSlot.CHEST)
-            .put(EquipmentSlot.LEGS, EnumWrappers.ItemSlot.LEGS)
-            .put(EquipmentSlot.FEET, EnumWrappers.ItemSlot.FEET)
-            .build());
-
     private final BasePlugin<?> plugin;
     private final ProtocolManager manager;
 

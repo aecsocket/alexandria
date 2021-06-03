@@ -17,9 +17,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.server.ServerLoadEvent;
-import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.spongepowered.configurate.BasicConfigurationNode;
 import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.ConfigurationOptions;
@@ -58,7 +57,7 @@ public abstract class BasePlugin<S extends BasePlugin<S>> extends JavaPlugin imp
 
     @Override
     public void onEnable() {
-        if (Bukkit.getPluginManager().isPluginEnabled("ProtocolLib"))
+        if (hasDependency(getDescription(), "ProtocolLib") && Bukkit.getPluginManager().isPluginEnabled("ProtocolLib"))
             protocol = ProtocolLibAPI.create(this);
 
         if (!getDataFolder().exists()) {
@@ -297,5 +296,15 @@ public abstract class BasePlugin<S extends BasePlugin<S>> extends JavaPlugin imp
      */
     public NamespacedKey key(String key) {
         return keys.computeIfAbsent(key, k -> new NamespacedKey(this, k));
+    }
+
+    /**
+     * Gets if a description file has a dependency or soft-dependency on another plugin.
+     * @param desc The description file.
+     * @param dependency The dependency.
+     * @return The result.
+     */
+    public static boolean hasDependency(PluginDescriptionFile desc, String dependency) {
+        return desc.getDepend().contains(dependency) || desc.getSoftDepend().contains(dependency);
     }
 }

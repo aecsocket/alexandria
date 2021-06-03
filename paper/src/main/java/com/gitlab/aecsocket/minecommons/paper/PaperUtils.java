@@ -5,10 +5,16 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.craftbukkit.v1_16_R3.CraftWorld;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 
 /**
  * Utilities concerning the Paper platform.
@@ -84,5 +90,23 @@ public final class PaperUtils {
      */
     public static Vector3 toCommons(Location location) {
         return new Vector3(location.getX(), location.getY(), location.getZ());
+    }
+
+    /**
+     * Gets all players within a radius of a location.
+     * @param location The location/center of radius.
+     * @param radius The radius.
+     * @return The players.
+     */
+    public static Collection<Player> players(Location location, double radius) {
+        double sqrRadius = radius * radius;
+        World world = location.getWorld();
+        Collection<Player> result = new HashSet<>();
+        for (Player player : world.getPlayers()) {
+            if (player.getLocation().distanceSquared(location) <= sqrRadius) {
+                result.add(player);
+            }
+        }
+        return result;
     }
 }
