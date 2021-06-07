@@ -9,7 +9,7 @@
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
-    <name>Minecommons Parent</name>
+    <name>Minecommons-Parent</name>
     <description>Commons library for Minecraft - parent</description>
     <url>https://gitlab.com/aecsocket/minecommons</url>
 
@@ -20,8 +20,8 @@
     </properties>
 
     <modules>
-        <module>core</module>
-        <module>paper</module>
+        <module>minecommons-core</module>
+        <module>minecommons-paper</module>
     </modules>
 
     <dependencyManagement>
@@ -37,12 +37,6 @@
                 <version>4.1.1</version>
             </dependency>
             <dependency>
-                <groupId>org.junit.jupiter</groupId>
-                <artifactId>junit-jupiter</artifactId>
-                <version>5.7.0</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
                 <groupId>net.kyori</groupId>
                 <artifactId>adventure-api</artifactId>
                 <version>4.7.0</version>
@@ -52,6 +46,12 @@
                 <groupId>net.kyori</groupId>
                 <artifactId>adventure-text-minimessage</artifactId>
                 <version>4.1.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter</artifactId>
+                <version>5.7.0</version>
+                <scope>test</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>

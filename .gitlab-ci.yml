@@ -17,7 +17,7 @@ build:
     - "mvn package"
   artifacts:
     paths:
-      - "*target"
+      - "*/target"
 
 deploy:
   script:
