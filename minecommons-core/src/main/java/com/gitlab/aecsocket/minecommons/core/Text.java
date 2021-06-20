@@ -1,11 +1,7 @@
 package com.gitlab.aecsocket.minecommons.core;
 
-import com.gitlab.aecsocket.minecommons.core.vector.cartesian.Vector3;
-import net.kyori.adventure.text.Component;
-
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.StringJoiner;
 
 /**
  * Utilities for text.
@@ -23,13 +19,9 @@ public final class Text {
     public static String mergeMessages(Throwable thrown, String delimiter) {
         Validation.notNull(thrown, "thrown");
         Validation.notNull(delimiter, "delimiter");
-        StringJoiner result = new StringJoiner(delimiter);
-        while (thrown != null) {
-            if (thrown.getMessage() != null)
-                result.add(thrown.getMessage());
-            thrown = thrown.getCause();
-        }
-        return result.toString();
+
+        String text = thrown.getClass().getSimpleName() + (thrown.getMessage() != null ? " (" + thrown.getMessage() + ")" : "");
+        return thrown.getCause() == null ? text : text + delimiter + mergeMessages(thrown.getCause(), delimiter);
     }
 
     /**

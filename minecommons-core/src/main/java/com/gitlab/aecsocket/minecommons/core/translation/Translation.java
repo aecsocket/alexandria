@@ -39,4 +39,8 @@ public class Translation extends HashMap<String, String> {
      * @return The locale.
      */
     public Locale locale() { return locale; }
+
+    public static Translation empty() {
+        return new Translation(null);
+    }
 }

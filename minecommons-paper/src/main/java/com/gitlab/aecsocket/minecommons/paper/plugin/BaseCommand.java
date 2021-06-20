@@ -7,7 +7,6 @@ import cloud.commandframework.context.CommandContext;
 import cloud.commandframework.execution.CommandExecutionCoordinator;
 import cloud.commandframework.minecraft.extras.MinecraftHelp;
 import cloud.commandframework.paper.PaperCommandManager;
-import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import net.kyori.adventure.text.Component;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -23,7 +22,6 @@ import java.util.function.Function;
 public class BaseCommand<P extends BasePlugin<P>> {
     protected final P plugin;
     protected final PaperCommandManager<CommandSender> manager;
-    protected final BukkitAudiences audiences;
     protected final MinecraftHelp<CommandSender> help;
     protected final String rootName;
     protected final Command.Builder<CommandSender> root;
@@ -37,8 +35,7 @@ public class BaseCommand<P extends BasePlugin<P>> {
         manager.registerAsynchronousCompletions();
 
         this.rootName = rootName;
-        audiences = BukkitAudiences.create(plugin);
-        help = new MinecraftHelp<>("/%s help".formatted(rootName), audiences::sender, manager);
+        help = new MinecraftHelp<>("/%s help".formatted(rootName), s -> s, manager);
         root = rootFactory.apply(manager, rootName);
 
         manager.command(root
@@ -56,7 +53,6 @@ public class BaseCommand<P extends BasePlugin<P>> {
 
     public P plugin() { return plugin; }
     public PaperCommandManager<CommandSender> manager() { return manager; }
-    public BukkitAudiences audiences() { return audiences; }
     public MinecraftHelp<CommandSender> help() { return help; }
     public String rootName() { return rootName; }
     public Command.Builder<CommandSender> root() { return root; }

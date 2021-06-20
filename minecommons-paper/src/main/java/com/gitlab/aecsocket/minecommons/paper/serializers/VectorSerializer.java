@@ -9,6 +9,7 @@ import org.bukkit.util.Vector;
  * Uses the format of {@link AbstractVector3DSerializer}.
  */
 public class VectorSerializer extends AbstractVector3DSerializer<Vector> {
+    /** A singleton instance of this serializer. */
     public static final VectorSerializer INSTANCE = new VectorSerializer();
 
     @Override protected double x(Vector obj) { return obj.getX(); }

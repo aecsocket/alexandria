@@ -1,5 +1,6 @@
 package com.gitlab.aecsocket.minecommons.paper.serializers;
 
+import com.gitlab.aecsocket.minecommons.paper.ItemSlot;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.inventory.ItemStack;
@@ -20,5 +21,6 @@ public final class PaperSerializers {
             .register(World.class, WorldSerializer.INSTANCE)
             .register(Location.class, LocationSerializer.INSTANCE)
             .register(Vector.class, VectorSerializer.INSTANCE)
+            .register(ItemSlot.class, ItemSlotSerializer.INSTANCE)
             .build();
 }

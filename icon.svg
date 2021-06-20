@@ -18,7 +18,21 @@
    xmlns:cc="http://creativecommons.org/ns#"
    xmlns:dc="http://purl.org/dc/elements/1.1/">
   <defs
-     id="defs2" />
+     id="defs2">
+    <style
+       id="style8567">.cls-1{fill:none;}.cls-2{fill:#fff;}.cls-3{fill:#fa0;}.cls-4{fill:#aaa;}.cls-5{fill:#55f;}.cls-6{fill:#5f5;}.cls-7{fill:#67cbdf;}.cls-8{fill:#f55;}.cls-9{fill:#f5f;}.cls-10{fill:#ff5;}.cls-11{fill:#444;}</style>
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath19185">
+      <ellipse
+         style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:2.11667;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         id="ellipse19187"
+         cx="262.82047"
+         cy="-151.05249"
+         rx="9.8783503"
+         ry="6.5854788" />
+    </clipPath>
+  </defs>
   <sodipodi:namedview
      id="base"
      pagecolor="#ffffff"
@@ -26,9 +40,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.70710678"
-     inkscape:cx="43.84062"
-     inkscape:cy="233.34524"
+     inkscape:zoom="0.35355339"
+     inkscape:cx="511.94531"
+     inkscape:cy="260.2153"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      inkscape:document-rotation="0"
@@ -39,23 +53,30 @@
      inkscape:window-x="0"
      inkscape:window-y="0"
      inkscape:window-maximized="1"
-     inkscape:pagecheckerboard="0">
-    <inkscape:grid
-       type="axonomgrid"
-       id="grid5891"
-       spacingy="1.0583333"
-       empspacing="2"
-       enabled="false"
-       units="px"
-       originx="67.73333"
-       originy="67.73333" />
+     inkscape:pagecheckerboard="0"
+     inkscape:snap-nodes="false"
+     inkscape:object-nodes="true"
+     inkscape:snap-bbox="true"
+     showguides="false"
+     inkscape:snap-global="true"
+     inkscape:snap-object-midpoints="false"
+     inkscape:snap-intersection-paths="false"
+     inkscape:snap-grids="true"
+     inkscape:bbox-paths="true"
+     inkscape:bbox-nodes="true"
+     inkscape:snap-bbox-edge-midpoints="true"
+     inkscape:snap-bbox-midpoints="true"
+     inkscape:snap-others="false"
+     inkscape:snap-smooth-nodes="false"
+     inkscape:snap-midpoints="false">
     <inkscape:grid
        type="xygrid"
-       id="grid7690"
-       spacingx="8.4666662"
-       spacingy="8.4666662"
+       id="grid6349"
+       spacingx="0.52916664"
+       spacingy="0.52916664"
        empspacing="4"
-       enabled="false" />
+       enabled="true"
+       dotted="false" />
   </sodipodi:namedview>
   <metadata
      id="metadata5">
@@ -72,19 +93,27 @@
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1">
-    <circle
-       style="fill:#31333b;stroke-width:0.264583;fill-opacity:1"
-       id="path1110"
-       cx="67.75103"
-       cy="68.040192"
-       r="67.73333" />
-    <path
-       style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="M 31.071591,81.491663 67.73333,102.65832 104.39507,81.491663 V 56.091664 L 67.73333,77.25833 31.071591,56.091664 Z"
-       id="path7805" />
-    <path
-       style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="M 31.071591,53.974997 67.73333,32.808331 104.39507,53.974997 82.398027,66.674996 67.73333,58.20833 53.068633,66.674996 Z"
-       id="path9079" />
+    <g
+       id="g14451"
+       transform="translate(-541.88435,135.1598)">
+      <circle
+         style="fill:#d9d789;fill-opacity:1;stroke-width:8.46667;stroke-miterlimit:4;stroke-dasharray:none"
+         id="path1110-6-9"
+         cx="609.61768"
+         cy="-67.426468"
+         r="67.73333" />
+      <g
+         id="g3781"
+         style="stroke-width:8.46667;stroke-miterlimit:4;stroke-dasharray:none">
+        <path
+           style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:8.46667;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+           d="m 572.93823,-53.974997 36.66174,21.166657 36.66174,-21.166657 v -25.399999 l -36.66174,21.166666 -36.66174,-21.166666 z"
+           id="path7805-3" />
+        <path
+           style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:8.46667;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+           d="m 572.93823,-81.491663 36.66174,-21.166667 36.66174,21.166667 -21.99704,12.699999 -14.6647,-8.466666 -14.6647,8.466666 z"
+           id="path9079-6" />
+      </g>
+    </g>
   </g>
 </svg>

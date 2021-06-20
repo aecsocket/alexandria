@@ -4,6 +4,7 @@ import net.kyori.adventure.text.Component;
 
 import java.util.*;
 import java.util.function.Supplier;
+import java.util.logging.Filter;
 
 /**
  * An abstract implementation of a {@link RegistryLocalizer}, defining a default locale,
@@ -29,6 +30,7 @@ public abstract class AbstractLocalizer implements RegistryLocalizer {
     private Locale defaultLocale;
     private String fallbackMessage;
     private final Map<Locale, Translation> translations = new HashMap<>();
+    private final Map<Locale, Map<String, Component>> cache = new HashMap<>();
 
     public AbstractLocalizer(Locale defaultLocale, String fallbackMessage) {
         this.defaultLocale = defaultLocale;
@@ -53,21 +55,28 @@ public abstract class AbstractLocalizer implements RegistryLocalizer {
 
     @Override
     public void unregister(Translation translation) {
-        Translation ourTranslation = translations.get(translation.locale());
-        if (ourTranslation == null)
-            return;
-        ourTranslation.entrySet().removeIf(entry -> translation.containsKey(entry.getKey()));
+        translations.getOrDefault(translation.locale(), Translation.empty()).entrySet().removeIf(entry -> translation.containsKey(entry.getKey()));
+        cache.getOrDefault(translation.locale(), Collections.emptyMap()).entrySet().removeIf(entry -> translation.containsKey(entry.getKey()));
     }
 
     @Override
     public void unregister(Locale locale) {
         translations.remove(locale);
+        cache.remove(locale);
     }
 
     /**
-     * Clears all translations.
+     * Clears all translations, including the cache.
      */
-    public void clear() { translations.clear(); }
+    public void clear() {
+        translations.clear();
+        cache.clear();
+    }
+
+    /**
+     * Removes all cached translations.
+     */
+    public void invalidateCache() { cache.clear(); }
 
     /**
      * Formats a string and arguments into a component.
@@ -90,10 +99,18 @@ public abstract class AbstractLocalizer implements RegistryLocalizer {
     }
 
     protected Component use(Locale locale, Supplier<Component> fallback, String key, Object... args) {
+        if (args.length == 0) {
+            Component cached = cache.getOrDefault(locale, Collections.emptyMap()).get(key);
+            if (cached != null)
+                return cached;
+        }
         Translation translation = translation(locale);
         if (translation == null || !translation.containsKey(key))
             return fallback.get();
-        return format(translation.get(key), args);
+        Component component = format(translation.get(key), args);
+        if (args.length == 0)
+            cache.computeIfAbsent(locale, l -> new HashMap<>()).put(key, component);
+        return component;
     }
 
     @Override

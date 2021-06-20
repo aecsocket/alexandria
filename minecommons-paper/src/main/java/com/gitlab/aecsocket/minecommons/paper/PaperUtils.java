@@ -1,6 +1,8 @@
 package com.gitlab.aecsocket.minecommons.paper;
 
+import com.gitlab.aecsocket.minecommons.core.Components;
 import com.gitlab.aecsocket.minecommons.core.vector.cartesian.Vector3;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -9,12 +11,12 @@ import org.bukkit.craftbukkit.v1_16_R3.CraftWorld;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
+import java.util.*;
+import java.util.function.Consumer;
 
 /**
  * Utilities concerning the Paper platform.
@@ -108,5 +110,45 @@ public final class PaperUtils {
             }
         }
         return result;
+    }
+
+    /**
+     * Modifies an item stack's metadata.
+     * @param item The item to modify.
+     * @param function The function to apply.
+     * @return The passed (and modified) item.
+     */
+    public static ItemStack modify(ItemStack item, Consumer<ItemMeta> function) {
+        ItemMeta meta = item.getItemMeta();
+        if (meta != null)
+            function.accept(meta);
+        item.setItemMeta(meta);
+        return item;
+    }
+
+    /**
+     * Adds lines of lore to a specified item meta, creating a lore list if it does not already exist,
+     * otherwise appending to existing lore.
+     * @param meta The meta.
+     * @param add The lines to add.
+     */
+    public static void addLore(ItemMeta meta, Collection<Component> add) {
+        List<Component> lore = meta.lore();
+        lore = lore == null ? new ArrayList<>() : lore;
+        lore.addAll(add);
+        meta.lore(lore);
+    }
+
+    /**
+     * Adds lines of lore to a specified item meta, creating a lore list if it does not already exist,
+     * otherwise appending to existing lore.
+     * @param meta The meta.
+     * @param add The lines to add.
+     */
+    public static void addLore(ItemMeta meta, Component... add) {
+        List<Component> lore = meta.lore();
+        lore = lore == null ? new ArrayList<>() : lore;
+        lore.addAll(Arrays.asList(add));
+        meta.lore(lore);
     }
 }
