@@ -7,7 +7,8 @@ import org.spongepowered.configurate.serialize.TypeSerializer;
 
 import java.lang.reflect.Type;
 import java.util.Locale;
-import java.util.logging.Level;
+
+import static com.gitlab.aecsocket.minecommons.core.serializers.Serializers.require;
 
 /**
  * Type serializer for a {@link Locale}.
@@ -28,6 +29,6 @@ public class LocaleSerializer implements TypeSerializer<Locale> {
 
     @Override
     public Locale deserialize(Type type, ConfigurationNode node) throws SerializationException {
-        return Locale.forLanguageTag(node.require(String.class));
+        return Locale.forLanguageTag(require(node, String.class));
     }
 }

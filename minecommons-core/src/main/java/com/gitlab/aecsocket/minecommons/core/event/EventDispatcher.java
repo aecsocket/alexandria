@@ -4,7 +4,6 @@ import com.gitlab.aecsocket.minecommons.core.Validation;
 
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 
 /**
  * Responsible for managing listeners: registration and sending events to listeners.
@@ -32,15 +31,24 @@ public final class EventDispatcher<E> {
         public boolean acceptsType(Class<? extends E> checkType) {
             return checkType == eventType || (!specific && eventType.isAssignableFrom(checkType));
         }
+
+        @Override
+        public String toString() {
+            return "{" +
+                    eventType +
+                    (specific ? " specific" : "") +
+                    " @ " + priority +
+                    '}';
+        }
     }
 
-    private final Set<Listener<E>> listeners = new TreeSet<>(Comparator.comparingInt(Listener::priority));
+    private final PriorityQueue<Listener<E>> listeners = new PriorityQueue<>(Comparator.comparingInt(Listener::priority));
 
     /**
      * Gets all registered listeners.
      * @return The listeners.
      */
-    public Set<Listener<E>> listeners() { return listeners; }
+    public PriorityQueue<Listener<E>> listeners() { return listeners; }
 
     /**
      * Gets all registered listeners for a specific event type.

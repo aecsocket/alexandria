@@ -1,9 +1,5 @@
 package com.gitlab.aecsocket.minecommons.paper.serializers;
 
-import com.gitlab.aecsocket.minecommons.core.serializers.Serializers;
-import com.google.gson.JsonParseException;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -11,9 +7,10 @@ import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
 import org.spongepowered.configurate.serialize.TypeSerializer;
 
-import java.io.Serial;
 import java.lang.reflect.Type;
 import java.util.Base64;
+
+import static com.gitlab.aecsocket.minecommons.core.serializers.Serializers.require;
 
 /**
  * Type serializer for an {@link ItemStack}.
@@ -39,7 +36,7 @@ public class ItemStackSerializer implements TypeSerializer<ItemStack> {
 
     @Override
     public ItemStack deserialize(Type type, ConfigurationNode node) throws SerializationException {
-        String string = node.require(String.class);
+        String string = require(node, String.class);
         if (string.isEmpty()) {
             return new ItemStack(Material.AIR);
         }

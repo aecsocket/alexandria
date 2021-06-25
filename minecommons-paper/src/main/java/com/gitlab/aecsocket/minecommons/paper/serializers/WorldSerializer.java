@@ -1,5 +1,6 @@
 package com.gitlab.aecsocket.minecommons.paper.serializers;
 
+import com.gitlab.aecsocket.minecommons.core.serializers.Serializers;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -8,6 +9,8 @@ import org.spongepowered.configurate.serialize.SerializationException;
 import org.spongepowered.configurate.serialize.TypeSerializer;
 
 import java.lang.reflect.Type;
+
+import static com.gitlab.aecsocket.minecommons.core.serializers.Serializers.require;
 
 /**
  * Type serializer for a {@link World}.
@@ -28,7 +31,7 @@ public class WorldSerializer implements TypeSerializer<World> {
 
     @Override
     public World deserialize(Type type, ConfigurationNode node) throws SerializationException {
-        String name = node.require(String.class);
+        String name = require(node, String.class);
         World world = Bukkit.getWorld(name);
         if (world == null)
             throw new SerializationException(node, type, "Invalid world `" + name + "`");

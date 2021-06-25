@@ -129,7 +129,7 @@ public class PaperRaycast extends Raycast<PaperRaycast.PaperBoundable> {
                 return result;
             }
         }
-        return null;
+        return Collections.emptyList();
     }
 
     public List<PaperBoundable> boundables(Entity entity) {
@@ -149,7 +149,7 @@ public class PaperRaycast extends Raycast<PaperRaycast.PaperBoundable> {
                 return result;
             }
         }
-        return null;
+        return Collections.emptyList();
     }
 
     @Override
