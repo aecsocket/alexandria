@@ -14,8 +14,8 @@ import org.bukkit.plugin.Plugin;
  * <p>
  * Uses:
  * <ul>
- * <li>{@link PacketType.Play.Client#ARM_ANIMATION}: {@link Inputs.Input#LEFT}</li>
- * <li>{@link PacketType.Play.Client#BLOCK_PLACE}: {@link Inputs.Input#RIGHT}</li>
+ *     <li>{@link PacketType.Play.Client#ARM_ANIMATION}: {@link #LEFT}</li>
+ *     <li>{@link PacketType.Play.Client#BLOCK_PLACE}: {@link #RIGHT}</li>
  * </ul>
  */
 public class PacketInputs extends AbstractInputs implements PacketListener {
@@ -45,12 +45,12 @@ public class PacketInputs extends AbstractInputs implements PacketListener {
 
         if (type == PacketType.Play.Client.ARM_ANIMATION) {
             if (packet.getHands().read(0) == EnumWrappers.Hand.MAIN_HAND) {
-                handle(player, Input.LEFT, () -> event.setCancelled(true));
+                handle(player, LEFT, () -> event.setCancelled(true));
             }
         }
         if (type == PacketType.Play.Client.BLOCK_PLACE) {
             if (packet.getHands().read(0) == EnumWrappers.Hand.MAIN_HAND) {
-                handle(player, Input.RIGHT, () -> event.setCancelled(true));
+                handle(player, RIGHT, () -> event.setCancelled(true));
             }
         }
     }

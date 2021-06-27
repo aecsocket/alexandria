@@ -32,11 +32,11 @@ public class ThreadScheduler implements Scheduler {
                         break;
                     long time = System.currentTimeMillis();
                     TaskContext ctx = new TaskContext(this, time - start, time - last, iteration);
+                    last = System.currentTimeMillis();
                     task.action().run(ctx);
                     if (ctx.cancelled() || task.interval() <= 0)
                         break;
                     synchronized (this) { wait(task.interval()); }
-                    last = System.currentTimeMillis();
                 }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();

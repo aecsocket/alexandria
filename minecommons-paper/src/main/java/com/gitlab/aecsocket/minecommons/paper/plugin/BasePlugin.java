@@ -19,6 +19,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.server.ServerLoadEvent;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.ConfigurationOptions;
@@ -106,7 +107,7 @@ public abstract class BasePlugin<S extends BasePlugin<S>> extends JavaPlugin imp
      * Gets the default locale of the plugin.
      * @return The locale.
      */
-    public Locale defaultLocale() { return setting(Locale.US, (n, d) -> n.get(Locale.class, d), "default_locale"); }
+    public @NotNull Locale defaultLocale() { return setting(Locale.US, (n, d) -> n.get(Locale.class, d), "default_locale"); }
 
     @EventHandler
     public boolean serverLoad(ServerLoadEvent event) {
