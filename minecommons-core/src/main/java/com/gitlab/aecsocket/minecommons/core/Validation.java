@@ -60,12 +60,12 @@ public final class Validation {
     /**
      * Errors if an object is null.
      * <p>
-     * Throws {@code [name] is null}.
+     * Throws a NullPointerException.
      * @param obj The object.
-     * @param name The name of the object.
+     * @param name The name of the argument.
      */
     public static void notNull(Object obj, String name) {
-        notNull(obj, new IllegalArgumentException("%s is null".formatted(name)));
+        notNull(obj, new NullPointerException(name));
     }
 
     /**
@@ -83,7 +83,8 @@ public final class Validation {
     /**
      * Errors if a number is not greater than another value.
      * <p>
-     * Throws {@code [name] must be above [target] (found [actual])}.
+     * Throws {@code [name]: failed condition `[actual] > [target]`}.
+     * @param name The name of the argument.
      * @param actual The actual number provided.
      * @param target The target number that the actual number must be compared against.
      */
@@ -106,7 +107,8 @@ public final class Validation {
     /**
      * Errors if a number is not greater than or equal to another value.
      * <p>
-     * Throws {@code [name] must be above or equal to [target] (found [actual])}.
+     * Throws {@code [name]: failed condition `[actual] >= [target]`}.
+     * @param name The name of the argument.
      * @param actual The actual number provided.
      * @param target The target number that the actual number must be compared against.
      */
@@ -129,7 +131,8 @@ public final class Validation {
     /**
      * Errors if a number is not lower than another value.
      * <p>
-     * Throws {@code [name] must be below [target] (found [actual])}.
+     * Throws {@code [name]: failed condition `[actual] < [target]`}.
+     * @param name The name of the argument.
      * @param actual The actual number provided.
      * @param target The target number that the actual number must be compared against.
      */
@@ -152,11 +155,38 @@ public final class Validation {
     /**
      * Errors if a number is not lower than or equal to another value.
      * <p>
-     * Throws {@code [name] must be below or equal to [target] (found [actual])}.
+     * Throws {@code [name]: failed condition `[actual] <= [target]`}.
+     * @param name The name of the argument.
      * @param actual The actual number provided.
      * @param target The target number that the actual number must be compared against.
      */
     public static void lowerThanEquals(String name, double actual, double target) {
         lowerThanEquals(actual, target, new IllegalArgumentException("%s: failed condition `%f <= %f`".formatted(name, actual, target)));
+    }
+
+    /**
+     * Errors if a number is not between two values, inclusive.
+     * @param actual The actual number provided.
+     * @param min The minimum value.
+     * @param max The maximum value.
+     * @param thrown The exception to throw.
+     * @param <E> The exception type.
+     * @throws E The exception to throw.
+     */
+    public static <E extends Throwable> void in(double actual, double min, double max, E thrown) throws E {
+        if (!Numbers.in(actual, min, max)) throw thrown;
+    }
+
+    /**
+     * Errors if a number is not between two values, inclusive.
+     * <p>
+     * Throws {@code [name]: failed condition `[min] <= [actual] <= [max]`}.
+     * @param name The name of the argument.
+     * @param actual The actual number provided.
+     * @param min The minimum value.
+     * @param max The maximum value.
+     */
+    public static void in(String name, double actual, double min, double max) {
+        in(actual, min, max, new IllegalArgumentException("%s: failed condition `%f <= %f <= %f`".formatted(name, min, actual, max)));
     }
 }

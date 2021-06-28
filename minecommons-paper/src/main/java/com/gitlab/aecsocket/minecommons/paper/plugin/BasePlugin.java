@@ -1,6 +1,5 @@
 package com.gitlab.aecsocket.minecommons.paper.plugin;
 
-import com.gitlab.aecsocket.minecommons.core.CollectionBuilder;
 import com.gitlab.aecsocket.minecommons.core.Logging;
 import com.gitlab.aecsocket.minecommons.core.Settings;
 import com.gitlab.aecsocket.minecommons.core.Text;
@@ -30,29 +29,26 @@ import org.spongepowered.configurate.serialize.SerializationException;
 import org.spongepowered.configurate.serialize.TypeSerializerCollection;
 import org.spongepowered.configurate.util.NamingSchemes;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.Reader;
 import java.util.*;
 
 /**
  * Plugin utility class.
  */
 public abstract class BasePlugin<S extends BasePlugin<S>> extends JavaPlugin implements Listener {
-    /** The path to the settings file. */
-    public static final String PATH_SETTINGS = "settings.conf";
-    /** The path to the directory storing language files. */
-    public static final String PATH_LANG = "lang";
-    /** The default resources that are saved to the plugin's data folder. */
-    public static final Set<String> DEFAULT_RESOURCES = CollectionBuilder.set(new HashSet<String>())
-            .add(PATH_SETTINGS)
-            .add(PATH_LANG + "/default_en-US.conf")
-            .add(PATH_LANG + "/en-US.conf")
-            .build();
+    /** The path to the resources manifest file in the JAR. */
+    public static final String PATH_RESOURCES = "resources.conf";
 
+    protected ResourceManifest resourceManifest;
     protected final Map<String, NamespacedKey> keys = new HashMap<>();
     protected final Logging logging = new Logging(getLogger());
     protected Settings settings = new Settings();
     protected final MiniMessageLocalizer localizer = MiniMessageLocalizer.builder().build();
-    protected ConfigurationOptions configOptions = ConfigurationOptions.defaults();
+    protected ConfigurationOptions configOptions = ConfigurationOptions.defaults()
+            .serializers(builder -> builder
+            .registerAnnotatedObjects(ObjectMapper.factoryBuilder().defaultNamingScheme(NamingSchemes.SNAKE_CASE).build()));
     protected ProtocolLibAPI protocol;
     protected BaseCommand<S> command;
 
@@ -61,11 +57,8 @@ public abstract class BasePlugin<S extends BasePlugin<S>> extends JavaPlugin imp
         if (hasDependency(getDescription(), "ProtocolLib") && Bukkit.getPluginManager().isPluginEnabled("ProtocolLib"))
             protocol = ProtocolLibAPI.create(this);
 
-        if (!getDataFolder().exists()) {
-            for (String resource : defaultResources()) {
-                saveResource(resource, true);
-            }
-        }
+        loadResourceManifest();
+        saveResources();
 
         try {
             command = createCommand();
@@ -76,18 +69,63 @@ public abstract class BasePlugin<S extends BasePlugin<S>> extends JavaPlugin imp
     }
 
     /**
-     * Gets the default resources that are saved into the data folder on plugin enable.
-     * @return The default resources.
-     */
-    protected Collection<String> defaultResources() { return DEFAULT_RESOURCES; }
-
-    /**
      * Creates a {@link BaseCommand} from this plugin.
      * @return The base command.
      * @throws Exception If the base command could not be created.
      */
     protected abstract BaseCommand<S> createCommand() throws Exception;
 
+    /**
+     * Loads the resource manifest from the JAR.
+     */
+    protected void loadResourceManifest() {
+        Reader reader = getTextResource(PATH_RESOURCES);
+        if (reader == null)
+            throw new IllegalStateException("No JAR resources manifest at [" + PATH_RESOURCES + "] found!");
+
+        try {
+            resourceManifest = loaderBuilder()
+                    .source(() -> new BufferedReader(reader))
+                    .build()
+                    .load().get(ResourceManifest.class);
+            if (resourceManifest == null)
+                throw new ConfigurateException("null");
+        } catch (ConfigurateException e) {
+            throw new IllegalStateException("Could not load resource manifest at [" + PATH_RESOURCES + "]", e);
+        }
+    }
+
+    /**
+     * Saves all resources defined to be saved in the resources manifest,
+     * into the {@link #getDataFolder()} folder, if the data folder does not exist yet.
+     */
+    protected void saveResources() {
+        if (!getDataFolder().exists()) {
+            for (String path : resourceManifest.saved()) {
+                saveResource(path, false);
+            }
+        }
+    }
+
+    /**
+     * Sets up config option serializers.
+     * @see #configOptionsDefaults(TypeSerializerCollection.Builder, ObjectMapper.Factory.Builder)
+     */
+    protected void setupConfigOptions() {
+        TypeSerializerCollection.Builder serializers = TypeSerializerCollection.defaults().childBuilder();
+
+        ObjectMapper.Factory.Builder mapperFactory = ObjectMapper.factoryBuilder();
+        configOptionsDefaults(serializers, mapperFactory);
+        serializers.registerAnnotatedObjects(mapperFactory.build());
+
+        configOptions = configOptions.serializers(serializers.build());
+    }
+
+    /**
+     * Registers default serializers and object mapper factory builder parameters.
+     * @param serializers The serializers.
+     * @param mapperFactory The object mapper factory builder.
+     */
     protected void configOptionsDefaults(TypeSerializerCollection.Builder serializers, ObjectMapper.Factory.Builder mapperFactory) {
         mapperFactory.defaultNamingScheme(NamingSchemes.SNAKE_CASE);
         serializers.registerAll(Serializers.SERIALIZERS);
@@ -96,12 +134,12 @@ public abstract class BasePlugin<S extends BasePlugin<S>> extends JavaPlugin imp
             serializers.registerAll(ProtocolSerializers.SERIALIZERS);
     }
 
-    public Logging logging() { return logging; }
-    public Settings settings() { return settings; }
-    public MiniMessageLocalizer localizer() { return localizer; }
-    public ConfigurationOptions configOptions() { return configOptions; }
-    public ProtocolLibAPI protocol() { return protocol; }
-    public BaseCommand<S> command() { return command; }
+    public @NotNull Logging logging() { return logging; }
+    public @NotNull Settings settings() { return settings; }
+    public @NotNull MiniMessageLocalizer localizer() { return localizer; }
+    public @NotNull ConfigurationOptions configOptions() { return configOptions; }
+    public @NotNull ProtocolLibAPI protocol() { return protocol; }
+    public @NotNull BaseCommand<S> command() { return command; }
 
     /**
      * Gets the default locale of the plugin.
@@ -111,13 +149,7 @@ public abstract class BasePlugin<S extends BasePlugin<S>> extends JavaPlugin imp
 
     @EventHandler
     public boolean serverLoad(ServerLoadEvent event) {
-        TypeSerializerCollection.Builder serializers = TypeSerializerCollection.defaults().childBuilder();
-
-        ObjectMapper.Factory.Builder mapperFactory = ObjectMapper.factoryBuilder();
-        configOptionsDefaults(serializers, mapperFactory);
-        serializers.registerAnnotatedObjects(mapperFactory.build());
-
-        configOptions = configOptions.serializers(serializers.build());
+        setupConfigOptions();
         return load();
     }
 
@@ -128,10 +160,10 @@ public abstract class BasePlugin<S extends BasePlugin<S>> extends JavaPlugin imp
     public boolean load() {
         // Settings
         try {
-            settings = loadSettings(file(PATH_SETTINGS));
+            settings = loadSettings(file(resourceManifest.settings()));
         } catch (ConfigurateException e) {
             settings = new Settings();
-            log(Logging.Level.ERROR, e, "Could not load settings from `%s`", PATH_SETTINGS);
+            log(Logging.Level.ERROR, e, "Could not load settings from `%s`", resourceManifest.settings());
             return false;
         }
 
@@ -140,7 +172,25 @@ public abstract class BasePlugin<S extends BasePlugin<S>> extends JavaPlugin imp
         // Language
         localizer.clear();
         localizer.defaultLocale(setting(Locale.US, (n, d) -> n.get(Locale.class, d), "locale"));
-        LocalizerLoader.hocon(file(PATH_LANG), localizer).forEach(result -> {
+
+        for (String path : resourceManifest.language().resources()) {
+            Reader reader = getTextResource(path);
+            if (reader == null) {
+                log(Logging.Level.WARNING, "No JAR translation at %s found", path);
+                continue;
+            }
+
+            try {
+                LocalizerLoader.load(localizer, () -> HoconConfigurationLoader.builder()
+                        .source(() -> new BufferedReader(reader))
+                        .build());
+            } catch (ConfigurateException e) {
+                log(Logging.Level.WARNING, e, "Could not load JAR translation from %s", path);
+            }
+        }
+
+        LocalizerLoader.hocon(file(resourceManifest.language().dataPath()), localizer)
+                .forEach(result -> {
             if (result.translation() != null)
                 log(Logging.Level.VERBOSE, "Loaded language %s from %s", result.translation().locale().toLanguageTag(), result.path());
             else if (result.exception() != null)

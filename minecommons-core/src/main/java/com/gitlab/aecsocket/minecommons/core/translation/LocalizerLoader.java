@@ -13,6 +13,7 @@ import java.io.File;
 import java.nio.file.Path;
 import java.util.Locale;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * Loads entries into a {@link RegistryLocalizer} from disk.
@@ -31,6 +32,24 @@ public class LocalizerLoader {
     public record Result(Path path, Translation translation, ConfigurateException exception) {}
 
     /**
+     * Loads a {@link Translation} into a registry localizer using a {@link ConfigurationLoader}.
+     * @param localizer The localizer to load into.
+     * @param loaderFactory The factory for the {@link ConfigurationLoader}.
+     * @return The translation loaded.
+     * @throws ConfigurateException If there is an error when loading.
+     */
+    public static Translation load(RegistryLocalizer localizer, Supplier<ConfigurationLoader<?>> loaderFactory) throws ConfigurateException {
+        ConfigurationLoader<?> loader = loaderFactory.get();
+        Translation translation = loader.load(configOptions).get(Translation.class);
+        if (translation != null) {
+            localizer.register(translation);
+            return translation;
+        }
+        throw new ConfigurateException("null translation");
+    }
+
+
+    /**
      * Loads {@link Translation}s into a registry localizer from disk, using {@link ConfigurationLoader}s.
      * @param root The root file.
      * @param localizer The localizer to load into.
@@ -41,13 +60,9 @@ public class LocalizerLoader {
         Callback<Result> callback = new Callback<>();
         Files.recursively(root, (file, path) -> {
             if (!FILE_EXTENSION.equals(Files.extension(file.getName()))) return;
-            ConfigurationLoader<?> loader = loaderFactory.apply(file);
             try {
-                Translation translation = loader.load().get(Translation.class);
-                if (translation != null) {
-                    localizer.register(translation);
-                    callback.add(new Result(path, translation, null));
-                }
+                Translation translation = load(localizer, () -> loaderFactory.apply(file));
+                callback.add(new Result(path, translation, null));
             } catch (ConfigurateException e) {
                 callback.add(new Result(path, null, e));
             }
