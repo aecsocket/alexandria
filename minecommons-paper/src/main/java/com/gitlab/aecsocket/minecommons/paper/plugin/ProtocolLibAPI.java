@@ -1,28 +1,19 @@
 package com.gitlab.aecsocket.minecommons.paper.plugin;
 
 import com.comphenix.protocol.PacketType;
-import com.comphenix.protocol.ProtocolLib;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.injector.netty.WirePacket;
-import com.comphenix.protocol.wrappers.EnumWrappers;
-import com.comphenix.protocol.wrappers.WrappedDataWatcher;
-import com.comphenix.protocol.wrappers.WrappedGameProfile;
-import com.comphenix.protocol.wrappers.WrappedWatchableObject;
-import com.gitlab.aecsocket.minecommons.core.CollectionBuilder;
+import com.comphenix.protocol.wrappers.*;
 import com.gitlab.aecsocket.minecommons.core.Logging;
-import com.gitlab.aecsocket.minecommons.core.serializers.Serializers;
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
-import org.bukkit.Location;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.EquipmentSlot;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.logging.Level;
 
 /**
  * Utility class for managing packets using a ProtocolLib {@link ProtocolManager}.
@@ -141,6 +132,15 @@ public final class ProtocolLibAPI {
      */
     public void send(Player player, PacketType type, Consumer<PacketContainer> builder) {
         send(player, type, builder, false);
+    }
+
+    /**
+     * Interprets an Adventure chat component into a ProtocolLib chat component.
+     * @param component The Adventure component.
+     * @return The ProtocolLib component.
+     */
+    public WrappedChatComponent chatComponent(Component component) {
+        return WrappedChatComponent.fromJson(GsonComponentSerializer.gson().serialize(component));
     }
 
     /**
