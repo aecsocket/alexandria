@@ -16,6 +16,11 @@
     <name>Minecommons-Paper</name>
     <description>Commons library for Minecraft - Paper implementation</description>
 
+    <properties>
+        <asm.version>9.1</asm.version>
+        <cloud.version>1.4.0</cloud.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>com.gitlab.aecsocket.minecommons</groupId>
@@ -24,21 +29,13 @@
         <dependency>
             <groupId>org.spongepowered</groupId>
             <artifactId>configurate-hocon</artifactId>
+            <scope>provided</scope> <!-- Library loader -->
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
         </dependency>
-        <dependency>
-            <groupId>cloud.commandframework</groupId>
-            <artifactId>cloud-paper</artifactId>
-            <version>1.4.0</version>
-        </dependency>
-        <dependency>
-            <groupId>cloud.commandframework</groupId>
-            <artifactId>cloud-minecraft-extras</artifactId>
-            <version>1.4.0</version>
-        </dependency>
+
         <dependency>
             <groupId>com.destroystokyo.paper</groupId>
             <artifactId>paper</artifactId>
@@ -54,6 +51,18 @@
                     <artifactId>minecraft-server</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>cloud.commandframework</groupId>
+            <artifactId>cloud-paper</artifactId>
+            <version>${cloud.version}</version>
+            <scope>provided</scope> <!-- Library loader -->
+        </dependency>
+        <dependency>
+            <groupId>cloud.commandframework</groupId>
+            <artifactId>cloud-minecraft-extras</artifactId>
+            <version>${cloud.version}</version>
+            <scope>provided</scope> <!-- Library loader -->
         </dependency>
         <dependency>
             <groupId>com.comphenix.protocol</groupId>
@@ -76,6 +85,88 @@
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.4</version>
+                <configuration>
+                    <finalName>${project.name}</finalName>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.2.4</version>
+                <configuration>
+                    <filters>
+                        <filter>
+                            <artifact>*:*</artifact>
+                            <excludes>
+                                <exclude>module-info.class</exclude>
+                                <exclude>META-INF/*.SF</exclude>
+                                <exclude>META-INF/*.DSA</exclude>
+                                <exclude>META-INF/*.RSA</exclude>
+                                <exclude>META-INF/MANIFEST.MF</exclude>
+                            </excludes>
+                        </filter>
+                    </filters>
+                    <relocations>
+                        <relocation>
+                            <pattern>cloud.commandframework</pattern>
+                            <shadedPattern>com.gitlab.aecsocket.cloud</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>org.bstats</pattern>
+                            <shadedPattern>com.gitlab.aecsocket.paper</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>com.github.stefvanschie.inventoryframework</pattern>
+                            <shadedPattern>com.gitlab.aecsocket.inventoryframework</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>io.leangen.geantyref</pattern>
+                            <shadedPattern>com.gitlab.aecsocket.geantyref</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>org.spongepowered.configurate</pattern>
+                            <shadedPattern>com.gitlab.aecsocket.configurate</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>com.typesafe.config</pattern>
+                            <shadedPattern>com.gitlab.aecsocket.config</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>net.kyori.adventure.text.minimessage</pattern>
+                            <shadedPattern>com.gitlab.aecsocket.minimessage</shadedPattern>
+                        </relocation>
+                    </relocations>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                        </configuration>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.ow2.asm</groupId>
+                        <artifactId>asm-commons</artifactId>
+                        <version>${asm.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.ow2.asm</groupId>
+                        <artifactId>asm</artifactId>
+                        <version>${asm.version}</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>

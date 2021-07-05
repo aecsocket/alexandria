@@ -43,6 +43,12 @@
             <artifactId>guava</artifactId>
             <version>30.1.1-jre</version>
         </dependency>
+        <dependency>
+            <groupId>net.kyori</groupId>
+            <artifactId>adventure-api</artifactId>
+            <version>4.8.1</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <build>
