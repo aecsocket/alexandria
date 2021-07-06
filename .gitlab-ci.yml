@@ -17,10 +17,10 @@ build:
   stage: build
   script:
     # Install Paper to local Maven repo
-    - "git clone https://github.com/papermc/paper"
-    - "cd paper"
+    - "mkdir libraries && cd libraries"
+    - "git clone https://github.com/papermc/paper && cd paper"
     - "./gradlew applyPatches publishToMavenLocal"
-    - "cd .."
+    - "cd ../.."
     # Build project
     - "./gradlew assemble"
   artifacts:
