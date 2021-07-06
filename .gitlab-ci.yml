@@ -19,8 +19,8 @@ build:
     # Install Paper to local Maven repo
     - "mkdir libraries && cd libraries"
     - "git clone https://github.com/papermc/paper && cd paper"
-    - "git config user.email 'ci@example.com'"
-    - "git config user.name 'ci'"
+    - "git config --global user.email 'ci@example.com'"
+    - "git config --global user.name 'ci'"
     - "./gradlew applyPatches publishToMavenLocal"
     - "cd ../.."
     # Build project
