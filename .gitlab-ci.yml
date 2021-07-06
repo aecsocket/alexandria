@@ -17,6 +17,7 @@ build:
   stage: build
   script:
     # Install Paper to local Maven repo
+    - "apt-get update"
     - "apt-get install jq"
     - "version='1.17'"
     - "build=$(curl https://papermc.io/api/v2/projects/paper/versions/${version} | jq '.builds[-1]')"
