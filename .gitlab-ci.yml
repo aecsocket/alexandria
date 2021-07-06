@@ -3,9 +3,10 @@ image: gradle:jdk16
 stages:
   - build
   - test
+  - deploy
 
 variables:
-  GRADLE_USER_HOME: `pwd`/.gradle
+  GRADLE_USER_HOME: "`pwd`/.gradle"
 
 cache:
   paths:
