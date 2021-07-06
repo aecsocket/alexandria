@@ -17,12 +17,10 @@ build:
   stage: build
   script:
     # Install Paper to local Maven repo
-    - "apt-get update"
-    - "apt-get -y install jq maven" # Maven required for paperclip
-    - "version='1.17'"
-    - "build=$(curl https://papermc.io/api/v2/projects/paper/versions/${version} | jq '.builds[-1]')"
-    - "curl --output paperclip.jar https://papermc.io/api/v2/projects/paper/versions/${version}/builds/${build}/downloads/paper-${version}-${build}.jar"
-    - "java -Dpaperclip.install=true -jar paperclip.jar"
+    - "git clone https://github.com/papermc/paper"
+    - "cd paper"
+    - "./gradlew applyPatches publishToMavenLocal"
+    - "cd .."
     # Build project
     - "./gradlew assemble"
   artifacts:
