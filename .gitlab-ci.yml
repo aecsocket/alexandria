@@ -1,26 +1,41 @@
-image: "maven:latest"
+image: gradle:jdk16
+
+stages:
+  - build
+  - test
+
+variables:
+  GRADLE_USER_HOME: `pwd`/.gradle
 
 cache:
   paths:
-    - "maven.repository/"
-
-variables:
-  MAVEN_OPTS: "-Dmaven.repo.local=maven.repository"
+    - .gradle/wrapper
+    - .gradle/caches
 
 build:
+  stage: build
   script:
-    - "microdnf install jq"
-    - "version='1.16.5'"
+    # Install Paper to local Maven repo
+    - "apt-get install jq"
+    - "version='1.17'"
     - "build=$(curl https://papermc.io/api/v2/projects/paper/versions/${version} | jq '.builds[-1]')"
     - "curl --output paperclip.jar https://papermc.io/api/v2/projects/paper/versions/${version}/builds/${build}/downloads/paper-${version}-${build}.jar"
     - "java -Dpaperclip.install=true -jar paperclip.jar"
-    - "mvn package"
+    # Build project
+    - "./gradlew assemble"
   artifacts:
     paths:
-      - "*/target"
+      - "*/build/libs/*.jar"
+    expire_in: 1 week
+
+test:
+  stage: test
+  script:
+    - "./gradlew check"
 
 deploy:
+  stage: deploy
   script:
-    - "mvn deploy -s ci_settings.xml"
+    - "./gradlew publish"
   only:
-    - "master"
+    - master
