@@ -18,7 +18,7 @@ build:
   script:
     # Install Paper to local Maven repo
     - "apt-get update"
-    - "apt-get -y install jq"
+    - "apt-get -y install jq maven" # Maven required for paperclip
     - "version='1.17'"
     - "build=$(curl https://papermc.io/api/v2/projects/paper/versions/${version} | jq '.builds[-1]')"
     - "curl --output paperclip.jar https://papermc.io/api/v2/projects/paper/versions/${version}/builds/${build}/downloads/paper-${version}-${build}.jar"
