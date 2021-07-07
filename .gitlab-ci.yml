@@ -1,4 +1,4 @@
-image: aecsocket/gradle-maven-jdk16:latest
+image: gradle:latest
 
 stages:
   - build
