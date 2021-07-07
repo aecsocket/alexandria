@@ -9,6 +9,8 @@ plugins {
     id("xyz.jpenilla.run-paper") version "1.0.3"
 }
 
+val minecraftVersion = "1.17.1"
+
 val mojangMappedServer: Configuration by configurations.creating
 configurations.compileOnly {
     extendsFrom(mojangMappedServer)
@@ -22,7 +24,9 @@ repositories {
 
 dependencies {
     api(project(":minecommons-core"))
-    mojangMappedServer("io.papermc.paper", "paper", "1.17-R0.1-SNAPSHOT", classifier = "mojang-mapped")
+    mojangMappedServer("io.papermc.paper", "paper", "${minecraftVersion}-R0.1-SNAPSHOT", classifier = "mojang-mapped") {
+        exclude("junit", "junit")
+    }
     remapper("org.quiltmc", "tiny-remapper", "0.4.1")
     // From library loader
     compileOnly("org.spongepowered", "configurate-hocon", "4.1.1")
@@ -62,7 +66,7 @@ tasks {
     }
 
     runServer {
-        minecraftVersion("1.17")
+        minecraftVersion(minecraftVersion)
         pluginJars.from(productionMappedJar.flatMap { it.outputJar })
     }
 }
