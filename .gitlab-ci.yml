@@ -1,4 +1,4 @@
-image: gradle:jdk16
+image: aecsocket/gradle-maven-jdk16:latest
 
 stages:
   - build
@@ -7,6 +7,7 @@ stages:
 
 variables:
   GRADLE_USER_HOME: "`pwd`/.gradle"
+  MC_VERSION: "1.17"
 
 cache:
   paths:
@@ -17,12 +18,10 @@ build:
   stage: build
   script:
     # Install Paper to local Maven repo
-    - "mkdir libraries && cd libraries"
-    - "git clone https://github.com/papermc/paper && cd paper"
-    - "git config --global user.email 'ci@example.com'"
-    - "git config --global user.name 'ci'"
-    - "./gradlew applyPatches publishToMavenLocal"
-    - "cd ../.."
+    - "apt install jq maven"
+    - "build=$(curl https://papermc.io/api/v2/projects/paper/versions/${MC_VERSION} | jq '.builds[-1]')"
+    - "curl -o paperclip.jar https://papermc.io/api/v2/projects/paper/versions/${MC_VERSION}/builds/${build}/downloads/paper-${MC_VERSION}-${build}.jar"
+    - "java -Dpaperclip.install=true -jar paperclip.jar"
     # Build project
     - "./gradlew assemble"
   artifacts:
