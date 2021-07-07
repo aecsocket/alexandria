@@ -1,4 +1,4 @@
-image: gradle:jdk16
+image: maven:latest
 
 stages:
   - build
@@ -18,8 +18,8 @@ build:
   stage: build
   script:
     # Install Paper to local Maven repo
-    - "apt-get update"
-    - "apt-get -y install jq maven"
+    - "microdnf update"
+    - "microdnf install jq"
     - "build=$(curl https://papermc.io/api/v2/projects/paper/versions/${MC_VERSION} | jq '.builds[-1]')"
     - "curl -o paperclip.jar https://papermc.io/api/v2/projects/paper/versions/${MC_VERSION}/builds/${build}/downloads/paper-${MC_VERSION}-${build}.jar"
     - "java -Dpaperclip.install=true -jar paperclip.jar"
