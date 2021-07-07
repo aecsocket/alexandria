@@ -2,18 +2,18 @@ image: gradle:jdk16
 
 stages:
   - build
-  - test
   - deploy
 
 variables:
   GRADLE_USER_HOME: "`pwd`/.gradle"
   MC_VERSION: "1.17.1"
+  MAVEN_OPTS: "-Dmaven.repo.local=${CI_PROJECT_DIR}/.m2/repository"
 
 cache:
   paths:
     - .gradle/wrapper
     - .gradle/caches
-    - libraries
+    - .m2/repository
 
 build:
   stage: build
@@ -29,16 +29,14 @@ build:
     - "./gradlew publishToMavenLocal"
     # Build project
     - "cd ../.."
-    - "./gradlew assemble"
+    - "./gradlew build"
+  cache:
+    paths:
+      - libraries
   artifacts:
     paths:
       - "*/build/libs/*.jar"
     expire_in: 1 week
-
-test:
-  stage: test
-  script:
-    - "./gradlew check"
 
 deploy:
   stage: deploy
