@@ -17,16 +17,16 @@ Commons library for Minecraft-related projects, with features such as vector man
 Repository
 ```xml
 <repository>
- <id>gitlab-maven-minecommons</id>
- <url>https://gitlab.com/api/v4/projects/27049637/packages/maven</url>
+    <id>gitlab-maven-minecommons</id>
+    <url>https://gitlab.com/api/v4/projects/27049637/packages/maven</url>
 </repository>
 ```
 Dependency
 ```xml
 <dependency>
- <groupId>com.gitlab.aecsocket.minecommons</groupId>
- <artifactId>[MODULE]</artifactId>
- <version>[VERSION]</version>
+    <groupId>com.gitlab.aecsocket.minecommons</groupId>
+    <artifactId>[MODULE]</artifactId>
+    <version>[VERSION]</version>
 </dependency>
 ```
 
@@ -62,4 +62,4 @@ Minecommons is exposed as a Paper plugin, for other plugins to depend on.
 * [Java >=16](https://adoptopenjdk.net/?variant=openjdk16&jvmVariant=hotspot)
 * [Paper >=1.17.1](https://papermc.io)
 
-### [Download](https://gitlab.example.com/api/v4/projects/27049637/jobs/artifacts/master/raw/paper/build/libs/minecommons-paper-1.2-SNAPSHOT.jar?job=build)
+### [Download](https://gitlab.com/api/v4/projects/27049637/jobs/artifacts/master/raw/paper/build/libs/minecommons-paper-1.2-SNAPSHOT.jar?job=build)
