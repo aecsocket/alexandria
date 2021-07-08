@@ -16,23 +16,17 @@ build:
   script:
     # Install libraries
     - "mkdir -p libraries && cd libraries"
-    - "mkdir -p gradle-cache"
-    # -> Paper
-    - "git clone https://github.com/papermc/paper"
+    # Paper
+    - "git clone https://github.com/papermc/paper || true"
     - "cd paper"
-    # --> Pull gradle cache
-    - "mv ../gradle-cache/paper .gradle || true"
-    # --> Install
+    - "git pull"
     - "git config --global user.email 'ci'"
     - "git config --global user.name 'ci'"
     - "gradle applyPatches"
     - "gradle publishToMavenLocal"
-    # --> Cache gradle
-    - "mv .gradle ../gradle-cache/paper"
 
-    # Return
-    - "cd ../.."
     # Build project
+    - "cd ../.."
     - "gradle --build-cache assemble"
   cache:
     key: "$CI_COMMIT_REF_NAME"
@@ -40,7 +34,7 @@ build:
     paths:
       - "*/build"
       - ".gradle"
-      - "libraries/gradle-cache"
+      - "libraries"
       - ".m2/repository"
   artifacts:
     paths:
