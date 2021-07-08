@@ -34,12 +34,14 @@ subprojects {
     }
 
     tasks {
-        withType<JavaCompile> {
+        compileJava {
             options.encoding = Charsets.UTF_8.name()
             options.release.set(16)
         }
-        withType<Javadoc> {
+
+        javadoc {
             options.encoding = Charsets.UTF_8.name()
+            source = sourceSets.main.get().allJava
         }
 
         test {
@@ -50,7 +52,7 @@ subprojects {
 
 publishing {
     publications {
-        create<MavenPublication>("minecommons-core"){
+        create<MavenPublication>("minecommons"){
             from(components["java"])
         }
     }

@@ -16,11 +16,6 @@ public record Vector2(double x, double y) {
     /** The north in a Minecraft world, equivalent to (0, -1). */
     public static final Vector2 NORTH = new Vector2(0, -1);
 
-    public Vector2(double x, double y) {
-        this.x = x;
-        this.y = y;
-    }
-
     public Vector2(double v) {
         this(v, v);
     }

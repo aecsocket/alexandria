@@ -7,11 +7,6 @@ public record Point2(int x, int y) {
     /** An instance with all fields set to 0. */
     public static final Point2 ZERO = new Point2(0);
 
-    public Point2(int x, int y) {
-        this.x = x;
-        this.y = y;
-    }
-
     public Point2(int v) {
         this(v, v);
     }

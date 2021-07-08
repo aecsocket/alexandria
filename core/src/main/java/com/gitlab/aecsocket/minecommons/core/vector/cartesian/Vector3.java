@@ -27,8 +27,6 @@ public record Vector3(double x, double y, double z) {
             this.mapper = mapper;
         }
 
-        public Function<Vector3, Double> mapper() { return mapper; }
-
         /**
          * Gets this component's value in a vector.
          * @param vec The vector.
@@ -40,17 +38,24 @@ public record Vector3(double x, double y, double z) {
     /** An instance with all fields set to 0. */
     public static final Vector3 ZERO = new Vector3(0);
 
-    public Vector3(double x, double y, double z) {
-        this.x = x;
-        this.y = y;
-        this.z = z;
-    }
-
     public Vector3(double v) {
         this(v, v, v);
     }
 
+    /**
+     * Creates a new vector.
+     * @param x The X component.
+     * @param y The Y component.
+     * @param z The Z component.
+     * @return The vector.
+     */
     public static Vector3 vec3(double x, double y, double z) { return new Vector3(x, y, z); }
+
+    /**
+     * Creates a new vector.
+     * @param v The value of each component.
+     * @return The vector.
+     */
     public static Vector3 vec3(double v) { return new Vector3(v); }
 
     /**

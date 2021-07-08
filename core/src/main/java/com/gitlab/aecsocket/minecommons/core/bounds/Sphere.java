@@ -8,14 +8,13 @@ import java.util.Objects;
 
 import static com.gitlab.aecsocket.minecommons.core.Numbers.sqr;
 
+/**
+ * A sphere-shaped volume.
+ */
 @ConfigSerializable
 public record Sphere(Vector3 center, double radius, double sqrRadius) implements Bound {
     public Sphere {
         Validation.greaterThan("radius", radius, 0);
-    }
-
-    public static Sphere sphere(Vector3 center, double radius) {
-        return new Sphere(center, radius, sqr(radius));
     }
 
     @Override

@@ -8,15 +8,14 @@ import java.util.Objects;
 
 import static com.gitlab.aecsocket.minecommons.core.Numbers.sqr;
 
+/**
+ * A cylinder-shaped volume, upright on the vertical axis.
+ */
 @ConfigSerializable
 public record Cylinder(Vector3 base, double radius, double height, double sqrRadius) implements Bound {
     public Cylinder {
         Validation.greaterThan("radius", radius, 0);
         Validation.greaterThan("height", height, 0);
-    }
-
-    public static Cylinder cylinder(Vector3 base, double radius, double height) {
-        return new Cylinder(base, radius, height, sqr(radius));
     }
 
     @Override

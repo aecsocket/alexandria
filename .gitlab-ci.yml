@@ -3,6 +3,7 @@ image: gradle:jdk16
 stages:
   - build
   - deploy
+  - pages
 
 variables:
   GRADLE_USER_HOME: "`pwd`/.gradle"
@@ -42,5 +43,16 @@ deploy:
   stage: deploy
   script:
     - "./gradlew publish"
+  only:
+    - master
+
+pages:
+  stage: pages
+  script:
+    - "./gradlew javadoc"
+    - "mv src/site public"
+    - "mkdir -p public/javadoc"
+    - "mv core/build/docs/javadoc public/javadoc/core"
+    - "mv paper/build/docs/javadoc public/javadoc/paper"
   only:
     - master

@@ -23,7 +23,7 @@ public final class PaperBounds {
     public static Bound from(VoxelShape shape) {
         List<Bound> bounds = new ArrayList<>();
         for (AABB bb : shape.toAabbs()) {
-            bounds.add(Box.box(
+            bounds.add(new Box(
                     new Vector3(bb.minX, bb.minY, bb.minZ),
                     new Vector3(bb.maxX, bb.maxY, bb.maxZ)
             ));
@@ -43,7 +43,7 @@ public final class PaperBounds {
         BoundingBox box = entity.getBoundingBox();
         Location location = entity.getLocation();
         double x = location.getX(), y = location.getY(), z = location.getZ();
-        return Box.box(
+        return new Box(
                 new Vector3(box.getMinX() - x, box.getMinY() - y, box.getMinZ() - z),
                 new Vector3(box.getMaxX() - x, box.getMaxY() - y, box.getMaxZ() - z),
                 location.getYaw()

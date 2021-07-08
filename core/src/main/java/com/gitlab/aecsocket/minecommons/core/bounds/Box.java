@@ -5,6 +5,9 @@ import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 import java.util.Objects;
 
+/**
+ * A cuboid-shaped volume.
+ */
 @ConfigSerializable
 public record Box(Vector3 min, Vector3 max, double angle) implements Bound, OrientedBound {
     public Box {
@@ -20,12 +23,8 @@ public record Box(Vector3 min, Vector3 max, double angle) implements Bound, Orie
         );
     }
 
-    public static Box box(Vector3 min, Vector3 max, double rotation) {
-        return new Box(min, max, rotation);
-    }
-
-    public static Box box(Vector3 min, Vector3 max) {
-        return new Box(min, max, 0);
+    public Box(Vector3 min, Vector3 max) {
+        this(min, max, 0);
     }
 
     @Override
@@ -33,9 +32,22 @@ public record Box(Vector3 min, Vector3 max, double angle) implements Bound, Orie
         return new Box(min, max, angle);
     }
 
+    /**
+     * Gets the center of this cuboid.
+     * @return The center.
+     */
     public Vector3 center() { return min.lerp(max, 0.5); }
+
+    /**
+     * Gets the vector between the maximum and minimum points of this cuboid.
+     * @return The result.
+     */
     public Vector3 size() { return max.subtract(min); }
 
+    /**
+     * Gets an array of six vectors representing the corners of this cuboid.
+     * @return The array.
+     */
     public Vector3[] corners() {
         return new Vector3[] {
                 min, new Vector3(max.x(), min.y(), min.z()), new Vector3(max.x(), max.y(), min.z()),

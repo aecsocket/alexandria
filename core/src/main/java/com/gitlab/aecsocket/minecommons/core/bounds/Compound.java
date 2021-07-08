@@ -5,11 +5,10 @@ import org.checkerframework.checker.units.qual.min;
 
 import java.util.Arrays;
 
+/**
+ * A combination of multiple bounds.
+ */
 public record Compound(Bound... bounds) implements Bound {
-    public static Compound compound(Bound... bounds) {
-        return new Compound(bounds);
-    }
-
     @Override
     public boolean intersects(Vector3 point) {
         for (Bound bound : bounds) {
