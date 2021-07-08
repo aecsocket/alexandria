@@ -2,6 +2,7 @@ image: gradle:jdk16
 
 stages:
   - build
+  - test
   - deploy
   - pages
 
@@ -30,14 +31,22 @@ build:
     - "./gradlew publishToMavenLocal"
     # Build project
     - "cd ../.."
-    - "./gradlew build"
+    - "./gradlew assemble"
   cache:
     paths:
+      - .gradle/wrapper
+      - .gradle/caches
+      - .m2/repository
       - libraries/paper/.gradle
   artifacts:
     paths:
-      - "*/build/libs/*.jar"
+      - "*/build/libs"
     expire_in: 1 week
+
+test:
+  stage: test
+  script:
+    - "./gradlew check"
 
 deploy:
   stage: deploy

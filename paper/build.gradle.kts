@@ -23,7 +23,7 @@ repositories {
 }
 
 dependencies {
-    api(project(":minecommons-core"))
+    api(project(":core"))
     mojangMappedServer("io.papermc.paper", "paper", "${minecraftVersion}-R0.1-SNAPSHOT", classifier = "mojang-mapped") {
         exclude("junit", "junit")
     }
