@@ -14,15 +14,23 @@ variables:
 build:
   stage: build
   script:
-    # Install Paper to local Maven repo
+    # Install libraries
     - "mkdir -p libraries && cd libraries"
-    - "git clone https://github.com/papermc/paper || true"
+    - "mkdir -p gradle-cache"
+    # -> Paper
+    - "git clone https://github.com/papermc/paper"
     - "cd paper"
-    - "git pull"
+    # --> Pull gradle cache
+    - "mv ../gradle-cache/paper .gradle || true"
+    # --> Install
     - "git config --global user.email 'ci'"
     - "git config --global user.name 'ci'"
     - "gradle applyPatches"
     - "gradle publishToMavenLocal"
+    # --> Cache gradle
+    - "mv .gradle ../gradle-cache/paper"
+
+    # Return
     - "cd ../.."
     # Build project
     - "gradle --build-cache assemble"
@@ -32,7 +40,7 @@ build:
     paths:
       - "*/build"
       - ".gradle"
-      - "libraries/*/.gradle"
+      - "libraries/gradle-cache"
   artifacts:
     paths:
       - ".gradle"
