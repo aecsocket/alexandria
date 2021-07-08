@@ -83,5 +83,8 @@ deploy:
       - "*/build"
       - ".gradle"
       - ".m2/repository"
+  artifacts:
+    paths:
+      - "public"
   only:
     - master
