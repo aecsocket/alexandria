@@ -7,7 +7,7 @@ stages:
   - pages
 
 variables:
-  GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+  GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dmaven.repo.local=${CI_PROJECT_DIR}/.m2/repository"
   GRADLE_USER_HOME: "${CI_PROJECT_DIR}/.gradle"
   MC_VERSION: "1.17.1"
 
@@ -41,6 +41,7 @@ build:
       - "*/build"
       - ".gradle"
       - "libraries/gradle-cache"
+      - ".m2/repository"
   artifacts:
     paths:
       - ".gradle"
@@ -57,6 +58,7 @@ test:
     paths:
       - "*/build"
       - ".gradle"
+      - ".m2/repository"
 
 deploy:
   stage: deploy
@@ -68,6 +70,7 @@ deploy:
     paths:
       - "*/build"
       - ".gradle"
+      - ".m2/repository"
   only:
     - master
 
@@ -85,5 +88,6 @@ pages:
     paths:
       - "*/build"
       - ".gradle"
+      - ".m2/repository"
   only:
     - master
