@@ -7,15 +7,10 @@ stages:
   - pages
 
 variables:
+  GRADLE_OPTS: "-Dorg.gradle.daemon=false"
   GRADLE_USER_HOME: "`pwd`/.gradle"
   MC_VERSION: "1.17.1"
   MAVEN_OPTS: "-Dmaven.repo.local=${CI_PROJECT_DIR}/.m2/repository"
-
-cache:
-  paths:
-    - .gradle/wrapper
-    - .gradle/caches
-    - .m2/repository
 
 build:
   stage: build
@@ -27,41 +22,65 @@ build:
     - "git pull"
     - "git config --global user.email 'ci'"
     - "git config --global user.name 'ci'"
-    - "./gradlew applyPatches"
-    - "./gradlew publishToMavenLocal"
-    # Build project
+    - "gradle applyPatches"
+    - "gradle publishToMavenLocal"
     - "cd ../.."
-    - "./gradlew assemble"
+    # Build project
+    - "gradle --build-cache assemble"
   cache:
+    key: "$CI_COMMIT_REF_NAME"
+    policy: push
     paths:
-      - .gradle/wrapper
-      - .gradle/caches
-      - .m2/repository
-      - libraries/paper/.gradle
+      - "*/build"
+      - ".gradle"
+      - ".m2/repository"
+      - "libraries/*/.gradle"
   artifacts:
     paths:
-      - "*/build/libs"
+      - ".gradle"
+      - "*/build/libs/*.jar"
     expire_in: 1 week
 
 test:
   stage: test
   script:
-    - "./gradlew check"
+    - "gradle check"
+  cache:
+    key: "$CI_COMMIT_REF_NAME"
+    policy: pull
+    paths:
+      - "*/build"
+      - ".gradle"
+      - ".m2/repository"
 
 deploy:
   stage: deploy
   script:
-    - "./gradlew publish"
+    - "gradle publish"
+  cache:
+    key: "$CI_COMMIT_REF_NAME"
+    policy: pull
+    paths:
+      - "*/build"
+      - ".gradle"
+      - ".m2/repository"
   only:
     - master
 
 pages:
   stage: pages
   script:
-    - "./gradlew javadoc"
+    - "gradle javadoc"
     - "mv src/site public"
     - "mkdir -p public/javadoc"
     - "mv core/build/docs/javadoc public/javadoc/core"
     - "mv paper/build/docs/javadoc public/javadoc/paper"
+  cache:
+    key: "$CI_COMMIT_REF_NAME"
+    policy: pull
+    paths:
+      - "*/build"
+      - ".gradle"
+      - ".m2/repository"
   only:
     - master
