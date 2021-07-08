@@ -6,7 +6,6 @@ import com.gitlab.aecsocket.minecommons.core.expressions.node.EvaluationExceptio
 import com.gitlab.aecsocket.minecommons.core.expressions.parsing.ParsingException;
 import com.gitlab.aecsocket.minecommons.core.expressions.parsing.Token;
 import com.gitlab.aecsocket.minecommons.core.expressions.parsing.TokenzingException;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.Test;
 
 import java.util.Deque;
@@ -39,7 +38,7 @@ public class MathParserTest {
         testToken("1 + 2", MathParser.CONSTANT_DEF.create("1"), MathParser.PLUS_MINUS_DEF.create("+"), MathParser.CONSTANT_DEF.create("2"));
     }
 
-    void testNode(String text, double expectedValue, MathNode expectedNode, @Nullable Consumer<MathNode> initializer) throws ParsingException, EvaluationException {
+    void testNode(String text, double expectedValue, MathNode expectedNode, Consumer<MathNode> initializer) throws ParsingException, EvaluationException {
         if (initializer != null)
             initializer.accept(expectedNode);
         MathNode actual = MathParser.parse(text);

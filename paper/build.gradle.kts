@@ -4,6 +4,7 @@ import io.papermc.paperweight.util.registering
 
 plugins {
     id("java-library")
+    id("maven-publish")
     id("com.github.johnrengelman.shadow") version "7.0.0"
     id("io.papermc.paperweight.patcher") version "1.1.7"
     id("xyz.jpenilla.run-paper") version "1.0.3"
@@ -39,7 +40,7 @@ dependencies {
 
 tasks {
     shadowJar {
-        archiveFileName.set("${rootProject.name}-${rootProject.version}-mojang-mapped.jar")
+        archiveFileName.set("${rootProject.name}-${project.name}-${rootProject.version}-mojang-mapped.jar")
         archiveClassifier.set("mojang-mapped")
         from(rootProject.projectDir.resolve("LICENSE"))
         listOf(
@@ -53,7 +54,7 @@ tasks {
 
     val productionMappedJar by registering<RemapJar> {
         inputJar.set(shadowJar.flatMap { it.archiveFile })
-        outputJar.set(project.layout.buildDirectory.file("libs/${rootProject.name}-${rootProject.version}.jar"))
+        outputJar.set(project.layout.buildDirectory.file("libs/${rootProject.name}-${project.name}-${rootProject.version}.jar"))
         mappingsFile.set(project.layout.projectDirectory.file("mojang+yarn-spigot-reobf-patched.tiny"))
         fromNamespace.set(Constants.DEOBF_NAMESPACE)
         toNamespace.set(Constants.SPIGOT_NAMESPACE)
@@ -73,4 +74,26 @@ tasks {
 
 runPaper {
     disablePluginJarDetection()
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("gitlab") {
+            from(components["java"])
+        }
+    }
+
+    repositories {
+        maven {
+            name = "gitlabMinecommons"
+            url = uri("https://gitlab.com/api/v4/projects/27049637/packages/maven")
+            credentials(HttpHeaderCredentials::class) {
+                name = "Job-Token"
+                value = System.getenv("CI_JOB_TOKEN")
+            }
+            authentication {
+                create<HttpHeaderAuthentication>("header")
+            }
+        }
+    }
 }

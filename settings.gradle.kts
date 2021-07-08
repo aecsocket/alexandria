@@ -5,6 +5,6 @@ pluginManagement {
     }
 }
 
-rootProject.name = "Minecommons"
+rootProject.name = "minecommons"
 
 include("core", "paper")

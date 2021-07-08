@@ -4,7 +4,7 @@ plugins {
 }
 
 allprojects {
-    group = "com.gitlab.aecsocket"
+    group = "com.gitlab.aecsocket.minecommons"
     version = "1.2-SNAPSHOT"
     description = "Commons library for Minecraft"
 }
@@ -30,10 +30,15 @@ subprojects {
     }
 
     dependencies {
+        implementation("org.jetbrains", "annotations", "16.0.2")
         testImplementation("org.junit.jupiter", "junit-jupiter", "5.7.1")
     }
 
     tasks {
+        jar {
+            archiveFileName.set("${rootProject.name}-${project.name}-${rootProject.version}.jar")
+        }
+
         compileJava {
             options.encoding = Charsets.UTF_8.name()
             options.release.set(16)
@@ -52,7 +57,7 @@ subprojects {
 
 publishing {
     publications {
-        create<MavenPublication>("minecommons"){
+        create<MavenPublication>("gitlab") {
             from(components["java"])
         }
     }
