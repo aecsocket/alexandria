@@ -3,7 +3,6 @@ image: gradle:jdk16
 stages:
   - build
   - test
-  - publish
   - deploy
 
 variables:
@@ -55,7 +54,7 @@ test:
       - ".m2/repository"
 
 publish:
-  stage: publish
+  stage: deploy
   script:
     - "gradle publish"
   cache:
@@ -68,7 +67,7 @@ publish:
   only:
     - master
 
-deploy:
+pages:
   stage: deploy
   script:
     - "gradle javadoc"
