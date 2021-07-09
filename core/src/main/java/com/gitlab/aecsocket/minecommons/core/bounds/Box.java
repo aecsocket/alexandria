@@ -79,11 +79,11 @@ public record Box(Vector3 min, Vector3 max, double angle) implements Bound, Orie
     public boolean intersects(Vector3 point) {
         // 1. rotate [p] [-ang] around [center]
         Vector3 center = center();
-        point = point.subtract(center).rotateY(-angle).add(center);
+        Vector3 mapped = point.subtract(center).rotateX(-angle).add(center);
         // 2. calculate
-        return point.x() >= min.x() && point.x() <= max.x()
-                && point.y() >= min.y() && point.y() <= max.y()
-                && point.z() >= min.z() && point.z() <= max.z();
+        return mapped.x() >= min.x() && mapped.x() <= max.x()
+                && mapped.y() >= min.y() && mapped.y() <= max.y()
+                && mapped.z() >= min.z() && mapped.z() <= max.z();
     }
 
     @Override

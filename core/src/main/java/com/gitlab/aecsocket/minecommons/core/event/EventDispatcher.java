@@ -46,20 +46,21 @@ public final class EventDispatcher<E> {
         @Override
         public String toString() {
             return "{" +
-                    eventType +
+                    eventType.getSimpleName() +
                     (specific ? " specific" : "") +
                     " @ " + priority +
+                    " (" + listener + ")" +
                     '}';
         }
     }
 
-    private final PriorityQueue<Listener<E>> listeners = new PriorityQueue<>(Comparator.comparingInt(Listener::priority));
+    private final TreeSet<Listener<E>> listeners = new TreeSet<>(Comparator.comparingInt(Listener::priority));
 
     /**
      * Gets all registered listeners.
      * @return The listeners.
      */
-    public PriorityQueue<Listener<E>> listeners() { return listeners; }
+    public Collection<Listener<E>> listeners() { return listeners; }
 
     /**
      * Gets all registered listeners for a specific event type.

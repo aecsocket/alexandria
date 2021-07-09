@@ -19,7 +19,8 @@ public class MathParserTest {
         Deque<Token> actual = MathParser.tokenize(text);
         var it = actual.iterator();
         for (Token token : expected) {
-            assertEquals(token, it.next());
+            Token next = it.next();
+            assertEquals(token, next);
         }
     }
 
