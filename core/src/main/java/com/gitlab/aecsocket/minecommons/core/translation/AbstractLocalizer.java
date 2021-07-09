@@ -4,7 +4,6 @@ import net.kyori.adventure.text.Component;
 
 import java.util.*;
 import java.util.function.Supplier;
-import java.util.logging.Filter;
 
 /**
  * An abstract implementation of a {@link RegistryLocalizer}, defining a default locale,

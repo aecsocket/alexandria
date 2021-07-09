@@ -1,6 +1,5 @@
 package com.gitlab.aecsocket.minecommons.paper.serializers;
 
-import com.gitlab.aecsocket.minecommons.core.serializers.Serializers;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.checkerframework.checker.nullness.qual.Nullable;

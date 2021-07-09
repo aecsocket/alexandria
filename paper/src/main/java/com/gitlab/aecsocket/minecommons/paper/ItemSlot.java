@@ -3,7 +3,6 @@ package com.gitlab.aecsocket.minecommons.paper;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.NoSuchElementException;
 import java.util.function.Consumer;
@@ -43,7 +42,7 @@ public final class ItemSlot {
      * @return The equipment slot.
      * @throws NoSuchElementException If there is no equipment slot present.
      */
-    public @NonNull EquipmentSlot equipment() throws NoSuchElementException {
+    public EquipmentSlot equipment() throws NoSuchElementException {
         if (equipment == null)
             throw new NoSuchElementException("No equipment slot present");
         return equipment;

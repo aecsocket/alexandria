@@ -35,6 +35,7 @@ public class KeySerializer implements TypeSerializer<Key> {
     @Override
     public Key deserialize(Type type, ConfigurationNode node) throws SerializationException {
         try {
+            //noinspection PatternValidation
             return Key.key(require(node, String.class));
         } catch (InvalidKeyException e) {
             throw new SerializationException(node, type, e);

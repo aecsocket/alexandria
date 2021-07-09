@@ -1,6 +1,7 @@
 package com.gitlab.aecsocket.minecommons.core.raycast;
 
 import com.gitlab.aecsocket.minecommons.core.vector.cartesian.Vector3;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,9 +25,9 @@ public abstract class Raycast<B extends Boundable> {
      * @param hit The hit boundable.
      */
     public record Result<B extends Boundable>(
-            Vector3 position, Vector3 out,
+            Vector3 position, @Nullable Vector3 out,
             double distance, double distanceThrough,
-            B hit
+            @Nullable B hit
     ) {}
 
     private double epsilon;
@@ -82,7 +83,7 @@ public abstract class Raycast<B extends Boundable> {
      * @param test The test which determines if an object is eligible to be intersected.
      * @return The cast result.
      */
-    public Result<B> cast(Vector3 origin, Vector3 direction, double maxDistance, Predicate<B> test) {
+    public Result<B> cast(Vector3 origin, Vector3 direction, double maxDistance, @Nullable Predicate<B> test) {
         List<? extends B> objects = baseObjects(origin, direction, maxDistance);
         Vector3 current = origin;
         Vector3 step = direction.multiply(epsilon);

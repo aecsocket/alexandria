@@ -2,7 +2,6 @@ package com.gitlab.aecsocket.minecommons.core.vector.cartesian;
 
 import com.gitlab.aecsocket.minecommons.core.Validation;
 import com.gitlab.aecsocket.minecommons.core.vector.polar.Coord3;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import static java.lang.Math.*;
 import static com.gitlab.aecsocket.minecommons.core.Numbers.*;
@@ -80,7 +79,7 @@ public record Vector3(double x, double y, double z) {
      * @param o The other vector.
      * @return The resulting vector.
      */
-    public Vector3 add(@NonNull Vector3 o) { return add(o.x, o.y, o.z); }
+    public Vector3 add(Vector3 o) { return add(o.x, o.y, o.z); }
 
 
     /**
@@ -104,7 +103,7 @@ public record Vector3(double x, double y, double z) {
      * @param o The other vector.
      * @return The resulting vector.
      */
-    public Vector3 subtract(@NonNull Vector3 o) { return subtract(o.x, o.y, o.z); }
+    public Vector3 subtract(Vector3 o) { return subtract(o.x, o.y, o.z); }
 
 
     /**
@@ -128,7 +127,7 @@ public record Vector3(double x, double y, double z) {
      * @param o The other vector.
      * @return The resulting vector.
      */
-    public Vector3 multiply(@NonNull Vector3 o) { return multiply(o.x, o.y, o.z); }
+    public Vector3 multiply(Vector3 o) { return multiply(o.x, o.y, o.z); }
 
 
     /**
@@ -152,7 +151,7 @@ public record Vector3(double x, double y, double z) {
      * @param o The other vector.
      * @return The resulting vector.
      */
-    public Vector3 divide(@NonNull Vector3 o) { return multiply(o.x, o.y, o.z); }
+    public Vector3 divide(Vector3 o) { return multiply(o.x, o.y, o.z); }
 
     /**
      * Negates all components.
@@ -276,7 +275,7 @@ public record Vector3(double x, double y, double z) {
      * @return The normalized vector.
      * @throws IllegalStateException If the length of the vector equals 0.
      */
-    public @NonNull Vector3 normalize() {
+    public Vector3 normalize() {
         double length = length();
         Validation.assertNot(length == 0, "Vector has no length, cannot multiply by 0");
         return new Vector3(x / length, y / length, z / length);
@@ -288,7 +287,7 @@ public record Vector3(double x, double y, double z) {
      * @param f The interpolation factor.
      * @return The interpolated vector.
      */
-    public @NonNull Vector3 lerp(@NonNull Vector3 o, double f) {
+    public Vector3 lerp(Vector3 o, double f) {
         return new Vector3(
                 x + (o.x - x) * f,
                 y + (o.y - y) * f,
@@ -301,7 +300,7 @@ public record Vector3(double x, double y, double z) {
      * @param o The other vector.
      * @return The midpoint.
      */
-    public @NonNull Vector3 midpoint(@NonNull Vector3 o) {
+    public Vector3 midpoint(Vector3 o) {
         return new Vector3(
                 (x + o.x) / 2,
                 (y + o.y) / 2,

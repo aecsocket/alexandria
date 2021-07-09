@@ -12,7 +12,7 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginDescriptionFile;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collections;
 import java.util.List;
@@ -164,7 +164,7 @@ public class BaseCommand<P extends BasePlugin<P>> {
          * @param locale The locale of the sender.
          * @param pSender The sender as a player, if they are a player, otherwise null.
          */
-        void handle(CommandContext<CommandSender> ctx, CommandSender sender, Locale locale, Player pSender);
+        void handle(CommandContext<CommandSender> ctx, CommandSender sender, Locale locale, @Nullable Player pSender);
     }
 
     /**
@@ -202,7 +202,7 @@ public class BaseCommand<P extends BasePlugin<P>> {
      * @return The argument.
      * @throws CommandException If there was no value, and the default value was null or there was no player sender.
      */
-    protected @NonNull <T> T defaultedArg(CommandContext<CommandSender> ctx, String key, Player pSender, Supplier<T> ifPlayer) throws CommandException {
+    protected <T> T defaultedArg(CommandContext<CommandSender> ctx, String key, @Nullable Player pSender, Supplier<T> ifPlayer) throws CommandException {
         return ctx.<T>getOptional(key).orElseGet(() -> {
             T result = pSender == null ? null : ifPlayer.get();
             if (result == null)

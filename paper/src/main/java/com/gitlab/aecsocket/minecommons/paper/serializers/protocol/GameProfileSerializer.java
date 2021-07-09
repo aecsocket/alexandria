@@ -2,9 +2,6 @@ package com.gitlab.aecsocket.minecommons.paper.serializers.protocol;
 
 import com.comphenix.protocol.wrappers.WrappedGameProfile;
 import com.comphenix.protocol.wrappers.WrappedSignedProperty;
-import io.leangen.geantyref.TypeToken;
-import org.bukkit.Bukkit;
-import org.bukkit.World;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;

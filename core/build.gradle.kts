@@ -10,6 +10,18 @@ dependencies {
     api("net.kyori", "adventure-text-minimessage", "4.1.0-SNAPSHOT") {
         exclude("net.kyori", "adventure-api")
     }
+    compileOnly("org.checkerframework", "checker-qual", "3.15.0")
+}
+
+tasks {
+    javadoc {
+        val opt = options as StandardJavadocDocletOptions
+        opt.links(
+                "https://docs.oracle.com/en/java/javase/16/docs/api/",
+                "https://configurate.aoeu.xyz/4.1.1/apidocs/",
+                "https://javadoc.io/doc/net.kyori/adventure-api/latest/index.html"
+        )
+    }
 }
 
 publishing {

@@ -2,7 +2,6 @@ package com.gitlab.aecsocket.minecommons.core.vector.cartesian;
 
 import com.gitlab.aecsocket.minecommons.core.Validation;
 import com.gitlab.aecsocket.minecommons.core.vector.polar.Coord2;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import static java.lang.Math.*;
 import static com.gitlab.aecsocket.minecommons.core.Numbers.*;
@@ -72,7 +71,7 @@ public record Vector2(double x, double y) {
      * @param o The other vector.
      * @return The resulting vector.
      */
-    public Vector2 add(@NonNull Vector2 o) { return add(o.x, o.y); }
+    public Vector2 add(Vector2 o) { return add(o.x, o.y); }
 
 
     /**
@@ -95,7 +94,7 @@ public record Vector2(double x, double y) {
      * @param o The other vector.
      * @return The resulting vector.
      */
-    public Vector2 subtract(@NonNull Vector2 o) { return subtract(o.x(), o.y()); }
+    public Vector2 subtract(Vector2 o) { return subtract(o.x(), o.y()); }
 
 
     /**
@@ -118,7 +117,7 @@ public record Vector2(double x, double y) {
      * @param o The other vector.
      * @return The resulting vector.
      */
-    public Vector2 multiply(@NonNull Vector2 o) { return multiply(o.x, o.y); }
+    public Vector2 multiply(Vector2 o) { return multiply(o.x, o.y); }
 
 
     /**
@@ -141,7 +140,7 @@ public record Vector2(double x, double y) {
      * @param o The other vector.
      * @return The resulting vector.
      */
-    public Vector2 divide(@NonNull Vector2 o) { return multiply(o.x, o.y); }
+    public Vector2 divide(Vector2 o) { return multiply(o.x, o.y); }
 
     /**
      * Negates all components.
@@ -172,7 +171,7 @@ public record Vector2(double x, double y) {
      * @return The normalized vector.
      * @throws IllegalStateException If the length of the vector equals 0.
      */
-    public @NonNull Vector2 normalize() {
+    public Vector2 normalize() {
         double length = length();
         Validation.assertNot(length == 0, "Vector has no length, cannot multiply by 0");
         return new Vector2(x / length, y / length);
@@ -184,7 +183,7 @@ public record Vector2(double x, double y) {
      * @param f The interpolation factor.
      * @return The interpolated vector.
      */
-    public @NonNull Vector2 lerp(@NonNull Vector2 o, double f) {
+    public Vector2 lerp(Vector2 o, double f) {
         return new Vector2(
                 x + (o.x() - x) * f,
                 y + (o.y() - y) * f

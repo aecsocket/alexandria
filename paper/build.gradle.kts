@@ -39,6 +39,18 @@ dependencies {
 }
 
 tasks {
+    javadoc {
+        val opt = options as StandardJavadocDocletOptions
+        opt.links(
+                "https://docs.oracle.com/en/java/javase/16/docs/api/",
+                "https://configurate.aoeu.xyz/4.1.1/apidocs/",
+                "https://javadoc.io/doc/net.kyori/adventure-api/latest/index.html",
+                "https://papermc.io/javadocs/paper/1.17/",
+                "https://javadoc.commandframework.cloud/",
+                "https://aadnk.github.io/ProtocolLib/Javadoc/"
+        )
+    }
+
     shadowJar {
         archiveFileName.set("${rootProject.name}-${project.name}-${rootProject.version}-mojang-mapped.jar")
         archiveClassifier.set("mojang-mapped")

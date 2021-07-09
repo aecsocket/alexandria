@@ -5,10 +5,6 @@ import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.StringJoiner;
-
 /**
  * Utilities for components.
  */

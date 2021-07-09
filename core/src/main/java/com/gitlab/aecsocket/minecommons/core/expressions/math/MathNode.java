@@ -180,7 +180,7 @@ public interface MathNode extends Node<MathVisitor> {
 
         @Override public int type() { return TYPE; }
 
-        @Override public double eval() throws EvaluationException { return value; }
+        @Override public double eval() { return value; }
 
         @Override public String toString() { return Double.toString(value); }
 

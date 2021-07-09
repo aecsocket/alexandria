@@ -18,7 +18,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.server.ServerLoadEvent;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.ConfigurationOptions;
@@ -146,43 +145,43 @@ public abstract class BasePlugin<S extends BasePlugin<S>> extends JavaPlugin imp
      * Gets the logging provider.
      * @return The logging.
      */
-    public @NonNull Logging logging() { return logging; }
+    public Logging logging() { return logging; }
 
     /**
      * Gets the settings.
      * @return The settings.
      */
-    public @NonNull Settings settings() { return settings; }
+    public Settings settings() { return settings; }
 
     /**
      * Gets the localizer.
      * @return The localizer.
      */
-    public @NonNull MiniMessageLocalizer localizer() { return localizer; }
+    public MiniMessageLocalizer localizer() { return localizer; }
 
     /**
      * Gets the configuration options.
      * @return The configuration options.
      */
-    public @NonNull ConfigurationOptions configOptions() { return configOptions; }
+    public ConfigurationOptions configOptions() { return configOptions; }
 
     /**
      * Gets the ProtocolLib integration.
      * @return The integration.
      */
-    public @NonNull ProtocolLibAPI protocol() { return protocol; }
+    public ProtocolLibAPI protocol() { return protocol; }
 
     /**
      * Gets the root command.
      * @return The root command.
      */
-    public @NonNull BaseCommand<S> command() { return command; }
+    public BaseCommand<S> command() { return command; }
 
     /**
      * Gets the default locale of the plugin.
      * @return The locale.
      */
-    public @NonNull Locale defaultLocale() { return setting(Locale.US, (n, d) -> n.get(Locale.class, d), "default_locale"); }
+    public Locale defaultLocale() { return setting(Locale.US, (n, d) -> n.get(Locale.class, d), "default_locale"); }
 
     /**
      * The event handler that runs on server load.

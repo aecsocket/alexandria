@@ -14,6 +14,7 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -113,7 +114,7 @@ public class PaperRaycast extends Raycast<PaperRaycast.PaperBoundable> {
      * @param name The name of the bound.
      * @param bound The bound.
      */
-    public record PaperBoundable(Block block, Entity entity, Vector3 origin, String name, Bound bound) implements Boundable {
+    public record PaperBoundable(@Nullable Block block, @Nullable Entity entity, Vector3 origin, String name, Bound bound) implements Boundable {
         /**
          * Creates a boundable of a block.
          * @param block The underlying block.

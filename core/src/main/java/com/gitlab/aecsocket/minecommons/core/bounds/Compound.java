@@ -1,7 +1,6 @@
 package com.gitlab.aecsocket.minecommons.core.bounds;
 
 import com.gitlab.aecsocket.minecommons.core.vector.cartesian.Vector3;
-import org.checkerframework.checker.units.qual.min;
 
 import java.util.Arrays;
 

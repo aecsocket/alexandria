@@ -3,8 +3,6 @@ package com.gitlab.aecsocket.minecommons.paper.inputs;
 import com.gitlab.aecsocket.minecommons.core.event.EventDispatcher;
 import org.bukkit.entity.Player;
 
-import java.util.*;
-
 /**
  * An abstract implementation of an input manager.
  */

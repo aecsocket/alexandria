@@ -44,8 +44,13 @@ subprojects {
         }
 
         javadoc {
-            options.encoding = Charsets.UTF_8.name()
-            source = sourceSets.main.get().allJava
+            val opt = options as StandardJavadocDocletOptions
+            opt.encoding = Charsets.UTF_8.name()
+            opt.source("16")
+            opt.linkSource(true)
+            setDestinationDir(file("${buildDir}/docs/javadoc"))
+            title = "${project.name} $version API"
+            opt.author(true)
         }
 
         test {

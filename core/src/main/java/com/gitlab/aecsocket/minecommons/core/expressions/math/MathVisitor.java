@@ -3,8 +3,6 @@ package com.gitlab.aecsocket.minecommons.core.expressions.math;
 import com.gitlab.aecsocket.minecommons.core.Validation;
 import com.gitlab.aecsocket.minecommons.core.expressions.node.Visitor;
 
-import java.lang.annotation.Target;
-
 /**
  * Generic visitor for {@link MathNode}s.
  */

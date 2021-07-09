@@ -37,7 +37,7 @@ public class Translation extends HashMap<String, String> {
      * @return The translation map.
      */
     public static Translation empty() {
-        return new Translation(null);
+        return new Translation(Locale.ROOT);
     }
 
     /**

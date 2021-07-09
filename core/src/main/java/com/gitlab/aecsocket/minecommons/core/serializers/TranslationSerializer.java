@@ -58,6 +58,6 @@ public class TranslationSerializer implements TypeSerializer<Translation> {
     public Translation deserialize(Type type, ConfigurationNode node) throws SerializationException {
         Map<String, String> values = new HashMap<>();
         deserialize(values, node);
-        return new Translation(values, node.node("locale").get(Locale.class));
+        return new Translation(values, Serializers.require(node.node("locale"), Locale.class));
     }
 }

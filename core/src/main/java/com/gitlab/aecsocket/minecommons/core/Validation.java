@@ -1,5 +1,7 @@
 package com.gitlab.aecsocket.minecommons.core;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 /**
  * Utilities for validating conditions.
  */
@@ -53,7 +55,7 @@ public final class Validation {
      * @param <E> The exception type.
      * @throws E The exception to throw.
      */
-    public static <E extends Throwable> void notNull(Object obj, E thrown) throws E {
+    public static <E extends Throwable> void notNull(@Nullable Object obj, E thrown) throws E {
         if (obj == null) throw thrown;
     }
 
@@ -64,7 +66,7 @@ public final class Validation {
      * @param obj The object.
      * @param name The name of the argument.
      */
-    public static void notNull(String name, Object obj) {
+    public static void notNull(String name, @Nullable Object obj) {
         notNull(obj, new NullPointerException(name));
     }
 

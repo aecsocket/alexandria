@@ -8,7 +8,6 @@ import org.spongepowered.configurate.serialize.TypeSerializer;
 
 import java.lang.reflect.Type;
 import java.util.Locale;
-import java.util.logging.Level;
 
 /**
  * Type serializer for a {@link Logging.Level}.

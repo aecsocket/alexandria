@@ -5,6 +5,7 @@ import com.gitlab.aecsocket.minecommons.core.vector.cartesian.Vector3;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.entity.Player;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Stores information on how to spawn particles to a client.
@@ -19,7 +20,7 @@ public record Particles(
         int count,
         Vector3 size,
         double speed,
-        Object data
+        @Nullable Object data
 ) {
     /**
      * Creates particle data.
@@ -30,7 +31,7 @@ public record Particles(
      * @param data The data.
      * @return The particle data.
      */
-    public static Particles particles(Particle particle, int count, Vector3 size, double speed, Object data) {
+    public static Particles particles(Particle particle, int count, Vector3 size, double speed, @Nullable Object data) {
         Validation.notNull("particle", particle);
         Validation.greaterThanEquals("count", count, 0);
         Validation.notNull("size", size);
@@ -56,7 +57,7 @@ public record Particles(
      * @param origin The location of the particles.
      * @param data The particle data.
      */
-    public void spawn(Player player, Location origin, Object data) {
+    public void spawn(Player player, Location origin, @Nullable Object data) {
         player.spawnParticle(particle, origin, count, size.x(), size.y(), size.z(), speed, data);
     }
 
@@ -74,7 +75,7 @@ public record Particles(
      * @param origin The location of the particles.
      * @param data The particle data.
      */
-    public void spawn(Location origin, Object data) {
+    public void spawn(Location origin, @Nullable Object data) {
         for (Player player : origin.getWorld().getPlayers()) {
             spawn(player, origin, data);
         }
