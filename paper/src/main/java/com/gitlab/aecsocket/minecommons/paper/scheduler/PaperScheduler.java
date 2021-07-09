@@ -18,10 +18,18 @@ public final class PaperScheduler implements Scheduler {
     private final Plugin plugin;
     private final List<Integer> tasks = new ArrayList<>();
 
+    /**
+     * Creates an instance.
+     * @param plugin The plugin to register tasks on.
+     */
     public PaperScheduler(Plugin plugin) {
         this.plugin = plugin;
     }
 
+    /**
+     * Gets the plugin to register tasks on.
+     * @return The plugin.
+     */
     public Plugin plugin() { return plugin; }
 
     private void schedule(Runnable runnable, long delay) {

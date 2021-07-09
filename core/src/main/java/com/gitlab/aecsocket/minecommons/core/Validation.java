@@ -13,7 +13,7 @@ public final class Validation {
      * @param <E> The exception type.
      * @throws E The exception to throw.
      */
-    public static <E extends Throwable> void is(boolean expr, E thrown) throws E {
+    public static <E extends Throwable> void assertNot(boolean expr, E thrown) throws E {
         if (expr) throw thrown;
     }
 
@@ -22,8 +22,8 @@ public final class Validation {
      * @param expr The expression.
      * @param message The message to error with.
      */
-    public static void is(boolean expr, String message) {
-        is(expr, new IllegalArgumentException(message));
+    public static void assertNot(boolean expr, String message) {
+        assertNot(expr, new IllegalArgumentException(message));
     }
 
     /**
@@ -33,17 +33,17 @@ public final class Validation {
      * @param <E> The exception type.
      * @throws E The exception to throw.
      */
-    public static <E extends Throwable> void not(boolean expr, E thrown) throws E {
+    public static <E extends Throwable> void assertIs(boolean expr, E thrown) throws E {
         if (!expr) throw thrown;
     }
 
     /**
      * Errors if an expression is false.
-     * @param expr The expression.
      * @param message The message to error with.
+     * @param expr The expression.
      */
-    public static void not(boolean expr, String message) {
-        not(expr, new IllegalArgumentException(message));
+    public static void assertIs(String message, boolean expr) {
+        assertIs(expr, new IllegalArgumentException(message));
     }
 
     /**
@@ -64,7 +64,7 @@ public final class Validation {
      * @param obj The object.
      * @param name The name of the argument.
      */
-    public static void notNull(Object obj, String name) {
+    public static void notNull(String name, Object obj) {
         notNull(obj, new NullPointerException(name));
     }
 

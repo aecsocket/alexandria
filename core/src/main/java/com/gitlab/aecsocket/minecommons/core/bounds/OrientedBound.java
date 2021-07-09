@@ -5,13 +5,13 @@ package com.gitlab.aecsocket.minecommons.core.bounds;
  */
 public interface OrientedBound extends Bound {
     /**
-     * The angle that this volume is rotated at, on the vertical axis, in radians.
+     * The angle that this volume is rotated at clockwise, on the vertical axis, in radians.
      * @return The angle, in radians.
      */
     double angle();
 
     /**
-     * Rotates this volume on the vertical axis by an angle, in radians.
+     * Sets the rotation of this volume clockwise on the vertical axis, in radians.
      * @param angle The angle, in radians.
      * @return A bound reflecting the changed state.
      */

@@ -11,19 +11,18 @@ import java.lang.annotation.Target;
 public interface MathVisitor extends Visitor<MathNode> {
     /**
      * A visitor which sets the value of {@link MathNode.Variable}s.
+     * @param name The variable name to set.
+     * @param value The value to set variable nodes of the corresponding name to.
      */
-    class Variable implements MathVisitor {
-        private final String name;
-        private final double value;
-
-        public Variable(String name, double value) {
-            Validation.notNull(name, "name");
-            this.name = name;
-            this.value = value;
+    record Variable(String name, double value) implements MathVisitor {
+        /**
+         * Creates an instance.
+         * @param name  The name of the variable.
+         * @param value The value to set to.
+         */
+        public Variable {
+            Validation.notNull("name", name);
         }
-
-        public String name() { return name; }
-        public double value() { return value; }
 
         @Override
         public void visit(MathNode node) {

@@ -26,6 +26,10 @@ public class PacketInputs extends AbstractInputs implements PacketListener {
 
     private final Plugin plugin;
 
+    /**
+     * Creates an instance.
+     * @param plugin The plugin which the packet listener is registered under.
+     */
     public PacketInputs(Plugin plugin) {
         this.plugin = plugin;
     }

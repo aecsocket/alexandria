@@ -33,12 +33,26 @@ public interface Inputs {
             private final int input;
             private boolean cancelled;
 
+            /**
+             * Creates an instance.
+             * @param player The player that performed the input.
+             * @param input The input type.
+             */
             public Input(Player player, int input) {
                 this.player = player;
                 this.input = input;
             }
 
+            /**
+             * Gets the player that performed the input.
+             * @return The player that performed the input.
+             */
             public Player player() { return player; }
+
+            /**
+             * Gets the input type.
+             * @return The input type.
+             */
             public int input() { return input; }
 
             @Override public boolean cancelled() { return cancelled; }

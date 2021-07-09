@@ -25,7 +25,7 @@ repositories {
 
 dependencies {
     api(project(":core"))
-    mojangMappedServer("io.papermc.paper", "paper", "${minecraftVersion}-R0.1-SNAPSHOT", classifier = "mojang-mapped") {
+    mojangMappedServer("io.papermc.paper", "paper", "1.17.1-R0.1-SNAPSHOT", classifier = "mojang-mapped") {
         exclude("junit", "junit")
     }
     remapper("org.quiltmc", "tiny-remapper", "0.4.1")

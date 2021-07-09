@@ -3,7 +3,7 @@ package com.gitlab.aecsocket.minecommons.paper;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
-import org.jetbrains.annotations.NotNull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.NoSuchElementException;
 import java.util.function.Consumer;
@@ -20,11 +20,19 @@ public final class ItemSlot {
     private final EquipmentSlot equipment;
     private final int index;
 
+    /**
+     * Creates a slot.
+     * @param equipment The underlying equipment slot.
+     */
     public ItemSlot(EquipmentSlot equipment) {
         this.equipment = equipment;
         index = -1;
     }
 
+    /**
+     * Creates a slot.
+     * @param index The underlying integer slot index.
+     */
     public ItemSlot(int index) {
         equipment = null;
         this.index = index;
@@ -35,7 +43,7 @@ public final class ItemSlot {
      * @return The equipment slot.
      * @throws NoSuchElementException If there is no equipment slot present.
      */
-    public @NotNull EquipmentSlot equipment() throws NoSuchElementException {
+    public @NonNull EquipmentSlot equipment() throws NoSuchElementException {
         if (equipment == null)
             throw new NoSuchElementException("No equipment slot present");
         return equipment;

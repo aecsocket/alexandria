@@ -25,7 +25,7 @@ public class ParticlesSerializer implements TypeSerializer<Particles> {
         else {
             node.node("particle").set(obj.particle());
             node.node("count").set(obj.count());
-            node.node("size").set(new Vector3(obj.dx(), obj.dy(), obj.dz()));
+            node.node("size").set(obj.size());
             node.node("speed").set(obj.speed());
             if (obj.data() != null)
                 node.node("data").set(obj.data());
@@ -35,11 +35,10 @@ public class ParticlesSerializer implements TypeSerializer<Particles> {
     @Override
     public Particles deserialize(Type type, ConfigurationNode node) throws SerializationException {
         Particle particle = require(node.node("particle"), Particle.class);
-        Vector3 size = node.node("size").get(Vector3.class, Vector3.ZERO);
-        return new Particles(
+        return Particles.particles(
                 particle,
                 node.node("count").getInt(0),
-                size.x(), size.y(), size.z(),
+                node.node("size").get(Vector3.class, Vector3.ZERO),
                 node.node("speed").getDouble(0),
                 particle.getDataType() == Void.class ? null : node.node("data").get(particle.getDataType())
         );

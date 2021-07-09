@@ -10,11 +10,13 @@ public class ThreadScheduler implements Scheduler {
     private final Executor executor;
     private final AtomicInteger cancelled = new AtomicInteger();
 
+    /**
+     * Creates an instance.
+     * @param executor The executor to run tasks from.
+     */
     public ThreadScheduler(Executor executor) {
         this.executor = executor;
     }
-
-    public Executor executor() { return executor; }
 
     @Override
     public void run(Task task) {

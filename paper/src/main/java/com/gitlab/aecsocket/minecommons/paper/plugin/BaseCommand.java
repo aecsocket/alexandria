@@ -12,7 +12,7 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginDescriptionFile;
-import org.jetbrains.annotations.NotNull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Collections;
 import java.util.List;
@@ -25,25 +25,56 @@ import java.util.function.Supplier;
  * Utility class for using a Cloud {@link PaperCommandManager}.
  */
 public class BaseCommand<P extends BasePlugin<P>> {
+    /**
+     * An exception that represents a user-facing error.
+     */
     protected static class CommandException extends RuntimeException {
+        /** The localization key. */
         private final String key;
+        /** The localization arguments. */
         private final Object[] args;
 
+        /**
+         * Creates an instance.
+         * @param key The localization key. This is automatically prefixed with {@code chat.error.}.
+         * @param args The localization arguments.
+         */
         public CommandException(String key, Object[] args) {
             this.key = key;
             this.args = args;
         }
 
+        /**
+         * Gets the localization key. This is automatically prefixed with {@code chat.error.}.
+         * @return The key.
+         */
         public String key() { return key; }
+
+        /**
+         * Gets the localization arguments.
+         * @return The arguments.
+         */
         public Object[] args() { return args; }
     }
 
+    /** The plugin that this command is registered under. */
     protected final P plugin;
+    /** The underlying command manager. */
     protected final PaperCommandManager<CommandSender> manager;
+    /** The help command builder. */
     protected final MinecraftHelp<CommandSender> help;
+    /** The name of the root command. */
     protected final String rootName;
+    /** The name of the root command. */
     protected final Command.Builder<CommandSender> root;
 
+    /**
+     * Creates an instance.
+     * @param plugin The plugin this command is registered under.
+     * @param rootName The name of the root command.
+     * @param rootFactory A factory for the root command.
+     * @throws Exception If an error occurred when making the command manager.
+     */
     public BaseCommand(P plugin, String rootName, BiFunction<PaperCommandManager<CommandSender>, String, Command.Builder<CommandSender>> rootFactory) throws Exception {
         this.plugin = plugin;
         manager = new PaperCommandManager<>(plugin,
@@ -69,10 +100,34 @@ public class BaseCommand<P extends BasePlugin<P>> {
                 .handler(c -> handle(c, this::reload)));
     }
 
+    /**
+     * Gets the plugin this is registered under.
+     * @return The plugin.
+     */
     public P plugin() { return plugin; }
+
+    /**
+     * Gets the underlying command manager.
+     * @return The manager.
+     */
     public PaperCommandManager<CommandSender> manager() { return manager; }
+
+    /**
+     * Gets the help command builder.
+     * @return The help command builder.
+     */
     public MinecraftHelp<CommandSender> help() { return help; }
+
+    /**
+     * Gets the name of the root command.
+     * @return The root name.
+     */
     public String rootName() { return rootName; }
+
+    /**
+     * Gets the root command builder.
+     * @return The root command builder.
+     */
     public Command.Builder<CommandSender> root() { return root; }
 
     /**
@@ -102,6 +157,13 @@ public class BaseCommand<P extends BasePlugin<P>> {
 
     /** A command handler, with pre-determined slots. */
     protected interface CommandHandler {
+        /**
+         * Handles a command.
+         * @param ctx The command context.
+         * @param sender The command sender.
+         * @param locale The locale of the sender.
+         * @param pSender The sender as a player, if they are a player, otherwise null.
+         */
         void handle(CommandContext<CommandSender> ctx, CommandSender sender, Locale locale, Player pSender);
     }
 
@@ -140,7 +202,7 @@ public class BaseCommand<P extends BasePlugin<P>> {
      * @return The argument.
      * @throws CommandException If there was no value, and the default value was null or there was no player sender.
      */
-    protected @NotNull <T> T defaultedArg(CommandContext<CommandSender> ctx, String key, Player pSender, Supplier<T> ifPlayer) throws CommandException {
+    protected @NonNull <T> T defaultedArg(CommandContext<CommandSender> ctx, String key, Player pSender, Supplier<T> ifPlayer) throws CommandException {
         return ctx.<T>getOptional(key).orElseGet(() -> {
             T result = pSender == null ? null : ifPlayer.get();
             if (result == null)
@@ -165,6 +227,13 @@ public class BaseCommand<P extends BasePlugin<P>> {
     }
 
 
+    /**
+     * Command for {@code version}.
+     * @param ctx The command context.
+     * @param sender The command sender.
+     * @param locale The locale of the sender.
+     * @param pSender The sender as a player, if they are a player, otherwise null.
+     */
     protected void version(CommandContext<CommandSender> ctx, CommandSender sender, Locale locale, Player pSender) {
         PluginDescriptionFile desc = plugin.getDescription();
         sender.sendMessage(localize(locale, "chat.version",
@@ -173,6 +242,13 @@ public class BaseCommand<P extends BasePlugin<P>> {
                 "authors", String.join(", ", desc.getAuthors())));
     }
 
+    /**
+     * Command for {@code reload}.
+     * @param ctx The command context.
+     * @param sender The command sender.
+     * @param locale The locale of the sender.
+     * @param pSender The sender as a player, if they are a player, otherwise null.
+     */
     protected void reload(CommandContext<CommandSender> ctx, CommandSender sender, Locale locale, Player pSender) {
         sender.sendMessage(localize(locale, "chat.reload.start"));
         plugin.reload();

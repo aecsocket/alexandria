@@ -29,24 +29,21 @@ public interface Node<V extends Visitor<?>> {
      * @param <V> The visitor input of this node, and its children.
      */
     abstract class Sequence<T extends Sequence.Term<N, V>, N extends Node<V>, V extends Visitor<N>> implements Node<V> {
+        /**
+         * A term in a sequence.
+         * @param <N> The node type.
+         * @param <V> The node visitor type.
+         */
         public interface Term<N extends Node<V>, V extends Visitor<N>> {
+            /**
+             * Gets the node.
+             * @return The node.
+             */
             N node();
         }
 
-        protected final List<T> terms;
-
-        public Sequence() {
-            terms = new ArrayList<>();
-        }
-
-        public Sequence(List<T> terms) {
-            this.terms = terms;
-        }
-
-        @SafeVarargs
-        public Sequence(T... terms) {
-            this.terms = new ArrayList<>(Arrays.asList(terms));
-        }
+        /** The terms. */
+        protected final List<T> terms = new ArrayList<>();
 
         /**
          * Adds a term.

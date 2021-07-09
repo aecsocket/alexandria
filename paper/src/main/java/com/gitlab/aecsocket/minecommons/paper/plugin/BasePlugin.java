@@ -18,7 +18,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.server.ServerLoadEvent;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.jetbrains.annotations.NotNull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.ConfigurationOptions;
@@ -41,21 +41,29 @@ public abstract class BasePlugin<S extends BasePlugin<S>> extends JavaPlugin imp
     /** The path to the resources manifest file in the JAR. */
     public static final String PATH_RESOURCES = "resources.conf";
 
+    /** The resources that this defines. */
     protected ResourceManifest resourceManifest;
+    /** The namespaced keys this caches. */
     protected final Map<String, NamespacedKey> keys = new HashMap<>();
+    /** The logging provider. */
     protected final Logging logging = new Logging(getLogger());
+    /** The settings. */
     protected Settings settings = new Settings();
+    /** The localizer. */
     protected final MiniMessageLocalizer localizer = MiniMessageLocalizer.builder().build();
+    /** The configuration options. */
     protected ConfigurationOptions configOptions = ConfigurationOptions.defaults()
             .serializers(builder -> builder
             .registerAnnotatedObjects(ObjectMapper.factoryBuilder().defaultNamingScheme(NamingSchemes.SNAKE_CASE).build()));
+    /** The ProtocolLib integration, if loaded. */
     protected ProtocolLibAPI protocol;
+    /** The base command. */
     protected BaseCommand<S> command;
 
     @Override
     public void onEnable() {
         if (hasDependency(getDescription(), "ProtocolLib") && Bukkit.getPluginManager().isPluginEnabled("ProtocolLib"))
-            protocol = ProtocolLibAPI.create(this);
+            protocol = new ProtocolLibAPI(this);
 
         loadResourceManifest();
         saveResources();
@@ -134,37 +142,69 @@ public abstract class BasePlugin<S extends BasePlugin<S>> extends JavaPlugin imp
             serializers.registerAll(ProtocolSerializers.SERIALIZERS);
     }
 
-    public @NotNull Logging logging() { return logging; }
-    public @NotNull Settings settings() { return settings; }
-    public @NotNull MiniMessageLocalizer localizer() { return localizer; }
-    public @NotNull ConfigurationOptions configOptions() { return configOptions; }
-    public @NotNull ProtocolLibAPI protocol() { return protocol; }
-    public @NotNull BaseCommand<S> command() { return command; }
+    /**
+     * Gets the logging provider.
+     * @return The logging.
+     */
+    public @NonNull Logging logging() { return logging; }
+
+    /**
+     * Gets the settings.
+     * @return The settings.
+     */
+    public @NonNull Settings settings() { return settings; }
+
+    /**
+     * Gets the localizer.
+     * @return The localizer.
+     */
+    public @NonNull MiniMessageLocalizer localizer() { return localizer; }
+
+    /**
+     * Gets the configuration options.
+     * @return The configuration options.
+     */
+    public @NonNull ConfigurationOptions configOptions() { return configOptions; }
+
+    /**
+     * Gets the ProtocolLib integration.
+     * @return The integration.
+     */
+    public @NonNull ProtocolLibAPI protocol() { return protocol; }
+
+    /**
+     * Gets the root command.
+     * @return The root command.
+     */
+    public @NonNull BaseCommand<S> command() { return command; }
 
     /**
      * Gets the default locale of the plugin.
      * @return The locale.
      */
-    public @NotNull Locale defaultLocale() { return setting(Locale.US, (n, d) -> n.get(Locale.class, d), "default_locale"); }
+    public @NonNull Locale defaultLocale() { return setting(Locale.US, (n, d) -> n.get(Locale.class, d), "default_locale"); }
 
+    /**
+     * The event handler that runs on server load.
+     * @param event The server load event.
+     */
     @EventHandler
-    public boolean serverLoad(ServerLoadEvent event) {
+    protected void serverLoad(ServerLoadEvent event) {
         setupConfigOptions();
-        return load();
+        load();
     }
 
     /**
      * Clears and loads all runtime plugin data, including settings and language files.
-     * @return If the process did not experience severe errors (e.g. no settings file) when loading.
      */
-    public boolean load() {
+    public void load() {
         // Settings
         try {
             settings = loadSettings(file(resourceManifest.settings()));
         } catch (ConfigurateException e) {
             settings = new Settings();
             log(Logging.Level.ERROR, e, "Could not load settings from `%s`", resourceManifest.settings());
-            return false;
+            return;
         }
 
         logging.level(setting(Logging.Level.INFO, (n, d) -> n.get(Logging.Level.class, d), "log_level"));
@@ -196,16 +236,13 @@ public abstract class BasePlugin<S extends BasePlugin<S>> extends JavaPlugin imp
             else if (result.exception() != null)
                 log(Logging.Level.WARNING, result.exception(), "Could not load language file from %s", result.path());
         });
-
-        return true;
     }
 
     /**
      * Cleans up current state, and {@link #load()}s data.
-     * @return If the process did not experience severe errors.
      */
-    public boolean reload() {
-        return load();
+    public void reload() {
+        load();
     }
 
     /**
@@ -281,6 +318,13 @@ public abstract class BasePlugin<S extends BasePlugin<S>> extends JavaPlugin imp
      * @see #setting(Object, DefaultedNodeFunction, Object...)
      */
     public interface DefaultedNodeFunction<T> {
+        /**
+         * Maps a node to a T value.
+         * @param node The node.
+         * @param defaultValue The default value, as supplied in the method.
+         * @return The value.
+         * @throws SerializationException If the value could not be deserialized.
+         */
         T apply(ConfigurationNode node, T defaultValue) throws SerializationException;
     }
 

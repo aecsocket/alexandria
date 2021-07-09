@@ -26,8 +26,8 @@ public final class Files {
      * @param function The function to apply to each file (does not apply to directories).
      */
     public static void recursively(File root, BiConsumer<File, Path> function) {
-        Validation.notNull(root, "root");
-        Validation.notNull(function, "function");
+        Validation.notNull("root", root);
+        Validation.notNull("function", function);
         recursively(root, function, Path.of(""));
     }
 
@@ -40,7 +40,7 @@ public final class Files {
      * @return The extension, or an empty string if there was none.
      */
     public static String extension(String filename) {
-        Validation.notNull(filename, "filename");
+        Validation.notNull("filename", filename);
         return filename.contains(".") ? filename.substring(filename.lastIndexOf(".") + 1) : "";
     }
 }

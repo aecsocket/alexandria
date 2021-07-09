@@ -50,12 +50,29 @@ public final class CollectionBuilder {
         private final Collection<E> value;
 
         private OfCollection(Collection<E> value) {
-            Validation.notNull(value, "value");
+            Validation.notNull("value", value);
             this.value = value;
         }
 
+        /**
+         * Adds a value.
+         * @param object The value to add.
+         * @return This instance.
+         */
         public OfCollection<E> add(E object) { value.add(object); return this; }
+
+        /**
+         * Adds values.
+         * @param collection The values to add.
+         * @return This instance.
+         */
         public OfCollection<E> add(Collection<E> collection) { value.addAll(collection); return this; }
+
+        /**
+         * Adds values.
+         * @param collection The values to add.
+         * @return This instance.
+         */
         @SafeVarargs public final OfCollection<E> add(E... collection) { value.addAll(Arrays.asList(collection)); return this; }
 
         /**
@@ -79,12 +96,29 @@ public final class CollectionBuilder {
         private final Set<E> value;
 
         private OfSet(Set<E> value) {
-            Validation.notNull(value, "value");
+            Validation.notNull("value", value);
             this.value = value;
         }
 
+        /**
+         * Adds a value.
+         * @param object The value to add.
+         * @return This instance.
+         */
         public OfSet<E> add(E object) { value.add(object); return this; }
+
+        /**
+         * Adds values.
+         * @param collection The values to add.
+         * @return This instance.
+         */
         public OfSet<E> add(Collection<E> collection) { value.addAll(collection); return this; }
+
+        /**
+         * Adds values.
+         * @param collection The values to add.
+         * @return This instance.
+         */
         public @SafeVarargs final OfSet<E> add(E... collection) { value.addAll(Arrays.asList(collection)); return this; }
 
         /**
@@ -108,12 +142,29 @@ public final class CollectionBuilder {
         private final List<E> value;
 
         private OfList(List<E> value) {
-            Validation.notNull(value, "value");
+            Validation.notNull("value", value);
             this.value = value;
         }
 
+        /**
+         * Adds a value.
+         * @param object The value to add.
+         * @return This instance.
+         */
         public OfList<E> add(E object) { value.add(object); return this; }
+
+        /**
+         * Adds values.
+         * @param collection The values to add.
+         * @return This instance.
+         */
         public OfList<E> add(Collection<E> collection) { value.addAll(collection); return this; }
+
+        /**
+         * Adds values.
+         * @param collection The values to add.
+         * @return This instance.
+         */
         public @SafeVarargs final OfList<E> add(E... collection) { value.addAll(Arrays.asList(collection)); return this; }
 
         /**
@@ -138,11 +189,23 @@ public final class CollectionBuilder {
         private final Map<K, V> value;
 
         private OfMap(Map<K, V> value) {
-            Validation.notNull(value, "value");
+            Validation.notNull("value", value);
             this.value = value;
         }
 
+        /**
+         * Adds a key/value pair.
+         * @param k The key.
+         * @param v The value.
+         * @return This instance.
+         */
         public OfMap<K, V> put(K k, V v) { value.put(k, v); return this; }
+
+        /**
+         * Adds key/value pairs.
+         * @param collection The values to add.
+         * @return This instance.
+         */
         public OfMap<K, V> put(Map<K, V> collection) { value.putAll(collection); return this; }
 
         /**

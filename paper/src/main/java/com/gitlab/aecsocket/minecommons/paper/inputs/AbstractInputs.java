@@ -9,6 +9,7 @@ import java.util.*;
  * An abstract implementation of an input manager.
  */
 public abstract class AbstractInputs implements Inputs {
+    /** The event dispatcher for input events. */
     protected final EventDispatcher<Events.Input> events = new EventDispatcher<>();
 
     @Override public EventDispatcher<Events.Input> events() { return events; }

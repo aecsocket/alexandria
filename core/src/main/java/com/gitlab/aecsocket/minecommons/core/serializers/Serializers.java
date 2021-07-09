@@ -42,6 +42,14 @@ public final class Serializers {
             .registerAll(ConfigurateComponentSerializer.configurate().serializers())
             .build();
 
+    /**
+     * Requires a value to be present, or throws an exception.
+     * @param node The node to get the value from.
+     * @param type The type of value.
+     * @param <V> The type of value.
+     * @return The value.
+     * @throws SerializationException If the value was not present.
+     */
     public static <V> V require(ConfigurationNode node, Class<V> type) throws SerializationException {
         V result = node.get(type);
         if (result == null)
@@ -49,6 +57,14 @@ public final class Serializers {
         return result;
     }
 
+    /**
+     * Requires a value to be present, or throws an exception.
+     * @param node The node to get the value from.
+     * @param type The type of value.
+     * @param <V> The type of value.
+     * @return The value.
+     * @throws SerializationException If the value was not present.
+     */
     public static <V> V require(ConfigurationNode node, TypeToken<V> type) throws SerializationException {
         V result = node.get(type);
         if (result == null)
@@ -56,6 +72,13 @@ public final class Serializers {
         return result;
     }
 
+    /**
+     * Requires a value to be present, or throws an exception.
+     * @param node The node to get the value from.
+     * @param type The type of value.
+     * @return The value.
+     * @throws SerializationException If the value was not present.
+     */
     public static Object require(ConfigurationNode node, Type type) throws SerializationException {
         Object result = node.get(type);
         if (result == null)

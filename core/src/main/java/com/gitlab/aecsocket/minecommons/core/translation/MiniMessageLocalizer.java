@@ -18,20 +18,36 @@ public final class MiniMessageLocalizer extends AbstractLocalizer {
     public static final class Builder extends AbstractLocalizer.Builder {
         private MiniMessage miniMessage = MiniMessage.get();
 
+        /**
+         * Gets the MiniMessage instance.
+         * @return The MiniMessage instance.
+         */
         public MiniMessage miniMessage() { return miniMessage; }
+
+        /**
+         * Sets the MiniMessage instance.
+         * @param miniMessage The MiniMessage instance.
+         * @return This instance.
+         */
         public Builder miniMessage(MiniMessage miniMessage) { this.miniMessage = miniMessage; return this; }
 
         @Override
         public MiniMessageLocalizer build() {
-            Validation.notNull(miniMessage, "miniMessage");
-            Validation.notNull(defaultLocale, "defaultLocale");
-            Validation.notNull(fallbackMessage, "fallbackMessage");
+            Validation.notNull("miniMessage", miniMessage);
+            Validation.notNull("defaultLocale", defaultLocale);
+            Validation.notNull("fallbackMessage", fallbackMessage);
             return new MiniMessageLocalizer(miniMessage, defaultLocale, fallbackMessage);
         }
     }
 
     private MiniMessage miniMessage;
 
+    /**
+     * Creates an instance.
+     * @param miniMessage The MiniMessage instance.
+     * @param defaultLocale The default locale.
+     * @param fallbackMessage The fallback message.
+     */
     public MiniMessageLocalizer(MiniMessage miniMessage, Locale defaultLocale, String fallbackMessage) {
         super(defaultLocale, fallbackMessage);
         this.miniMessage = miniMessage;
@@ -43,7 +59,16 @@ public final class MiniMessageLocalizer extends AbstractLocalizer {
      */
     public static Builder builder() { return new Builder(); }
 
+    /**
+     * Gets the MiniMessage instance used.
+     * @return The instance.
+     */
     public MiniMessage miniMessage() { return miniMessage; }
+
+    /**
+     * Sets the MiniMessage instance used.
+     * @param miniMessage The instance.
+     */
     public void miniMessage(MiniMessage miniMessage) { this.miniMessage = miniMessage; }
 
     @Override

@@ -1,42 +1,53 @@
 package com.gitlab.aecsocket.minecommons.paper.display;
 
 import com.gitlab.aecsocket.minecommons.core.Validation;
+import com.gitlab.aecsocket.minecommons.core.vector.cartesian.Vector3;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.entity.Player;
 
 /**
  * Stores information on how to spawn particles to a client.
+ * @param particle The particle to display.
+ * @param count The amount of particles, or {@code 0} for a single finely-controllable particle.
+ * @param size The size.
+ * @param speed The speed.
+ * @param data The data.
  */
 public record Particles(
         Particle particle,
         int count,
-        double dx,
-        double dy,
-        double dz,
+        Vector3 size,
         double speed,
         Object data
 ) {
-    public Particles {
-        Validation.notNull(particle, "particle");
+    /**
+     * Creates particle data.
+     * @param particle The particle to display.
+     * @param count The amount of particles, or {@code 0} for a single finely-controllable particle.
+     * @param size The size.
+     * @param speed The speed.
+     * @param data The data.
+     * @return The particle data.
+     */
+    public static Particles particles(Particle particle, int count, Vector3 size, double speed, Object data) {
+        Validation.notNull("particle", particle);
         Validation.greaterThanEquals("count", count, 0);
-        Validation.greaterThanEquals("speed", speed, 0);
+        Validation.notNull("size", size);
+        Validation.greaterThan("speed", speed, 0);
+        return new Particles(particle, count, size, speed, data);
     }
 
-    public Particles(Particle particle, int count, double dx, double dy, double dz, double speed) {
-        this(particle, count, dx, dy, dz, speed, null);
-    }
-
-    public Particles(Particle particle, int count, double dx, double dy, double dz) {
-        this(particle, count, dx, dy, dz, 0, null);
-    }
-
-    public Particles(Particle particle, int count) {
-        this(particle, count, 0, 0, 0, 0, null);
-    }
-
-    public Particles(Particle particle) {
-        this(particle, 0, 0, 0, 0, 0, null);
+    /**
+     * Creates particle data, with no data.
+     * @param particle The particle to display.
+     * @param count The amount of particles, or {@code 0} for a single finely-controllable particle.
+     * @param size The size.
+     * @param speed The speed.
+     * @return The particle data.
+     */
+    public static Particles particles(Particle particle, int count, Vector3 size, double speed) {
+        return particles(particle, count, size, speed, null);
     }
 
     /**
@@ -46,7 +57,7 @@ public record Particles(
      * @param data The particle data.
      */
     public void spawn(Player player, Location origin, Object data) {
-        player.spawnParticle(particle, origin, count, dx, dy, dz, speed, data);
+        player.spawnParticle(particle, origin, count, size.x(), size.y(), size.z(), speed, data);
     }
 
     /**

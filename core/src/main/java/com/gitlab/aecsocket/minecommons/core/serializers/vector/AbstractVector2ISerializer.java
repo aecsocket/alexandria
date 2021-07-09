@@ -16,9 +16,26 @@ import java.util.Arrays;
  * @param <T> The vector type
  */
 public abstract class AbstractVector2ISerializer<T> implements TypeSerializer<T> {
+    /**
+     * Gets the X component of a vector object.
+     * @param obj The object.
+     * @return The component.
+     */
     protected abstract int x(T obj);
+
+    /**
+     * Gets the Y component of a vector object.
+     * @param obj The object.
+     * @return The component.
+     */
     protected abstract int y(T obj);
 
+    /**
+     * Creates a vector object from an x, y pair.
+     * @param x The X component.
+     * @param y The Y component.
+     * @return The vector object.
+     */
     protected abstract T of(int x, int y);
 
     @Override

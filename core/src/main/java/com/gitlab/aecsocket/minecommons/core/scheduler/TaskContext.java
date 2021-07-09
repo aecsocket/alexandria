@@ -10,6 +10,13 @@ public final class TaskContext {
     private final int iteration;
     private boolean cancelled;
 
+    /**
+     * Creates an instance.
+     * @param scheduler The underlying scheduler.
+     * @param elapsed How many milliseconds have elapsed for this task in total.
+     * @param delta How many milliseconds have elapsed for this task since the last iteration.
+     * @param iteration How many iterations of this task have been run.
+     */
     public TaskContext(Scheduler scheduler, long elapsed, long delta, int iteration) {
         this.scheduler = scheduler;
         this.elapsed = elapsed;

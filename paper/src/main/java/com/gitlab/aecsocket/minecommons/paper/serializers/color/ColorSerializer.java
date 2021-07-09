@@ -9,8 +9,13 @@ import org.bukkit.Color;
  * Uses the format of {@link AbstractRGBSerializer}.
  */
 public class ColorSerializer extends AbstractRGBSerializer<Color> {
+    /** A singleton instance of this serializer. */
     public static final ColorSerializer INSTANCE = new ColorSerializer(Format.COMPONENTS);
 
+    /**
+     * Creates an instance.
+     * @param format The format to use.
+     */
     public ColorSerializer(Format format) {
         super(format);
     }

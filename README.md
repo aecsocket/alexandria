@@ -4,11 +4,18 @@ Commons library for Minecraft-related projects, with features such as vector man
 
 ---
 
-## Development Setup
+## Paper
+
+Minecommons is exposed as a Paper plugin, for other plugins to depend on.
 
 ### Dependencies
 
-*  [Java >=16](https://adoptopenjdk.net/?variant=openjdk16&jvmVariant=hotspot)
+* [Java >=16](https://adoptopenjdk.net/?variant=openjdk16&jvmVariant=hotspot)
+* [Paper >=1.17.1](https://papermc.io)
+
+### [Download](https://gitlab.com/api/v4/projects/27049637/jobs/artifacts/master/raw/paper/build/libs/minecommons-paper-1.2-SNAPSHOT.jar?job=build)
+
+## Development Setup
 
 ### Coordinates
 
@@ -48,18 +55,7 @@ implementation("com.gitlab.aecsocket.minecommons", "[MODULE]", "[VERSION]")
 
 ### Modules
 
-* Core
+* Core `core`
 
 Implementations:
-* Paper
-
-## Paper
-
-Minecommons is exposed as a Paper plugin, for other plugins to depend on.
-
-### Dependencies
-
-* [Java >=16](https://adoptopenjdk.net/?variant=openjdk16&jvmVariant=hotspot)
-* [Paper >=1.17.1](https://papermc.io)
-
-### [Download](https://gitlab.com/api/v4/projects/27049637/jobs/artifacts/master/raw/paper/build/libs/minecommons-paper-1.2-SNAPSHOT.jar?job=build)
+* Paper `paper`

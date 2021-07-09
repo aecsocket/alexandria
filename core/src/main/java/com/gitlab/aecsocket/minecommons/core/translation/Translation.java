@@ -10,28 +10,34 @@ import java.util.Map;
  * A translation, mapping a string key to a string array value.
  */
 public class Translation extends HashMap<String, String> {
+    /** The locale that this translation is for. */
     private final Locale locale;
 
-    public Translation(int initialCapacity, float loadFactor, Locale locale) {
-        super(initialCapacity, loadFactor);
-        Validation.notNull(locale, "locale");
-        this.locale = locale;
-    }
-
-    public Translation(int initialCapacity, Locale locale) {
-        super(initialCapacity);
-        Validation.notNull(locale, "locale");
-        this.locale = locale;
-    }
-
+    /**
+     * Creates a translation.
+     * @param locale The locale.
+     */
     public Translation(Locale locale) {
         this.locale = locale;
     }
 
+    /**
+     * Creates a translation.
+     * @param m The existing translations.
+     * @param locale The locale.
+     */
     public Translation(Map<? extends String, ? extends String> m, Locale locale) {
         super(m);
-        Validation.notNull(locale, "locale");
+        Validation.notNull("locale", locale);
         this.locale = locale;
+    }
+
+    /**
+     * Creates an empty translation map.
+     * @return The translation map.
+     */
+    public static Translation empty() {
+        return new Translation(null);
     }
 
     /**
@@ -39,8 +45,4 @@ public class Translation extends HashMap<String, String> {
      * @return The locale.
      */
     public Locale locale() { return locale; }
-
-    public static Translation empty() {
-        return new Translation(null);
-    }
 }

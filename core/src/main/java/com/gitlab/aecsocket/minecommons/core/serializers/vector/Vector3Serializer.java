@@ -8,6 +8,7 @@ import com.gitlab.aecsocket.minecommons.core.vector.cartesian.Vector3;
  * Uses the format of {@link AbstractVector3DSerializer}.
  */
 public class Vector3Serializer extends AbstractVector3DSerializer<Vector3> {
+    /** A singleton instance of this serializer. */
     public static final Vector3Serializer INSTANCE = new Vector3Serializer();
 
     @Override protected double x(Vector3 obj) { return obj.x(); }

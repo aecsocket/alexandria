@@ -16,10 +16,34 @@ import java.util.Arrays;
  * @param <T> The vector type
  */
 public abstract class AbstractVector3DSerializer<T> implements TypeSerializer<T> {
+    /**
+     * Gets the X component of a vector object.
+     * @param obj The object.
+     * @return The component.
+     */
     protected abstract double x(T obj);
+
+    /**
+     * Gets the Y component of a vector object.
+     * @param obj The object.
+     * @return The component.
+     */
     protected abstract double y(T obj);
+
+    /**
+     * Gets the Z component of a vector object.
+     * @param obj The object.
+     * @return The component.
+     */
     protected abstract double z(T obj);
 
+    /**
+     * Creates a vector object from an x, y, z triplet.
+     * @param x The X component.
+     * @param y The Y component.
+     * @param z The Y component.
+     * @return The vector object.
+     */
     protected abstract T of(double x, double y, double z);
 
     @Override

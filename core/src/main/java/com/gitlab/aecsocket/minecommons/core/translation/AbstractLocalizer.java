@@ -15,15 +15,41 @@ public abstract class AbstractLocalizer implements RegistryLocalizer {
      * An abstract builder for a {@link AbstractLocalizer}.
      */
     public static abstract class Builder {
+        /** The default locale. */
         protected Locale defaultLocale = Locale.getDefault();
+        /** The fallback message. */
         protected String fallbackMessage = "<locale_key> <args>";
 
+        /**
+         * Gets the default locale.
+         * @return The default locale.
+         */
         public Locale defaultLocale() { return defaultLocale; }
+
+        /**
+         * Sets the default locale.
+         * @param defaultLocale The default locale.
+         * @return This instance.
+         */
         public Builder defaultLocale(Locale defaultLocale) { this.defaultLocale = defaultLocale; return this; }
 
+        /**
+         * Gets the fallback message.
+         * @return The fallback message.
+         */
         public String fallbackMessage() { return fallbackMessage; }
+
+        /**
+         * Sets the fallback message.
+         * @param fallbackMessage The fallback message.
+         * @return This instance.
+         */
         public Builder fallbackMessage(String fallbackMessage) { this.fallbackMessage = fallbackMessage; return this; }
 
+        /**
+         * Builds a localizer from the provided options.
+         * @return The localizer.
+         */
         public abstract AbstractLocalizer build();
     }
 
@@ -32,17 +58,40 @@ public abstract class AbstractLocalizer implements RegistryLocalizer {
     private final Map<Locale, Translation> translations = new HashMap<>();
     private final Map<Locale, Map<String, Component>> cache = new HashMap<>();
 
+    /**
+     * Creates an instance.
+     * @param defaultLocale The default locale.
+     * @param fallbackMessage The fallback message.
+     */
     public AbstractLocalizer(Locale defaultLocale, String fallbackMessage) {
         this.defaultLocale = defaultLocale;
         this.fallbackMessage = fallbackMessage;
     }
 
     @Override public Locale defaultLocale() { return defaultLocale; }
+
+    /**
+     * Sets the default locale.
+     * @param defaultLocale The default locale.
+     */
     public void defaultLocale(Locale defaultLocale) { this.defaultLocale = defaultLocale; }
 
+    /**
+     * Gets the fallback message to translate, if a proper message cannot be obtained.
+     * @return The fallback message.
+     */
     public String fallbackMessage() { return fallbackMessage; }
+
+    /**
+     * Sets the fallback message to translate, if a proper message cannot be obtained.
+     * @param fallbackMessage The fallback message.
+     */
     public void fallbackMessage(String fallbackMessage) { this.fallbackMessage = fallbackMessage; }
 
+    /**
+     * Gets all registered translations.
+     * @return The translations.
+     */
     public Map<Locale, Translation> translations() { return translations; }
 
     @Override
@@ -98,6 +147,14 @@ public abstract class AbstractLocalizer implements RegistryLocalizer {
                 "args", args.length == 0 ? "" : Arrays.toString(args));
     }
 
+    /**
+     * Uses a translation of a locale for its component, otherwise uses a fallback.
+     * @param locale The locale.
+     * @param fallback The fallback.
+     * @param key The key.
+     * @param args The arguments.
+     * @return The translated component.
+     */
     protected Component use(Locale locale, Supplier<Component> fallback, String key, Object... args) {
         if (args.length == 0) {
             Component cached = cache.getOrDefault(locale, Collections.emptyMap()).get(key);

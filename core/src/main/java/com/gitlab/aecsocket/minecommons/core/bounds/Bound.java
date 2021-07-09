@@ -1,7 +1,6 @@
 package com.gitlab.aecsocket.minecommons.core.bounds;
 
 import com.gitlab.aecsocket.minecommons.core.vector.cartesian.Vector3;
-import com.gitlab.aecsocket.minecommons.core.raycast.Ray;
 
 /**
  * A volume in 3D space which can be intersected by a point.

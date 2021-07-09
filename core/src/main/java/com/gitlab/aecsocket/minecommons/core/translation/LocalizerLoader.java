@@ -4,6 +4,7 @@ import com.gitlab.aecsocket.minecommons.core.Callback;
 import com.gitlab.aecsocket.minecommons.core.Files;
 import com.gitlab.aecsocket.minecommons.core.serializers.LocaleSerializer;
 import com.gitlab.aecsocket.minecommons.core.serializers.TranslationSerializer;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.ConfigurationOptions;
 import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
@@ -28,8 +29,11 @@ public class LocalizerLoader {
 
     /**
      * A load result, used in {@link Callback}s.
+     * @param path The path to the loaded file.
+     * @param translation The translation loaded.
+     * @param exception The exception thrown due to failure to load.
      */
-    public record Result(Path path, Translation translation, ConfigurateException exception) {}
+    public record Result(Path path, @Nullable Translation translation, @Nullable ConfigurateException exception) {}
 
     /**
      * Loads a {@link Translation} into a registry localizer using a {@link ConfigurationLoader}.

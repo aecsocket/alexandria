@@ -11,11 +11,18 @@ import java.util.Queue;
 public class Callback<E> implements Iterable<E> {
     private final Queue<E> queue;
 
+    /**
+     * Creates an instance.
+     * @param queue The queue.
+     */
     public Callback(Queue<E> queue) {
-        Validation.notNull(queue, "queue");
+        Validation.notNull("queue", queue);
         this.queue = queue;
     }
 
+    /**
+     * Creates an instance.
+     */
     public Callback() {
         this(new ArrayDeque<>());
     }

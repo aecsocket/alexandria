@@ -4,13 +4,29 @@ import com.gitlab.aecsocket.minecommons.core.Validation;
 
 /**
  * A task that can be registered to a {@link Scheduler}. Defines timings.
+ * @param action The action that this task runs.
+ * @param delay The delay, in ms, to start this task.
+ * @param interval The delay, in ms, between iterations of this task.
  */
 public record Task(Action action, long delay, long interval) {
+    /**
+     * An action to run for a task.
+     */
     @FunctionalInterface
     public interface Action {
+        /**
+         * Runs the action.
+         * @param ctx The task context.
+         */
         void run(TaskContext ctx);
     }
 
+    /**
+     * Creates an instance.
+     * @param action The action that this task runs.
+     * @param delay The delay, in ms, to start this task.
+     * @param interval The delay, in ms, between iterations of this task.
+     */
     public Task {
         Validation.greaterThanEquals("delay", delay, 0);
     }

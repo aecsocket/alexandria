@@ -5,5 +5,9 @@ package com.gitlab.aecsocket.minecommons.core.expressions.node;
  * @param <N> The node type.
  */
 public interface Visitor<N extends Node<?>> {
+    /**
+     * Performs functions on a node.
+     * @param node The node.
+     */
     void visit(N node);
 }

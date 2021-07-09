@@ -6,15 +6,24 @@ import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 import java.util.Objects;
 
-import static com.gitlab.aecsocket.minecommons.core.Numbers.sqr;
-
 /**
  * A sphere-shaped volume.
+ * @param center The center.
+ * @param radius The radius.
+ * @param sqrRadius The square radius.
  */
 @ConfigSerializable
 public record Sphere(Vector3 center, double radius, double sqrRadius) implements Bound {
-    public Sphere {
+    /**
+     * Creates a sphere.
+     * @param center The center.
+     * @param radius The radius.
+     * @return The sphere.
+     */
+    public static Sphere sphere(Vector3 center, double radius) {
+        Validation.notNull("center", center);
         Validation.greaterThan("radius", radius, 0);
+        return new Sphere(center, radius, radius*radius);
     }
 
     @Override

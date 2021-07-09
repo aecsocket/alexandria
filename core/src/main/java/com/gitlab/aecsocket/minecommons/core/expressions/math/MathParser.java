@@ -4,27 +4,47 @@ import com.gitlab.aecsocket.minecommons.core.expressions.parsing.*;
 
 import java.util.Deque;
 
+/**
+ * Tokenizer and evaluator of math expressions.
+ */
 public final class MathParser {
     private MathParser() {}
 
+    /** Token of {@link #OPEN_BRACKET_DEF}. */
     public static final int OPEN_BRACKET = 1;
+    /** Token of {@link #CLOSE_BRACKET_DEF}. */
     public static final int CLOSE_BRACKET = 2;
+    /** Token of {@link #EXPONENT_DEF}. */
     public static final int EXPONENT = 3;
+    /** Token of {@link #FUNCTION_DEF}. */
     public static final int FUNCTION = 4;
+    /** Token of {@link #PLUS_MINUS_DEF}. */
     public static final int PLUS_MINUS = 5;
+    /** Token of {@link #MULTIPLY_DIVIDE_DEF}. */
     public static final int MULTIPLY_DIVIDE = 6;
+    /** Token of {@link #CONSTANT_DEF}. */
     public static final int CONSTANT = 7;
+    /** Token of {@link #VARIABLE_DEF}. */
     public static final int VARIABLE = 8;
 
+    /** Definition for an opening bracket. */
     public static final Tokenizer.Definition OPEN_BRACKET_DEF = Tokenizer.Definition.of("\\(", OPEN_BRACKET);
+    /** Definition for a closing bracket. */
     public static final Tokenizer.Definition CLOSE_BRACKET_DEF = Tokenizer.Definition.of("\\)", CLOSE_BRACKET);
+    /** Definition for an exponent. */
     public static final Tokenizer.Definition EXPONENT_DEF = Tokenizer.Definition.of("\\^", EXPONENT);
+    /** Definition for a mathematical function. */
     public static final Tokenizer.Definition FUNCTION_DEF = Tokenizer.Definition.of(String.join("|", MathNode.MathFunction.FUNCTIONS.keySet()), FUNCTION);
+    /** Definition for a plus/minus operator. */
     public static final Tokenizer.Definition PLUS_MINUS_DEF = Tokenizer.Definition.of("[+-]", PLUS_MINUS);
+    /** Definition for a multiply/divide operator. */
     public static final Tokenizer.Definition MULTIPLY_DIVIDE_DEF = Tokenizer.Definition.of("[*/]", MULTIPLY_DIVIDE);
+    /** Definition for a numerical constant. */
     public static final Tokenizer.Definition CONSTANT_DEF = Tokenizer.Definition.of("[0-9.]+", CONSTANT);
+    /** Definition for a numerical variable. */
     public static final Tokenizer.Definition VARIABLE_DEF = Tokenizer.Definition.of("[a-zA-Z][a-zA-Z0-9_]*", VARIABLE);
 
+    /** The singleton tokenizer instance. */
     public static final Tokenizer TOKENIZER = Tokenizer.builder()
             .add(OPEN_BRACKET_DEF)
             .add(CLOSE_BRACKET_DEF)
@@ -36,6 +56,12 @@ public final class MathParser {
             .add(VARIABLE_DEF)
             .build();
 
+    /**
+     * Tokenizes text input.
+     * @param text The text.
+     * @return The tokenized output.
+     * @throws TokenzingException If the text could not be tokenized.
+     */
     public static Deque<Token> tokenize(String text) throws TokenzingException {
         return TOKENIZER.tokenize(text);
     }
@@ -229,9 +255,22 @@ public final class MathParser {
         }
     }
 
+    /**
+     * Evaluates expression nodes from tokens.
+     * @param tokens The tokens.
+     * @return The node.
+     * @throws NodeException If the node could not be created.
+     */
     public static MathNode node(Deque<Token> tokens) throws NodeException {
         return new MathNodeCreator().node(tokens);
     }
 
+    /**
+     * Fully parses text input into an expression node: tokenizes and evaluates.
+     * @param text The text.
+     * @return The node.
+     * @throws TokenzingException If the text could nto be tokenized.
+     * @throws NodeException If the node could not be created.
+     */
     public static MathNode parse(String text) throws TokenzingException, NodeException { return node(tokenize(text)); }
 }

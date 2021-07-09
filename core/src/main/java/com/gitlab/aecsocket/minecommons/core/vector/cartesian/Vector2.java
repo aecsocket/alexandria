@@ -9,15 +9,32 @@ import static com.gitlab.aecsocket.minecommons.core.Numbers.*;
 
 /**
  * An immutable (x, y) double value pair, using the Cartesian coordinate system.
+ * @param x The X component.
+ * @param y The Y component.
  */
 public record Vector2(double x, double y) {
     /** An instance with all fields set to 0. */
-    public static final Vector2 ZERO = new Vector2(0);
+    public static final Vector2 ZERO = vec2(0);
     /** The north in a Minecraft world, equivalent to (0, -1). */
-    public static final Vector2 NORTH = new Vector2(0, -1);
+    public static final Vector2 NORTH = vec2(0, -1);
 
-    public Vector2(double v) {
-        this(v, v);
+    /**
+     * Creates a vector.
+     * @param x The X component.
+     * @param y The Y component.
+     * @return The vector.
+     */
+    public static Vector2 vec2(double x, double y) {
+        return new Vector2(x, y);
+    }
+
+    /**
+     * Creates a vector.
+     * @param v The value of all components.
+     * @return The vector.
+     */
+    public static Vector2 vec2(double v) {
+        return vec2(v, v);
     }
 
     /**
@@ -157,7 +174,7 @@ public record Vector2(double x, double y) {
      */
     public @NonNull Vector2 normalize() {
         double length = length();
-        Validation.is(length == 0, "Vector has no length, cannot multiply by 0");
+        Validation.assertNot(length == 0, "Vector has no length, cannot multiply by 0");
         return new Vector2(x / length, y / length);
     }
 

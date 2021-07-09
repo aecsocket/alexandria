@@ -14,8 +14,13 @@ import java.lang.reflect.Type;
  * Can also deserialize {@link NamedTextColor}s.
  */
 public class TextColorSerializer extends AbstractRGBSerializer<TextColor> {
+    /** A singleton instance of this serializer. */
     public static final TextColorSerializer INSTANCE = new TextColorSerializer(Format.COMPONENTS);
 
+    /**
+     * Creates an instance.
+     * @param format The format to use.
+     */
     public TextColorSerializer(Format format) {
         super(format);
     }

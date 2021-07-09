@@ -17,8 +17,8 @@ public final class Text {
      * @return The joined message.
      */
     public static String mergeMessages(Throwable thrown, String delimiter) {
-        Validation.notNull(thrown, "thrown");
-        Validation.notNull(delimiter, "delimiter");
+        Validation.notNull("thrown", (Object) thrown);
+        Validation.notNull("delimiter", delimiter);
 
         String text = thrown.getClass().getSimpleName() + (thrown.getMessage() != null ? " (" + thrown.getMessage() + ")" : "");
         return thrown.getCause() == null ? text : text + delimiter + mergeMessages(thrown.getCause(), delimiter);
@@ -41,7 +41,7 @@ public final class Text {
      * @return The lines.
      */
     public static String[] stackTrace(Throwable thrown, int indent) {
-        Validation.notNull(thrown, "thrown");
+        Validation.notNull("thrown", (Object) thrown);
         StringWriter writer = new StringWriter();
         thrown.printStackTrace(new PrintWriter(writer));
         return writer.toString().replace("\t", " ".repeat(indent)).split("\n");
@@ -54,7 +54,7 @@ public final class Text {
      * @return The modified lines.
      */
     public static String[] prefix(String prefix, String... lines) {
-        Validation.notNull(prefix, "prefix");
+        Validation.notNull("prefix", prefix);
         for (int i = 0; i < lines.length; i++) {
             lines[i] = prefix + lines[i];
         }

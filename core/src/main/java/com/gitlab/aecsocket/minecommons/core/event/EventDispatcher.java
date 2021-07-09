@@ -15,12 +15,23 @@ public final class EventDispatcher<E> {
 
     /**
      * A registered listener.
-     * @param <E> The specific event type.
+     * @param <E> The event type.
+     * @param eventType The event type.
+     * @param specific If the listener only listens to the exact event type specified, or all subclasses too.
+     * @param listener The function to run on event call.
+     * @param priority The numerical order in which this listener will be ran.
      */
     public record Listener<E>(Class<E> eventType, boolean specific, Consumer<E> listener, int priority) {
+        /**
+         * Creates an instance.
+         * @param eventType The event type.
+         * @param specific If the listener only listens to the exact event type specified, or all subclasses too.
+         * @param listener The function to run on event call.
+         * @param priority The numerical order in which this listener will be ran.
+         */
         public Listener {
-            Validation.notNull(eventType, "eventType");
-            Validation.notNull(listener, "listener");
+            Validation.notNull("eventType", eventType);
+            Validation.notNull("listener", listener);
         }
 
         /**

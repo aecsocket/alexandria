@@ -13,17 +13,22 @@ public final class Tokenizer {
      */
     public static final class Definition {
         private final Pattern pattern;
-        private final int input;
+        private final int tokenType;
 
-        public Definition(Pattern pattern, int input) {
+        /**
+         * Creates a definition.
+         * @param pattern The pattern.
+         * @param tokenType The type of token.
+         */
+        public Definition(Pattern pattern, int tokenType) {
             this.pattern = pattern;
-            this.input = input;
+            this.tokenType = tokenType;
         }
 
         /**
          * Creates a definition.
          * @param pattern The pattern.
-         * @param tokenType The input of token.
+         * @param tokenType The type of token.
          * @return The definition.
          */
         public static Definition of(String pattern, int tokenType) {
@@ -40,16 +45,16 @@ public final class Tokenizer {
          * The input of token that this definition creates.
          * @return The input.
          */
-        public int input() { return input; }
+        public int input() { return tokenType; }
 
         /**
          * Creates a token from a string sequence.
          * @param sequence The sequence.
          * @return The token.
          */
-        public Token create(String sequence) { return new Token(input, sequence); }
+        public Token create(String sequence) { return new Token(tokenType, sequence); }
 
-        @Override public String toString() { return "<%d> /%s/".formatted(input, pattern.pattern()); }
+        @Override public String toString() { return "<%d> /%s/".formatted(tokenType, pattern.pattern()); }
     }
 
     /**
@@ -100,6 +105,10 @@ public final class Tokenizer {
         }
     }
 
+    /**
+     * Creates a new tokenizer builder.
+     * @return The builder.
+     */
     public static Builder builder() { return new Builder(); }
 
     private final List<Definition> definitions;

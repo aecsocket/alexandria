@@ -30,7 +30,6 @@ subprojects {
     }
 
     dependencies {
-        implementation("org.jetbrains", "annotations", "16.0.2")
         testImplementation("org.junit.jupiter", "junit-jupiter", "5.7.1")
     }
 

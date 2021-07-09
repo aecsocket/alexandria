@@ -1,16 +1,14 @@
 package com.gitlab.aecsocket.minecommons.core.serializers;
 
 import com.gitlab.aecsocket.minecommons.core.translation.Translation;
+import io.leangen.geantyref.TypeToken;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
 import org.spongepowered.configurate.serialize.TypeSerializer;
 
 import java.lang.reflect.Type;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Level;
 
 /**
@@ -50,7 +48,7 @@ public class TranslationSerializer implements TypeSerializer<Translation> {
                 deserialize(values, entry.getValue(), newPath);
             }
         } else if (node.isList()) {
-            values.put(join(path), String.join("\n", node.getList(String.class)));
+            values.put(join(path), String.join("\n", Serializers.require(node, new TypeToken<List<String>>() {})));
         } else {
             values.put(join(path), node.getString());
         }

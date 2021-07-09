@@ -6,16 +6,27 @@ import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 import java.util.Objects;
 
-import static com.gitlab.aecsocket.minecommons.core.Numbers.sqr;
-
 /**
  * A cylinder-shaped volume, upright on the vertical axis.
+ * @param base The position of the center at the bottom of the cylinder.
+ * @param radius The radius.
+ * @param height The height.
+ * @param sqrRadius The square radius.
  */
 @ConfigSerializable
 public record Cylinder(Vector3 base, double radius, double height, double sqrRadius) implements Bound {
-    public Cylinder {
+    /**
+     * Creates a cylinder.
+     * @param base The position of the center at the bottom of the cylinder.
+     * @param radius The radius.
+     * @param height The height.
+     * @return The cylinder.
+     */
+    public static Cylinder cylinder(Vector3 base, double radius, double height) {
+        Validation.notNull("base", base);
         Validation.greaterThan("radius", radius, 0);
         Validation.greaterThan("height", height, 0);
+        return new Cylinder(base, radius, height, radius*radius);
     }
 
     @Override

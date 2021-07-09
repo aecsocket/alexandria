@@ -36,7 +36,7 @@ public class PreciseSoundSerializer implements TypeSerializer<PreciseSound> {
 
     @Override
     public PreciseSound deserialize(Type type, ConfigurationNode node) throws SerializationException {
-        return PreciseSound.of(
+        return PreciseSound.sound(
                 require(node.node("name"), Key.class),
                 node.node("source").get(Sound.Source.class, Sound.Source.MASTER),
                 node.node("volume").getFloat(1f),

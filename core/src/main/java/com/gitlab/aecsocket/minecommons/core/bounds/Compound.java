@@ -7,8 +7,18 @@ import java.util.Arrays;
 
 /**
  * A combination of multiple bounds.
+ * @param bounds The bounds that make up this compound.
  */
 public record Compound(Bound... bounds) implements Bound {
+    /**
+     * Creates a compound.
+     * @param bounds The bounds that make up this compound.
+     * @return The compound.
+     */
+    public static Compound compound(Bound... bounds) {
+        return new Compound(bounds);
+    }
+
     @Override
     public boolean intersects(Vector3 point) {
         for (Bound bound : bounds) {

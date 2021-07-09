@@ -10,7 +10,9 @@ import java.util.Queue;
  * @param <N> The created node type.
  */
 public abstract class AbstractNodeCreator<N extends Node<?>> implements NodeCreator<N> {
+    /** The tokens ahead of the lookahead. */
     protected Deque<Token> tokens;
+    /** The token in front. */
     protected Token lookahead;
 
     @Override
@@ -28,6 +30,9 @@ public abstract class AbstractNodeCreator<N extends Node<?>> implements NodeCrea
         return node;
     }
 
+    /**
+     * Gets the next token.
+     */
     protected void next() {
         tokens.pop();
         lookahead = tokens.isEmpty() ? Token.EPSILON : tokens.getFirst();

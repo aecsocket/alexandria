@@ -2,13 +2,30 @@ package com.gitlab.aecsocket.minecommons.core.vector.cartesian;
 
 /**
  * An immutable (x, y) integer value pair, using the Cartesian coordinate system.
+ * @param x The X component.
+ * @param y The Y component.
  */
 public record Point2(int x, int y) {
     /** An instance with all fields set to 0. */
-    public static final Point2 ZERO = new Point2(0);
+    public static final Point2 ZERO = point2(0);
 
-    public Point2(int v) {
-        this(v, v);
+    /**
+     * Creates a point.
+     * @param x The X component.
+     * @param y The Y component.
+     * @return The point,
+     */
+    public static Point2 point2(int x, int y) {
+        return new Point2(x, y);
+    }
+
+    /**
+     * Creates a point.
+     * @param v The value of all components.
+     * @return The point,
+     */
+    public static Point2 point2(int v) {
+        return point2(v, v);
     }
 
     /**

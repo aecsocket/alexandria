@@ -4,66 +4,38 @@ import com.gitlab.aecsocket.minecommons.core.Validation;
 import com.gitlab.aecsocket.minecommons.core.vector.polar.Coord3;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-import java.util.function.Function;
-
 import static java.lang.Math.*;
 import static com.gitlab.aecsocket.minecommons.core.Numbers.*;
 
 /**
  * An immutable (x, y, z) double value triplet, using the Cartesian coordinate system.
+ * @param x The X component.
+ * @param y The Y component.
+ * @param z The Z component.
  */
 public record Vector3(double x, double y, double z) {
-    /**
-     * A component of a 3D vector.
-     */
-    public enum Component {
-        X   (Vector3::x),
-        Y   (Vector3::y),
-        Z   (Vector3::z);
-
-        private final Function<Vector3, Double> mapper;
-
-        Component(Function<Vector3, Double> mapper) {
-            this.mapper = mapper;
-        }
-
-        /**
-         * Gets this component's value in a vector.
-         * @param vec The vector.
-         * @return The component's value.
-         */
-        public double get(Vector3 vec) { return mapper.apply(vec); }
-    }
-
     /** An instance with all fields set to 0. */
-    public static final Vector3 ZERO = new Vector3(0);
-
-    public Vector3(double v) {
-        this(v, v, v);
-    }
+    public static final Vector3 ZERO = vec3(0);
 
     /**
-     * Creates a new vector.
+     * Creates a vector.
      * @param x The X component.
      * @param y The Y component.
      * @param z The Z component.
      * @return The vector.
      */
-    public static Vector3 vec3(double x, double y, double z) { return new Vector3(x, y, z); }
+    public static Vector3 vec3(double x, double y, double z) {
+        return new Vector3(x, y, z);
+    }
 
     /**
-     * Creates a new vector.
-     * @param v The value of each component.
+     * Creates a vector.
+     * @param v The value of all components.
      * @return The vector.
      */
-    public static Vector3 vec3(double v) { return new Vector3(v); }
-
-    /**
-     * Gets the value of a specific component in this vector.
-     * @param component The component.
-     * @return The component's value.
-     */
-    public double get(Component component) { return component.get(this); }
+    public static Vector3 vec3(double v) {
+        return vec3(v, v, v);
+    }
 
     /**
      * Creates a new vector with the specified component changed.
@@ -251,16 +223,52 @@ public record Vector3(double x, double y, double z) {
         );
     }
 
+    /**
+     * Gets a 2D vector of {@code (x, x)}.
+     * @return The 2D vector.
+     */
     public Vector2 xx() { return new Vector2(x, x); }
+    /**
+     * Gets a 2D vector of {@code (x, y)}.
+     * @return The 2D vector.
+     */
     public Vector2 xy() { return new Vector2(x, y); }
+    /**
+     * Gets a 2D vector of {@code (x, z)}.
+     * @return The 2D vector.
+     */
     public Vector2 xz() { return new Vector2(x, z); }
 
+    /**
+     * Gets a 2D vector of {@code (y, x)}.
+     * @return The 2D vector.
+     */
     public Vector2 yx() { return new Vector2(y, x); }
+    /**
+     * Gets a 2D vector of {@code (y, y)}.
+     * @return The 2D vector.
+     */
     public Vector2 yy() { return new Vector2(y, y); }
+    /**
+     * Gets a 2D vector of {@code (y, z)}.
+     * @return The 2D vector.
+     */
     public Vector2 yz() { return new Vector2(y, z); }
 
+    /**
+     * Gets a 2D vector of {@code (z, x)}.
+     * @return The 2D vector.
+     */
     public Vector2 zx() { return new Vector2(z, x); }
+    /**
+     * Gets a 2D vector of {@code (z, y)}.
+     * @return The 2D vector.
+     */
     public Vector2 zy() { return new Vector2(z, y); }
+    /**
+     * Gets a 2D vector of {@code (z, z)}.
+     * @return The 2D vector.
+     */
     public Vector2 zz() { return new Vector2(z, z); }
 
     /**
@@ -270,7 +278,7 @@ public record Vector3(double x, double y, double z) {
      */
     public @NonNull Vector3 normalize() {
         double length = length();
-        Validation.is(length == 0, "Vector has no length, cannot multiply by 0");
+        Validation.assertNot(length == 0, "Vector has no length, cannot multiply by 0");
         return new Vector3(x / length, y / length, z / length);
     }
 
@@ -285,6 +293,19 @@ public record Vector3(double x, double y, double z) {
                 x + (o.x - x) * f,
                 y + (o.y - y) * f,
                 z + (o.z - z) * f
+        );
+    }
+
+    /**
+     * Gets the midpoint between this vector and another.
+     * @param o The other vector.
+     * @return The midpoint.
+     */
+    public @NonNull Vector3 midpoint(@NonNull Vector3 o) {
+        return new Vector3(
+                (x + o.x) / 2,
+                (y + o.y) / 2,
+                (z + o.z) / 2
         );
     }
 

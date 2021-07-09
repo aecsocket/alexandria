@@ -1,30 +1,46 @@
 package com.gitlab.aecsocket.minecommons.core.bounds;
 
+import com.gitlab.aecsocket.minecommons.core.Validation;
 import com.gitlab.aecsocket.minecommons.core.vector.cartesian.Vector3;
-import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 import java.util.Objects;
 
 /**
  * A cuboid-shaped volume.
+ * @param min The corner with the smallest coordinates.
+ * @param max The corner with the largest coordinates.
+ * @param angle The rotation of the box clockwise on the vertical axis.
  */
-@ConfigSerializable
 public record Box(Vector3 min, Vector3 max, double angle) implements Bound, OrientedBound {
-    public Box {
-        min = new Vector3(
-                Math.min(min.x(), max.x()),
-                Math.min(min.y(), max.y()),
-                Math.min(min.z(), max.z())
-        );
-        max = new Vector3(
-                Math.max(min.x(), max.x()),
-                Math.max(min.y(), max.y()),
-                Math.max(min.z(), max.z())
+    /**
+     * Creates a box.
+     * <p>
+     * The corners passed are automatically adjusted to be the real minimum and maximum values.
+     * @param min The corner with the smallest coordinates.
+     * @param max The corner with the largest coordinates.
+     * @param angle The rotation of the box clockwise on the vertical axis.
+     * @return The box.
+     */
+    public static Box box(Vector3 min, Vector3 max, double angle) {
+        Validation.notNull("min", min);
+        Validation.notNull("max", max);
+        return new Box(
+                Vector3.min(min, max),
+                Vector3.max(min, max),
+                angle
         );
     }
 
-    public Box(Vector3 min, Vector3 max) {
-        this(min, max, 0);
+    /**
+     * Creates a box with an angle of 0 radians.
+     * <p>
+     * The corners passed are automatically adjusted to be the real minimum and maximum values.
+     * @param min The corner with the smallest coordinates.
+     * @param max The corner with the largest coordinates.
+     * @return The box.
+     */
+    public static Box box(Vector3 min, Vector3 max) {
+        return box(min, max, 0);
     }
 
     @Override
@@ -36,13 +52,17 @@ public record Box(Vector3 min, Vector3 max, double angle) implements Bound, Orie
      * Gets the center of this cuboid.
      * @return The center.
      */
-    public Vector3 center() { return min.lerp(max, 0.5); }
+    public Vector3 center() {
+        return min.midpoint(max);
+    }
 
     /**
      * Gets the vector between the maximum and minimum points of this cuboid.
      * @return The result.
      */
-    public Vector3 size() { return max.subtract(min); }
+    public Vector3 size() {
+        return max.subtract(min);
+    }
 
     /**
      * Gets an array of six vectors representing the corners of this cuboid.
@@ -76,7 +96,7 @@ public record Box(Vector3 min, Vector3 max, double angle) implements Bound, Orie
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Box box = (Box) o;
-        return Double.compare(box.angle, angle) == 0 && min.equals(box.min) && max.equals(box.max);
+        return Double.compare(box.angle(), angle) == 0 && min.equals(box.min()) && max.equals(box.max());
     }
 
     @Override

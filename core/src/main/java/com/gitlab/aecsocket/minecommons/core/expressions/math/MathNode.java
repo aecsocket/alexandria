@@ -36,38 +36,77 @@ public interface MathNode extends Node<MathVisitor> {
         return this;
     }
 
+    /**
+     * Creates a constant value node.
+     * @param value The value of the constant.
+     * @return The node.
+     */
     static Constant constant(double value) {
         return new Constant(value);
     }
+
+    /**
+     * Creates a constant value node from text.
+     * @param text The text to parse.
+     * @return The node.
+     * @throws NodeException If the text could not be parsed.
+     */
     static Constant constant(String text) throws NodeException {
         return Constant.of(text);
     }
 
+    /**
+     * Creates a variable node.
+     * @param name The name of the variable.
+     * @return The node.
+     */
     static Variable variable(String name){
         return Variable.of(name);
     }
 
+    /**
+     * Creates a sum node.
+     * @return The node.
+     */
     static Sum sum() {
         return new Sum();
     }
-    static Sum sum(Sum.Term... terms) {
-        return new Sum(terms);
-    }
 
+    /**
+     * Creates a product node.
+     * @return The node.
+     */
     static Product product() {
         return new Product();
     }
-    static Product product(Product.Term... terms) {
-        return new Product(terms);
-    }
 
+    /**
+     * Creates an exponent node.
+     * @param base The base.
+     * @param exponent The exponent.
+     * @return The node.
+     */
     static Exponent exponent(MathNode base, MathNode exponent) {
         return new Exponent(base, exponent);
     }
 
+    /**
+     * Creates a math function node.
+     * @param function The function.
+     * @param term The term applied to the function.
+     * @return The node.
+     */
     static MathFunction mathFunction(MathFunction.Function function, MathNode term) {
         return new MathFunction(function, term);
     }
+
+    /**
+     * Creates a math function node.
+     * @param name The name of the function.
+     * @param term The term applied to the function.
+     * @return The node.
+     * @throws NodeException If the function could not be created from the name.
+     */
     static MathFunction mathFunction(String name, MathNode term) throws NodeException {
         return MathFunction.of(name, term);
     }
@@ -87,10 +126,6 @@ public interface MathNode extends Node<MathVisitor> {
             String op();
             default double eval() throws EvaluationException { return node().eval(); }
         }
-
-        public Sequence() {}
-        public Sequence(List<T> terms) { super(terms); }
-        @SafeVarargs public Sequence(T... terms) { super(terms); }
 
         @Override protected MathNode self() { return this; }
 
@@ -116,10 +151,15 @@ public interface MathNode extends Node<MathVisitor> {
      * A node which holds a constant value.
      */
     final class Constant implements MathNode {
+        /** The node type. */
         public static final int TYPE = 1;
 
         private final double value;
 
+        /**
+         * Creates an instance.
+         * @param value The constant value.
+         */
         public Constant(double value) {
             this.value = value;
         }
@@ -140,7 +180,6 @@ public interface MathNode extends Node<MathVisitor> {
 
         @Override public int type() { return TYPE; }
 
-        public double value() { return value; }
         @Override public double eval() throws EvaluationException { return value; }
 
         @Override public String toString() { return Double.toString(value); }
@@ -166,6 +205,7 @@ public interface MathNode extends Node<MathVisitor> {
      * {@link #set(String, double)} can be used to set the value.
      */
     final class Variable implements MathNode {
+        /** The node type. */
         public static final int TYPE = 2;
 
         /**
@@ -179,11 +219,20 @@ public interface MathNode extends Node<MathVisitor> {
         private final String name;
         private Double value;
 
+        /**
+         * Creates an instance.
+         * @param name The variable name.
+         * @param value The variable value.
+         */
         public Variable(String name, Double value) {
             this.name = name;
             this.value = value;
         }
 
+        /**
+         * Creates an instance.
+         * @param name The variable name.
+         */
         public Variable(String name) {
             this.name = name;
         }
@@ -199,9 +248,23 @@ public interface MathNode extends Node<MathVisitor> {
 
         @Override public int type() { return TYPE; }
 
+        /**
+         * Gets the variable name.
+         * @return The name.
+         */
         public String name() { return name; }
 
+        /**
+         * Gets the variable value.
+         * @return The value.
+         */
         public Double value() { return value; }
+
+        /**
+         * Sets the variable value.
+         * @param value The value.
+         * @return This instance.
+         */
         public Variable value(Double value) { this.value = value; return this; }
 
         @Override
@@ -231,15 +294,17 @@ public interface MathNode extends Node<MathVisitor> {
      * A node which sums or subtracts multiple terms.
      */
     final class Sum extends Sequence<Sum.Term> {
+        /** The node type. */
         public static final int TYPE = 3;
 
+        /**
+         * A term in a sequence.
+         * @param node The node.
+         * @param positive If the term is positive.
+         */
         record Term(MathNode node, boolean positive) implements MathNode.Sequence.Term {
             @Override public String op() { return positive ? "+" : "-"; }
         }
-
-        public Sum() {}
-        public Sum(List<Sum.Term> terms) { super(terms); }
-        public Sum(Sum.Term... terms) { super(terms); }
 
         @Override public int type() { return TYPE; }
 
@@ -249,7 +314,19 @@ public interface MathNode extends Node<MathVisitor> {
             return this;
         }
 
+        /**
+         * Adds a positive term from a node.
+         * @param node The node.
+         * @return This instance.
+         */
         public Sum add(MathNode node) { return add(node, true); }
+
+        /**
+         * Adds a term from a node.
+         * @param node The node.
+         * @param positive If this term is positive or negative.
+         * @return This instance.
+         */
         public Sum add(MathNode node, boolean positive) { return add(new Term(node, positive)); }
 
         @Override
@@ -269,15 +346,17 @@ public interface MathNode extends Node<MathVisitor> {
      * A node which multiplies or divides multiple terms.
      */
     final class Product extends Sequence<Product.Term> {
+        /** The node type. */
         public static final int TYPE = 4;
 
+        /**
+         * A term in a sequence.
+         * @param node The node.
+         * @param multiply If the term is multiplicative.
+         */
         record Term(MathNode node, boolean multiply) implements MathNode.Sequence.Term {
             @Override public String op() { return multiply ? "*" : "/"; }
         }
-
-        public Product() {}
-        public Product(List<Product.Term> terms) { super(terms); }
-        public Product(Product.Term... terms) { super(terms); }
 
         @Override public int type() { return TYPE; }
 
@@ -287,7 +366,19 @@ public interface MathNode extends Node<MathVisitor> {
             return this;
         }
 
+        /**
+         * Adds a multiplicative term from a node.
+         * @param node The node.
+         * @return This instance.
+         */
         public Product add(MathNode node) { return add(node, true); }
+
+        /**
+         * Adds a term from a node.
+         * @param node The node.
+         * @param multiply If this term is multiplies or divides.
+         * @return This instance.
+         */
         public Product add(MathNode node, boolean multiply) { return add(new Product.Term(node, multiply)); }
 
         @Override
@@ -307,21 +398,36 @@ public interface MathNode extends Node<MathVisitor> {
      * A node which raises a base to an exponent.
      */
     final class Exponent implements MathNode {
+        /** The node type. */
         public static final int TYPE = 5;
 
         private final MathNode base;
         private final MathNode exponent;
 
+        /**
+         * Creates an instance.
+         * @param base The base.
+         * @param exponent The exponent.
+         */
         public Exponent(MathNode base, MathNode exponent) {
-            Validation.notNull(base, "base");
-            Validation.notNull(exponent, "exponent");
+            Validation.notNull("base", base);
+            Validation.notNull("exponent", exponent);
             this.base = base;
             this.exponent = exponent;
         }
 
         @Override public int type() { return TYPE; }
 
+        /**
+         * Gets the base.
+         * @return The base.
+         */
         public MathNode base() { return base; }
+
+        /**
+         * Gets the exponent.
+         * @return The exponent.
+         */
         public MathNode exponent() { return exponent; }
 
         @Override
@@ -357,9 +463,20 @@ public interface MathNode extends Node<MathVisitor> {
      * A node which applies a mathematical function to a term, e.g. sine and cosine.
      */
     final class MathFunction implements MathNode {
+        /** The node type. */
         public static final int TYPE = 6;
 
+        /**
+         * A function that can map one number to another.
+         * @param name The name of the function.
+         * @param function The mapper function.
+         */
         public record Function(String name, java.util.function.Function<Double, Double> function) {
+            /**
+             * Applies this function to a number.
+             * @param value The number value.
+             * @return The mapped number.
+             */
             public double apply(double value) { return function.apply(value); }
 
             @Override
@@ -376,26 +493,42 @@ public interface MathNode extends Node<MathVisitor> {
             }
         }
 
+        /** {@link Math#floor(double)}. */
         public static final Function FLOOR = new Function("floor", Math::floor);
+        /** {@link Math#ceil(double)}. */
         public static final Function CEIL = new Function("ceil", Math::ceil);
+        /** {@link Math#round(double)}. */
         public static final Function ROUND = new Function("round", x -> (double) Math.round(x));
 
+        /** {@link Math#abs(double)}. */
         public static final Function ABS = new Function("abs", Math::abs);
+        /** {@link Math#sqrt(double)}. */
         public static final Function SQRT = new Function("sqrt", Math::sqrt);
+        /** {@link Math#exp(double)}. */
         public static final Function EXP = new Function("exp", Math::exp);
 
+        /** {@link Math#toRadians(double)}. */
         public static final Function RAD = new Function("rad", Math::toRadians);
+        /** {@link Math#toDegrees(double)}. */
         public static final Function DEG = new Function("deg", Math::toDegrees);
 
+        /** {@link Math#sin(double)}. */
         public static final Function SIN = new Function("sin", Math::sin);
+        /** {@link Math#cos(double)}. */
         public static final Function COS = new Function("cos", Math::cos);
+        /** {@link Math#tan(double)}. */
         public static final Function TAN = new Function("tan", Math::tan);
 
+        /** {@link Math#asin(double)}. */
         public static final Function ASIN = new Function("asin", Math::asin);
+        /** {@link Math#acos(double)}. */
         public static final Function ACOS = new Function("acos", Math::acos);
+        /** {@link Math#atan(double)}. */
         public static final Function ATAN = new Function("atan", Math::atan);
 
+        /** {@link Math#log(double)}. */
         public static final Function LN = new Function("ln", Math::log);
+        /** {@link Math#log10(double)}. */
         public static final Function LOG = new Function("log", Math::log10);
 
         /** Map of default functions. */
@@ -426,9 +559,14 @@ public interface MathNode extends Node<MathVisitor> {
         private final Function function;
         private final MathNode term;
 
+        /**
+         * Creates an instance.
+         * @param function The function.
+         * @param term The term that applies to the function.
+         */
         public MathFunction(Function function, MathNode term) {
-            Validation.notNull(function, "function");
-            Validation.notNull(term, "term");
+            Validation.notNull("function", function);
+            Validation.notNull("term", term);
             this.function = function;
             this.term = term;
         }
@@ -440,7 +578,7 @@ public interface MathNode extends Node<MathVisitor> {
          * @throws NodeException If the function is invalid.
          */
         public static Function function(String name) throws NodeException {
-            Validation.notNull(name, "name");
+            Validation.notNull("name", name);
             Function function = FUNCTIONS.get(name);
             Validation.notNull(function, new NodeException("Invalid function `%s`".formatted(name)));
             return function;
@@ -459,7 +597,16 @@ public interface MathNode extends Node<MathVisitor> {
 
         @Override public int type() { return TYPE; }
 
+        /**
+         * Gets the function.
+         * @return The function.
+         */
         public Function function() { return function; }
+
+        /**
+         * Gets the term.
+         * @return The term.
+         */
         public MathNode term() { return term; }
 
         @Override

@@ -17,20 +17,34 @@ import org.bukkit.util.BoundingBox;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Utility for getting {@link Bound}s from Paper entities and blocks.
+ */
 public final class PaperBounds {
     private PaperBounds() {}
 
+    /**
+     * Gets a bound from a Minecraft voxel shape.
+     * @param shape The shape.
+     * @return The bound.
+     */
     public static Bound from(VoxelShape shape) {
         List<Bound> bounds = new ArrayList<>();
         for (AABB bb : shape.toAabbs()) {
             bounds.add(new Box(
                     new Vector3(bb.minX, bb.minY, bb.minZ),
-                    new Vector3(bb.maxX, bb.maxY, bb.maxZ)
+                    new Vector3(bb.maxX, bb.maxY, bb.maxZ),
+                    0
             ));
         }
         return new Compound(bounds.toArray(new Bound[0]));
     }
 
+    /**
+     * Gets a bound from a block.
+     * @param block The block.
+     * @return The bound.
+     */
     public static Bound from(Block block) {
         VoxelShape shape = ((CraftBlock) block).getNMS().getShape(
                 ((CraftChunk) block.getChunk()).getHandle(),
@@ -39,6 +53,11 @@ public final class PaperBounds {
         return from(shape);
     }
 
+    /**
+     * Gets a bound from an entity. Handles rotation.
+     * @param entity The entity.
+     * @return The bound.
+     */
     public static Bound from(Entity entity) {
         BoundingBox box = entity.getBoundingBox();
         Location location = entity.getLocation();

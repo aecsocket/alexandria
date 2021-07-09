@@ -30,21 +30,68 @@ public abstract class AbstractRGBSerializer<T> implements TypeSerializer<T> {
 
     private Format format;
 
+    /**
+     * Creates an instance.
+     * @param format The format to use.
+     */
     public AbstractRGBSerializer(Format format) {
         this.format = format;
     }
 
+    /**
+     * Gets the format.
+     * @return The format.
+     */
     public Format format() { return format; }
+
+    /**
+     * Sets the format.
+     * @param format The format.
+     */
     public void format(Format format) { this.format = format; }
 
+    /**
+     * Gets the integer-compressed value of a color object.
+     * @param obj The object.
+     * @return The value.
+     */
     protected abstract int value(T obj);
 
+    /**
+     * Gets the red component of a color object.
+     * @param obj The object.
+     * @return The value.
+     */
     protected abstract double r(T obj);
+
+    /**
+     * Gets the green component of a color object.
+     * @param obj The object.
+     * @return The value.
+     */
     protected abstract double g(T obj);
+
+    /**
+     * Gets the blue component of a color object.
+     * @param obj The object.
+     * @return The value.
+     */
     protected abstract double b(T obj);
 
+    /**
+     * Creates a color object from an integer-compressed value.
+     * @param value The value.
+     * @return The object.
+     */
     protected abstract T of(int value);
 
+    /**
+     * Creates a color object from red, green, blue values.
+     * @param r The red component.
+     * @param g The green component.
+     * @param b The blue component.
+     * @return The object.
+     */
     protected T of(int r, int g, int b) {
         return of(
                 (r & 0xff) << 16
@@ -81,6 +128,13 @@ public abstract class AbstractRGBSerializer<T> implements TypeSerializer<T> {
         }
     }
 
+    /**
+     * Performs deserialization if no other deserialization option could be performed.
+     * @param type The type.
+     * @param node The node.
+     * @return The fallback value.
+     * @throws SerializationException If there was an error when serializing.
+     */
     protected T fallback(Type type, ConfigurationNode node) throws SerializationException {
         return of(node.getInt());
     }

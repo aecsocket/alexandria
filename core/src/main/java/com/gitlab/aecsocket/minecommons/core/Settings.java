@@ -18,6 +18,7 @@ import java.util.Map;
 public final class Settings {
     /**
      * A path to a child node, comprised of an Object varargs.
+     * @param path The path.
      */
     public record Path(Object... path) {}
 
@@ -32,16 +33,26 @@ public final class Settings {
     private final ConfigurationNode root;
     private final Map<Path, Object> cache = new HashMap<>();
 
+    /**
+     * Creates an instance.
+     * @param root The root configuration node from which values are obtained.
+     */
     public Settings(ConfigurationNode root) {
         this.root = root;
     }
 
+    /**
+     * Creates an instance with an empty configuration node.
+     */
     public Settings() {
         this(BasicConfigurationNode.root());
     }
 
+    /**
+     * Gets the root configuration node from which values are obtained.
+     * @return The node.
+     */
     public ConfigurationNode root() { return root; }
-    public Map<Path, Object> cache() { return cache; }
 
     /**
      * Gets a setting value, either from cache if it exists, or from a {@link ConfigurationNode}.
@@ -49,6 +60,7 @@ public final class Settings {
      * @param path The path to the value.
      * @param <T> The value type.
      * @return The value.
+     * @throws SerializationException If there was an error when getting the value.
      */
     public <T> T get(NodeFunction<T> mapper, Path path) throws SerializationException {
         if (cache.containsKey(path)) {
@@ -68,6 +80,7 @@ public final class Settings {
      * @param path The path to the value.
      * @param <T> The value type.
      * @return The value.
+     * @throws SerializationException If there was an error when getting the value.
      */
     public <T> T get(NodeFunction<T> mapper, Object... path) throws SerializationException {
         return get(mapper, new Path(path));

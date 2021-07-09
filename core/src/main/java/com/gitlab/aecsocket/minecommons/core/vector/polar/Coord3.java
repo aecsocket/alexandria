@@ -4,14 +4,17 @@ import com.gitlab.aecsocket.minecommons.core.vector.cartesian.Vector3;
 
 /**
  * An (r, yaw, pitch) double triplet, using the spherical coordinate system.
- * <p>
- * r: r
- * <p>
- * theta: pitch
- * <p>
- * phi: yaw
+ * @param r The radius in radians.
+ * @param yaw The yaw (phi).
+ * @param pitch The pitch (theta).
  */
 public record Coord3(double r, double yaw, double pitch) {
+    /**
+     * Creates an instance.
+     * @param r The radius in radians.
+     * @param yaw The yaw (phi).
+     * @param pitch The pitch (theta).
+     */
     public Coord3 {
         double _2pi = 2 * Math.PI;
         yaw %= _2pi;

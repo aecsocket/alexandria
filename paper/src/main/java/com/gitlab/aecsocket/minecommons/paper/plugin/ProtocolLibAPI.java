@@ -17,22 +17,24 @@ import java.util.function.Consumer;
 
 /**
  * Utility class for managing packets using a ProtocolLib {@link ProtocolManager}.
+ * @param plugin The underlying plugin.
+ * @param manager The underlying ProtocolLib manager.
  */
-public final class ProtocolLibAPI {
-    private final BasePlugin<?> plugin;
-    private final ProtocolManager manager;
-
-    public ProtocolLibAPI(BasePlugin<?> plugin, ProtocolManager manager) {
-        this.plugin = plugin;
-        this.manager = manager;
+public record ProtocolLibAPI(BasePlugin<?> plugin, ProtocolManager manager) {
+    /**
+     * Creates an instance, getting the default {@link ProtocolLibrary#getProtocolManager()}.
+     * @param plugin The plugin.
+     */
+    public ProtocolLibAPI(BasePlugin<?> plugin) {
+        this(plugin, ProtocolLibrary.getProtocolManager());
     }
 
-    public static ProtocolLibAPI create(BasePlugin<?> plugin) {
-        return new ProtocolLibAPI(plugin, ProtocolLibrary.getProtocolManager());
-    }
-
+    /**
+     * Gets the underlying plugin.
+     * @return The plugin.
+     */
+    @Override
     public BasePlugin<?> plugin() { return plugin; }
-    public ProtocolManager manager() { return manager; }
 
     /**
      * Builds a packet using a function.
@@ -65,7 +67,6 @@ public final class ProtocolLibAPI {
     public byte protocolAngle(float ang) { return (byte) (ang * 256 / 360); }
 
     /**
-     *
      * Gets a protocol angle as its Bukkit representation.
      * @param ang The protocol angle.
      * @return The Bukkit angle.

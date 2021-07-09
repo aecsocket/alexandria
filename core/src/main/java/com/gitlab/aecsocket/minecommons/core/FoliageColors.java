@@ -4,6 +4,9 @@ import java.awt.image.BufferedImage;
 
 /**
  * Provides an index for a foliage color map, using the default Minecraft client's algorithm.
+ * @param width The width of the color map.
+ * @param height The height of the color map.
+ * @param pixels The pixel data in each entry of the map.
  */
 public record FoliageColors(int width, int height, int[] pixels) {
     /** The default color, if the index to be used is outside of the pixels array. */

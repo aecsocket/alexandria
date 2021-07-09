@@ -15,13 +15,24 @@ import org.bukkit.plugin.Plugin;
 
 /**
  * A sound whose volume over distance can be accurately controlled, and simulates speed-of-sound.
+ * @param name The namespaced key of the sound, sent to clients.
+ * @param source The source.
+ * @param volume The volume.
+ * @param pitch The pitch.
+ * @param dropoff The distance at which volume starts to decrease.
+ * @param dropoffSqr The square dropoff.
+ * @param range The distance at which the sound is inaudible.
+ * @param rangeSqr The square range.
+ * @param speed The speed, in m/t, of the sound.
  */
 public record PreciseSound(
         Key name,
         Sound.Source source,
         float volume,
         float pitch,
+        double dropoff,
         double dropoffSqr,
+        double range,
         double rangeSqr,
         double speed
 ) {
@@ -32,26 +43,40 @@ public record PreciseSound(
     /** The distance at which sounds will be played away from a player. */
     public static final double OFFSET_DISTANCE = 10;
 
-    public PreciseSound {
-        Validation.notNull(name, "name");
-        Validation.notNull(source, "source");
+    /**
+     * Creates a sound.
+     * @param name The namespaced key of the sound, sent to clients.
+     * @param source The source.
+     * @param volume The volume.
+     * @param pitch The pitch.
+     * @param dropoff The distance at which volume starts to decrease.
+     * @param range The distance at which the sound is inaudible.
+     * @param speed The speed, in m/t, of the sound.
+     * @return The sound.
+     */
+    public static PreciseSound sound(Key name, Sound.Source source, float volume, float pitch, double dropoff, double range, double speed) {
+        Validation.notNull("name", name);
+        Validation.notNull("source", source);
         Validation.greaterThanEquals("volume", volume, 0);
         Validation.greaterThanEquals("pitch", pitch, 0);
-        Validation.greaterThanEquals("dropoffSqr", dropoffSqr, 0);
-        Validation.greaterThanEquals("rangeSqr", rangeSqr, 0);
+        Validation.greaterThanEquals("dropoff", dropoff, 0);
+        Validation.greaterThanEquals("rangeSqr", range, 0);
         Validation.greaterThan("speed", speed, 0);
+        return new PreciseSound(name, source, volume, pitch, dropoff, dropoff*dropoff, range, range*range, speed);
     }
 
-    public PreciseSound(Key name, Sound.Source source, float volume, float pitch, double dropoffSqr, double rangeSqr) {
-        this(name, source, volume, pitch, dropoffSqr, rangeSqr, SPEED_MT);
-    }
-
-    public static PreciseSound of(Key name, Sound.Source source, float volume, float pitch, double dropoff, double range, double speed) {
-        return new PreciseSound(name, source, volume, pitch, dropoff * dropoff, range * range, speed / Ticks.TPS);
-    }
-
-    public static PreciseSound of(Key name, Sound.Source source, float volume, float pitch, double dropoff, double range) {
-        return new PreciseSound(name, source, volume, pitch, dropoff * dropoff, range * range);
+    /**
+     * Creates a sound, using the default speed {@link #SPEED_MT}.
+     * @param name The namespaced key of the sound, sent to clients.
+     * @param source The source.
+     * @param volume The volume.
+     * @param pitch The pitch.
+     * @param dropoff The distance at which volume starts to decrease.
+     * @param range The distance at which the sound is inaudible.
+     * @return The sound.
+     */
+    public static PreciseSound sound(Key name, Sound.Source source, float volume, float pitch, double dropoff, double range) {
+        return sound(name, source, volume, pitch, dropoff, range, SPEED_MT);
     }
 
 
@@ -66,6 +91,12 @@ public record PreciseSound(
         audience.playSound(Sound.sound(name, source, volume, pitch), x, y, z);
     }
 
+    /**
+     * Plays a sound internally.
+     * @param player The player.
+     * @param deltaSqr The distance from source, squared.
+     * @param origin The origin of the sound.
+     */
     private void play(Player player, double deltaSqr, Location origin) {
         Vector3 location = PaperUtils.toCommons(player.getLocation());
         Vector3 delta = new Vector3(

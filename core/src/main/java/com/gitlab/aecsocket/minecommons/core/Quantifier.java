@@ -7,6 +7,8 @@ import java.util.List;
 /**
  * Stores an object along with an amount of it.
  * @param <T> The type of object stored.
+ * @param object The object stored.
+ * @param amount The amount.
  */
 public record Quantifier<T>(T object, int amount) {
     /**

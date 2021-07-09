@@ -8,25 +8,52 @@ import java.util.logging.Logger;
  * Convenience class for pretty logging, regardless of {@link Logger} level.
  */
 public final class Logging {
+    /** ANSI color escape sequence start. */
     private static final String start = "\033[";
+    /** ANSI color escape sequence split. */
     private static final String split = ";";
+    /** ANSI color escape sequence end. */
     private static final String end = "m";
 
     /**
      * A logging level, determining the style and priority of a logging message.
+     * @param name The full name of the level.
+     * @param level The numerical logging level. Higher is quieter.
+     * @param prefix The short prefix of the level.
+     * @param bgColor The ANSI color code for the prefix background color.
+     * @param fgColor The ANSI color code for the prefix foreground color.
+     * @param textColor The ANSI color code for the message text color.
      */
     public record Level(String name, int level, String prefix, String bgColor, String fgColor, String textColor) {
+        /** Very fine detail, for debugging. */
         public static final Level DEBUG = new Level("debug", -2, "DBG", "100", "37", "90");
+        /** Fine detail, to get extra detail on operations. */
         public static final Level VERBOSE = new Level("verbose", -1, "VRB", "44", "39", "37");
+        /** Standard, important user-facing info. */
         public static final Level INFO = new Level("info", 0, "INF", "42", "30", "39");
+        /** Notices which are not fatal but should be addressed by a user. */
         public static final Level WARNING = new Level("warning", 1, "WRN", "43", "30", "33");
+        /** Notices which may be fatal to execution. */
         public static final Level ERROR = new Level("error", 2, "ERR", "41", "39", "31");
 
+        /**
+         * Creates an instance.
+         * @param name The name.
+         * @param level The numerical level.
+         * @param prefix The prefix.
+         * @param bgColor The background color code.
+         * @param fgColor The foreground color code.
+         * @param textColor The text color code.
+         */
         public Level {
-            Validation.notNull(name, "name");
-            Validation.notNull(prefix, "prefix");
+            Validation.notNull("name", name);
+            Validation.notNull("prefix", prefix);
         }
 
+        /**
+         * Generates a prefix for logged messages.
+         * @return The prefix.
+         */
         private String genPrefix() {
             return start + bgColor + split + fgColor + end + // Color
                     " " + prefix + " " + // Prefix
@@ -61,21 +88,43 @@ public final class Logging {
     private final Logger logger;
     private Level level = Level.INFO;
 
+    /**
+     * Creates an instance.
+     * @param logger The underlying logger to log to.
+     * @param level The level to log at.
+     */
     public Logging(Logger logger, Level level) {
-        Validation.notNull(logger, "logger");
-        Validation.notNull(level, "level");
+        Validation.notNull("logger", logger);
+        Validation.notNull("level", level);
         this.logger = logger;
         this.level = level;
     }
 
+    /**
+     * Creates an instance.
+     * @param logger The underlying logger to log to.
+     */
     public Logging(Logger logger) {
-        Validation.notNull(logger, "logger");
+        Validation.notNull("logger", logger);
         this.logger = logger;
     }
 
+    /**
+     * Gets the underlying logger.
+     * @return The logger.
+     */
     public Logger logger() { return logger; }
 
+    /**
+     * Gets the level to log at.
+     * @return The level.
+     */
     public Level level() { return level; }
+
+    /**
+     * Sets the level to log at.
+     * @param level The level.
+     */
     public void level(Level level) { this.level = level; }
 
     /**

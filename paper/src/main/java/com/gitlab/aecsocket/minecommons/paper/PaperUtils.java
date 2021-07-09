@@ -11,8 +11,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -48,7 +48,7 @@ public final class PaperUtils {
      * @param item The item.
      * @return The result.
      */
-    public static @NotNull ItemStack normalize(@Nullable ItemStack item) {
+    public static @NonNull ItemStack normalize(@Nullable ItemStack item) {
         return item == null ? new ItemStack(Material.AIR) : item;
     }
 

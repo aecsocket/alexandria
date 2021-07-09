@@ -4,8 +4,15 @@ import com.gitlab.aecsocket.minecommons.core.vector.cartesian.Vector2;
 
 /**
  * An (r, ang) double pair, using the polar coordinate system.
+ * @param r The radius.
+ * @param ang The angle in radians.
  */
 public record Coord2(double r, double ang) {
+    /**
+     * Creates an instance.
+     * @param r The radius.
+     * @param ang The angle in radians.
+     */
     public Coord2 {
         double _2pi = 2 * Math.PI;
         ang %= _2pi;
