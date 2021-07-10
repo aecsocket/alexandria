@@ -12,7 +12,9 @@ dependencies {
     compileOnlyApi("net.kyori", "adventure-api", "4.8.1")
     compileOnlyApi("net.kyori", "adventure-serializer-configurate4", "4.8.1")
     compileOnlyApi("org.checkerframework", "checker-qual", "3.15.0")
-    api("net.kyori", "adventure-text-minimessage", "4.1.0-SNAPSHOT")
+    api("net.kyori", "adventure-text-minimessage", "4.1.0-SNAPSHOT") {
+        exclude("net.kyori", "adventure-api")
+    }
 }
 
 java {

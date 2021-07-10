@@ -8,8 +8,12 @@ author: "aecsocket"
 main: "com.gitlab.aecsocket.minecommons.paper.MinecommonsPlugin"
 api-version: "1.17"
 
+softdepend:
+  - "ProtocolLib"
+
 libraries:
   - "org.spongepowered:configurate-hocon:4.1.1"
+  - "net.kyori:adventure-serializer-configurate4:4.8.1"
   - "cloud.commandframework:cloud-paper:1.4.0"
-  - "cloud.commandframework:cloud-minecraft-extras:1.4.0"
+  - "cloud.commandframework:cloud-minecraft-extras:1.5.0"
   - "com.github.stefvanschie.inventoryframework:IF:0.10.0"

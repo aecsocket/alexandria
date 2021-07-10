@@ -36,13 +36,14 @@ dependencies {
     }
     remapper("org.quiltmc", "tiny-remapper", "0.4.1")
     // From library loader
-    compileOnly("org.spongepowered", "configurate-hocon", "4.1.1")
-    val cloudVersion = "1.4.0"
-    compileOnly("cloud.commandframework", "cloud-paper", cloudVersion)
-    compileOnly("cloud.commandframework", "cloud-minecraft-extras", cloudVersion)
-    compileOnly("com.github.stefvanschie.inventoryframework", "IF", "0.10.0")
+    compileOnlyApi("org.spongepowered", "configurate-hocon", "4.1.1")
+    compileOnlyApi("net.kyori", "adventure-serializer-configurate4", "4.8.1")
+    val cloudVersion = "1.5.0"
+    compileOnlyApi("cloud.commandframework", "cloud-paper", cloudVersion)
+    compileOnlyApi("cloud.commandframework", "cloud-minecraft-extras", cloudVersion)
+    compileOnlyApi("com.github.stefvanschie.inventoryframework", "IF", "0.10.0")
     // Plugins
-    compileOnly("com.comphenix.protocol", "ProtocolLib", "4.7.0")
+    compileOnlyApi("com.comphenix.protocol", "ProtocolLib", "4.7.0")
 }
 
 tasks {
@@ -61,6 +62,9 @@ tasks {
     shadowJar {
         archiveFileName.set("${rootProject.name}-${project.name}-${rootProject.version}-mojang-mapped.jar")
         archiveClassifier.set("mojang-mapped")
+        listOf(
+                "net.kyori.adventure.text.minimessage"
+        ).forEach { relocate(it, "${rootProject.group}.lib.$it") }
     }
 
     val productionMappedJar by registering<RemapJar> {

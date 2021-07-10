@@ -36,7 +36,7 @@ import java.util.*;
 /**
  * Plugin utility class.
  */
-public abstract class BasePlugin<S extends BasePlugin<S>> extends JavaPlugin implements Listener {
+public abstract class BasePlugin<S extends BasePlugin<S>> extends JavaPlugin {
     /** The path to the resources manifest file in the JAR. */
     public static final String PATH_RESOURCES = "resources.conf";
 
@@ -67,12 +67,12 @@ public abstract class BasePlugin<S extends BasePlugin<S>> extends JavaPlugin imp
         loadResourceManifest();
         saveResources();
 
+        Bukkit.getScheduler().scheduleSyncDelayedTask(this, this::serverLoad, 0);
         try {
             command = createCommand();
         } catch (Exception e) {
             log(Logging.Level.ERROR, e, "Could not initialize command manager - command functionality will be disabled");
         }
-        Bukkit.getPluginManager().registerEvents(this, this);
     }
 
     /**
@@ -184,11 +184,9 @@ public abstract class BasePlugin<S extends BasePlugin<S>> extends JavaPlugin imp
     public Locale defaultLocale() { return setting(Locale.US, (n, d) -> n.get(Locale.class, d), "default_locale"); }
 
     /**
-     * The event handler that runs on server load.
-     * @param event The server load event.
+     * The method that runs on server load.
      */
-    @EventHandler
-    protected void serverLoad(ServerLoadEvent event) {
+    protected void serverLoad() {
         setupConfigOptions();
         load();
     }
