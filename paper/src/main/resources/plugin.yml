@@ -1,6 +1,6 @@
 # TODO https://github.com/Minecrell/plugin-yml when it adds `libraries` support
 name: "Minecommons"
-version: "1.2-SNAPSHOT"
+version: "1.2"
 description: "Commons library for Minecraft"
 url: "https://gitlab.com/aecsocket/minecommons"
 author: "aecsocket"

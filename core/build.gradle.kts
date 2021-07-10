@@ -6,12 +6,19 @@ repositories {
     maven("https://oss.sonatype.org/content/repositories/snapshots/")
 }
 
+val exposedApi: Configuration by configurations.creating {
+    isTransitive = true
+}
+configurations.compileOnlyApi {
+    extendsFrom(exposedApi)
+}
+
 dependencies {
-    compileOnlyApi("org.spongepowered", "configurate-hocon", "4.1.1")
-    compileOnlyApi("com.google.guava", "guava", "30.1.1-jre")
-    compileOnlyApi("net.kyori", "adventure-api", "4.8.1")
-    compileOnlyApi("net.kyori", "adventure-serializer-configurate4", "4.8.1")
-    compileOnlyApi("org.checkerframework", "checker-qual", "3.15.0")
+    exposedApi("org.spongepowered", "configurate-hocon", "4.1.1")
+    exposedApi("com.google.guava", "guava", "30.1.1-jre")
+    exposedApi("net.kyori", "adventure-api", "4.8.1")
+    exposedApi("net.kyori", "adventure-serializer-configurate4", "4.8.1")
+    exposedApi("org.checkerframework", "checker-qual", "3.15.0")
     api("net.kyori", "adventure-text-minimessage", "4.1.0-SNAPSHOT") {
         exclude("net.kyori", "adventure-api")
     }

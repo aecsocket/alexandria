@@ -17,8 +17,14 @@ configurations.compileOnly {
     extendsFrom(mojangMappedServer)
 }
 
+val exposedApi: Configuration by configurations.creating {
+    isTransitive = true
+}
+configurations.compileOnlyApi {
+    extendsFrom(exposedApi)
+}
+
 repositories {
-    maven("https://papermc.io/repo/repository/maven-public/")
     maven("https://maven.quiltmc.org/repository/release/") {
         mavenContent {
             releasesOnly()
@@ -36,14 +42,12 @@ dependencies {
     }
     remapper("org.quiltmc", "tiny-remapper", "0.4.1")
     // From library loader
-    compileOnlyApi("org.spongepowered", "configurate-hocon", "4.1.1")
-    compileOnlyApi("net.kyori", "adventure-serializer-configurate4", "4.8.1")
     val cloudVersion = "1.5.0"
-    compileOnlyApi("cloud.commandframework", "cloud-paper", cloudVersion)
-    compileOnlyApi("cloud.commandframework", "cloud-minecraft-extras", cloudVersion)
-    compileOnlyApi("com.github.stefvanschie.inventoryframework", "IF", "0.10.0")
+    exposedApi("cloud.commandframework", "cloud-paper", cloudVersion)
+    exposedApi("cloud.commandframework", "cloud-minecraft-extras", cloudVersion)
+    exposedApi("com.github.stefvanschie.inventoryframework", "IF", "0.10.0")
     // Plugins
-    compileOnlyApi("com.comphenix.protocol", "ProtocolLib", "4.7.0")
+    exposedApi("com.comphenix.protocol", "ProtocolLib", "4.7.0")
 }
 
 tasks {

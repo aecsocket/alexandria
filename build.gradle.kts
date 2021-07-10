@@ -5,7 +5,7 @@ plugins {
 
 allprojects {
     group = "com.gitlab.aecsocket.minecommons"
-    version = "1.2-SNAPSHOT"
+    version = "1.2"
     description = "Commons library for Minecraft"
 }
 
@@ -18,7 +18,9 @@ subprojects {
     }
 
     repositories {
+        //mavenLocal()
         mavenCentral()
+        maven("https://oss.sonatype.org/content/repositories/snapshots/")
     }
 
     dependencies {
