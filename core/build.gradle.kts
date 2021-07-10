@@ -2,15 +2,22 @@ plugins {
     id("maven-publish")
 }
 
+repositories {
+    maven("https://oss.sonatype.org/content/repositories/snapshots/")
+}
+
 dependencies {
-    compileOnly("org.spongepowered", "configurate-hocon", "4.1.1")
-    compileOnly("com.google.guava", "guava", "30.1.1-jre")
-    compileOnly("net.kyori", "adventure-api", "4.8.1")
-    compileOnly("net.kyori", "adventure-serializer-configurate4", "4.8.1")
-    api("net.kyori", "adventure-text-minimessage", "4.1.0-SNAPSHOT") {
-        exclude("net.kyori", "adventure-api")
-    }
-    compileOnly("org.checkerframework", "checker-qual", "3.15.0")
+    compileOnlyApi("org.spongepowered", "configurate-hocon", "4.1.1")
+    compileOnlyApi("com.google.guava", "guava", "30.1.1-jre")
+    compileOnlyApi("net.kyori", "adventure-api", "4.8.1")
+    compileOnlyApi("net.kyori", "adventure-serializer-configurate4", "4.8.1")
+    compileOnlyApi("org.checkerframework", "checker-qual", "3.15.0")
+    api("net.kyori", "adventure-text-minimessage", "4.1.0-SNAPSHOT")
+}
+
+java {
+    withJavadocJar()
+    withSourcesJar()
 }
 
 tasks {
@@ -19,7 +26,7 @@ tasks {
         opt.links(
                 "https://docs.oracle.com/en/java/javase/16/docs/api/",
                 "https://configurate.aoeu.xyz/4.1.1/apidocs/",
-                "https://javadoc.io/doc/net.kyori/adventure-api/latest/index.html"
+                "https://jd.adventure.kyori.net/api/4.8.1/"
         )
     }
 }
@@ -33,7 +40,6 @@ publishing {
 
     repositories {
         maven {
-            name = "gitlabMinecommons"
             url = uri("https://gitlab.com/api/v4/projects/27049637/packages/maven")
             credentials(HttpHeaderCredentials::class) {
                 name = "Job-Token"

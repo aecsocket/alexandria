@@ -1,6 +1,7 @@
 # Minecommons
 
-Commons library for Minecraft-related projects, with features such as vector manipulation, event dispatchers and serialization support.
+Commons library for Minecraft-related projects, with features such as vector manipulation,
+event dispatchers and serialization support.
 
 ---
 

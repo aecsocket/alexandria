@@ -19,6 +19,12 @@ configurations.compileOnly {
 
 repositories {
     maven("https://papermc.io/repo/repository/maven-public/")
+    maven("https://maven.quiltmc.org/repository/release/") {
+        mavenContent {
+            releasesOnly()
+            includeModule("org.quiltmc", "tiny-remapper")
+        }
+    }
     maven("https://repo.dmulloy2.net/nexus/repository/public/")
     mavenLocal()
 }
@@ -34,8 +40,9 @@ dependencies {
     val cloudVersion = "1.4.0"
     compileOnly("cloud.commandframework", "cloud-paper", cloudVersion)
     compileOnly("cloud.commandframework", "cloud-minecraft-extras", cloudVersion)
+    compileOnly("com.github.stefvanschie.inventoryframework", "IF", "0.10.0")
     // Plugins
-    compileOnly("com.comphenix.protocol", "ProtocolLib", "4.6.0")
+    compileOnly("com.comphenix.protocol", "ProtocolLib", "4.7.0")
 }
 
 tasks {
@@ -44,7 +51,7 @@ tasks {
         opt.links(
                 "https://docs.oracle.com/en/java/javase/16/docs/api/",
                 "https://configurate.aoeu.xyz/4.1.1/apidocs/",
-                "https://javadoc.io/doc/net.kyori/adventure-api/latest/index.html",
+                "https://jd.adventure.kyori.net/api/4.8.1/",
                 "https://papermc.io/javadocs/paper/1.17/",
                 "https://javadoc.commandframework.cloud/",
                 "https://aadnk.github.io/ProtocolLib/Javadoc/"
@@ -54,14 +61,6 @@ tasks {
     shadowJar {
         archiveFileName.set("${rootProject.name}-${project.name}-${rootProject.version}-mojang-mapped.jar")
         archiveClassifier.set("mojang-mapped")
-        from(rootProject.projectDir.resolve("LICENSE"))
-        listOf(
-                "cloud.commandframework",
-                "io.leangen.geantyref",
-                "net.kyori.adventure.text.minimessage",
-                "org.bstats",
-                "com.github.stefvanschie.inventoryframework"
-        ).forEach { relocate(it, "${rootProject.group}.lib.$it") }
     }
 
     val productionMappedJar by registering<RemapJar> {
@@ -97,7 +96,6 @@ publishing {
 
     repositories {
         maven {
-            name = "gitlabMinecommons"
             url = uri("https://gitlab.com/api/v4/projects/27049637/packages/maven")
             credentials(HttpHeaderCredentials::class) {
                 name = "Job-Token"
