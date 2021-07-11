@@ -6,7 +6,7 @@ stages:
   - deploy
 
 variables:
-  GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dmaven.repo.local=${CI_PROJECT_DIR}/.m2/repository"
+  GRADLE_OPTS: "-Dmaven.repo.local=${CI_PROJECT_DIR}/.m2/repository"
   GRADLE_USER_HOME: "${CI_PROJECT_DIR}/.gradle"
   MC_VERSION: "1.17.1"
 
