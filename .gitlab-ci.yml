@@ -27,6 +27,12 @@ build:
     # Build project
     - "cd ../.."
     - "gradle --build-cache assemble shadowJar productionMappedJar"
+
+    # Test
+    - "gradle check"
+
+    # Publish
+    - "gradle publish"
   cache:
     key: "$CI_COMMIT_REF_NAME"
     policy: pull-push
@@ -39,32 +45,6 @@ build:
     paths:
       - "*/build/libs/*.jar"
     expire_in: 1 week
-
-test:
-  stage: test
-  script:
-    - "gradle check"
-  cache:
-    key: "$CI_COMMIT_REF_NAME"
-    policy: pull
-    paths:
-      - "*/build"
-      - ".gradle"
-      - ".m2/repository"
-
-publish:
-  stage: deploy
-  script:
-    - "gradle publish"
-  cache:
-    key: "$CI_COMMIT_REF_NAME"
-    policy: pull
-    paths:
-      - "*/build"
-      - ".gradle"
-      - ".m2/repository"
-  only:
-    - master
 
 pages:
   stage: deploy
