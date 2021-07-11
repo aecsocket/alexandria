@@ -3,6 +3,7 @@ package com.gitlab.aecsocket.minecommons.core.translation;
 import net.kyori.adventure.text.Component;
 
 import java.util.Locale;
+import java.util.Optional;
 
 /**
  * Allows generating {@link Component}s for different keys depending on the locale, and arguments provided.
@@ -25,17 +26,43 @@ public interface Localizer {
      * @param locale The locale to localize for.
      * @param key The key of the localization value.
      * @param args The arguments.
-     * @return The localized component.
+     * @return An Optional of the localized component.
      */
-    Component localize(Locale locale, String key, Object... args);
+    Optional<Component> get(Locale locale, String key, Object... args);
 
     /**
-     * Localizes a key and arguments into a component, using the {@link #defaultLocale()}.
+     * Localizes a key and arguments into a component, using a specific locale.
+     * <p>
+     * Uses the {@link #defaultLocale()} as a fallback.
      * <p>
      * How the arguments passed are used, is an implementation detail.
+     * <p>
+     * If a translation was not found, will throw an exception.
+     * @param locale The locale to localize for.
      * @param key The key of the localization value.
      * @param args The arguments.
      * @return The localized component.
      */
-    Component localize(String key, Object... args);
+    default Component req(Locale locale, String key, Object... args) {
+        return get(locale, key, args)
+                .orElseThrow(() -> new IllegalArgumentException("Could not get translation for key [" + key + "]"));
+    }
+
+    /**
+     * Localizes a key and arguments into a component, using a specific locale.
+     * <p>
+     * Uses the {@link #defaultLocale()} as a fallback.
+     * <p>
+     * How the arguments passed are used, is an implementation detail.
+     * <p>
+     * If a translation was not found, will return the key passed.
+     * @param locale The locale to localize for.
+     * @param key The key of the localization value.
+     * @param args The arguments.
+     * @return The localized component.
+     */
+    default Component safe(Locale locale, String key, Object... args) {
+        return get(locale, key, args)
+                .orElse(Component.text(key));
+    }
 }

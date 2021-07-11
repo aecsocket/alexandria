@@ -8,14 +8,10 @@ import com.gitlab.aecsocket.minecommons.core.translation.LocalizerLoader;
 import com.gitlab.aecsocket.minecommons.core.translation.MiniMessageLocalizer;
 import com.gitlab.aecsocket.minecommons.paper.serializers.PaperSerializers;
 import com.gitlab.aecsocket.minecommons.paper.serializers.protocol.ProtocolSerializers;
-import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.server.ServerLoadEvent;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.spongepowered.configurate.ConfigurateException;
@@ -157,7 +153,7 @@ public abstract class BasePlugin<S extends BasePlugin<S>> extends JavaPlugin {
      * Gets the localizer.
      * @return The localizer.
      */
-    public MiniMessageLocalizer localizer() { return localizer; }
+    public MiniMessageLocalizer lc() { return localizer; }
 
     /**
      * Gets the configuration options.
@@ -353,32 +349,6 @@ public abstract class BasePlugin<S extends BasePlugin<S>> extends JavaPlugin {
      */
     public Locale locale(CommandSender sender) {
         return sender instanceof Player ? ((Player) sender).locale() : defaultLocale();
-    }
-
-    /**
-     * Localizes a key and arguments into a component, using a specific locale.
-     * <p>
-     * Uses the {@link #defaultLocale()} as a fallback.
-     * @param locale The locale to localize for.
-     * @param key The key of the localization value.
-     * @param args The arguments.
-     * @return The localized component.
-     */
-    public Component localize(Locale locale, String key, Object... args) {
-        return localizer.localize(locale, key, args);
-    }
-
-    /**
-     * Localizes a key and arguments into a component, using the appropriate locale for a sender.
-     * <p>
-     * Uses the {@link #defaultLocale()} as a fallback.
-     * @param sender The sender.
-     * @param key The key of the localization value.
-     * @param args The arguments.
-     * @return The localized component.
-     */
-    public Component localize(CommandSender sender, String key, Object... args) {
-        return localize(locale(sender), key, args);
     }
 
     /**

@@ -35,8 +35,7 @@ public final class MiniMessageLocalizer extends AbstractLocalizer {
         public MiniMessageLocalizer build() {
             Validation.notNull("miniMessage", miniMessage);
             Validation.notNull("defaultLocale", defaultLocale);
-            Validation.notNull("fallbackMessage", fallbackMessage);
-            return new MiniMessageLocalizer(miniMessage, defaultLocale, fallbackMessage);
+            return new MiniMessageLocalizer(miniMessage, defaultLocale);
         }
     }
 
@@ -46,10 +45,9 @@ public final class MiniMessageLocalizer extends AbstractLocalizer {
      * Creates an instance.
      * @param miniMessage The MiniMessage instance.
      * @param defaultLocale The default locale.
-     * @param fallbackMessage The fallback message.
      */
-    public MiniMessageLocalizer(MiniMessage miniMessage, Locale defaultLocale, String fallbackMessage) {
-        super(defaultLocale, fallbackMessage);
+    public MiniMessageLocalizer(MiniMessage miniMessage, Locale defaultLocale) {
+        super(defaultLocale);
         this.miniMessage = miniMessage;
     }
 
