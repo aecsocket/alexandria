@@ -9,14 +9,28 @@ import org.bukkit.event.inventory.InventoryEvent;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.plugin.Plugin;
 
+/**
+ * Allows running code on an inventory event, through an inventory holder.
+ */
 public interface EventInventoryHolder extends InventoryHolder {
+    /**
+     * The listener for the holder.
+     */
     final class EventListener implements Listener {
         private final Plugin plugin;
 
+        /**
+         * Creates an instance.
+         * @param plugin The plugin.
+         */
         public EventListener(Plugin plugin) {
             this.plugin = plugin;
         }
 
+        /**
+         * Gets the plugin.
+         * @return The plugin.
+         */
         public Plugin plugin() { return plugin; }
 
         private void handle(InventoryEvent event) {
@@ -28,11 +42,20 @@ public interface EventInventoryHolder extends InventoryHolder {
             }
         }
 
-        @EventHandler public void onEvent(InventoryClickEvent event) { handle(event); }
-        @EventHandler public void onEvent(InventoryDragEvent event) { handle(event); }
-        @EventHandler public void onEvent(InventoryCloseEvent event) { handle(event); }
+        @EventHandler private void onEvent(InventoryClickEvent event) { handle(event); }
+        @EventHandler private void onEvent(InventoryDragEvent event) { handle(event); }
+        @EventHandler private void onEvent(InventoryCloseEvent event) { handle(event); }
     }
 
+    /**
+     * Gets the plugin used to register event listeners.
+     * @return The plugin.
+     */
     Plugin plugin();
+
+    /**
+     * Runs when an event is called.
+     * @param event The event.
+     */
     void event(InventoryEvent event);
 }

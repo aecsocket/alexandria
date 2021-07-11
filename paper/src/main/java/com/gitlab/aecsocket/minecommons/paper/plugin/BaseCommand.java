@@ -28,10 +28,14 @@ import java.util.function.Supplier;
  * Utility class for using a Cloud {@link PaperCommandManager}.
  */
 public class BaseCommand<P extends BasePlugin<P>> {
+    /** The prefix for chat keys. */
     public static final String PREFIX_CHAT = "chat";
+    /** The prefix for chat command keys. */
     public static final String PREFIX_COMMAND = PREFIX_CHAT + ".command";
+    /** The prefix for chat error keys. */
     public static final String PREFIX_ERROR = PREFIX_CHAT + ".error";
 
+    /** The key for a generic command error. */
     public static final String KEY_COMMAND_ERROR = PREFIX_COMMAND + ".error";
 
     /**
@@ -98,7 +102,7 @@ public class BaseCommand<P extends BasePlugin<P>> {
 
         this.rootName = rootName;
         help = new MinecraftHelp<>("/%s help".formatted(rootName), s -> s, manager);
-        help.messageProvider((sender, key, args) -> localize(locale(sender), PREFIX_COMMAND + ".help." + key)
+        help.messageProvider((sender, key, args) -> lc(locale(sender), PREFIX_COMMAND + ".help." + key)
                 .orElseThrow(() -> new IllegalArgumentException("Could not get localized message for help message: " + key)));
 
         if (manager.getCaptionRegistry() instanceof FactoryDelegatingCaptionRegistry<CommandSender> captions) {
@@ -112,7 +116,7 @@ public class BaseCommand<P extends BasePlugin<P>> {
                 .withInvalidSyntaxHandler()
                 .withNoPermissionHandler()
                 .withCommandExecutionHandler()
-                .withDecorator(msg -> localize(plugin.defaultLocale(), KEY_COMMAND_ERROR,
+                .withDecorator(msg -> lc(plugin.defaultLocale(), KEY_COMMAND_ERROR,
                         "message", msg)
                         .orElseThrow(() -> new IllegalArgumentException("Could not get command error localization at " + KEY_COMMAND_ERROR)));
         exceptionHandler.apply(manager, s -> s);
@@ -178,9 +182,8 @@ public class BaseCommand<P extends BasePlugin<P>> {
      * @param key The key of the localization value.
      * @param args The arguments.
      * @return The localized component.
-     * @see BasePlugin#localize(Locale, String, Object...)
      */
-    protected Optional<Component> localize(Locale locale, String key, Object... args) { return plugin().lc().get(locale, key, args); }
+    protected Optional<Component> lc(Locale locale, String key, Object... args) { return plugin().lc().get(locale, key, args); }
 
     /**
      * Returns a player if the sender if a player, otherwise null.
@@ -212,7 +215,7 @@ public class BaseCommand<P extends BasePlugin<P>> {
         try {
             handler.handle(ctx, sender, locale, player(sender));
         } catch (CommandException e) {
-            localize(locale, e.key, e.args).ifPresent(sender::sendMessage);
+            lc(locale, e.key, e.args).ifPresent(sender::sendMessage);
         }
     }
 
@@ -234,7 +237,7 @@ public class BaseCommand<P extends BasePlugin<P>> {
      * @param args The localization arguments.
      */
     protected void send(CommandSender sender, Locale locale, String key, Object... args) {
-        localize(locale, PREFIX_COMMAND + "." + key, args).ifPresent(sender::sendMessage);
+        lc(locale, PREFIX_COMMAND + "." + key, args).ifPresent(sender::sendMessage);
     }
 
     /**
