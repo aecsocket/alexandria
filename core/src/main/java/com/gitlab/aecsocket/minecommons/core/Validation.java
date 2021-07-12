@@ -85,13 +85,14 @@ public final class Validation {
     /**
      * Errors if a number is not greater than another value.
      * <p>
-     * Throws {@code [name]: failed condition `[actual] > [target]`}.
+     * Throws {@code [name]: failed condition [actual] > [target]}.
      * @param name The name of the argument.
      * @param actual The actual number provided.
      * @param target The target number that the actual number must be compared against.
      */
     public static void greaterThan(String name, double actual, double target) {
-        greaterThan(actual, target, new IllegalArgumentException("%s: failed condition `%f > %f`".formatted(name, actual, target)));
+        greaterThan(actual, target,new IllegalArgumentException(
+                name + ": failed condition " + actual + " > " + target));
     }
 
     /**
@@ -109,13 +110,14 @@ public final class Validation {
     /**
      * Errors if a number is not greater than or equal to another value.
      * <p>
-     * Throws {@code [name]: failed condition `[actual] >= [target]`}.
+     * Throws {@code [name]: failed condition [actual] >= [target]}.
      * @param name The name of the argument.
      * @param actual The actual number provided.
      * @param target The target number that the actual number must be compared against.
      */
     public static void greaterThanEquals(String name, double actual, double target) {
-        greaterThanEquals(actual, target, new IllegalArgumentException("%s: failed condition `%f >= %f`".formatted(name, actual, target)));
+        greaterThanEquals(actual, target, new IllegalArgumentException(
+                name + ": failed condition " + actual + " >= " + target));
     }
 
     /**
@@ -133,13 +135,14 @@ public final class Validation {
     /**
      * Errors if a number is not lower than another value.
      * <p>
-     * Throws {@code [name]: failed condition `[actual] < [target]`}.
+     * Throws {@code [name]: failed condition [actual] < [target]}.
      * @param name The name of the argument.
      * @param actual The actual number provided.
      * @param target The target number that the actual number must be compared against.
      */
     public static void lowerThan(String name, double actual, double target) {
-        lowerThan(actual, target, new IllegalArgumentException("%s: failed condition `%f < %f`".formatted(name, actual, target)));
+        lowerThan(actual, target, new IllegalArgumentException(
+                name + ": failed condition " + actual + " < " + target));
     }
 
     /**
@@ -157,13 +160,14 @@ public final class Validation {
     /**
      * Errors if a number is not lower than or equal to another value.
      * <p>
-     * Throws {@code [name]: failed condition `[actual] <= [target]`}.
+     * Throws {@code [name]: failed condition [actual] <= [target]}.
      * @param name The name of the argument.
      * @param actual The actual number provided.
      * @param target The target number that the actual number must be compared against.
      */
     public static void lowerThanEquals(String name, double actual, double target) {
-        lowerThanEquals(actual, target, new IllegalArgumentException("%s: failed condition `%f <= %f`".formatted(name, actual, target)));
+        lowerThanEquals(actual, target, new IllegalArgumentException(
+                name + ": failed condition " + actual + " <= " + target));
     }
 
     /**
@@ -182,13 +186,14 @@ public final class Validation {
     /**
      * Errors if a number is not between two values, inclusive.
      * <p>
-     * Throws {@code [name]: failed condition `[min] <= [actual] <= [max]`}.
+     * Throws {@code [name]: failed condition [min] <= [actual] <= [max]}.
      * @param name The name of the argument.
      * @param actual The actual number provided.
      * @param min The minimum value.
      * @param max The maximum value.
      */
     public static void in(String name, double actual, double min, double max) {
-        in(actual, min, max, new IllegalArgumentException("%s: failed condition `%f <= %f <= %f`".formatted(name, min, actual, max)));
+        in(actual, min, max, new IllegalArgumentException(
+                name + ": failed condition " + min + " <= " + actual + " <= " + max));
     }
 }

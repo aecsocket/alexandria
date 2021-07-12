@@ -54,7 +54,8 @@ public final class EventDispatcher<E> {
         }
     }
 
-    private final TreeSet<Listener<E>> listeners = new TreeSet<>(Comparator.comparingInt(Listener::priority));
+    // TODO find a better data structure
+    private final List<Listener<E>> listeners = new ArrayList<>();
 
     /**
      * Gets all registered listeners.
@@ -95,6 +96,7 @@ public final class EventDispatcher<E> {
         @SuppressWarnings("unchecked")
         Listener<E> registered = (Listener<E>) new Listener<>(eventType, specific, listener, priority);
         listeners.add(registered);
+        listeners.sort(Comparator.comparingInt(Listener::priority));
         return registered;
     }
 

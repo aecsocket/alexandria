@@ -41,11 +41,13 @@ dependencies {
         exclude("junit", "junit")
     }
     remapper("org.quiltmc", "tiny-remapper", "0.4.1")
+
+    // TODO: This does not get shaded, however it should. BUT gradle doesn't let me depend on shaded deps from other jars.
+    api("com.github.stefvanschie.inventoryframework", "IF", "0.10.0")
     // From library loader
     val cloudVersion = "1.5.0"
     exposedApi("cloud.commandframework", "cloud-paper", cloudVersion)
     exposedApi("cloud.commandframework", "cloud-minecraft-extras", cloudVersion)
-    exposedApi("com.github.stefvanschie.inventoryframework", "IF", "0.10.0")
     // Plugins
     exposedApi("com.comphenix.protocol", "ProtocolLib", "4.7.0")
 }
@@ -81,7 +83,7 @@ tasks {
         remapClasspath.from(mojangMappedServer)
     }
 
-    build {
+    assemble {
         dependsOn(productionMappedJar)
     }
 
@@ -97,7 +99,7 @@ runPaper {
 
 publishing {
     publications {
-        create<MavenPublication>("gitlab") {
+        create<MavenPublication>("maven") {
             from(components["java"])
         }
     }
