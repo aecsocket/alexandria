@@ -14,7 +14,7 @@ Minecommons is exposed as a Paper plugin, for other plugins to depend on.
 * [Java >=16](https://adoptopenjdk.net/?variant=openjdk16&jvmVariant=hotspot)
 * [Paper >=1.17.1](https://papermc.io)
 
-### [Download](https://gitlab.com/api/v4/projects/27049637/jobs/artifacts/master/raw/paper/build/libs/minecommons-paper-1.2-SNAPSHOT.jar?job=build)
+### [Download](https://gitlab.com/api/v4/projects/27049637/jobs/artifacts/master/raw/paper/build/libs/minecommons-paper-1.2.jar?job=build)
 
 ## Development Setup
 
