@@ -39,7 +39,7 @@ public abstract class AbstractLocalizer implements RegistryLocalizer {
 
     private Locale defaultLocale;
     private final Map<Locale, Translation> translations = new HashMap<>();
-    private final Map<Locale, Map<String, Component>> cache = new HashMap<>();
+    private final Map<Locale, Map<String, List<Component>>> cache = new HashMap<>();
 
     /**
      * Creates an instance.
@@ -105,30 +105,40 @@ public abstract class AbstractLocalizer implements RegistryLocalizer {
     public abstract Component format(String value, Object... args);
 
     /**
-     * Uses a translation of a locale for its component, otherwise uses a fallback.
+     * Uses a translation of a locale for its components, otherwise uses a fallback.
      * @param locale The locale.
      * @param fallback The fallback.
      * @param key The key.
      * @param args The arguments.
-     * @return The translated component.
+     * @return The translated components.
      */
-    protected Optional<Component> use(Locale locale, Supplier<Optional<Component>> fallback, String key, Object... args) {
+    protected Optional<List<Component>> use(Locale locale, Supplier<Optional<List<Component>>> fallback, String key, Object... args) {
         if (args.length == 0) {
-            Component cached = cache.getOrDefault(locale, Collections.emptyMap()).get(key);
+            List<Component> cached = cache.getOrDefault(locale, Collections.emptyMap()).get(key);
             if (cached != null)
                 return Optional.of(cached);
         }
         Translation translation = translation(locale);
         if (translation == null || !translation.containsKey(key))
             return fallback.get();
-        Component component = format(translation.get(key), args);
+
+        List<Component> lines = new ArrayList<>();
+        for (String line : translation.get(key))
+            lines.add(format(line, args));
+
         if (args.length == 0)
-            cache.computeIfAbsent(locale, l -> new HashMap<>()).put(key, component);
-        return Optional.of(component);
+            cache.computeIfAbsent(locale, l -> new HashMap<>()).put(key, lines);
+        return Optional.of(lines);
     }
 
     @Override
     public Optional<Component> get(Locale locale, String key, Object... args) {
+        return use(locale, () -> use(defaultLocale, Optional::empty, key, args), key, args)
+                .map(c -> Component.join(Component.newline(), c));
+    }
+
+    @Override
+    public Optional<List<Component>> lines(Locale locale, String key, Object... args) {
         return use(locale, () -> use(defaultLocale, Optional::empty, key, args), key, args);
     }
 }

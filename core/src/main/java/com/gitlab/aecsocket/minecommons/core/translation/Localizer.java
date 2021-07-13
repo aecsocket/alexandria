@@ -2,6 +2,8 @@ package com.gitlab.aecsocket.minecommons.core.translation;
 
 import net.kyori.adventure.text.Component;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -64,5 +66,54 @@ public interface Localizer {
     default Component safe(Locale locale, String key, Object... args) {
         return get(locale, key, args)
                 .orElse(Component.text(key));
+    }
+
+    /**
+     * Localizes a key and arguments into lines of components, using a specific locale.
+     * <p>
+     * Uses the {@link #defaultLocale()} as a fallback.
+     * <p>
+     * How the arguments passed are used, is an implementation detail.
+     * @param locale The locale to localize for.
+     * @param key The key of the localization value.
+     * @param args The arguments.
+     * @return An Optional of the localized components.
+     */
+    Optional<List<Component>> lines(Locale locale, String key, Object... args);
+
+    /**
+     * Localizes a key and arguments into lines of components, using a specific locale.
+     * <p>
+     * Uses the {@link #defaultLocale()} as a fallback.
+     * <p>
+     * How the arguments passed are used, is an implementation detail.
+     * <p>
+     * If a translation was not found, will throw an exception.
+     * @param locale The locale to localize for.
+     * @param key The key of the localization value.
+     * @param args The arguments.
+     * @return The localized components.
+     */
+    default List<Component> reqLines(Locale locale, String key, Object... args) {
+        return lines(locale, key, args)
+                .orElseThrow(() -> new IllegalArgumentException("Could not get translation for key [" + key + "]"));
+    }
+
+    /**
+     * Localizes a key and arguments into lines of components, using a specific locale.
+     * <p>
+     * Uses the {@link #defaultLocale()} as a fallback.
+     * <p>
+     * How the arguments passed are used, is an implementation detail.
+     * <p>
+     * If a translation was not found, will return the key passed.
+     * @param locale The locale to localize for.
+     * @param key The key of the localization value.
+     * @param args The arguments.
+     * @return The localized components.
+     */
+    default List<Component> safeLines(Locale locale, String key, Object... args) {
+        return lines(locale, key, args)
+                .orElse(Collections.singletonList(Component.text(key)));
     }
 }

@@ -3,13 +3,14 @@ package com.gitlab.aecsocket.minecommons.core.translation;
 import com.gitlab.aecsocket.minecommons.core.Validation;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
 /**
- * A translation, mapping a string key to a string array value.
+ * A translation, mapping a string key to a string list value.
  */
-public class Translation extends HashMap<String, String> {
+public class Translation extends HashMap<String, List<String>> {
     /** The locale that this translation is for. */
     private final Locale locale;
 
@@ -26,7 +27,7 @@ public class Translation extends HashMap<String, String> {
      * @param m The existing translations.
      * @param locale The locale.
      */
-    public Translation(Map<? extends String, ? extends String> m, Locale locale) {
+    public Translation(Map<? extends String, ? extends List<String>> m, Locale locale) {
         super(m);
         Validation.notNull("locale", locale);
         this.locale = locale;
