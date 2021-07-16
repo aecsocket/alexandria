@@ -7,6 +7,7 @@ plugins {
     id("maven-publish")
     id("com.github.johnrengelman.shadow") version "7.0.0"
     id("io.papermc.paperweight.patcher") version "1.1.7"
+    //id("net.minecrell.plugin-yml.bukkit") version "0.4.0"
     id("xyz.jpenilla.run-paper") version "1.0.3"
 }
 
@@ -42,7 +43,6 @@ dependencies {
     }
     remapper("org.quiltmc", "tiny-remapper", "0.4.1")
 
-    // TODO: This does not get shaded, however it should. BUT gradle doesn't let me depend on shaded deps from other jars.
     api("com.github.stefvanschie.inventoryframework", "IF", "0.10.0")
     // From library loader
     val cloudVersion = "1.5.0"
@@ -92,6 +92,18 @@ tasks {
         pluginJars.from(productionMappedJar.flatMap { it.outputJar })
     }
 }
+
+/*
+bukkit {
+    name = "Minecommons"
+    main = "${project.group}.paper.MinecommonsPlugin"
+    apiVersion = "1.17"
+    softDepend = listOf("ProtocolLib")
+    website = "https://gitlab.com/aecsocket/minecommons"
+    authors = listOf("aecsocket")
+
+    libraries {}
+}*/
 
 runPaper {
     disablePluginJarDetection()

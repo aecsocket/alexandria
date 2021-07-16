@@ -1,8 +1,6 @@
 package com.gitlab.aecsocket.minecommons.paper.inputs;
 
-import com.gitlab.aecsocket.minecommons.core.InputType;
 import com.gitlab.aecsocket.minecommons.core.event.EventDispatcher;
-import org.bukkit.entity.Player;
 
 /**
  * An abstract implementation of an input manager.
@@ -15,12 +13,11 @@ public abstract class AbstractInputs implements Inputs {
 
     /**
      * Handles an input event.
-     * @param player The player.
-     * @param input The input type.
+     * @param event The incoming input event.
      * @param ifCancelled The code to run if cancelled.
      */
-    protected void handle(Player player, InputType input, Runnable ifCancelled) {
-        if (events.call(new Events.Input(player, input)).cancelled()) {
+    protected void handle(Events.Input event, Runnable ifCancelled) {
+        if (events.call(event).cancelled()) {
             ifCancelled.run();
         }
     }

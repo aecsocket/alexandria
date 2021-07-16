@@ -24,7 +24,7 @@ public interface Inputs {
         /**
          * Runs when a player makes an input.
          */
-        public static final class Input implements Cancellable {
+        public static class Input implements Cancellable {
             private final Player player;
             private final InputType input;
             private boolean cancelled;

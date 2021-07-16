@@ -12,6 +12,20 @@ public enum InputType {
     OFFHAND,
     /** Dropping the current item, including dropping the entire stack. */
     DROP,
+    /** Swapping to a different hotbar slot. */
+    SWAP,
+    /** Starting to sneak. */
+    SNEAK_START,
+    /** Stopping sneaking. */
+    SNEAK_STOP,
+    /** Starting to sprint. */
+    SPRINT_START,
+    /** Stopping sprinting. */
+    SPRINT_STOP,
+    /** Starting to fly. */
+    FLIGHT_START,
+    /** Stopping flying. */
+    FLIGHT_STOP,
     /** Opening the advancements menu. */
     ADVANCEMENTS
 }
