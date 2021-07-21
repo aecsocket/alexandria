@@ -7,8 +7,9 @@ import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.events.PacketListener;
 import com.comphenix.protocol.wrappers.EnumWrappers;
 import com.gitlab.aecsocket.minecommons.core.InputType;
+import com.gitlab.aecsocket.minecommons.paper.plugin.BasePlugin;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
 
 /**
  * Handles player inputs through a packet listener.
@@ -19,7 +20,7 @@ import org.bukkit.plugin.Plugin;
  *     <li>{@link PacketType.Play.Client#BLOCK_PLACE}: {@link InputType#MOUSE_RIGHT}</li>
  *     <li>{@link PacketType.Play.Client#BLOCK_DIG} state {@link EnumWrappers.PlayerDigType#SWAP_HELD_ITEMS}: {@link InputType#OFFHAND}</li>
  *     <li>{@link PacketType.Play.Client#BLOCK_DIG} state {@link EnumWrappers.PlayerDigType#DROP_ITEM}: {@link InputType#DROP}</li>
- *     <li>{@link PacketType.Play.Client#HELD_ITEM_SLOT}: {@link InputType#SWAP}</li>
+ *     <li>{@link PacketType.Play.Client#HELD_ITEM_SLOT}: {@link InputType#SWAP}, {@link InputType#SCROLL_UP}, {@link InputType#SCROLL_DOWN}</li>
  *     <li>{@link PacketType.Play.Client#ENTITY_ACTION}: {@link InputType#SNEAK_START}, {@link InputType#SNEAK_STOP},
  *              {@link InputType#SPRINT_START}, {@link InputType#SPRINT_STOP}</li>
  *     <li>{@link PacketType.Play.Client#ABILITIES}: {@link InputType#FLIGHT_START}, {@link InputType#FLIGHT_STOP}</li>
@@ -36,7 +37,8 @@ public class PacketInputs extends AbstractInputs implements PacketListener {
                     PacketType.Play.Client.ADVANCEMENTS)
             .build();
 
-    private final Plugin plugin;
+    private final BasePlugin<?> plugin;
+    private int lastScroll;
 
     private enum AdvancementAction {
         OPENED_TAB,
@@ -47,11 +49,11 @@ public class PacketInputs extends AbstractInputs implements PacketListener {
      * Creates an instance.
      * @param plugin The plugin which the packet listener is registered under.
      */
-    public PacketInputs(Plugin plugin) {
+    public PacketInputs(BasePlugin<?> plugin) {
         this.plugin = plugin;
     }
 
-    @Override public Plugin getPlugin() { return plugin; }
+    @Override public BasePlugin<?> getPlugin() { return plugin; }
 
     @Override public ListeningWhitelist getSendingWhitelist() { return sendingWhitelist; }
     @Override public ListeningWhitelist getReceivingWhitelist() { return receivingWhitelist; }
@@ -81,7 +83,19 @@ public class PacketInputs extends AbstractInputs implements PacketListener {
             }
         }
         if (type == PacketType.Play.Client.HELD_ITEM_SLOT) {
+            if (Bukkit.getCurrentTick() <= lastScroll + 1)
+                return;
             handle(new Events.PacketInput(player, InputType.SWAP, event), () -> event.setCancelled(true));
+            int prv = player.getInventory().getHeldItemSlot();
+            handle(new Events.PacketInput(event.getPlayer(),
+                    scrollDirection(packet.getIntegers().read(0), prv),
+                    event), () -> {
+                event.setCancelled(true);
+                PacketContainer cancelPacket = new PacketContainer(PacketType.Play.Server.HELD_ITEM_SLOT);
+                cancelPacket.getIntegers().write(0, prv);
+                plugin.protocol().send(player, cancelPacket, false, false);
+                lastScroll = Bukkit.getCurrentTick();
+            });
         }
         if (type == PacketType.Play.Client.ENTITY_ACTION) {
             switch (packet.getPlayerActions().read(0)) {
@@ -114,6 +128,12 @@ public class PacketInputs extends AbstractInputs implements PacketListener {
         public static class PacketInput extends Inputs.Events.Input {
             private final PacketEvent event;
 
+            /**
+             * Creates an instance.
+             * @param player The player.
+             * @param input The input type.
+             * @param event The underlying event.
+             */
             public PacketInput(Player player, InputType input, PacketEvent event) {
                 super(player, input);
                 this.event = event;

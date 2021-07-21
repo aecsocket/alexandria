@@ -1,5 +1,6 @@
 package com.gitlab.aecsocket.minecommons.paper.inputs;
 
+import com.gitlab.aecsocket.minecommons.core.InputType;
 import com.gitlab.aecsocket.minecommons.core.event.EventDispatcher;
 
 /**
@@ -20,5 +21,16 @@ public abstract class AbstractInputs implements Inputs {
         if (events.call(event).cancelled()) {
             ifCancelled.run();
         }
+    }
+
+    /**
+     * Gets a scroll direction from a hotbar slot change.
+     * @param cur The new slot.
+     * @param prv The previous slot.
+     * @return The scroll direction, either {@link InputType#SCROLL_UP} or {@link InputType#SCROLL_DOWN}.
+     */
+    public static InputType scrollDirection(int cur, int prv) {
+        return (cur < prv || (cur == 8 && prv == 0)) && !(cur == 0 && prv == 8)
+                ? InputType.SCROLL_UP : InputType.SCROLL_DOWN;
     }
 }

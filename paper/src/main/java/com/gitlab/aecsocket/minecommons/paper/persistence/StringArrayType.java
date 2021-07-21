@@ -19,10 +19,17 @@ public class StringArrayType implements PersistentDataType<byte[], String[]> {
 
     private final Charset charset;
 
+    /**
+     * Creates an instance with a charset.
+     * @param charset The charset.
+     */
     public StringArrayType(Charset charset) {
         this.charset = charset;
     }
 
+    /**
+     * Creates an instance with the {@link StandardCharsets#UTF_8} charset.
+     */
     public StringArrayType() {
         this(StandardCharsets.UTF_8);
     }

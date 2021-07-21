@@ -91,18 +91,29 @@ public record ProtocolLibAPI(BasePlugin<?> plugin, ProtocolManager manager) {
      * Sends a packet, catching exceptions and forwarding them to {@link BasePlugin#log(Logging.Level, Throwable, String, Object...)}.
      * @param player The player to send to.
      * @param packet The packet to send.
+     * @param filters If packet filters should be invoked.
      * @param wire If the packet should be converted to a {@link WirePacket} and sent instantly (not waiting for the 50ms packet loop).
      */
-    public void send(Player player, PacketContainer packet, boolean wire) {
+    public void send(Player player, PacketContainer packet, boolean filters, boolean wire) {
         try {
             if (wire) {
                 manager.sendWirePacket(player, WirePacket.fromPacket(packet));
             } else {
-                manager.sendServerPacket(player, packet);
+                manager.sendServerPacket(player, packet, filters);
             }
         } catch (InvocationTargetException e) {
             plugin.log(Logging.Level.WARNING, e, "Could not send packet to %s (%s)", player.getName(), player.getUniqueId());
         }
+    }
+
+    /**
+     * Sends a packet, catching exceptions and forwarding them to {@link BasePlugin#log(Logging.Level, Throwable, String, Object...)}.
+     * @param player The player to send to.
+     * @param packet The packet to send.
+     * @param wire If the packet should be converted to a {@link WirePacket} and sent instantly (not waiting for the 50ms packet loop).
+     */
+    public void send(Player player, PacketContainer packet, boolean wire) {
+        send(player, packet, true, wire);
     }
 
     /**

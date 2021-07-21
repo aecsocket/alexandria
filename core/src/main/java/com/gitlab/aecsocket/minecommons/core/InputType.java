@@ -14,6 +14,10 @@ public enum InputType {
     DROP,
     /** Swapping to a different hotbar slot. */
     SWAP,
+    /** Changing hotbar slot in the mouse wheel up direction. */
+    SCROLL_UP,
+    /** Changing hotbar slot in the mouse wheel down direction. */
+    SCROLL_DOWN,
     /** Starting to sneak. */
     SNEAK_START,
     /** Stopping sneaking. */

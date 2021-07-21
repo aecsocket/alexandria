@@ -17,7 +17,7 @@ import org.bukkit.inventory.EquipmentSlot;
  *     <li>{@link PlayerInteractEvent}: {@link InputType#MOUSE_RIGHT}</li>
  *     <li>{@link PlayerSwapHandItemsEvent}: {@link InputType#OFFHAND}</li>
  *     <li>{@link PlayerDropItemEvent}: {@link InputType#DROP}</li>
- *     <li>{@link PlayerItemHeldEvent}: {@link InputType#SWAP}</li>
+ *     <li>{@link PlayerItemHeldEvent}: {@link InputType#SWAP}, {@link InputType#SCROLL_UP}, {@link InputType#SCROLL_DOWN}</li>
  *     <li>{@link PlayerToggleSneakEvent}: {@link InputType#SNEAK_START}, {@link InputType#SNEAK_STOP}</li>
  *     <li>{@link PlayerToggleSprintEvent}: {@link InputType#SPRINT_START}, {@link InputType#SPRINT_STOP}</li>
  *     <li>{@link PlayerToggleFlightEvent}: {@link InputType#FLIGHT_START}, {@link InputType#FLIGHT_STOP}</li>
@@ -50,6 +50,9 @@ public class ListenerInputs extends AbstractInputs implements Listener {
     @EventHandler
     private void onEvent(PlayerItemHeldEvent event) {
         handle(new Events.SwapInput(event.getPlayer(), InputType.SWAP, event), () -> event.setCancelled(true));
+        handle(new Events.SwapInput(event.getPlayer(),
+                scrollDirection(event.getNewSlot(), event.getPreviousSlot()),
+                event), () -> event.setCancelled(true));
     }
 
     @EventHandler
@@ -80,6 +83,11 @@ public class ListenerInputs extends AbstractInputs implements Listener {
          * Runs when a player makes an input which has an underlying {@link PlayerEvent}.
          */
         public static abstract class EventInput extends Inputs.Events.Input {
+            /**
+             * Creates an instance.
+             * @param player The player.
+             * @param input The input type.
+             */
             public EventInput(Player player, InputType input) {
                 super(player, input);
             }
@@ -97,6 +105,12 @@ public class ListenerInputs extends AbstractInputs implements Listener {
         public static class AnimationInput extends EventInput {
             private final PlayerAnimationEvent event;
 
+            /**
+             * Creates an instance.
+             * @param player The player.
+             * @param input The input type.
+             * @param event The underlying event.
+             */
             public AnimationInput(Player player, InputType input, PlayerAnimationEvent event) {
                 super(player, input);
                 this.event = event;
@@ -111,6 +125,12 @@ public class ListenerInputs extends AbstractInputs implements Listener {
         public static class InteractInput extends EventInput {
             private final PlayerInteractEvent event;
 
+            /**
+             * Creates an instance.
+             * @param player The player.
+             * @param input The input type.
+             * @param event The underlying event.
+             */
             public InteractInput(Player player, InputType input, PlayerInteractEvent event) {
                 super(player, input);
                 this.event = event;
@@ -125,6 +145,12 @@ public class ListenerInputs extends AbstractInputs implements Listener {
         public static class SwapHandInput extends EventInput {
             private final PlayerSwapHandItemsEvent event;
 
+            /**
+             * Creates an instance.
+             * @param player The player.
+             * @param input The input type.
+             * @param event The underlying event.
+             */
             public SwapHandInput(Player player, InputType input, PlayerSwapHandItemsEvent event) {
                 super(player, input);
                 this.event = event;
@@ -139,6 +165,12 @@ public class ListenerInputs extends AbstractInputs implements Listener {
         public static class DropInput extends EventInput {
             private final PlayerDropItemEvent event;
 
+            /**
+             * Creates an instance.
+             * @param player The player.
+             * @param input The input type.
+             * @param event The underlying event.
+             */
             public DropInput(Player player, InputType input, PlayerDropItemEvent event) {
                 super(player, input);
                 this.event = event;
@@ -153,6 +185,12 @@ public class ListenerInputs extends AbstractInputs implements Listener {
         public static class SwapInput extends EventInput {
             private final PlayerItemHeldEvent event;
 
+            /**
+             * Creates an instance.
+             * @param player The player.
+             * @param input The input type.
+             * @param event The underlying event.
+             */
             public SwapInput(Player player, InputType input, PlayerItemHeldEvent event) {
                 super(player, input);
                 this.event = event;
@@ -167,6 +205,12 @@ public class ListenerInputs extends AbstractInputs implements Listener {
         public static class SneakInput extends EventInput {
             private final PlayerToggleSneakEvent event;
 
+            /**
+             * Creates an instance.
+             * @param player The player.
+             * @param input The input type.
+             * @param event The underlying event.
+             */
             public SneakInput(Player player, InputType input, PlayerToggleSneakEvent event) {
                 super(player, input);
                 this.event = event;
@@ -181,6 +225,12 @@ public class ListenerInputs extends AbstractInputs implements Listener {
         public static class SprintInput extends EventInput {
             private final PlayerToggleSprintEvent event;
 
+            /**
+             * Creates an instance.
+             * @param player The player.
+             * @param input The input type.
+             * @param event The underlying event.
+             */
             public SprintInput(Player player, InputType input, PlayerToggleSprintEvent event) {
                 super(player, input);
                 this.event = event;
@@ -195,6 +245,12 @@ public class ListenerInputs extends AbstractInputs implements Listener {
         public static class FlightInput extends EventInput {
             private final PlayerToggleFlightEvent event;
 
+            /**
+             * Creates an instance.
+             * @param player The player.
+             * @param input The input type.
+             * @param event The underlying event.
+             */
             public FlightInput(Player player, InputType input, PlayerToggleFlightEvent event) {
                 super(player, input);
                 this.event = event;
