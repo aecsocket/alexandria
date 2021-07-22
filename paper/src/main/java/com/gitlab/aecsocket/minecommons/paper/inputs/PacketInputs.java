@@ -7,9 +7,8 @@ import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.events.PacketListener;
 import com.comphenix.protocol.wrappers.EnumWrappers;
 import com.gitlab.aecsocket.minecommons.core.InputType;
-import com.gitlab.aecsocket.minecommons.paper.plugin.BasePlugin;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 
 /**
  * Handles player inputs through a packet listener.
@@ -37,8 +36,7 @@ public class PacketInputs extends AbstractInputs implements PacketListener {
                     PacketType.Play.Client.ADVANCEMENTS)
             .build();
 
-    private final BasePlugin<?> plugin;
-    private int lastScroll;
+    private final Plugin plugin;
 
     private enum AdvancementAction {
         OPENED_TAB,
@@ -49,11 +47,11 @@ public class PacketInputs extends AbstractInputs implements PacketListener {
      * Creates an instance.
      * @param plugin The plugin which the packet listener is registered under.
      */
-    public PacketInputs(BasePlugin<?> plugin) {
+    public PacketInputs(Plugin plugin) {
         this.plugin = plugin;
     }
 
-    @Override public BasePlugin<?> getPlugin() { return plugin; }
+    @Override public Plugin getPlugin() { return plugin; }
 
     @Override public ListeningWhitelist getSendingWhitelist() { return sendingWhitelist; }
     @Override public ListeningWhitelist getReceivingWhitelist() { return receivingWhitelist; }
@@ -83,18 +81,16 @@ public class PacketInputs extends AbstractInputs implements PacketListener {
             }
         }
         if (type == PacketType.Play.Client.HELD_ITEM_SLOT) {
-            if (Bukkit.getCurrentTick() <= lastScroll + 1)
-                return;
             handle(new Events.PacketInput(player, InputType.SWAP, event), () -> event.setCancelled(true));
+            int cur = packet.getIntegers().read(0);
             int prv = player.getInventory().getHeldItemSlot();
+            if (cur == prv)
+                return;
             handle(new Events.PacketInput(event.getPlayer(),
-                    scrollDirection(packet.getIntegers().read(0), prv),
+                    scrollDirection(cur, prv),
                     event), () -> {
                 event.setCancelled(true);
-                PacketContainer cancelPacket = new PacketContainer(PacketType.Play.Server.HELD_ITEM_SLOT);
-                cancelPacket.getIntegers().write(0, prv);
-                plugin.protocol().send(player, cancelPacket, false, false);
-                lastScroll = Bukkit.getCurrentTick();
+                player.getInventory().setHeldItemSlot(prv);
             });
         }
         if (type == PacketType.Play.Client.ENTITY_ACTION) {
