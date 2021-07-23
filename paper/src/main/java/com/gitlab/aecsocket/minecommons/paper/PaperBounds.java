@@ -5,6 +5,7 @@ import com.gitlab.aecsocket.minecommons.core.bounds.Box;
 import com.gitlab.aecsocket.minecommons.core.bounds.Compound;
 import com.gitlab.aecsocket.minecommons.core.vector.cartesian.Vector3;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.bukkit.Location;

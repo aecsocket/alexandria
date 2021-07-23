@@ -25,4 +25,15 @@ public final class ProtocolConstants {
             .put(EquipmentSlot.LEGS, EnumWrappers.ItemSlot.LEGS)
             .put(EquipmentSlot.FEET, EnumWrappers.ItemSlot.FEET)
             .build());
+
+    /**
+     * A map of Bukkit {@link EquipmentSlot}s to numerical protocol slot IDs.
+     */
+    public static final BiMap<EquipmentSlot, Integer> SLOT_IDS = HashBiMap.create(CollectionBuilder.map(new HashMap<EquipmentSlot, Integer>())
+            .put(EquipmentSlot.FEET, 36)
+            .put(EquipmentSlot.LEGS, 37)
+            .put(EquipmentSlot.CHEST, 38)
+            .put(EquipmentSlot.HEAD, 39)
+            .put(EquipmentSlot.OFF_HAND, 40)
+            .build());
 }

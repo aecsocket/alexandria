@@ -81,11 +81,11 @@ public class PacketInputs extends AbstractInputs implements PacketListener {
             }
         }
         if (type == PacketType.Play.Client.HELD_ITEM_SLOT) {
-            handle(new Events.PacketInput(player, InputType.SWAP, event), () -> event.setCancelled(true));
             int cur = packet.getIntegers().read(0);
             int prv = player.getInventory().getHeldItemSlot();
             if (cur == prv)
                 return;
+            handle(new Events.PacketInput(player, InputType.SWAP, event), () -> event.setCancelled(true));
             handle(new Events.PacketInput(event.getPlayer(),
                     scrollDirection(cur, prv),
                     event), () -> {

@@ -8,6 +8,8 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.World;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 import org.spongepowered.configurate.serialize.TypeSerializerCollection;
 
@@ -30,5 +32,7 @@ public final class PaperSerializers {
             .register(PreciseSound.class, PreciseSoundSerializer.INSTANCE)
             .register(Particles.class, ParticlesSerializer.INSTANCE)
             .registerExact(NamespacedKey.class, NamespacedKeySerializer.INSTANCE)
+            .register(PotionEffectType.class, PotionEffectTypeSerializer.INSTANCE)
+            .register(PotionEffect.class, PotionEffectSerializer.INSTANCE)
             .build();
 }

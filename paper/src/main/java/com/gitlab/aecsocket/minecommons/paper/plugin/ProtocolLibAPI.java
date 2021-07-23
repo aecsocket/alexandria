@@ -9,7 +9,9 @@ import com.comphenix.protocol.wrappers.*;
 import com.gitlab.aecsocket.minecommons.core.Logging;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
+import org.bukkit.craftbukkit.v1_17_R1.inventory.CraftItemStack;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
@@ -153,6 +155,15 @@ public record ProtocolLibAPI(BasePlugin<?> plugin, ProtocolManager manager) {
      */
     public WrappedChatComponent chatComponent(Component component) {
         return WrappedChatComponent.fromJson(GsonComponentSerializer.gson().serialize(component));
+    }
+
+    /**
+     * Gets an NMS version of a Bukkit ItemStack.
+     * @param itemStack The ItemStack.
+     * @return The NMS ItemStack.
+     */
+    public Object itemStack(ItemStack itemStack) {
+        return CraftItemStack.asNMSCopy(itemStack);
     }
 
     /**

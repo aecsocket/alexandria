@@ -63,4 +63,13 @@ public record Task(Action action, long delay, long interval) {
     public static Task single(Action action, long delay) {
         return new Task(action, delay, 0);
     }
+
+    /**
+     * Creates a one-off task which runs instantly.
+     * @param action The action to run.
+     * @return The task.
+     */
+    public static Task single(Action action) {
+        return new Task(action, 0, 0);
+    }
 }
