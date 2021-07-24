@@ -3,9 +3,11 @@ package com.gitlab.aecsocket.minecommons.core.serializers;
 import com.gitlab.aecsocket.minecommons.core.Logging;
 import com.gitlab.aecsocket.minecommons.core.serializers.color.TextColorSerializer;
 import com.gitlab.aecsocket.minecommons.core.serializers.vector.Point2Serializer;
+import com.gitlab.aecsocket.minecommons.core.serializers.vector.Vector2Serializer;
 import com.gitlab.aecsocket.minecommons.core.serializers.vector.Vector3Serializer;
 import com.gitlab.aecsocket.minecommons.core.translation.Translation;
 import com.gitlab.aecsocket.minecommons.core.vector.cartesian.Point2;
+import com.gitlab.aecsocket.minecommons.core.vector.cartesian.Vector2;
 import com.gitlab.aecsocket.minecommons.core.vector.cartesian.Vector3;
 import io.leangen.geantyref.TypeToken;
 import net.kyori.adventure.key.Key;
@@ -33,6 +35,7 @@ public final class Serializers {
             .register(Logging.Level.class, LoggingLevelSerializer.INSTANCE)
             .register(Locale.class, LocaleSerializer.INSTANCE)
             .register(Translation.class, TranslationSerializer.INSTANCE)
+            .register(Vector2.class, Vector2Serializer.INSTANCE)
             .register(Vector3.class, Vector3Serializer.INSTANCE)
             .register(Point2.class, Point2Serializer.INSTANCE)
             .register(TextColor.class, TextColorSerializer.INSTANCE)
