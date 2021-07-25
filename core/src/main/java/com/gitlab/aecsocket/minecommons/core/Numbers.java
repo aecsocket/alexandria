@@ -168,4 +168,52 @@ public final class Numbers {
         v = ((v - min) % (max - min + 1));
         return v < 0 ? max + 1 + v : min + v;
     }
+
+    /**
+     * Linearly interpolates between two values, by a factor, such that
+     * where f = 0, return value = a.
+     * @param a Value one.
+     * @param b Value two.
+     * @param f The factor.
+     * @return The interpolated value.
+     */
+    public static int lerp(int a, int b, int f) {
+        return a + (b - a) * f;
+    }
+
+    /**
+     * Linearly interpolates between two values, by a factor, such that
+     * where f = 0, return value = a.
+     * @param a Value one.
+     * @param b Value two.
+     * @param f The factor.
+     * @return The interpolated value.
+     */
+    public static long lerp(long a, long b, long f) {
+        return a + (b - a) * f;
+    }
+
+    /**
+     * Linearly interpolates between two values, by a factor, such that
+     * where f = 0, return value = a.
+     * @param a Value one.
+     * @param b Value two.
+     * @param f The factor.
+     * @return The interpolated value.
+     */
+    public static float lerp(float a, float b, float f) {
+        return a + (b - a) * f;
+    }
+
+    /**
+     * Linearly interpolates between two values, by a factor, such that
+     * where f = 0, return value = a.
+     * @param a Value one.
+     * @param b Value two.
+     * @param f The factor.
+     * @return The interpolated value.
+     */
+    public static double lerp(double a, double b, double f) {
+        return a + (b - a) * f;
+    }
 }
