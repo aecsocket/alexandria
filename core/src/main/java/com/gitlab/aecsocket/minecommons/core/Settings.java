@@ -7,6 +7,7 @@ import org.spongepowered.configurate.loader.ConfigurationLoader;
 import org.spongepowered.configurate.serialize.SerializationException;
 import org.spongepowered.configurate.util.CheckedFunction;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,7 +21,22 @@ public final class Settings {
      * A path to a child node, comprised of an Object varargs.
      * @param path The path.
      */
-    public record Path(Object... path) {}
+    public record Path(Object... path) {
+        @Override public String toString() { return Arrays.toString(path); }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Path path1 = (Path) o;
+            return Arrays.equals(path, path1.path);
+        }
+
+        @Override
+        public int hashCode() {
+            return Arrays.hashCode(path);
+        }
+    }
 
     /**
      * A functional interface which maps a {@link ConfigurationNode} to a {@link T},

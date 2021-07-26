@@ -67,7 +67,6 @@ public class EventsTest {
         events.register(Event.class, listen("+100", evt -> flag.set(flag.get() + 100)), 1);
         events.register(Event.class, listen("/flag", evt -> flag.set(flag.get() / evt.flag)));
         events.register(Event.class, listen("+10", evt -> flag.set(flag.get() + 10)), -1);
-        System.out.println(events.listeners());
         assertTimeout(ofMillis(10), () -> {
             events.call(new Event(2));
             assertEquals(105, flag.get());
