@@ -26,7 +26,7 @@ build:
 
     # Build project
     - "cd ../.."
-    - "gradle --build-cache assemble shadowJar productionMappedJar"
+    - "gradle --build-cache assemble shadowJar"
 
     # Test
     - "gradle check"
