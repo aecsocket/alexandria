@@ -44,7 +44,11 @@ public class PaperRaycast extends Raycast<PaperRaycast.PaperBoundable> {
          * @param epsilon The value.
          * @return This instance.
          */
-        public Builder epsilon(double epsilon) { this.epsilon = epsilon; return this; }
+        public Builder epsilon(double epsilon) {
+            Validation.greaterThan("epsilon", epsilon, 0);
+            this.epsilon = epsilon;
+            return this;
+        }
 
         /**
          * Gets all registered bounds for block states.
@@ -92,11 +96,11 @@ public class PaperRaycast extends Raycast<PaperRaycast.PaperBoundable> {
 
         /**
          * Builds a Paper raycast provider.
+         * @param world The world to raycast in.
          * @return The raycast provider.
          */
-        public PaperRaycast build() {
-            Validation.greaterThan("epsilon", epsilon, 0);
-            return new PaperRaycast(epsilon, blockBounds, entityBounds);
+        public PaperRaycast build(World world) {
+            return new PaperRaycast(epsilon, blockBounds, entityBounds, world);
         }
     }
 
@@ -181,21 +185,25 @@ public class PaperRaycast extends Raycast<PaperRaycast.PaperBoundable> {
      * @param epsilon The collision epsilon.
      * @param blockBounds The registered block bounds.
      * @param entityBounds The registered entity bounds.
+     * @param world The world this will cast in.
      */
-    public PaperRaycast(double epsilon, Map<Material, List<Bounds<Block>>> blockBounds, Map<EntityType, List<Bounds<Entity>>> entityBounds) {
+    public PaperRaycast(double epsilon, Map<Material, List<Bounds<Block>>> blockBounds, Map<EntityType, List<Bounds<Entity>>> entityBounds, World world) {
         super(epsilon);
         this.blockBounds = blockBounds;
         this.entityBounds = entityBounds;
+        this.world = world;
     }
 
     /**
      * Creates an instance.
      * @param blockBounds The registered block bounds.
      * @param entityBounds The registered entity bounds.
+     * @param world The world this will cast in.
      */
-    public PaperRaycast(Map<Material, List<Bounds<Block>>> blockBounds, Map<EntityType, List<Bounds<Entity>>> entityBounds) {
+    public PaperRaycast(Map<Material, List<Bounds<Block>>> blockBounds, Map<EntityType, List<Bounds<Entity>>> entityBounds, World world) {
         this.blockBounds = blockBounds;
         this.entityBounds = entityBounds;
+        this.world = world;
     }
 
     /**

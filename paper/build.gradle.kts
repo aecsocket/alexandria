@@ -1,12 +1,12 @@
-import io.papermc.paperweight.tasks.RemapJar
-import io.papermc.paperweight.util.Constants
-import io.papermc.paperweight.util.registering
+//import io.papermc.paperweight.tasks.RemapJar
+//import io.papermc.paperweight.util.Constants
+//import io.papermc.paperweight.util.registering
 
 plugins {
     id("java-library")
     id("maven-publish")
     id("com.github.johnrengelman.shadow") version "7.0.0"
-    id("io.papermc.paperweight.patcher") version "1.1.7"
+    //id("io.papermc.paperweight.patcher") version "1.1.7"
     //id("net.minecrell.plugin-yml.bukkit") version "0.4.0"
     id("xyz.jpenilla.run-paper") version "1.0.3"
 }
@@ -38,10 +38,11 @@ repositories {
 
 dependencies {
     api(project(":core"))
-    mojangMappedServer("io.papermc.paper", "paper", "1.17.1-R0.1-SNAPSHOT", classifier = "mojang-mapped") {
+    //mojangMappedServer("io.papermc.paper", "paper", "1.17.1-R0.1-SNAPSHOT", classifier = "mojang-mapped") {
+    mojangMappedServer("io.papermc.paper", "paper", "1.17.1-R0.1-SNAPSHOT") {
         exclude("junit", "junit")
     }
-    remapper("org.quiltmc", "tiny-remapper", "0.4.1")
+    //remapper("org.quiltmc", "tiny-remapper", "0.4.1")
 
     api("com.github.stefvanschie.inventoryframework", "IF", "0.10.0")
     // From library loader
@@ -66,6 +67,21 @@ tasks {
     }
 
     shadowJar {
+        archiveFileName.set("${rootProject.name}-${project.name}-${rootProject.version}.jar")
+        listOf(
+                "net.kyori.adventure.text.minimessage"
+        ).forEach { relocate(it, "${rootProject.group}.lib.$it") }
+    }
+
+    assemble {
+        dependsOn(shadowJar)
+    }
+
+    runServer {
+        minecraftVersion(minecraftVersion)
+    }
+
+    /*shadowJar {
         archiveFileName.set("${rootProject.name}-${project.name}-${rootProject.version}-mojang-mapped.jar")
         archiveClassifier.set("mojang-mapped")
         listOf(
@@ -90,7 +106,9 @@ tasks {
     runServer {
         minecraftVersion(minecraftVersion)
         pluginJars.from(productionMappedJar.flatMap { it.outputJar })
-    }
+    }*/
+
+
 }
 
 /*
