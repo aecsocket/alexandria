@@ -1,6 +1,7 @@
 package com.gitlab.aecsocket.minecommons.core.bounds;
 
 import com.gitlab.aecsocket.minecommons.core.Validation;
+import com.gitlab.aecsocket.minecommons.core.vector.cartesian.Ray3;
 import com.gitlab.aecsocket.minecommons.core.vector.cartesian.Vector3;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
@@ -29,6 +30,21 @@ public record Sphere(Vector3 center, double radius, double sqrRadius) implements
     @Override
     public boolean intersects(Vector3 point) {
         return center.sqrDistance(point) <= sqrRadius;
+    }
+
+    @Override
+    public Collision collision(Ray3 ray) {
+        Vector3 m = ray.orig().subtract(center);
+        double b = m.dot(ray.dir());
+        double c = m.dot(m) - sqrRadius;
+
+        if (c > 0 && b > 0)
+            return null;
+        double sqrDiscrim = b*b - c;
+        if (sqrDiscrim < 0)
+            return null;
+        double discrim = Math.sqrt(sqrDiscrim);
+        return new Collision(-b - discrim, -b + discrim);
     }
 
     @Override

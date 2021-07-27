@@ -1,32 +1,39 @@
 package com.gitlab.aecsocket.minecommons.core.raycast;
 
+import com.gitlab.aecsocket.minecommons.core.bounds.Bound;
+import com.gitlab.aecsocket.minecommons.core.vector.cartesian.Ray3;
 import com.gitlab.aecsocket.minecommons.core.vector.cartesian.Vector3;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 import java.util.function.Predicate;
+
+import static com.gitlab.aecsocket.minecommons.core.vector.cartesian.Ray3.*;
 
 /**
  * Provides raycasting in a 3D space, colliding with defined boundables.
  * @param <B> The boundable type.
  */
 public abstract class Raycast<B extends Boundable> {
-    /** The distance that is travelled by a ray after a successful collision, to penetrate the surface. */
+    /** The distance that is travelled by a ray to check for collisions. */
     public static final double EPSILON = 0.01;
 
     /**
      * A collision result.
      * @param <B> The boundable type.
-     * @param position The hit position.
-     * @param out The position that the ray exited.
-     * @param distance The distance travelled in total, including through the surface.
-     * @param distanceThrough The distance travelled through the hit surface.
-     * @param hit The hit boundable.
+     * @param ray The ray used to get this result.
+     * @param distance The distance travelled from the origin to the in-position.
+     * @param in Either the final position, or the position that the ray entered a bound.
+     * @param out The position that the ray exited a bound, or null if no bound was hit.
+     * @param penetration The distance travelled through the bound, or -1 if no bound was hit.
+     * @param hit The bound that was hit, or null if no bound was hit.
      */
     public record Result<B extends Boundable>(
-            Vector3 position, @Nullable Vector3 out,
-            double distance, double distanceThrough,
+            Ray3 ray,
+            double distance,
+            Vector3 in,
+            @Nullable Vector3 out,
+            double penetration,
             @Nullable B hit
     ) {}
 
@@ -64,16 +71,9 @@ public abstract class Raycast<B extends Boundable> {
      * @param origin The start location.
      * @param direction The ray direction.
      * @param maxDistance The max distance the ray will travel.
-     * @return The boundables.
+     * @return The collection of boundables.
      */
-    protected abstract List<? extends B> baseObjects(Vector3 origin, Vector3 direction, double maxDistance);
-
-    /**
-     * Gets all boundables at the current position of a raycast.
-     * @param point The position of the raycast.
-     * @return The boundables.
-     */
-    protected abstract List<? extends B> currentObjects(Vector3 point);
+    protected abstract Collection<? extends B> objects(Vector3 origin, Vector3 direction, double maxDistance);
 
     /**
      * Casts a ray.
@@ -84,34 +84,27 @@ public abstract class Raycast<B extends Boundable> {
      * @return The cast result.
      */
     public Result<B> cast(Vector3 origin, Vector3 direction, double maxDistance, @Nullable Predicate<B> test) {
-        List<? extends B> objects = baseObjects(origin, direction, maxDistance);
-        Vector3 current = origin;
-        Vector3 step = direction.multiply(epsilon);
-
-        Vector3 in = null;
-        B hit = null;
-        double hitTravelled = 0;
-        for (double travelled = 0; travelled < maxDistance; travelled += epsilon) {
-            B intersected = null;
-            List<B> currentObjects = new ArrayList<>(objects);
-            currentObjects.addAll(currentObjects(current));
-
-            for (B object : currentObjects) {
-                if ((test == null || test.test(object)) && object.bound().intersects(current.subtract(object.origin()))) {
-                    if (hit == null) {
-                        in = current;
-                        hit = object;
-                        hitTravelled = travelled;
-                    }
-                    intersected = object;
-                    break;
+        Collection<? extends B> objects = objects(origin, direction, maxDistance);
+        Ray3 origRay = ray3(origin, direction);
+        Result<B> nearestResult = null;
+        for (B object : objects) {
+            if (test != null && !test.test(object))
+                continue;
+            Vector3 objectOrig = object.origin();
+            Ray3 ray = origRay.at(origin.subtract(objectOrig));
+            Bound.Collision collision = object.bound().collision(ray);
+            if (collision != null) {
+                if (nearestResult == null || collision.in() < nearestResult.distance) {
+                    nearestResult = new Result<>(origRay, collision.in(),
+                            ray.point(collision.in()).add(objectOrig),
+                            ray.point(collision.out()).add(objectOrig),
+                            collision.out() - collision.in(),
+                            object);
                 }
             }
-            if (hit != null && !hit.equals(intersected))
-                return new Result<>(in, current, travelled, travelled - hitTravelled, hit);
-
-            current = current.add(step);
         }
-        return new Result<>(current, null, -1, -1, null);
+        return nearestResult == null || nearestResult.distance > maxDistance
+                ? new Result<>(origRay, maxDistance, origin.add(direction.multiply(maxDistance)), null, -1, null)
+                : nearestResult;
     }
 }

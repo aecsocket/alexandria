@@ -1,12 +1,10 @@
 package com.gitlab.aecsocket.minecommons.core;
 
 import com.gitlab.aecsocket.minecommons.core.bounds.Box;
-import com.gitlab.aecsocket.minecommons.core.bounds.Cylinder;
 import com.gitlab.aecsocket.minecommons.core.bounds.Sphere;
 import org.junit.jupiter.api.Test;
 
 import static com.gitlab.aecsocket.minecommons.core.bounds.Box.*;
-import static com.gitlab.aecsocket.minecommons.core.bounds.Cylinder.*;
 import static com.gitlab.aecsocket.minecommons.core.bounds.Sphere.*;
 
 import static com.gitlab.aecsocket.minecommons.core.vector.cartesian.Vector3.*;
@@ -56,7 +54,7 @@ public class BoundsTest {
         assertThrows(NullPointerException.class, () -> box(vec3(1), null), "null max");
     }
 
-    void testCylinder0(Cylinder cyl) {
+    /*void testCylinder0(Cylinder cyl) {
         assertTrue(cyl.intersects(cyl.base()), cyl + " -> base");
 
         assertTrue(cyl.intersects(cyl.base().add(cyl.radius(), 0, 0)), cyl + " -> radius");
@@ -81,7 +79,7 @@ public class BoundsTest {
         assertThrows(IllegalArgumentException.class, () -> cylinder(vec3(0), -0.1, 1), "negative radius");
         assertThrows(IllegalArgumentException.class, () -> cylinder(vec3(0), 1, 0), "zero height");
         assertThrows(IllegalArgumentException.class, () -> cylinder(vec3(0), 1, -0.1), "negative height");
-    }
+    }*/
 
     void testSphere0(Sphere sphr) {
         assertTrue(sphr.intersects(sphr.center()), sphr + " -> center");

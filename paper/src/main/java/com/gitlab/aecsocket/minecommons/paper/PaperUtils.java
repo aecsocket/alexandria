@@ -1,11 +1,13 @@
 package com.gitlab.aecsocket.minecommons.paper;
 
+import com.gitlab.aecsocket.minecommons.core.CollectionBuilder;
 import com.gitlab.aecsocket.minecommons.core.vector.cartesian.Vector3;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -16,11 +18,22 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.*;
 import java.util.function.Consumer;
 
+import static com.gitlab.aecsocket.minecommons.core.vector.cartesian.Vector3.*;
+
 /**
  * Utilities concerning the Paper platform.
  */
 public final class PaperUtils {
     private PaperUtils() {}
+
+    /**
+     * A map of block faces to their normal vectors.
+     */
+    public static final Map<BlockFace, Vector3> NORMALS = CollectionBuilder.map(new HashMap<BlockFace, Vector3>())
+            .put(BlockFace.UP, vec3(0, 1, 0)).put(BlockFace.DOWN, vec3(0, -1, 0))
+            .put(BlockFace.NORTH, vec3(0, 0, -1)).put(BlockFace.SOUTH, vec3(0, 0, 1))
+            .put(BlockFace.EAST, vec3(-1, 0, 0)).put(BlockFace.WEST, vec3(1, 0, 0))
+            .build();
 
     private static final double rayTraceDistance = 4;
 
@@ -157,5 +170,17 @@ public final class PaperUtils {
         lore = lore == null ? new ArrayList<>() : lore;
         lore.addAll(Arrays.asList(add));
         meta.lore(lore);
+    }
+
+    /**
+     * Gets a normal vector from a block face.
+     * @param face The face.
+     * @return The vector.
+     */
+    public static Vector3 normal(BlockFace face) {
+        Vector3 result = NORMALS.get(face);
+        if (result == null)
+            throw new IllegalArgumentException("Invalid block face: accepts " + NORMALS.keySet());
+        return result;
     }
 }

@@ -1,6 +1,7 @@
 package com.gitlab.aecsocket.minecommons.core.bounds;
 
 import com.gitlab.aecsocket.minecommons.core.Validation;
+import com.gitlab.aecsocket.minecommons.core.vector.cartesian.Ray3;
 import com.gitlab.aecsocket.minecommons.core.vector.cartesian.Vector3;
 
 import java.util.Objects;
@@ -75,6 +76,10 @@ public record Box(Vector3 min, Vector3 max, double angle) implements Bound, Orie
         };
     }
 
+    private Vector3 bound(boolean sign) {
+        return sign ? max : min;
+    }
+
     @Override
     public boolean intersects(Vector3 point) {
         // 1. rotate [p] [-ang] around [center]
@@ -84,6 +89,36 @@ public record Box(Vector3 min, Vector3 max, double angle) implements Bound, Orie
         return mapped.x() >= min.x() && mapped.x() <= max.x()
                 && mapped.y() >= min.y() && mapped.y() <= max.y()
                 && mapped.z() >= min.z() && mapped.z() <= max.z();
+    }
+
+    @Override
+    public Collision collision(Ray3 ray) {
+        Vector3 center = center();
+        Vector3 orig = ray.orig().subtract(center).rotateY(-angle).add(center);
+        Vector3 invDir = ray.dir().rotateY(-angle).reciprocal();
+        boolean signX = invDir.x() < 0;
+        boolean signY = invDir.y() < 0;
+        boolean signZ = invDir.z() < 0;
+
+        double tMin = (bound(signX).x() - orig.x()) * invDir.x();
+        double tMax = (bound(!signX).x() - orig.x()) * invDir.x();
+        double tyMin = (bound(signY).y() - orig.y()) * invDir.y();
+        double tyMax = (bound(!signY).y() - orig.y()) * invDir.y();
+
+        if ((tMin > tyMax) || (tyMin > tMax))
+            return null;
+        if (tyMin > tMin) tMin = tyMin;
+        if (tyMax < tMax) tMax = tyMax;
+
+        double tzMin = (bound(signZ).z() - orig.z()) * invDir.z();
+        double tzMax = (bound(!signZ).z() - orig.z()) * invDir.z();
+
+        if ((tMin > tzMax) || (tzMin > tMax))
+            return null;
+        if (tzMin > tMin) tMin = tzMin;
+        if (tzMax < tMax) tMax = tzMax;
+
+        return new Collision(tMin, tMax);
     }
 
     @Override

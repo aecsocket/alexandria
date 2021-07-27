@@ -1,5 +1,6 @@
 package com.gitlab.aecsocket.minecommons.core.bounds;
 
+import com.gitlab.aecsocket.minecommons.core.vector.cartesian.Ray3;
 import com.gitlab.aecsocket.minecommons.core.vector.cartesian.Vector3;
 
 import java.util.Arrays;
@@ -28,6 +29,16 @@ public record Compound(Bound... bounds) implements Bound {
     }
 
     @Override
+    public Collision collision(Ray3 ray) {
+        for (Bound bound : bounds) {
+            Collision result = bound.collision(ray);
+            if (result != null)
+                return result;
+        }
+        return null;
+    }
+
+    @Override
     public Compound shift(Vector3 vec) {
         Bound[] newBounds = new Bound[bounds.length];
         for (int i = 0; i < bounds.length; i++) {
@@ -35,6 +46,9 @@ public record Compound(Bound... bounds) implements Bound {
         }
         return new Compound(newBounds);
     }
+
+    @Override
+    public String toString() { return Arrays.toString(bounds); }
 
     @Override
     public boolean equals(Object o) {

@@ -2,6 +2,10 @@ package com.gitlab.aecsocket.minecommons.core.vector.cartesian;
 
 import com.gitlab.aecsocket.minecommons.core.Validation;
 import com.gitlab.aecsocket.minecommons.core.vector.polar.Coord3;
+import com.google.common.base.Preconditions;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.function.Function;
 
 import static java.lang.Math.*;
 import static com.gitlab.aecsocket.minecommons.core.Numbers.*;
@@ -223,6 +227,23 @@ public record Vector3(double x, double y, double z) {
     }
 
     /**
+     * Rotates this vector around a unit axis.
+     * @param a The unit axis.
+     * @param angle The angle to rotate by, in radians.
+     * @return The resulting vector.
+     */
+    public Vector3 rotate(Vector3 a, double angle) {
+        double cos = Math.cos(angle);
+        double sin = Math.sin(angle);
+        double dot = dot(a);
+        return new Vector3(
+                a.x * dot * (1 - cos) + x * cos + (-a.z * y + a.y * z) * sin,
+                a.y * dot * (1 - cos) + y * cos + (a.z * x - a.x * z) * sin,
+                a.z * dot * (1 - cos) + z * cos + (-a.y * x + a.x * y) * sin
+        );
+    }
+
+    /**
      * Gets a 2D vector of {@code (x, x)}.
      * @return The 2D vector.
      */
@@ -269,6 +290,23 @@ public record Vector3(double x, double y, double z) {
      * @return The 2D vector.
      */
     public Vector2 zz() { return new Vector2(z, z); }
+
+    /**
+     * Creates a new vector, with each component mapped to a different number through a mapper function.
+     * @param mapper The mapper.
+     * @return The new vector.
+     */
+    public Vector3 map(Function<Double, Double> mapper) {
+        return new Vector3(mapper.apply(x), mapper.apply(y), mapper.apply(z));
+    }
+
+    /**
+     * Gets {@code 1 / this}.
+     * @return The reciprocal of this vector.
+     */
+    public Vector3 reciprocal() {
+        return new Vector3(1 / x, 1 / y, 1 / z);
+    }
 
     /**
      * Normalizes this vector so that its length equals 1.

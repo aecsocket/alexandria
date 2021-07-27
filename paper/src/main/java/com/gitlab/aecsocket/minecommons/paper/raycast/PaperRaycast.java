@@ -9,6 +9,7 @@ import com.gitlab.aecsocket.minecommons.core.raycast.Raycast;
 import com.gitlab.aecsocket.minecommons.core.vector.cartesian.Vector3;
 import com.gitlab.aecsocket.minecommons.paper.PaperBounds;
 import com.gitlab.aecsocket.minecommons.paper.PaperUtils;
+import org.bukkit.Chunk;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -28,6 +29,7 @@ public class PaperRaycast extends Raycast<PaperRaycast.PaperBoundable> {
      */
     public static final class Builder {
         private double epsilon = EPSILON;
+        private boolean ignorePassable = true;
         private final Map<Material, List<Bounds<Block>>> blockBounds = new HashMap<>();
         private final Map<EntityType, List<Bounds<Entity>>> entityBounds = new HashMap<>();
 
@@ -49,6 +51,19 @@ public class PaperRaycast extends Raycast<PaperRaycast.PaperBoundable> {
             this.epsilon = epsilon;
             return this;
         }
+
+        /**
+         * Gets if passable blocks should be ignored.
+         * @return The value.
+         */
+        public boolean ignorePassable() { return ignorePassable; }
+
+        /**
+         * Sets if passable blocks should be ignored.
+         * @param ignorePassable The value.
+         * @return This instance.
+         */
+        public Builder ignorePassable(boolean ignorePassable) { this.ignorePassable = ignorePassable; return this; }
 
         /**
          * Gets all registered bounds for block states.
@@ -100,7 +115,7 @@ public class PaperRaycast extends Raycast<PaperRaycast.PaperBoundable> {
          * @return The raycast provider.
          */
         public PaperRaycast build(World world) {
-            return new PaperRaycast(epsilon, blockBounds, entityBounds, world);
+            return new PaperRaycast(epsilon, ignorePassable, blockBounds, entityBounds, world);
         }
     }
 
@@ -176,6 +191,7 @@ public class PaperRaycast extends Raycast<PaperRaycast.PaperBoundable> {
      */
     public record Bounds<T>(Predicate<T> test, Map<String, Bound> bounds) {}
 
+    private boolean ignorePassable;
     private final Map<Material, List<Bounds<Block>>> blockBounds;
     private final Map<EntityType, List<Bounds<Entity>>> entityBounds;
     private World world;
@@ -183,12 +199,14 @@ public class PaperRaycast extends Raycast<PaperRaycast.PaperBoundable> {
     /**
      * Creates an instance.
      * @param epsilon The collision epsilon.
+     * @param ignorePassable If passable blocks should be ignored.
      * @param blockBounds The registered block bounds.
      * @param entityBounds The registered entity bounds.
      * @param world The world this will cast in.
      */
-    public PaperRaycast(double epsilon, Map<Material, List<Bounds<Block>>> blockBounds, Map<EntityType, List<Bounds<Entity>>> entityBounds, World world) {
+    public PaperRaycast(double epsilon, boolean ignorePassable, Map<Material, List<Bounds<Block>>> blockBounds, Map<EntityType, List<Bounds<Entity>>> entityBounds, World world) {
         super(epsilon);
+        this.ignorePassable = ignorePassable;
         this.blockBounds = blockBounds;
         this.entityBounds = entityBounds;
         this.world = world;
@@ -196,15 +214,23 @@ public class PaperRaycast extends Raycast<PaperRaycast.PaperBoundable> {
 
     /**
      * Creates an instance.
+     * @param ignorePassable If passable blocks should be ignored.
      * @param blockBounds The registered block bounds.
      * @param entityBounds The registered entity bounds.
      * @param world The world this will cast in.
      */
-    public PaperRaycast(Map<Material, List<Bounds<Block>>> blockBounds, Map<EntityType, List<Bounds<Entity>>> entityBounds, World world) {
+    public PaperRaycast(boolean ignorePassable, Map<Material, List<Bounds<Block>>> blockBounds, Map<EntityType, List<Bounds<Entity>>> entityBounds, World world) {
+        this.ignorePassable = ignorePassable;
         this.blockBounds = blockBounds;
         this.entityBounds = entityBounds;
         this.world = world;
     }
+
+    /**
+     * Gets if passable blocks should be ignored.
+     * @return The value.
+     */
+    public boolean ignorePassable() { return ignorePassable; }
 
     /**
      * Gets the registered block bounds.
@@ -237,7 +263,7 @@ public class PaperRaycast extends Raycast<PaperRaycast.PaperBoundable> {
      * @return The boundables.
      */
     public List<PaperBoundable> boundables(Block block) {
-        if (block.getType() == Material.AIR)
+        if (block.getType() == Material.AIR || (ignorePassable && block.isPassable()))
             return Collections.emptyList();
         List<Bounds<Block>> boundsList = blockBounds.get(block.getType());
         if (boundsList == null) {
@@ -281,24 +307,46 @@ public class PaperRaycast extends Raycast<PaperRaycast.PaperBoundable> {
         return Collections.emptyList();
     }
 
-    @Override
-    protected List<? extends PaperBoundable> baseObjects(Vector3 origin, Vector3 direction, double maxDistance) {
-        return Collections.emptyList();
-    }
+    private record BoundablePair(Vector3 origin, List<PaperBoundable> boundables) {}
 
-    private void addChunk(World world, int cx, int cz, List<PaperBoundable> boundables) {
-        for (Entity entity : world.getChunkAt(cx, cz).getEntities()) {
-            boundables.addAll(boundables(entity));
-        }
+    private int correct(double v) {
+        return (int) (v < 0 ? v - 1 : v);
     }
 
     @Override
-    protected List<? extends PaperBoundable> currentObjects(Vector3 point) {
-        List<PaperBoundable> boundables = new ArrayList<>(boundables(world.getBlockAt((int) point.x(), (int) point.y(), (int) point.z())));
-        int cx = (int) point.x() / 16, cz = (int) point.z() / 16;
-        for (Offset offset : offsets) {
-            addChunk(world, cx + offset.x, cz + offset.z, boundables);
+    protected Collection<? extends PaperBoundable> objects(Vector3 origin, Vector3 direction, double maxDistance) {
+        List<PaperBoundable> result = new ArrayList<>();
+        List<Chunk> chunks = new ArrayList<>();
+        Vector3 end = origin.add(direction.multiply(maxDistance));
+
+        int x0 = correct(origin.x()), x1 = correct(end.x());
+        int y0 = correct(origin.y()), y1 = correct(end.y());
+        int z0 = correct(origin.z()), z1 = correct(end.z());
+
+        int dx = Math.abs(x1-x0), sx = x0 < x1 ? 1 : -1;
+        int dy = Math.abs(y1-y0), sy = y0 < y1 ? 1 : -1;
+        int dz = Math.abs(z1-z0), sz = z0 < z1 ? 1 : -1;
+        int dm = Math.max(dx, Math.max(dy, dz)), i = dm;
+        x1 = y1 = z1 = dm/2;
+
+        while (true) {
+            if (!world.isChunkLoaded(x0 / 16, z0 / 16))
+                break;
+            Block block = world.getBlockAt(x0, y0, z0);
+            result.addAll(boundables(block));
+            chunks.add(block.getChunk());
+            if (i-- == 0) break;
+            x1 -= dx; if (x1 < 0) { x1 += dm; x0 += sx; }
+            y1 -= dy; if (y1 < 0) { y1 += dm; y0 += sy; }
+            z1 -= dz; if (z1 < 0) { z1 += dm; z0 += sz; }
         }
-        return boundables;
+
+        for (Chunk chunk : chunks) {
+            for (Entity entity : chunk.getEntities()) {
+                result.addAll(boundables(entity));
+            }
+        }
+
+        return result;
     }
 }
