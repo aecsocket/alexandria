@@ -12,15 +12,9 @@ public interface Bound {
      * Information on a collision with a ray.
      * @param in The t-value at which the ray enters the bound.
      * @param out The t-value at which the ray exits the bound.
+     * @param normal The normal of the surface hit.
      */
-    record Collision(double in, double out) {}
-
-    /**
-     * Gets if a point is inside of this volume.
-     * @param point The point.
-     * @return The status.
-     */
-    boolean intersects(Vector3 point);
+    record Collision(double in, double out, Vector3 normal) {}
 
     /**
      * Gets if a ray collides with this bound.

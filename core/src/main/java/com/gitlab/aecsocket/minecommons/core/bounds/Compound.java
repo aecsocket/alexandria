@@ -20,15 +20,6 @@ public record Compound(Bound... bounds) implements Bound {
     }
 
     @Override
-    public boolean intersects(Vector3 point) {
-        for (Bound bound : bounds) {
-            if (bound.intersects(point))
-                return true;
-        }
-        return false;
-    }
-
-    @Override
     public Collision collision(Ray3 ray) {
         for (Bound bound : bounds) {
             Collision result = bound.collision(ray);

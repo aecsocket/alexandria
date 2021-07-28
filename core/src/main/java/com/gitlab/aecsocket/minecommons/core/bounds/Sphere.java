@@ -28,11 +28,6 @@ public record Sphere(Vector3 center, double radius, double sqrRadius) implements
     }
 
     @Override
-    public boolean intersects(Vector3 point) {
-        return center.sqrDistance(point) <= sqrRadius;
-    }
-
-    @Override
     public Collision collision(Ray3 ray) {
         Vector3 m = ray.orig().subtract(center);
         double b = m.dot(ray.dir());
@@ -44,7 +39,9 @@ public record Sphere(Vector3 center, double radius, double sqrRadius) implements
         if (sqrDiscrim < 0)
             return null;
         double discrim = Math.sqrt(sqrDiscrim);
-        return new Collision(-b - discrim, -b + discrim);
+
+        double in = -b - discrim;
+        return new Collision(in, -b + discrim, ray.point(in).subtract(center).normalize());
     }
 
     @Override

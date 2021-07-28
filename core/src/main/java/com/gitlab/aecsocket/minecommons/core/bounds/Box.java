@@ -6,13 +6,19 @@ import com.gitlab.aecsocket.minecommons.core.vector.cartesian.Vector3;
 
 import java.util.Objects;
 
+import static com.gitlab.aecsocket.minecommons.core.vector.cartesian.Vector3.*;
+
 /**
  * A cuboid-shaped volume.
  * @param min The corner with the smallest coordinates.
  * @param max The corner with the largest coordinates.
  * @param angle The rotation of the box clockwise on the vertical axis.
  */
-public record Box(Vector3 min, Vector3 max, double angle) implements Bound, OrientedBound {
+public record Box(Vector3 min, Vector3 max, Vector3 extent, double angle) implements Bound, OrientedBound {
+    private static final Vector3[] normals = new Vector3[] {
+            vec3(1, 0, 0), vec3(0, 1, 0), vec3(0, 0, 1)
+    };
+
     /**
      * Creates a box.
      * <p>
@@ -25,11 +31,9 @@ public record Box(Vector3 min, Vector3 max, double angle) implements Bound, Orie
     public static Box box(Vector3 min, Vector3 max, double angle) {
         Validation.notNull("min", min);
         Validation.notNull("max", max);
-        return new Box(
-                Vector3.min(min, max),
-                Vector3.max(min, max),
-                angle
-        );
+        Vector3 rMin = Vector3.min(min, max);
+        Vector3 rMax = Vector3.max(min, max);
+        return new Box(rMin, rMax, max.subtract(min), angle);
     }
 
     /**
@@ -46,7 +50,7 @@ public record Box(Vector3 min, Vector3 max, double angle) implements Bound, Orie
 
     @Override
     public Box angle(double angle) {
-        return new Box(min, max, angle);
+        return new Box(min, max, extent, angle);
     }
 
     /**
@@ -65,65 +69,47 @@ public record Box(Vector3 min, Vector3 max, double angle) implements Bound, Orie
         return max.subtract(min);
     }
 
-    /**
-     * Gets an array of six vectors representing the corners of this cuboid.
-     * @return The array.
-     */
-    public Vector3[] corners() {
-        return new Vector3[] {
-                min, new Vector3(max.x(), min.y(), min.z()), new Vector3(max.x(), max.y(), min.z()),
-                max, new Vector3(min.x(), max.y(), max.z()), new Vector3(min.x(), min.y(), max.z())
-        };
-    }
-
     private Vector3 bound(boolean sign) {
         return sign ? max : min;
     }
 
     @Override
-    public boolean intersects(Vector3 point) {
-        // 1. rotate [p] [-ang] around [center]
-        Vector3 center = center();
-        Vector3 mapped = point.subtract(center).rotateX(-angle).add(center);
-        // 2. calculate
-        return mapped.x() >= min.x() && mapped.x() <= max.x()
-                && mapped.y() >= min.y() && mapped.y() <= max.y()
-                && mapped.z() >= min.z() && mapped.z() <= max.z();
-    }
-
-    @Override
     public Collision collision(Ray3 ray) {
         Vector3 center = center();
-        Vector3 orig = ray.orig().subtract(center).rotateY(-angle).add(center);
-        Vector3 invDir = ray.dir().rotateY(-angle).reciprocal();
-        boolean signX = invDir.x() < 0;
-        boolean signY = invDir.y() < 0;
-        boolean signZ = invDir.z() < 0;
+        Vector3 offset = center.neg();
+        Vector3 min = this.min.add(offset);
+        Vector3 max = this.max.add(offset);
 
-        double tMin = (bound(signX).x() - orig.x()) * invDir.x();
-        double tMax = (bound(!signX).x() - orig.x()) * invDir.x();
-        double tyMin = (bound(signY).y() - orig.y()) * invDir.y();
-        double tyMax = (bound(!signY).y() - orig.y()) * invDir.y();
+        Vector3 orig, dir, invDir;
+        if (Double.compare(angle, 0) == 0) {
+            orig = ray.orig().add(offset);
+            dir = ray.dir();
+            invDir = ray.invDir();
+        } else {
+            orig = ray.orig().subtract(center).rotateY(-angle).add(center).add(offset);
+            dir = ray.dir().rotateY(-angle);
+            invDir = dir.reciprocal();
+        }
 
-        if ((tMin > tyMax) || (tyMin > tMax))
+        Vector3 n = invDir.multiply(orig);
+        Vector3 k = invDir.abs().multiply(extent.divide(2));
+        Vector3 t1 = n.neg().subtract(k);
+        Vector3 t2 = n.neg().add(k);
+        double near = t1.maxComponent();
+        double far = t2.minComponent();
+        if (near > far || far < 0)
             return null;
-        if (tyMin > tMin) tMin = tyMin;
-        if (tyMax < tMax) tMax = tyMax;
-
-        double tzMin = (bound(signZ).z() - orig.z()) * invDir.z();
-        double tzMax = (bound(!signZ).z() - orig.z()) * invDir.z();
-
-        if ((tMin > tzMax) || (tzMin > tMax))
-            return null;
-        if (tzMin > tMin) tMin = tzMin;
-        if (tzMax < tMax) tMax = tzMax;
-
-        return new Collision(tMin, tMax);
+        Vector3 normal = dir.sign().neg()
+                .multiply(vec3(t1.y(), t1.z(), t1.x()).step(t1))
+                .multiply(vec3(t1.z(), t1.x(), t1.y()).step(t1));
+        return new Collision(near, far, normal);
     }
 
     @Override
     public Box shift(Vector3 vec) {
-        return new Box(min.add(vec), max.add(vec), angle);
+        Vector3 min = this.min.add(vec);
+        Vector3 max = this.max.add(vec);
+        return new Box(min, max, extent, angle);
     }
 
     @Override
@@ -131,7 +117,7 @@ public record Box(Vector3 min, Vector3 max, double angle) implements Bound, Orie
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Box box = (Box) o;
-        return Double.compare(box.angle(), angle) == 0 && min.equals(box.min()) && max.equals(box.max());
+        return Double.compare(box.angle, angle) == 0 && min.equals(box.min) && max.equals(box.max);
     }
 
     @Override

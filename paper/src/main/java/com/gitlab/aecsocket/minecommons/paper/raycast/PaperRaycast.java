@@ -1,24 +1,31 @@
 package com.gitlab.aecsocket.minecommons.paper.raycast;
 
 import com.gitlab.aecsocket.minecommons.core.CollectionBuilder;
-import com.gitlab.aecsocket.minecommons.core.Validation;
 import com.gitlab.aecsocket.minecommons.core.bounds.Bound;
 import com.gitlab.aecsocket.minecommons.core.bounds.OrientedBound;
 import com.gitlab.aecsocket.minecommons.core.raycast.Boundable;
 import com.gitlab.aecsocket.minecommons.core.raycast.Raycast;
+import com.gitlab.aecsocket.minecommons.core.vector.cartesian.Point3;
+import com.gitlab.aecsocket.minecommons.core.vector.cartesian.Ray3;
 import com.gitlab.aecsocket.minecommons.core.vector.cartesian.Vector3;
 import com.gitlab.aecsocket.minecommons.paper.PaperBounds;
 import com.gitlab.aecsocket.minecommons.paper.PaperUtils;
+import com.google.common.util.concurrent.AtomicDouble;
+import net.minecraft.server.level.WorldServer;
+import net.minecraft.world.phys.AxisAlignedBB;
 import org.bukkit.Chunk;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.craftbukkit.v1_17_R1.CraftWorld;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
+
 
 /**
  * A raycast provider for Paper blocks and entities.
@@ -28,29 +35,11 @@ public class PaperRaycast extends Raycast<PaperRaycast.PaperBoundable> {
      * A raycast provider builder.
      */
     public static final class Builder {
-        private double epsilon = EPSILON;
         private boolean ignorePassable = true;
         private final Map<Material, List<Bounds<Block>>> blockBounds = new HashMap<>();
         private final Map<EntityType, List<Bounds<Entity>>> entityBounds = new HashMap<>();
 
         private Builder() {}
-
-        /**
-         * Gets the collision epsilon.
-         * @return The value.
-         */
-        public double epsilon() { return epsilon; }
-
-        /**
-         * Sets the collision epsilon.
-         * @param epsilon The value.
-         * @return This instance.
-         */
-        public Builder epsilon(double epsilon) {
-            Validation.greaterThan("epsilon", epsilon, 0);
-            this.epsilon = epsilon;
-            return this;
-        }
 
         /**
          * Gets if passable blocks should be ignored.
@@ -115,7 +104,7 @@ public class PaperRaycast extends Raycast<PaperRaycast.PaperBoundable> {
          * @return The raycast provider.
          */
         public PaperRaycast build(World world) {
-            return new PaperRaycast(epsilon, ignorePassable, blockBounds, entityBounds, world);
+            return new PaperRaycast(ignorePassable, blockBounds, entityBounds, world);
         }
     }
 
@@ -177,12 +166,6 @@ public class PaperRaycast extends Raycast<PaperRaycast.PaperBoundable> {
         }
     }
 
-    private record Offset(int x, int z) {}
-
-    private static final List<Offset> offsets = Arrays.asList(new Offset(0, 0),
-            new Offset(1, 0), new Offset(1, 1), new Offset(0, 1), new Offset(-1, 1),
-            new Offset(-1, 0), new Offset(-1, -1), new Offset(0, -1), new Offset(1, -1));
-
     /**
      * A collection of bounds, which are applied on a successful test.
      * @param <T> The type of object to test on.
@@ -191,26 +174,10 @@ public class PaperRaycast extends Raycast<PaperRaycast.PaperBoundable> {
      */
     public record Bounds<T>(Predicate<T> test, Map<String, Bound> bounds) {}
 
-    private boolean ignorePassable;
+    private final boolean ignorePassable;
     private final Map<Material, List<Bounds<Block>>> blockBounds;
     private final Map<EntityType, List<Bounds<Entity>>> entityBounds;
     private World world;
-
-    /**
-     * Creates an instance.
-     * @param epsilon The collision epsilon.
-     * @param ignorePassable If passable blocks should be ignored.
-     * @param blockBounds The registered block bounds.
-     * @param entityBounds The registered entity bounds.
-     * @param world The world this will cast in.
-     */
-    public PaperRaycast(double epsilon, boolean ignorePassable, Map<Material, List<Bounds<Block>>> blockBounds, Map<EntityType, List<Bounds<Entity>>> entityBounds, World world) {
-        super(epsilon);
-        this.ignorePassable = ignorePassable;
-        this.blockBounds = blockBounds;
-        this.entityBounds = entityBounds;
-        this.world = world;
-    }
 
     /**
      * Creates an instance.
@@ -313,40 +280,101 @@ public class PaperRaycast extends Raycast<PaperRaycast.PaperBoundable> {
         return (int) (v < 0 ? v - 1 : v);
     }
 
-    @Override
-    protected Collection<? extends PaperBoundable> objects(Vector3 origin, Vector3 direction, double maxDistance) {
-        List<PaperBoundable> result = new ArrayList<>();
-        List<Chunk> chunks = new ArrayList<>();
-        Vector3 end = origin.add(direction.multiply(maxDistance));
-
-        int x0 = correct(origin.x()), x1 = correct(end.x());
-        int y0 = correct(origin.y()), y1 = correct(end.y());
-        int z0 = correct(origin.z()), z1 = correct(end.z());
-
-        int dx = Math.abs(x1-x0), sx = x0 < x1 ? 1 : -1;
-        int dy = Math.abs(y1-y0), sy = y0 < y1 ? 1 : -1;
-        int dz = Math.abs(z1-z0), sz = z0 < z1 ? 1 : -1;
-        int dm = Math.max(dx, Math.max(dy, dz)), i = dm;
-        x1 = y1 = z1 = dm/2;
-
-        while (true) {
-            if (!world.isChunkLoaded(x0 / 16, z0 / 16))
-                break;
-            Block block = world.getBlockAt(x0, y0, z0);
+    private void add(Block block, List<PaperBoundable> result, Set<Point3> blocks, Set<Chunk> chunks) {
+        if (block.getType() == Material.AIR)
+            return;
+        Point3 coord = Point3.point3(block.getX(), block.getY(), block.getZ());
+        if (!blocks.contains(coord)) {
             result.addAll(boundables(block));
+            blocks.add(coord);
             chunks.add(block.getChunk());
-            if (i-- == 0) break;
-            x1 -= dx; if (x1 < 0) { x1 += dm; x0 += sx; }
-            y1 -= dy; if (y1 < 0) { y1 += dm; y0 += sy; }
-            z1 -= dz; if (z1 < 0) { z1 += dm; z0 += sz; }
         }
+    }
 
-        for (Chunk chunk : chunks) {
-            for (Entity entity : chunk.getEntities()) {
-                result.addAll(boundables(entity));
+    private double frac(double v) {
+        long l = (long) v;
+        return v - (double) (v < l ? l - 1 : l);
+    }
+
+    private int floor(double v) {
+        int i = (int) v;
+        return v < i ? i - 1 : i;
+    }
+
+    public Result<PaperBoundable> castBlocks(Ray3 ray, double maxDistance, @Nullable Predicate<PaperBoundable> test) {
+        Vector3 orig = ray.orig();
+        Vector3 end = ray.point(maxDistance);
+
+        double x0 = orig.x(), x1 = end.x();
+        double y0 = orig.y(), y1 = end.y();
+        double z0 = orig.z(), z1 = end.z();
+
+        int xi = floor(x0), yi = floor(y0), zi = floor(z0);
+
+        double dx = x1 - x0, dy = y1 - y0, dz = z1 - z0;
+        int xs = (int) Math.signum(dx), ys = (int) Math.signum(dy), zs = (int) Math.signum(dz);
+        double xa = xs == 0 ? Double.MAX_VALUE : (double) xs / dx;
+        double ya = ys == 0 ? Double.MAX_VALUE : (double) ys / dy;
+        double za = zs == 0 ? Double.MAX_VALUE : (double) zs / dz;
+
+        double xb = xa * (xs > 0 ? 1 - frac(x0) : frac(x0));
+        double yb = ya * (ys > 0 ? 1 - frac(y0) : frac(y0));
+        double zb = za * (zs > 0 ? 1 - frac(z0) : frac(z0));
+
+        Result<PaperBoundable> result;
+        while ((result = intersects(ray, boundables(world.getBlockAt(xi, yi, zi)), test)) == null) {
+            if (xb > 1 && yb > 1 && zb > 1)
+                break;
+
+            if (xb < yb) {
+                if (xb < zb) {
+                    xi += xs;
+                    xb += xa;
+                } else {
+                    zi += zs;
+                    zb += za;
+                }
+            } else if (yb < zb) {
+                yi += ys;
+                yb += ya;
+            } else {
+                zi += zs;
+                zb += za;
             }
         }
 
-        return result;
+        return result == null
+                ? new Result<>(ray, maxDistance, ray.point(maxDistance), null, null, -1, null)
+                : result;
+    }
+
+    public Result<PaperBoundable> castEntities(Ray3 ray, double maxDistance, @Nullable Predicate<PaperBoundable> test) {
+        Vector3 orig = ray.orig();
+        Vector3 end = ray.point(maxDistance);
+        WorldServer world = ((CraftWorld) this.world).getHandle();
+
+        var nearestResult = new AtomicReference<Raycast.Result<PaperBoundable>>();
+        var nearestDist = new AtomicDouble();
+        world.getEntities().a(new AxisAlignedBB(
+                orig.x(), orig.y(), orig.z(),
+                end.x(), end.y(), end.z()
+        ), ent -> {
+            Entity entity = ent.getBukkitEntity();
+            var result = intersects(ray, boundables(entity), test);
+            if (result != null && (nearestResult.get() == null || result.distance() < nearestDist.get())) {
+                nearestResult.set(result);
+                nearestDist.set(result.distance());
+            }
+        });
+        return nearestResult.get() == null
+                ? new Result<>(ray, maxDistance, ray.point(maxDistance), null, null, -1, null)
+                : nearestResult.get();
+    }
+
+    @Override
+    public Result<PaperBoundable> cast(Ray3 ray, double maxDistance, @Nullable Predicate<PaperBoundable> test) {
+        var block = castBlocks(ray, maxDistance, test);
+        var entity = castEntities(ray, maxDistance, test);
+        return block.distance() < entity.distance() ? block : entity;
     }
 }

@@ -8,15 +8,11 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.Collection;
 import java.util.function.Predicate;
 
-import static com.gitlab.aecsocket.minecommons.core.vector.cartesian.Ray3.*;
-
 /**
  * Provides raycasting in a 3D space, colliding with defined boundables.
  * @param <B> The boundable type.
  */
 public abstract class Raycast<B extends Boundable> {
-    /** The distance that is travelled by a ray to check for collisions. */
-    public static final double EPSILON = 0.01;
 
     /**
      * A collision result.
@@ -25,6 +21,7 @@ public abstract class Raycast<B extends Boundable> {
      * @param distance The distance travelled from the origin to the in-position.
      * @param in Either the final position, or the position that the ray entered a bound.
      * @param out The position that the ray exited a bound, or null if no bound was hit.
+     * @param normal The normal of the surface hit.
      * @param penetration The distance travelled through the bound, or -1 if no bound was hit.
      * @param hit The bound that was hit, or null if no bound was hit.
      */
@@ -33,50 +30,63 @@ public abstract class Raycast<B extends Boundable> {
             double distance,
             Vector3 in,
             @Nullable Vector3 out,
+            @Nullable Vector3 normal,
             double penetration,
             @Nullable B hit
     ) {}
 
-    private double epsilon;
-
     /**
-     * Creates an instance.
-     * @param epsilon The collision epsilon.
+     * Checks if a ray intersects with an object.
+     * @param ray The ray.
+     * @param object The object.
+     * @param test The test which determines if an object is eligible to be intersected.
+     * @return The intersection result, or null if the object did not intersect.
      */
-    public Raycast(double epsilon) {
-        this.epsilon = epsilon;
+    protected @Nullable Result<B> intersects(Ray3 ray, B object, @Nullable Predicate<B> test) {
+        if (test != null && !test.test(object))
+            return null;
+        Vector3 orig = object.origin();
+        ray = ray.at(ray.orig().subtract(orig));
+        Bound.Collision collision = object.bound().collision(ray);
+        if (collision != null) {
+            return new Result<>(ray, collision.in(),
+                    ray.point(collision.in()).add(orig),
+                    ray.point(collision.out()).add(orig),
+                    collision.normal(),
+                    collision.out() - collision.in(),
+                    object);
+        }
+        return null;
     }
 
     /**
-     * Creates an instance.
+     * Checks if a ray intersects with any of the objects provided.
+     * @param ray The ray.
+     * @param objects The set of objects object.
+     * @param test The test which determines if an object is eligible to be intersected.
+     * @return The intersection result, or null no object intersected.
      */
-    public Raycast() {
-        this(EPSILON);
+    protected @Nullable Result<B> intersects(Ray3 ray, Collection<? extends B> objects, @Nullable Predicate<B> test) {
+        for (B object : objects) {
+            var result = intersects(ray, object, test);
+            if (result != null)
+                return result;
+        }
+        return null;
     }
 
     /**
-     * Gets the collision epsilon.
-     * @return The value.
-     */
-    public double epsilon() { return epsilon; }
-
-    /**
-     * Sets the collision epsilon.
-     * @param epsilon The value.
-     */
-    public void epsilon(double epsilon) { this.epsilon = epsilon; }
-
-    /**
-     * Gets all boundables defined at the start of a raycast.
-     * @param origin The start location.
-     * @param direction The ray direction.
+     * Tests for intersections between the provided ray, and the objects determined by this raycast.
+     * @param ray The ray.
      * @param maxDistance The max distance the ray will travel.
-     * @return The collection of boundables.
+     * @param test The test which determines if an object is eligible to be intersected.
+     * @return The cast result.
      */
-    protected abstract Collection<? extends B> objects(Vector3 origin, Vector3 direction, double maxDistance);
+    public abstract Result<B> cast(Ray3 ray, double maxDistance, @Nullable Predicate<B> test);
+
 
     /**
-     * Casts a ray.
+     * Tests for intersections between the provided ray, and the objects determined by this raycast.
      * @param origin The start location.
      * @param direction The ray direction.
      * @param maxDistance The max distance the ray will travel.
@@ -84,27 +94,6 @@ public abstract class Raycast<B extends Boundable> {
      * @return The cast result.
      */
     public Result<B> cast(Vector3 origin, Vector3 direction, double maxDistance, @Nullable Predicate<B> test) {
-        Collection<? extends B> objects = objects(origin, direction, maxDistance);
-        Ray3 origRay = ray3(origin, direction);
-        Result<B> nearestResult = null;
-        for (B object : objects) {
-            if (test != null && !test.test(object))
-                continue;
-            Vector3 objectOrig = object.origin();
-            Ray3 ray = origRay.at(origin.subtract(objectOrig));
-            Bound.Collision collision = object.bound().collision(ray);
-            if (collision != null) {
-                if (nearestResult == null || collision.in() < nearestResult.distance) {
-                    nearestResult = new Result<>(origRay, collision.in(),
-                            ray.point(collision.in()).add(objectOrig),
-                            ray.point(collision.out()).add(objectOrig),
-                            collision.out() - collision.in(),
-                            object);
-                }
-            }
-        }
-        return nearestResult == null || nearestResult.distance > maxDistance
-                ? new Result<>(origRay, maxDistance, origin.add(direction.multiply(maxDistance)), null, -1, null)
-                : nearestResult;
+        return cast(Ray3.ray3(origin, direction), maxDistance, test);
     }
 }

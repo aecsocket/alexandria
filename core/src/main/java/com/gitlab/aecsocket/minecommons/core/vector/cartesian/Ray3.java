@@ -4,8 +4,9 @@ package com.gitlab.aecsocket.minecommons.core.vector.cartesian;
  * A pair of an origin and a direction.
  * @param orig The starting position, origin.
  * @param dir The normalized ray direction.
+ * @param invDir {@code 1 / dir}.
  */
-public record Ray3(Vector3 orig, Vector3 dir) {
+public record Ray3(Vector3 orig, Vector3 dir, Vector3 invDir) {
     /**
      * Creates a ray.
      * @param orig The starting position, origin.
@@ -13,7 +14,7 @@ public record Ray3(Vector3 orig, Vector3 dir) {
      * @return The ray.
      */
     public static Ray3 ray3(Vector3 orig, Vector3 dir) {
-        return new Ray3(orig, dir);
+        return new Ray3(orig, dir, dir.reciprocal());
     }
 
     /**
@@ -22,7 +23,7 @@ public record Ray3(Vector3 orig, Vector3 dir) {
      * @return The new ray.
      */
     public Ray3 at(Vector3 orig) {
-        return new Ray3(orig, dir);
+        return new Ray3(orig, dir, invDir);
     }
 
     /**

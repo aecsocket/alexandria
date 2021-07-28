@@ -10,12 +10,15 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.v1_17_R1.CraftChunk;
+import org.bukkit.craftbukkit.v1_17_R1.CraftWorld;
 import org.bukkit.craftbukkit.v1_17_R1.block.CraftBlock;
 import org.bukkit.entity.Entity;
 import org.bukkit.util.BoundingBox;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.gitlab.aecsocket.minecommons.core.bounds.Box.*;
 
 /**
  * Utility for getting {@link Bound}s from Paper entities and blocks.
@@ -31,10 +34,9 @@ public final class PaperBounds {
     public static Bound from(VoxelShape shape) {
         List<Bound> bounds = new ArrayList<>();
         for (AxisAlignedBB bb : shape.toList()) {
-            bounds.add(new Box(
+            bounds.add(box(
                     new Vector3(bb.a, bb.b, bb.c),
-                    new Vector3(bb.d, bb.e, bb.f),
-                    0
+                    new Vector3(bb.d, bb.e, bb.f)
             ));
         }
         return new Compound(bounds.toArray(new Bound[0]));
@@ -62,7 +64,7 @@ public final class PaperBounds {
         BoundingBox box = entity.getBoundingBox();
         Location location = entity.getLocation();
         double x = location.getX(), y = location.getY(), z = location.getZ();
-        return new Box(
+        return box(
                 new Vector3(box.getMinX() - x, box.getMinY() - y, box.getMinZ() - z),
                 new Vector3(box.getMaxX() - x, box.getMaxY() - y, box.getMaxZ() - z),
                 location.getYaw()

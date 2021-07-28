@@ -148,14 +148,14 @@ public record Vector3(double x, double y, double z) {
      * @param v The value.
      * @return The resulting vector.
      */
-    public Vector3 divide(double v) { return multiply(v, v, v); }
+    public Vector3 divide(double v) { return divide(v, v, v); }
 
     /**
      * {@code (x1 / x2, y1 / y2, z1 / z2)}.
      * @param o The other vector.
      * @return The resulting vector.
      */
-    public Vector3 divide(Vector3 o) { return multiply(o.x, o.y, o.z); }
+    public Vector3 divide(Vector3 o) { return divide(o.x, o.y, o.z); }
 
     /**
      * Negates all components.
@@ -334,6 +334,20 @@ public record Vector3(double x, double y, double z) {
     }
 
     /**
+     * Returns a vector with each component mapped: if {@code o[component]} is less than {@code this[component]},
+     * {@code 0} is used, otherwise {@code 1}.
+     * @param o The other vector.
+     * @return The stepped vector.
+     */
+    public Vector3 step(Vector3 o) {
+        return new Vector3(
+                o.x < x ? 0 : 1,
+                o.y < y ? 0 : 1,
+                o.z < z ? 0 : 1
+        );
+    }
+
+    /**
      * Gets the midpoint between this vector and another.
      * @param o The other vector.
      * @return The midpoint.
@@ -404,6 +418,14 @@ public record Vector3(double x, double y, double z) {
     public double angle(Vector3 o) {
         double dot = clamp(dot(o) / (length() * o.length()), -1, 1);
         return acos(dot);
+    }
+
+    /**
+     * Gets a vector expressed as the sign of each component.
+     * @return The vector.
+     */
+    public Vector3 sign() {
+        return new Vector3(Math.signum(x), Math.signum(y), Math.signum(z));
     }
 
     /**
