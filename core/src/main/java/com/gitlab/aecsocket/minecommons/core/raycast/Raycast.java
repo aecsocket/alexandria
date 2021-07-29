@@ -15,25 +15,62 @@ import java.util.function.Predicate;
 public abstract class Raycast<B extends Boundable> {
 
     /**
-     * A collision result.
+     * A result of a raycast.
      * @param <B> The boundable type.
      * @param ray The ray used to get this result.
-     * @param distance The distance travelled from the origin to the in-position.
-     * @param in Either the final position, or the position that the ray entered a bound.
-     * @param out The position that the ray exited a bound, or null if no bound was hit.
-     * @param normal The normal of the surface hit.
-     * @param penetration The distance travelled through the bound, or -1 if no bound was hit.
-     * @param hit The bound that was hit, or null if no bound was hit.
+     * @param distance The distance travelled from the origin to the final position.
+     * @param pos Either the final position, or the position that the ray entered a bound.
+     * @param hit The info on the collision itself, or null if there was no collision.
      */
     public record Result<B extends Boundable>(
             Ray3 ray,
             double distance,
-            Vector3 in,
-            @Nullable Vector3 out,
-            @Nullable Vector3 normal,
-            double penetration,
-            @Nullable B hit
+            Vector3 pos,
+            @Nullable Hit<B> hit
     ) {}
+
+    /**
+     * Information on a ray intersecting a {@link B}.
+     * @param <B> The boundable type.
+     * @param out The position that the ray exited a bound.
+     * @param normal The normal of the surface hit.
+     * @param penetration The distance travelled through the bound.
+     * @param hit The bound that was hit.
+     */
+    public record Hit<B extends Boundable>(
+            Vector3 out,
+            Vector3 normal,
+            double penetration,
+            B hit
+    ) {}
+
+    /**
+     * Creates a raycast result which hit.
+     * @param ray The ray used to get this result.
+     * @param distance The distance travelled from the origin to the final position.
+     * @param pos The position that the ray entered a bound.
+     * @param out The position that the ray exited a bound.
+     * @param normal The normal of the surface hit.
+     * @param penetration The distance travelled through the bound.
+     * @param hit The bound that was hit.
+     * @return The result.
+     */
+    protected Result<B> hit(Ray3 ray, double distance, Vector3 pos, Vector3 out, Vector3 normal, double penetration, B hit) {
+        return new Result<>(ray, distance, pos, new Hit<>(
+                out, normal, penetration, hit
+        ));
+    }
+
+    /**
+     * Creates a raycast result which hit.
+     * @param ray The ray used to get this result.
+     * @param distance The distance travelled from the origin to the final position.
+     * @param pos The position that the ray entered a bound.
+     * @return The result.
+     */
+    protected Result<B> miss(Ray3 ray, double distance, Vector3 pos) {
+        return new Result<>(ray, distance, pos, null);
+    }
 
     /**
      * Checks if a ray intersects with an object.
@@ -49,7 +86,7 @@ public abstract class Raycast<B extends Boundable> {
         ray = ray.at(ray.orig().subtract(orig));
         Bound.Collision collision = object.bound().collision(ray);
         if (collision != null) {
-            return new Result<>(ray, collision.in(),
+            return hit(ray, collision.in(),
                     ray.point(collision.in()).add(orig),
                     ray.point(collision.out()).add(orig),
                     collision.normal(),

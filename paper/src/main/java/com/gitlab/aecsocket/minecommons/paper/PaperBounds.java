@@ -1,7 +1,6 @@
 package com.gitlab.aecsocket.minecommons.paper;
 
 import com.gitlab.aecsocket.minecommons.core.bounds.Bound;
-import com.gitlab.aecsocket.minecommons.core.bounds.Box;
 import com.gitlab.aecsocket.minecommons.core.bounds.Compound;
 import com.gitlab.aecsocket.minecommons.core.vector.cartesian.Vector3;
 import net.minecraft.core.BlockPosition;
@@ -10,7 +9,6 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.v1_17_R1.CraftChunk;
-import org.bukkit.craftbukkit.v1_17_R1.CraftWorld;
 import org.bukkit.craftbukkit.v1_17_R1.block.CraftBlock;
 import org.bukkit.entity.Entity;
 import org.bukkit.util.BoundingBox;

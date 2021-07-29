@@ -8,17 +8,36 @@ import com.gitlab.aecsocket.minecommons.core.vector.cartesian.Vector2;
  * @param ang The angle in radians.
  */
 public record Coord2(double r, double ang) {
-    /**
-     * Creates an instance.
-     * @param r The radius.
-     * @param ang The angle in radians.
-     */
-    public Coord2 {
-        double _2pi = 2 * Math.PI;
-        ang %= _2pi;
-        if (ang < 0)
-            ang += _2pi;
+    private static final double pi2 = Math.PI * 2;
+
+    private static double normalize(double v) {
+        v %= pi2;
+        return v < 0 ? v + pi2 : v;
     }
+
+    /**
+     * Creates a coordinate.
+     * @param r The radius in radians.
+     * @param ang The angle in radians.
+     * @return The coordinate.
+     */
+    public static Coord2 coord2(double r, double ang) {
+        return new Coord2(r, normalize(ang));
+    }
+
+    /**
+     * Creates a new coordinate with the specified component changed.
+     * @param r The new radius component.
+     * @return The new coordinate.
+     */
+    public Coord2 r(double r) { return new Coord2(r, ang); }
+
+    /**
+     * Creates a new coordinate with the specified component changed.
+     * @param ang The new angle component.
+     * @return The new coordinate.
+     */
+    public Coord2 ang(double ang) { return new Coord2(r, normalize(ang)); }
 
     /**
      * Gets the Cartesian X component.
@@ -40,5 +59,5 @@ public record Coord2(double r, double ang) {
         return new Vector2(cartesianX(), cartesianY());
     }
 
-    @Override public String toString() { return "%f, %.0f°".formatted(r, Math.toDegrees(ang)); }
+    @Override public String toString() { return "(%s, %.1f°)".formatted(""+r, Math.toDegrees(ang)); }
 }

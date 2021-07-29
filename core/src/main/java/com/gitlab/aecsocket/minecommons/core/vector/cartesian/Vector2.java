@@ -133,14 +133,14 @@ public record Vector2(double x, double y) {
      * @param v The value.
      * @return The resulting vector.
      */
-    public Vector2 divide(double v) { return multiply(v, v); }
+    public Vector2 divide(double v) { return divide(v, v); }
 
     /**
      * {@code (x1 / x2, y1 / y2)}.
      * @param o The other vector.
      * @return The resulting vector.
      */
-    public Vector2 divide(Vector2 o) { return multiply(o.x, o.y); }
+    public Vector2 divide(Vector2 o) { return divide(o.x, o.y); }
 
     /**
      * Negates all components.
@@ -270,5 +270,5 @@ public record Vector2(double x, double y) {
         return new Coord2(polarR(), polarAng());
     }
 
-    @Override public String toString() { return "(%s, %s)".formatted(Double.toString(x), Double.toString(y)); }
+    @Override public String toString() { return "(%s, %s)".formatted(""+x, ""+y); }
 }

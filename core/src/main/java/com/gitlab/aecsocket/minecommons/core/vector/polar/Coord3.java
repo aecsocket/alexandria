@@ -9,19 +9,44 @@ import com.gitlab.aecsocket.minecommons.core.vector.cartesian.Vector3;
  * @param pitch The pitch (theta).
  */
 public record Coord3(double r, double yaw, double pitch) {
+    private static final double pi2 = Math.PI * 2;
+
+    private static double normalize(double v) {
+        v %= pi2;
+        return v < 0 ? v + pi2 : v;
+    }
+
     /**
-     * Creates an instance.
+     * Creates a coordinate.
      * @param r The radius in radians.
      * @param yaw The yaw (phi).
      * @param pitch The pitch (theta).
+     * @return The coordinate.
      */
-    public Coord3 {
-        double _2pi = 2 * Math.PI;
-        yaw %= _2pi;
-        if (yaw < 0) yaw += _2pi;
-        pitch %= _2pi;
-        if (pitch < 0) pitch += _2pi;
+    public static Coord3 coord3(double r, double yaw, double pitch) {
+        return new Coord3(r, normalize(yaw), normalize(pitch));
     }
+
+    /**
+     * Creates a new coordinate with the specified component changed.
+     * @param r The new radius component.
+     * @return The new coordinate.
+     */
+    public Coord3 r(double r) { return new Coord3(r, yaw, pitch); }
+
+    /**
+     * Creates a new coordinate with the specified component changed.
+     * @param yaw The new yaw component.
+     * @return The new coordinate.
+     */
+    public Coord3 yaw(double yaw) { return new Coord3(r, normalize(yaw), pitch); }
+
+    /**
+     * Creates a new coordinate with the specified component changed.
+     * @param pitch The new pitch component.
+     * @return The new coordinate.
+     */
+    public Coord3 pitch(double pitch) { return new Coord3(r, yaw, normalize(pitch)); }
 
     /**
      * Gets the Cartesian X component.
@@ -49,5 +74,5 @@ public record Coord3(double r, double yaw, double pitch) {
         return new Vector3(cartesianX(), cartesianY(), cartesianZ());
     }
 
-    @Override public String toString() { return "%f, %.0f, %.0f°".formatted(r, Math.toDegrees(yaw), Math.toDegrees(pitch)); }
+    @Override public String toString() { return "(%s, %.1f°, %.1f°)".formatted(""+r, Math.toDegrees(yaw), Math.toDegrees(pitch)); }
 }

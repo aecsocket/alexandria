@@ -101,7 +101,8 @@ public record Box(Vector3 min, Vector3 max, Vector3 extent, double angle) implem
             return null;
         Vector3 normal = dir.sign().neg()
                 .multiply(vec3(t1.y(), t1.z(), t1.x()).step(t1))
-                .multiply(vec3(t1.z(), t1.x(), t1.y()).step(t1));
+                .multiply(vec3(t1.z(), t1.x(), t1.y()).step(t1))
+                .rotateY(angle);
         return new Collision(near, far, normal);
     }
 

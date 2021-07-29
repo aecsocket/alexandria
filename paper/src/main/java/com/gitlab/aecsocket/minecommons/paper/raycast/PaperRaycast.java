@@ -36,6 +36,7 @@ public class PaperRaycast extends Raycast<PaperRaycast.PaperBoundable> {
      */
     public static final class Builder {
         private boolean ignorePassable = true;
+        private double entityLenience = 8;
         private final Map<Material, List<Bounds<Block>>> blockBounds = new HashMap<>();
         private final Map<EntityType, List<Bounds<Entity>>> entityBounds = new HashMap<>();
 
@@ -53,6 +54,21 @@ public class PaperRaycast extends Raycast<PaperRaycast.PaperBoundable> {
          * @return This instance.
          */
         public Builder ignorePassable(boolean ignorePassable) { this.ignorePassable = ignorePassable; return this; }
+
+        /**
+         * Gets the amount of blocks that the search hitbox for entities will be expanded, to account for
+         * larger than vanilla hitboxes.
+         * @return The lenience.
+         */
+        public double entityLenience() { return entityLenience; }
+
+        /**
+         * Sets the amount of blocks that the search hitbox for entities will be expanded, to account for
+         * larger than vanilla hitboxes.
+         * @param entityLenience The lenience.
+         * @return This instance.
+         */
+        public Builder entityLenience(double entityLenience) { this.entityLenience = entityLenience; return this; }
 
         /**
          * Gets all registered bounds for block states.
@@ -100,11 +116,11 @@ public class PaperRaycast extends Raycast<PaperRaycast.PaperBoundable> {
 
         /**
          * Builds a Paper raycast provider.
-         * @param world The world to raycast in.
+         * @param world The world to raycast pos.
          * @return The raycast provider.
          */
         public PaperRaycast build(World world) {
-            return new PaperRaycast(ignorePassable, blockBounds, entityBounds, world);
+            return new PaperRaycast(ignorePassable, entityLenience, blockBounds, entityBounds, world);
         }
     }
 
@@ -175,6 +191,7 @@ public class PaperRaycast extends Raycast<PaperRaycast.PaperBoundable> {
     public record Bounds<T>(Predicate<T> test, Map<String, Bound> bounds) {}
 
     private final boolean ignorePassable;
+    private final double entityLenience;
     private final Map<Material, List<Bounds<Block>>> blockBounds;
     private final Map<EntityType, List<Bounds<Entity>>> entityBounds;
     private World world;
@@ -182,12 +199,15 @@ public class PaperRaycast extends Raycast<PaperRaycast.PaperBoundable> {
     /**
      * Creates an instance.
      * @param ignorePassable If passable blocks should be ignored.
+     * @param entityLenience The amount of blocks that the search hitbox for entities will be expanded, to account for
+     *                       larger than vanilla hitboxes.
      * @param blockBounds The registered block bounds.
      * @param entityBounds The registered entity bounds.
-     * @param world The world this will cast in.
+     * @param world The world this will cast pos.
      */
-    public PaperRaycast(boolean ignorePassable, Map<Material, List<Bounds<Block>>> blockBounds, Map<EntityType, List<Bounds<Entity>>> entityBounds, World world) {
+    public PaperRaycast(boolean ignorePassable, double entityLenience, Map<Material, List<Bounds<Block>>> blockBounds, Map<EntityType, List<Bounds<Entity>>> entityBounds, World world) {
         this.ignorePassable = ignorePassable;
+        this.entityLenience = entityLenience;
         this.blockBounds = blockBounds;
         this.entityBounds = entityBounds;
         this.world = world;
@@ -198,6 +218,13 @@ public class PaperRaycast extends Raycast<PaperRaycast.PaperBoundable> {
      * @return The value.
      */
     public boolean ignorePassable() { return ignorePassable; }
+
+    /**
+     * Gets the amount of blocks that the search hitbox for entities will be expanded, to account for
+     * larger than vanilla hitboxes.
+     * @return The lenience.
+     */
+    public double entityLenience() { return entityLenience; }
 
     /**
      * Gets the registered block bounds.
@@ -212,13 +239,13 @@ public class PaperRaycast extends Raycast<PaperRaycast.PaperBoundable> {
     public Map<EntityType, List<Bounds<Entity>>> entityBounds() { return entityBounds; }
 
     /**
-     * Gets the world this raycast provider operates in.
+     * Gets the world this raycast provider operates pos.
      * @return The world.
      */
     public World world() { return world; }
 
     /**
-     * Sets the world this raycast provider operates in.
+     * Sets the world this raycast provider operates pos.
      * @param world The world.
      * @return This instance.
      */
@@ -344,7 +371,7 @@ public class PaperRaycast extends Raycast<PaperRaycast.PaperBoundable> {
         }
 
         return result == null
-                ? new Result<>(ray, maxDistance, ray.point(maxDistance), null, null, -1, null)
+                ? miss(ray, maxDistance, ray.point(maxDistance))
                 : result;
     }
 
@@ -356,8 +383,8 @@ public class PaperRaycast extends Raycast<PaperRaycast.PaperBoundable> {
         var nearestResult = new AtomicReference<Raycast.Result<PaperBoundable>>();
         var nearestDist = new AtomicDouble();
         world.getEntities().a(new AxisAlignedBB(
-                orig.x(), orig.y(), orig.z(),
-                end.x(), end.y(), end.z()
+                orig.x() - entityLenience, orig.y() - entityLenience, orig.z() - entityLenience,
+                end.x() + entityLenience, end.y() + entityLenience, end.z() + entityLenience
         ), ent -> {
             Entity entity = ent.getBukkitEntity();
             var result = intersects(ray, boundables(entity), test);
@@ -367,7 +394,7 @@ public class PaperRaycast extends Raycast<PaperRaycast.PaperBoundable> {
             }
         });
         return nearestResult.get() == null
-                ? new Result<>(ray, maxDistance, ray.point(maxDistance), null, null, -1, null)
+                ? miss(ray, maxDistance, ray.point(maxDistance))
                 : nearestResult.get();
     }
 

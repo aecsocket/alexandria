@@ -2,8 +2,6 @@ package com.gitlab.aecsocket.minecommons.core.vector.cartesian;
 
 import com.gitlab.aecsocket.minecommons.core.Validation;
 import com.gitlab.aecsocket.minecommons.core.vector.polar.Coord3;
-import com.google.common.base.Preconditions;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Function;
 
@@ -247,6 +245,7 @@ public record Vector3(double x, double y, double z) {
      * Gets a 2D vector of {@code (x, x)}.
      * @return The 2D vector.
      */
+    @SuppressWarnings("SuspiciousNameCombination")
     public Vector2 xx() { return new Vector2(x, x); }
     /**
      * Gets a 2D vector of {@code (x, y)}.
@@ -263,22 +262,26 @@ public record Vector3(double x, double y, double z) {
      * Gets a 2D vector of {@code (y, x)}.
      * @return The 2D vector.
      */
+    @SuppressWarnings("SuspiciousNameCombination")
     public Vector2 yx() { return new Vector2(y, x); }
     /**
      * Gets a 2D vector of {@code (y, y)}.
      * @return The 2D vector.
      */
+    @SuppressWarnings("SuspiciousNameCombination")
     public Vector2 yy() { return new Vector2(y, y); }
     /**
      * Gets a 2D vector of {@code (y, z)}.
      * @return The 2D vector.
      */
+    @SuppressWarnings("SuspiciousNameCombination")
     public Vector2 yz() { return new Vector2(y, z); }
 
     /**
      * Gets a 2D vector of {@code (z, x)}.
      * @return The 2D vector.
      */
+    @SuppressWarnings("SuspiciousNameCombination")
     public Vector2 zx() { return new Vector2(z, x); }
     /**
      * Gets a 2D vector of {@code (z, y)}.
@@ -411,6 +414,19 @@ public record Vector3(double x, double y, double z) {
     public double dot(Vector3 o) { return (x * o.x) + (y * o.y) + (z * o.z); }
 
     /**
+     * Gets the cross product of this vector and another.
+     * @param o The other vector.
+     * @return The cross product.
+     */
+    public Vector3 cross(Vector3 o) {
+        return new Vector3(
+                y * o.z - o.y * z,
+                z * o.x - o.z * x,
+                x * o.y - o.x * y
+        );
+    }
+
+    /**
      * Gets the angle between this vector and another, in radians.
      * @param o The other vector.
      * @return The angle.
@@ -454,7 +470,7 @@ public record Vector3(double x, double y, double z) {
         return new Coord3(sphericalR(), sphericalYaw(), sphericalPitch());
     }
 
-    @Override public String toString() { return "(%s, %s, %s)".formatted(Double.toString(x), Double.toString(y), Double.toString(z)); }
+    @Override public String toString() { return "(%s, %s, %s)".formatted(""+x, ""+y, ""+z); }
 
     /**
      * Gets a vector of a combination of the smallest components from each vector.
@@ -482,5 +498,31 @@ public record Vector3(double x, double y, double z) {
                 Math.max(a.y, b.y),
                 Math.max(a.z, b.z)
         );
+    }
+
+    /**
+     * Reflects a vector around a normal.
+     * @param vec The vector to reflect.
+     * @param norm The normalized normal vector.
+     * @return The reflected vector.
+     */
+    public static Vector3 reflect(Vector3 vec, Vector3 norm) {
+        return vec.subtract(norm.multiply(2 * vec.dot(norm)));
+    }
+
+    /**
+     * Gets a direction offset by another vector.
+     * @param dir The original direction.
+     * @param offset The offset.
+     * @return The offset vector.
+     */
+    public static Vector3 offset(Vector3 dir, Vector3 offset) {
+        Vector3 xzTan = vec3(-dir.z, 0, dir.x).normalize();
+        Vector3 yTan = xzTan.cross(dir).normalize();
+
+        return xzTan
+                .multiply(offset.x)
+                .add(dir.multiply(offset.z)
+                        .add(yTan.multiply(offset.y)));
     }
 }
