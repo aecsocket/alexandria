@@ -51,6 +51,11 @@ public record Particles(
         return particles(particle, count, size, speed, null);
     }
 
+    private Object data(@Nullable Object data) {
+        return data == null || !particle.getDataType().isAssignableFrom(data.getClass())
+                ? null : data;
+    }
+
     /**
      * Spawns the particles to a specified player at a location, with data provided.
      * @param player The player to spawn to.
@@ -58,7 +63,7 @@ public record Particles(
      * @param data The particle data.
      */
     public void spawn(Player player, Location origin, @Nullable Object data) {
-        player.spawnParticle(particle, origin, count, size.x(), size.y(), size.z(), speed, data);
+        player.spawnParticle(particle, origin, count, size.x(), size.y(), size.z(), data(data));
     }
 
     /**
