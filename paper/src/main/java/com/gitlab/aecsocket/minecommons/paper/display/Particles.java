@@ -27,7 +27,7 @@ public record Particles(
      * @param particle The particle to display.
      * @param count The amount of particles, or {@code 0} for a single finely-controllable particle.
      * @param size The size.
-     * @param speed The speed.
+     * @param speed The speed {@code >= 0}.
      * @param data The data.
      * @return The particle data.
      */
@@ -35,7 +35,7 @@ public record Particles(
         Validation.notNull("particle", particle);
         Validation.greaterThanEquals("count", count, 0);
         Validation.notNull("size", size);
-        Validation.greaterThan("speed", speed, 0);
+        Validation.greaterThanEquals("speed", speed, 0);
         return new Particles(particle, count, size, speed, data);
     }
 
