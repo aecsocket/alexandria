@@ -23,7 +23,6 @@ public final class PaperSerializers {
      * A {@link TypeSerializerCollection} with the default serializers defined in this package.
      */
     public static final TypeSerializerCollection SERIALIZERS = TypeSerializerCollection.builder()
-            .register(ItemStack.class, ItemStackSerializer.INSTANCE)
             .register(BlockData.class, BlockDataSerializer.INSTANCE)
             .register(World.class, WorldSerializer.INSTANCE)
             .register(Location.class, LocationSerializer.INSTANCE)

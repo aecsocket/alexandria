@@ -14,6 +14,7 @@ import com.google.common.util.concurrent.AtomicDouble;
 import net.minecraft.server.level.WorldServer;
 import net.minecraft.world.phys.AxisAlignedBB;
 import org.bukkit.Chunk;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -261,7 +262,7 @@ public class PaperRaycast extends Raycast<PaperRaycast.PaperBoundable> {
             return Collections.emptyList();
         List<Bounds<Block>> boundsList = blockBounds.get(block.getType());
         if (boundsList == null) {
-            return Collections.singletonList(PaperBoundable.of(block, "main", PaperBounds.from(block)));
+            return Collections.singletonList(PaperBoundable.of(block, block.getType().getKey().value(), PaperBounds.from(block)));
         }
         for (Bounds<Block> bounds : boundsList) {
             if (bounds.test.test(block)) {
@@ -284,7 +285,7 @@ public class PaperRaycast extends Raycast<PaperRaycast.PaperBoundable> {
     public List<PaperBoundable> boundables(Entity entity) {
         List<Bounds<Entity>> boundsList = entityBounds.get(entity.getType());
         if (boundsList == null) {
-            return Collections.singletonList(PaperBoundable.of(entity, "main", PaperBounds.from(entity)));
+            return Collections.singletonList(PaperBoundable.of(entity, entity.getType().getKey().value(), PaperBounds.from(entity)));
         }
         for (Bounds<Entity> bounds : boundsList) {
             if (bounds.test.test(entity)) {
@@ -328,6 +329,13 @@ public class PaperRaycast extends Raycast<PaperRaycast.PaperBoundable> {
         return v < i ? i - 1 : i;
     }
 
+    /**
+     * Tests for intersections between the provided ray, and the blocks in its path.
+     * @param ray The ray.
+     * @param maxDistance The max distance the ray will travel.
+     * @param test The test which determines if an object is eligible to be intersected.
+     * @return The cast result.
+     */
     public Result<PaperBoundable> castBlocks(Ray3 ray, double maxDistance, @Nullable Predicate<PaperBoundable> test) {
         Vector3 orig = ray.orig();
         Vector3 end = ray.point(maxDistance);
@@ -352,6 +360,8 @@ public class PaperRaycast extends Raycast<PaperRaycast.PaperBoundable> {
         while ((result = intersects(ray, boundables(world.getBlockAt(xi, yi, zi)), test)) == null) {
             if (xb > 1 && yb > 1 && zb > 1)
                 break;
+            if (!new Location(world, xb, yb, zb).isChunkLoaded())
+                break;
 
             if (xb < yb) {
                 if (xb < zb) {
@@ -375,6 +385,13 @@ public class PaperRaycast extends Raycast<PaperRaycast.PaperBoundable> {
                 : result;
     }
 
+    /**
+     * Tests for intersections between the provided ray, and the entities in its path.
+     * @param ray The ray.
+     * @param maxDistance The max distance the ray will travel.
+     * @param test The test which determines if an object is eligible to be intersected.
+     * @return The cast result.
+     */
     public Result<PaperBoundable> castEntities(Ray3 ray, double maxDistance, @Nullable Predicate<PaperBoundable> test) {
         Vector3 orig = ray.orig();
         Vector3 end = ray.point(maxDistance);
@@ -382,9 +399,11 @@ public class PaperRaycast extends Raycast<PaperRaycast.PaperBoundable> {
 
         var nearestResult = new AtomicReference<Raycast.Result<PaperBoundable>>();
         var nearestDist = new AtomicDouble();
+        Vector3 min = Vector3.min(orig, end);
+        Vector3 max = Vector3.max(orig, end);
         world.getEntities().a(new AxisAlignedBB(
-                orig.x() - entityLenience, orig.y() - entityLenience, orig.z() - entityLenience,
-                end.x() + entityLenience, end.y() + entityLenience, end.z() + entityLenience
+                min.x() - entityLenience, min.y() - entityLenience, min.z() - entityLenience,
+                max.x() + entityLenience, max.y() + entityLenience, max.z() + entityLenience
         ), ent -> {
             Entity entity = ent.getBukkitEntity();
             var result = intersects(ray, boundables(entity), test);

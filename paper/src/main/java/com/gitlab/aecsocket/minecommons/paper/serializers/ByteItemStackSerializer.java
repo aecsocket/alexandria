@@ -13,33 +13,29 @@ import java.util.Base64;
 import static com.gitlab.aecsocket.minecommons.core.serializers.Serializers.require;
 
 /**
- * Type serializer for an {@link ItemStack}.
+ * Type serializer for an {@link ItemStack}, serializing as an internal representation of bytes.
  * <p>
  * Uses {@link ItemStack#serializeAsBytes()} and {@link ItemStack#deserializeBytes(byte[])}, as base 64.
  * If the material is {@link Material#AIR}, saves an empty string instead.
  */
-public class ItemStackSerializer implements TypeSerializer<ItemStack> {
+public class ByteItemStackSerializer implements TypeSerializer<ItemStack> {
     /** A singleton instance of this serializer. */
-    public static final ItemStackSerializer INSTANCE = new ItemStackSerializer();
+    public static final ByteItemStackSerializer INSTANCE = new ByteItemStackSerializer();
 
     @Override
     public void serialize(Type type, @Nullable ItemStack obj, ConfigurationNode node) throws SerializationException {
         if (obj == null) node.set(null);
         else {
-            node.set(
-                    obj.getType() == Material.AIR
-                            ? ""
-                            : Base64.getEncoder().encodeToString(obj.serializeAsBytes())
-            );
+            node.set(obj.getType() == Material.AIR
+                    ? "" : Base64.getEncoder().encodeToString(obj.serializeAsBytes()));
         }
     }
 
     @Override
     public ItemStack deserialize(Type type, ConfigurationNode node) throws SerializationException {
         String string = require(node, String.class);
-        if (string.isEmpty()) {
+        if (string.isEmpty())
             return new ItemStack(Material.AIR);
-        }
         try {
             byte[] bytes = Base64.getDecoder().decode(string);
             return ItemStack.deserializeBytes(bytes);
