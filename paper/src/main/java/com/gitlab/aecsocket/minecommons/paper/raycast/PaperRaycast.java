@@ -360,7 +360,7 @@ public class PaperRaycast extends Raycast<PaperRaycast.PaperBoundable> {
         while ((result = intersects(ray, boundables(world.getBlockAt(xi, yi, zi)), test)) == null) {
             if (xb > 1 && yb > 1 && zb > 1)
                 break;
-            if (!new Location(world, xb, yb, zb).isChunkLoaded())
+            if (!new Location(world, xi, yi, zi).isChunkLoaded())
                 break;
 
             if (xb < yb) {
