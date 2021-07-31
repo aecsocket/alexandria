@@ -7,6 +7,7 @@ import java.util.function.Function;
 
 import static java.lang.Math.*;
 import static com.gitlab.aecsocket.minecommons.core.Numbers.*;
+import static com.gitlab.aecsocket.minecommons.core.vector.polar.Coord3.*;
 
 /**
  * An immutable (x, y, z) double value triplet, using the Cartesian coordinate system.
@@ -15,6 +16,8 @@ import static com.gitlab.aecsocket.minecommons.core.Numbers.*;
  * @param z The Z component.
  */
 public record Vector3(double x, double y, double z) {
+    private static final double PI2 = PI * 2;
+
     /** An instance with all fields set to 0. */
     public static final Vector3 ZERO = vec3(0);
 
@@ -454,20 +457,20 @@ public record Vector3(double x, double y, double z) {
      * Gets the spherical yaw component.
      * @return The component.
      */
-    public double sphericalYaw() { return atan(sqrt(sqr(x) + sqr(y)) / z); }
+    public double sphericalYaw() { return atan2(-x, z) + PI2; }
 
     /**
      * Gets the spherical pitch component.
      * @return The component.
      */
-    public double sphericalPitch() { return atan(y / x); }
+    public double sphericalPitch() { return atan(-y / sqrt(x*x + z*z)); }
 
     /**
      * Converts this to the spherical coordinate system.
      * @return A vector in the spherical coordinate system.
      */
     public Coord3 spherical() {
-        return new Coord3(sphericalR(), sphericalYaw(), sphericalPitch());
+        return coord3(sphericalR(), sphericalYaw(), sphericalPitch());
     }
 
     @Override public String toString() { return "(%s, %s, %s)".formatted(""+x, ""+y, ""+z); }

@@ -2,6 +2,9 @@ package com.gitlab.aecsocket.minecommons.core.vector.polar;
 
 import com.gitlab.aecsocket.minecommons.core.vector.cartesian.Vector3;
 
+import static java.lang.Math.*;
+import static com.gitlab.aecsocket.minecommons.core.vector.cartesian.Vector3.*;
+
 /**
  * An (r, yaw, pitch) double triplet, using the spherical coordinate system.
  * @param r The radius in radians.
@@ -52,26 +55,31 @@ public record Coord3(double r, double yaw, double pitch) {
      * Gets the Cartesian X component.
      * @return The component.
      */
-    public double cartesianX() { return r * Math.cos(yaw) * Math.sin(pitch); }
+    public double cartesianX() { return r * -cos(pitch) * sin(yaw); }
 
     /**
      * Gets the Cartesian Y component.
      * @return The component.
      */
-    public double cartesianY() { return r * Math.sin(yaw) * Math.cos(pitch); }
+    public double cartesianY() { return r * -sin(pitch); }
 
     /**
      * Gets the Cartesian Z component.
      * @return The component.
      */
-    public double cartesianZ() { return r * Math.cos(pitch); }
+    public double cartesianZ() { return r * cos(pitch) * cos(yaw); }
 
     /**
      * Converts this to the Cartesian coordinate system.
      * @return A vector in the Cartesian coordinate system.
      */
     public Vector3 cartesian() {
-        return new Vector3(cartesianX(), cartesianY(), cartesianZ());
+        double xz = cos(pitch);
+        return vec3(
+                -xz * sin(yaw),
+                -sin(pitch),
+                xz * cos(yaw)
+        );
     }
 
     @Override public String toString() { return "(%s, %.1f°, %.1f°)".formatted(""+r, Math.toDegrees(yaw), Math.toDegrees(pitch)); }
