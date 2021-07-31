@@ -79,6 +79,59 @@ public record PreciseSound(
         return sound(name, source, volume, pitch, dropoff, range, SPEED_MT);
     }
 
+    /**
+     * Creates a new instance with the specified field changed.
+     * @param name The new namespaced key of the sound.
+     * @return The instance.
+     */
+    public PreciseSound name(Key name) {
+        return new PreciseSound(name, source, volume, pitch, dropoff, dropoffSqr, range, rangeSqr, speed);
+    }
+
+    /**
+     * Creates a new instance with the specified field changed.
+     * @param source The new source.
+     * @return The instance.
+     */
+    public PreciseSound source(Sound.Source source) {
+        return new PreciseSound(name, source, volume, pitch, dropoff, dropoffSqr, range, rangeSqr, speed);
+    }
+
+    /**
+     * Creates a new instance with the specified field changed.
+     * @param volume The new volume.
+     * @return The instance.
+     */
+    public PreciseSound volume(float volume) {
+        return new PreciseSound(name, source, volume, pitch, dropoff, dropoffSqr, range, rangeSqr, speed);
+    }
+
+    /**
+     * Creates a new instance with the specified field changed.
+     * @param pitch The new pitch.
+     * @return The instance.
+     */
+    public PreciseSound pitch(float pitch) {
+        return new PreciseSound(name, source, volume, pitch, dropoff, dropoffSqr, range, rangeSqr, speed);
+    }
+
+    /**
+     * Creates a new instance with the specified field changed.
+     * @param dropoff The new distance at which volume starts to decrease.
+     * @return The instance.
+     */
+    public PreciseSound dropoff(double dropoff) {
+        return new PreciseSound(name, source, volume, pitch, dropoff, dropoff*dropoff, range, rangeSqr, speed);
+    }
+
+    /**
+     * Creates a new instance with the specified field changed.
+     * @param range The new distance at which the sound is inaudible.
+     * @return The instance.
+     */
+    public PreciseSound range(double range) {
+        return new PreciseSound(name, source, volume, pitch, dropoff, dropoffSqr, range, range*range, speed);
+    }
 
     /**
      * Plays the sound to an audience.

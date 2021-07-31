@@ -51,6 +51,51 @@ public record Particles(
         return particles(particle, count, size, speed, null);
     }
 
+    /**
+     * Creates a new instance with the specified field changed.
+     * @param particle The new particle to display.
+     * @return The instance.
+     */
+    public Particles particle(Particle particle) {
+        return new Particles(particle, count, size, speed, data);
+    }
+
+    /**
+     * Creates a new instance with the specified field changed.
+     * @param count The new amount of particles.
+     * @return The instance.
+     */
+    public Particles count(int count) {
+        return new Particles(particle, count, size, speed, data);
+    }
+
+    /**
+     * Creates a new instance with the specified field changed.
+     * @param size The new size.
+     * @return The instance.
+     */
+    public Particles size(Vector3 size) {
+        return new Particles(particle, count, size, speed, data);
+    }
+
+    /**
+     * Creates a new instance with the specified field changed.
+     * @param speed The new speed.
+     * @return The instance.
+     */
+    public Particles speed(double speed) {
+        return new Particles(particle, count, size, speed, data);
+    }
+
+    /**
+     * Creates a new instance with the specified field changed.
+     * @param data The new data.
+     * @return The instance.
+     */
+    public Particles speed(@Nullable Object data) {
+        return new Particles(particle, count, size, speed, data);
+    }
+
     private Object data(@Nullable Object data) {
         return data == null || !particle.getDataType().isAssignableFrom(data.getClass())
                 ? null : data;
