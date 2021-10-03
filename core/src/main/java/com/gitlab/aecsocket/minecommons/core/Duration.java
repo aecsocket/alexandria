@@ -3,6 +3,9 @@ package com.gitlab.aecsocket.minecommons.core;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * A period of time specified in milliseconds.
+ */
 public record Duration(long ms) {
     private static final long second = 1000;
     private static final long minute = second * 60;
@@ -13,14 +16,33 @@ public record Duration(long ms) {
             "(?:([0-9]+)d)?(?:([0-9]+)h)?(?:([0-9]+)m)?(?:([0-9]+(?:[.,][0-9]+)?)?s)?",
             Pattern.CASE_INSENSITIVE);
 
+    /**
+     * Creates a duration from its millisecond value.
+     * @param ms The milliseconds.
+     * @return The duration.
+     */
     public static Duration duration(long ms) {
         return new Duration(ms);
     }
 
+    /**
+     * Creates a duration from its individual time components.
+     * @param days The days.
+     * @param hours The hours.
+     * @param minutes The minutes.
+     * @param seconds The seconds.
+     * @param ms The milliseconds.
+     * @return The duration.
+     */
     public static Duration duration(long days, long hours, long minutes, long seconds, long ms) {
         return new Duration(days*day + hours*hour + minutes*minute + seconds*second + ms);
     }
 
+    /**
+     * Parses a duration from a string, in the format {@code 1d2h3m4.5s}
+     * @param str The string.
+     * @return The duration.
+     */
     public static Duration duration(String str) {
         Matcher matcher = pattern.matcher(str);
         if (!matcher.matches())
@@ -32,17 +54,52 @@ public record Duration(long ms) {
         return new Duration(days*day + hours*hour + minutes*minute + ms);
     }
 
+    /**
+     * The amount of exclusive milliseconds in this duration.
+     * @return The value.
+     */
     public long exclMs() { return ms % 1000; }
 
+    /**
+     * The amount of total seconds in this duration.
+     * @return The value.
+     */
     public long seconds() { return ms / 1000; }
+
+    /**
+     * The amount of exclusive seconds in this duration.
+     * @return The value.
+     */
     public long exclSeconds() { return seconds() % 60; }
 
+    /**
+     * The amount of total minutes in this duration.
+     * @return The value.
+     */
     public long minutes() { return ms / (1000 * 60); }
+
+    /**
+     * The amount of exclusive minutes in this duration.
+     * @return The value.
+     */
     public long exclMinutes() { return minutes() % 60; }
 
+    /**
+     * The amount of total hours in this duration.
+     * @return The value.
+     */
     public long hours() { return ms / (1000 * 60 * 60); }
+
+    /**
+     * The amount of exclusive hours in this duration.
+     * @return The value.
+     */
     public long exclHours() { return hours() % 24; }
 
+    /**
+     * The amount of total days in this duration.
+     * @return The value.
+     */
     public long days() { return ms / (1000 * 60 * 60 * 24); }
 
     @Override

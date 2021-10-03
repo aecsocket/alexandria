@@ -1,6 +1,7 @@
 package com.gitlab.aecsocket.minecommons.core;
 
 import com.gitlab.aecsocket.minecommons.core.event.EventDispatcher;
+import io.leangen.geantyref.TypeToken;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -18,9 +19,23 @@ public class EventsTest {
         }
     }
 
-    static class ExtraEvent extends Event {
-        public ExtraEvent(int flag) {
+    static class SubEvent extends Event {
+        public SubEvent(int flag) {
             super(flag);
+        }
+    }
+
+    static class GenericEvent<T> {
+        T value;
+
+        public GenericEvent(T value) {
+            this.value = value;
+        }
+    }
+
+    static class GenericSubEvent<T> extends GenericEvent<T> {
+        public GenericSubEvent(T value) {
+            super(value);
         }
     }
 
@@ -55,7 +70,7 @@ public class EventsTest {
         AtomicInteger flag = new AtomicInteger();
         events.register(Event.class, true, evt -> flag.set(evt.flag));
         assertTimeout(ofMillis(10), () -> {
-            events.call(new ExtraEvent(3));
+            events.call(new SubEvent(3));
             assertEquals(0, flag.get());
         });
     }
@@ -70,6 +85,29 @@ public class EventsTest {
         assertTimeout(ofMillis(10), () -> {
             events.call(new Event(2));
             assertEquals(105, flag.get());
+        });
+    }
+
+    @Test
+    @SuppressWarnings("rawtypes")
+    void testGenerics() {
+        EventDispatcher<GenericEvent<?>> events = new EventDispatcher<>();
+        AtomicInteger flag = new AtomicInteger();
+        // check if non-parameterized types don't error out
+        events.register(new TypeToken<GenericEvent>(){}, evt -> {});
+
+        events.register(new TypeToken<GenericEvent<Integer>>(){}, evt -> flag.set(evt.value));
+
+        assertThrows(ClassCastException.class, () -> events.call(new GenericEvent<>(10L)));
+
+        assertTimeout(ofMillis(10), () -> {
+            events.call(new GenericEvent<>(10));
+            assertEquals(10, flag.get());
+        });
+
+        assertTimeout(ofMillis(10), () -> {
+            events.call(new GenericSubEvent<>(20));
+            assertEquals(20, flag.get());
         });
     }
 }

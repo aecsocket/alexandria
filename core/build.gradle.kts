@@ -19,6 +19,8 @@ dependencies {
     exposedApi("net.kyori", "adventure-api", "4.8.1")
     exposedApi("net.kyori", "adventure-serializer-configurate4", "4.8.1")
     exposedApi("org.checkerframework", "checker-qual", "3.15.0")
+    exposedApi("io.leangen.geantyref", "geantyref", "1.3.4")
+    testRuntimeOnly("io.leangen.geantyref", "geantyref", "1.3.4")
     api("net.kyori", "adventure-text-minimessage", "4.1.0-SNAPSHOT") {
         exclude("net.kyori", "adventure-api")
     }

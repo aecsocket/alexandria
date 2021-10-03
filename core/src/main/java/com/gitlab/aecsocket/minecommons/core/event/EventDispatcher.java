@@ -1,7 +1,9 @@
 package com.gitlab.aecsocket.minecommons.core.event;
 
 import com.gitlab.aecsocket.minecommons.core.Validation;
+import io.leangen.geantyref.TypeToken;
 
+import java.lang.reflect.*;
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -9,6 +11,7 @@ import java.util.function.Consumer;
  * Responsible for managing listeners: registration and sending events to listeners.
  * @param <E> The base event type.
  */
+@SuppressWarnings("UnstableApiUsage")
 public final class EventDispatcher<E> {
     /** The default priority of listeners. */
     public static final int DEFAULT_PRIORITY = 0;
@@ -45,12 +48,9 @@ public final class EventDispatcher<E> {
 
         @Override
         public String toString() {
-            return "{" +
-                    eventType.getSimpleName() +
-                    (specific ? " specific" : "") +
-                    " @ " + priority +
-                    " (" + listener + ")" +
-                    '}';
+            return eventType.getSimpleName()
+                    + (specific ? "" : "+")
+                    + " @" + priority;
         }
     }
 
@@ -92,12 +92,41 @@ public final class EventDispatcher<E> {
      * @param <F> The event type.
      * @return The listener created.
      */
+    public <F extends E> Listener<E> register(TypeToken<F> eventType, boolean specific, Consumer<F> listener, int priority) {
+        @SuppressWarnings("unchecked")
+        Listener<E> registered = (Listener<E>) new Listener<>((Class<F>) rawType(eventType.getType()), specific, listener, priority);
+        listeners.add(registered);
+        listeners.sort(Comparator.comparingInt(Listener::priority));
+        return registered;
+    }
+
+    /**
+     * Registers a listener, receiving event calls.
+     * @param eventType The event type.
+     * @param specific If the specific event type should be listened for, or all subtypes as well.
+     * @param listener The action to run for the event.
+     * @param priority The event priority. Default is {@link #DEFAULT_PRIORITY}.
+     * @param <F> The event type.
+     * @return The listener created.
+     */
     public <F extends E> Listener<E> register(Class<F> eventType, boolean specific, Consumer<F> listener, int priority) {
         @SuppressWarnings("unchecked")
         Listener<E> registered = (Listener<E>) new Listener<>(eventType, specific, listener, priority);
         listeners.add(registered);
         listeners.sort(Comparator.comparingInt(Listener::priority));
         return registered;
+    }
+
+    /**
+     * Registers a listener, receiving event calls.
+     * @param eventType The event type.
+     * @param listener The action to run for the event.
+     * @param priority The event priority. Default is {@link #DEFAULT_PRIORITY}.
+     * @param <F> The event type.
+     * @return The listener created.
+     */
+    public <F extends E> Listener<E> register(TypeToken<F> eventType, Consumer<F> listener, int priority) {
+        return register(eventType, false, listener, priority);
     }
 
     /**
@@ -120,8 +149,31 @@ public final class EventDispatcher<E> {
      * @param <F> The event type.
      * @return The listener created.
      */
+    public <F extends E> Listener<E> register(TypeToken<F> eventType, boolean specific, Consumer<F> listener) {
+        return register(eventType, specific, listener, DEFAULT_PRIORITY);
+    }
+
+    /**
+     * Registers a listener, receiving event calls.
+     * @param eventType The event type.
+     * @param specific If the specific event type should be listened for, or all subtypes as well.
+     * @param listener The action to run for the event.
+     * @param <F> The event type.
+     * @return The listener created.
+     */
     public <F extends E> Listener<E> register(Class<F> eventType, boolean specific, Consumer<F> listener) {
         return register(eventType, specific, listener, DEFAULT_PRIORITY);
+    }
+
+    /**
+     * Registers a listener, receiving event calls.
+     * @param eventType The event type.
+     * @param listener The action to run for the event.
+     * @param <F> The event type.
+     * @return The listener created.
+     */
+    public <F extends E> Listener<E> register(TypeToken<F> eventType, Consumer<F> listener) {
+        return register(eventType, false, listener, DEFAULT_PRIORITY);
     }
 
     /**
@@ -179,5 +231,20 @@ public final class EventDispatcher<E> {
             listener.listener.accept(event);
         }
         return event;
+    }
+
+    private static Class<?> rawType(Type type) {
+        // https://github.com/google/gson/blob/master/gson/src/main/java/com/google/gson/internal/%24Gson%24Types.java
+        if (type instanceof Class<?> t)
+            return t;
+        else if (type instanceof ParameterizedType t)
+            return (Class<?>) t.getRawType();
+        else if (type instanceof GenericArrayType t)
+            return Array.newInstance(rawType(t.getGenericComponentType()), 0).getClass();
+        else if (type instanceof TypeVariable)
+            return Object.class;
+        else if (type instanceof WildcardType t)
+            return rawType(t.getUpperBounds()[0]);
+        throw new IllegalArgumentException("Could not get raw type from a " + type.getClass().getName());
     }
 }
