@@ -20,7 +20,7 @@ public final class Text {
         Validation.notNull("thrown", (Object) thrown);
         Validation.notNull("delimiter", delimiter);
 
-        String text = thrown.getClass().getSimpleName() + (thrown.getMessage() != null ? " (" + thrown.getMessage() + ")" : "");
+        String text = thrown.getClass().getSimpleName() + (thrown.getMessage() != null ? " - " + thrown.getMessage() : "");
         return thrown.getCause() == null ? text : text + delimiter + mergeMessages(thrown.getCause(), delimiter);
     }
 
@@ -31,7 +31,7 @@ public final class Text {
      * @return The joined message.
      */
     public static String mergeMessages(Throwable thrown) {
-        return mergeMessages(thrown, ": ");
+        return mergeMessages(thrown, " > ");
     }
 
     /**

@@ -36,6 +36,16 @@ public abstract class BasePlugin<S extends BasePlugin<S>> extends JavaPlugin {
     /** The path to the resources manifest file in the JAR. */
     public static final String PATH_RESOURCES = "resources.conf";
 
+    /** How detailed stack trace logs will be. */
+    public enum StackTraceLogging {
+        /** The entire stack trace is logged. */
+        FULL,
+        /** A user-readable, per-line breakdown of the trace is logged. */
+        SIMPLIFIED,
+        /** A single-line, compact version of the trace is logged. */
+        MINIMAL
+    }
+
     /** The resources that this defines. */
     protected ResourceManifest resourceManifest;
     /** The namespaced keys this caches. */
@@ -284,7 +294,8 @@ public abstract class BasePlugin<S extends BasePlugin<S>> extends JavaPlugin {
      * @param args The arguments.
      */
     public void log(Logging.Level level, String message, Object... args) {
-        logging.log(level, message.formatted(args));
+        for (var line : message.formatted(args).split("\n"))
+            logging.log(level, line);
     }
 
     /**
@@ -295,13 +306,21 @@ public abstract class BasePlugin<S extends BasePlugin<S>> extends JavaPlugin {
      * @param args The arguments.
      */
     public void log(Logging.Level level, Throwable thrown, String message, Object... args) {
-        if (setting(true, ConfigurationNode::getBoolean, "print_stack_traces")) {
-            log(level, message, args);
-            for (String line : Text.stackTrace(thrown, 4)) {
-                log(level, line);
+        switch (setting(StackTraceLogging.FULL, (n, d) -> n.get(StackTraceLogging.class, d), "stack_trace_logging")) {
+            case FULL -> {
+                log(level, message, args);
+                for (var line : Text.stackTrace(thrown, 4)) {
+                    log(level, line);
+                }
             }
-        } else {
-            log(level, "%s: %s".formatted(message.formatted(args), Text.mergeMessages(thrown)));
+            case SIMPLIFIED -> {
+                log(level, message.formatted(args) + ":");
+                for (Throwable cur = thrown; cur != null; cur = cur.getCause()) {
+                    log(level, "    " + cur.getClass().getSimpleName() +
+                            (cur.getMessage() == null ? "" : ": " + cur.getMessage()));
+                }
+            }
+            case MINIMAL -> log(level, message.formatted(args) + ": " + Text.mergeMessages(thrown));
         }
     }
 
