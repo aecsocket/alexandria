@@ -1,6 +1,7 @@
 package com.gitlab.aecsocket.minecommons.core.translation;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.JoinConfiguration;
 
 import java.util.*;
 import java.util.function.Supplier;
@@ -134,7 +135,7 @@ public abstract class AbstractLocalizer implements RegistryLocalizer {
     @Override
     public Optional<Component> get(Locale locale, String key, Object... args) {
         return use(locale, () -> use(defaultLocale, Optional::empty, key, args), key, args)
-                .map(c -> Component.join(Component.newline(), c));
+                .map(c -> Component.join(JoinConfiguration.separator(Component.newline()), c));
     }
 
     @Override
