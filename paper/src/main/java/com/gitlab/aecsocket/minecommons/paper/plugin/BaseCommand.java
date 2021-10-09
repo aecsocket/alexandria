@@ -10,7 +10,7 @@ import cloud.commandframework.execution.CommandExecutionCoordinator;
 import cloud.commandframework.minecraft.extras.MinecraftExceptionHandler;
 import cloud.commandframework.minecraft.extras.MinecraftHelp;
 import cloud.commandframework.paper.PaperCommandManager;
-import net.kyori.adventure.text.Component;
+import com.gitlab.aecsocket.minecommons.core.translation.Localizer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginDescriptionFile;
@@ -19,7 +19,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -72,6 +71,8 @@ public class BaseCommand<P extends BasePlugin<P>> {
 
     /** The plugin that this command is registered under. */
     protected final P plugin;
+    /** The plugin's localizer. */
+    protected final Localizer lc;
     /** The underlying command manager. */
     protected final PaperCommandManager<CommandSender> manager;
     /** The help command builder. */
@@ -94,6 +95,7 @@ public class BaseCommand<P extends BasePlugin<P>> {
      */
     public BaseCommand(P plugin, String rootName, BiFunction<PaperCommandManager<CommandSender>, String, Command.Builder<CommandSender>> rootFactory) throws Exception {
         this.plugin = plugin;
+        lc = plugin.localizer;
         manager = new PaperCommandManager<>(plugin,
                 CommandExecutionCoordinator.simpleCoordinator(),
                 Function.identity(), Function.identity());
@@ -102,8 +104,6 @@ public class BaseCommand<P extends BasePlugin<P>> {
 
         this.rootName = rootName;
         help = new MinecraftHelp<>("/%s help".formatted(rootName), s -> s, manager);
-        help.messageProvider((sender, key, args) -> lc(locale(sender), PREFIX_COMMAND + ".help." + key)
-                .orElseThrow(() -> new IllegalArgumentException("Could not get localized message for help message: " + key)));
 
         if (manager.getCaptionRegistry() instanceof FactoryDelegatingCaptionRegistry<CommandSender> captions) {
             this.captions = captions;
@@ -116,7 +116,7 @@ public class BaseCommand<P extends BasePlugin<P>> {
                 .withInvalidSyntaxHandler()
                 .withNoPermissionHandler()
                 .withCommandExecutionHandler()
-                .withDecorator(msg -> lc(plugin.defaultLocale(), KEY_COMMAND_ERROR,
+                .withDecorator(msg -> lc.get(plugin.defaultLocale(), KEY_COMMAND_ERROR,
                         "message", msg)
                         .orElseThrow(() -> new IllegalArgumentException("Could not get command error localization at " + KEY_COMMAND_ERROR)));
         exceptionHandler.apply(manager, s -> s);
@@ -177,15 +177,6 @@ public class BaseCommand<P extends BasePlugin<P>> {
     protected Locale locale(CommandSender sender) { return plugin().locale(sender); }
 
     /**
-     * Localizes a key and arguments into a component, using a specific locale.
-     * @param locale The locale to localize for.
-     * @param key The key of the localization value.
-     * @param args The arguments.
-     * @return The localized component.
-     */
-    protected Optional<Component> lc(Locale locale, String key, Object... args) { return plugin().lc().get(locale, key, args); }
-
-    /**
      * Returns a player if the sender if a player, otherwise null.
      * @param sender The sender.
      * @return The player, or null.
@@ -215,7 +206,7 @@ public class BaseCommand<P extends BasePlugin<P>> {
         try {
             handler.handle(ctx, sender, locale, player(sender));
         } catch (CommandException e) {
-            lc(locale, e.key, e.args).ifPresent(sender::sendMessage);
+            lc.lines(locale, e.key, e.args).ifPresent(m -> m.forEach(sender::sendMessage));
         }
     }
 
@@ -237,7 +228,7 @@ public class BaseCommand<P extends BasePlugin<P>> {
      * @param args The localization arguments.
      */
     protected void send(CommandSender sender, Locale locale, String key, Object... args) {
-        lc(locale, PREFIX_COMMAND + "." + key, args).ifPresent(sender::sendMessage);
+        lc.lines(locale, PREFIX_COMMAND + "." + key, args).ifPresent(m -> m.forEach(sender::sendMessage));
     }
 
     /**
