@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 /**
  * Utility class for using a Cloud {@link PaperCommandManager}.
@@ -241,9 +240,9 @@ public class BaseCommand<P extends BasePlugin<P>> {
      * @return The argument.
      * @throws CommandException If there was no value, and the default value was null or there was no player sender.
      */
-    protected <T> T defaultedArg(CommandContext<CommandSender> ctx, String key, @Nullable Player pSender, Supplier<T> ifPlayer) throws CommandException {
+    protected <T> T defaultedArg(CommandContext<CommandSender> ctx, String key, @Nullable Player pSender, Function<Player, T> ifPlayer) throws CommandException {
         return ctx.<T>getOptional(key).orElseGet(() -> {
-            T result = pSender == null ? null : ifPlayer.get();
+            T result = pSender == null ? null : ifPlayer.apply(pSender);
             if (result == null)
                 throw error("no_arg", "arg", key);
             return result;
@@ -258,8 +257,9 @@ public class BaseCommand<P extends BasePlugin<P>> {
      * @return The players.
      * @throws CommandException If there were no targets selected.
      */
-    protected List<Player> targets(CommandContext<CommandSender> ctx, String key, Player pSender) throws CommandException {
-        List<Player> targets = this.defaultedArg(ctx, key, pSender, () -> new MultiplePlayerSelector("", Collections.singletonList(pSender))).getPlayers();
+    protected List<Player> targets(CommandContext<CommandSender> ctx, String key, @Nullable Player pSender) throws CommandException {
+        List<Player> targets = defaultedArg(ctx, key, pSender,
+                p -> new MultiplePlayerSelector("", Collections.singletonList(p))).getPlayers();
         if (targets.size() == 0)
             throw error("no_targets");
         return targets;

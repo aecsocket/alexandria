@@ -67,6 +67,18 @@ public record Duration(long ms) {
     public long seconds() { return ms / 1000; }
 
     /**
+     * The amount of total ticks in this duration.
+     * @return The value.
+     */
+    public long ticks() { return ms / Ticks.MSPT; }
+
+    /**
+     * The amount of exclusive ticks in this duration.
+     * @return The value.
+     */
+    public long exclTicks() { return ticks() % Ticks.TPS; }
+
+    /**
      * The amount of exclusive seconds in this duration.
      * @return The value.
      */
