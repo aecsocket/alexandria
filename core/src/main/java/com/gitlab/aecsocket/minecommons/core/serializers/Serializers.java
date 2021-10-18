@@ -2,6 +2,7 @@ package com.gitlab.aecsocket.minecommons.core.serializers;
 
 import com.gitlab.aecsocket.minecommons.core.Duration;
 import com.gitlab.aecsocket.minecommons.core.Logging;
+import com.gitlab.aecsocket.minecommons.core.Range;
 import com.gitlab.aecsocket.minecommons.core.serializers.color.TextColorSerializer;
 import com.gitlab.aecsocket.minecommons.core.serializers.vector.Point2Serializer;
 import com.gitlab.aecsocket.minecommons.core.serializers.vector.Point3Serializer;
@@ -44,6 +45,7 @@ public final class Serializers {
             .register(Point3.class, Point3Serializer.INSTANCE)
             .register(TextColor.class, TextColorSerializer.INSTANCE)
             .register(Duration.class, DurationSerializer.INSTANCE)
+            .register(Range.class, RangeSerializer.INSTANCE)
             .registerExact(Key.class, KeySerializer.INSTANCE)
             .registerAll(ConfigurateComponentSerializer.configurate().serializers())
             .build();

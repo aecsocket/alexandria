@@ -1,5 +1,7 @@
 package com.gitlab.aecsocket.minecommons.core.serializers.vector;
 
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
@@ -68,9 +70,26 @@ public abstract class AbstractVector3DSerializer<T> implements TypeSerializer<T>
                     node.node(1).getDouble(0),
                     node.node(2).getDouble(0)
             );
-        } else {
-            double v = node.getDouble();
-            return of(v, v, v);
+        } else if (node.raw() instanceof String string) {
+            if (string.startsWith("#")) {
+                try {
+                    int hex = (int) Long.parseLong(string.substring(1), 16);
+                    return of(
+                            ((hex >> 16) & 0xff) / 255d,
+                            ((hex >> 8) & 0xff) / 255d,
+                            (hex & 0xff) / 255d
+                    );
+                } catch (NumberFormatException e) {
+                    throw new SerializationException(node, type, "Invalid hex color '" + string + "'", e);
+                }
+            } else {
+                TextColor color = NamedTextColor.NAMES.value(string);
+                if (color != null)
+                    return of(color.red(), color.green(), color.blue());
+            }
         }
+
+        double v = node.getDouble();
+        return of(v, v, v);
     }
 }

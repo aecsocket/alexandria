@@ -1,13 +1,15 @@
 package com.gitlab.aecsocket.minecommons.core.vector.cartesian;
 
+import com.gitlab.aecsocket.minecommons.core.Numbers;
 import com.gitlab.aecsocket.minecommons.core.Validation;
 import com.gitlab.aecsocket.minecommons.core.vector.polar.Coord3;
+import org.checkerframework.common.value.qual.IntRange;
 
 import java.util.function.Function;
 
-import static java.lang.Math.*;
 import static com.gitlab.aecsocket.minecommons.core.Numbers.*;
 import static com.gitlab.aecsocket.minecommons.core.vector.polar.Coord3.*;
+import static java.lang.Math.*;
 
 /**
  * An immutable (x, y, z) double value triplet, using the Cartesian coordinate system.
@@ -40,6 +42,185 @@ public record Vector3(double x, double y, double z) {
     public static Vector3 vec3(double v) {
         return vec3(v, v, v);
     }
+
+    /**
+     * Creates a color from the red, green, blue components.
+     * @param r The red component.
+     * @param g The green component.
+     * @param b The blue component.
+     * @return The vector.
+     */
+    public static Vector3 rgb(double r, double g, double b) {
+        return new Vector3(r, g, b);
+    }
+
+    /**
+     * Creates a color from the red, green, blue components.
+     * @param r The red component.
+     * @param g The green component.
+     * @param b The blue component.
+     * @return The vector.
+     */
+    public static Vector3 rgb(
+            @IntRange(from = 0x00, to = 0xff) int r,
+            @IntRange(from = 0x00, to = 0xff) int g,
+            @IntRange(from = 0x00, to = 0xff) int b
+    ) {
+        return new Vector3(r / 255d, g / 255d, b / 255d);
+    }
+
+    /**
+     * Creates a color from the packed RGB color value.
+     * @param value The packed RGB value.
+     * @return The vector.
+     */
+    public static Vector3 rgb(int value) {
+        return rgb(
+                (value >> 16) & 0xff,
+                (value >> 8) & 0xff,
+                value & 0xff
+        );
+    }
+
+    /**
+     * Creates an HSV color from the hue, saturation, value components.
+     * @param h The hue component.
+     * @param s The saturation component.
+     * @param v The value component.
+     * @return The vector.
+     */
+    public static Vector3 hsv(double h, double s, double v) {
+        return new Vector3(h, s, v);
+    }
+
+    /**
+     * Creates an HSV color from the red, green, blue components of an RGB color.
+     * @param r The red component.
+     * @param g The green component.
+     * @param b The blue component.
+     * @return The vector.
+     */
+    public static Vector3 hsvFromRgb(double r, double g, double b) {
+        double min = Math.min(r, Math.min(g, b)), max = Math.max(r, Math.max(g, b));
+        double delta = max - min;
+
+        double s = max == 0 ? 0 : delta / max;
+        if (s == 0)
+            return new Vector3(0, s, max);
+
+        double h;
+        if (r == max)
+            h = (g - b) / delta;
+        else if (g == max)
+            h = 2 + (b - r) / delta;
+        else
+            h = 4 + (r - g) / delta;
+        h *= 60;
+        if (h < 0)
+            h += 360;
+        return new Vector3(h / 360, s, max);
+    }
+
+    /**
+     * Creates an HSV color from the red, green, blue components of an RGB color.
+     * @param r The red component.
+     * @param g The green component.
+     * @param b The blue component.
+     * @return The vector.
+     */
+    public static Vector3 hsvFromRgb(
+            @IntRange(from = 0x00, to = 0xff) int r,
+            @IntRange(from = 0x00, to = 0xff) int g,
+            @IntRange(from = 0x00, to = 0xff) int b
+    ) {
+        return hsvFromRgb(r / 255d, g / 255d, b / 255d);
+    }
+
+    /**
+     * Creates an RGB color from the hue, saturation, value components of an HSV color.
+     * @param h The hue component.
+     * @param s The saturation component.
+     * @param v The value component.
+     * @return The vector.
+     */
+    @SuppressWarnings("SuspiciousNameCombination")
+    public static Vector3 rgbFromHsv(double h, double s, double v) {
+        s = Numbers.clamp01(s);
+        v = Numbers.clamp01(v);
+        if (s == 0)
+            return new Vector3(v, v, v);
+
+        h = Numbers.wrap(h, 0, 1) * 6;
+        int sector = (int) h;
+        double f = h - sector,
+                x = v * (1 - s),
+                y = v * (1 - s * f),
+                z = v * (1 - s * (1 - f));
+
+        switch (sector) {
+            case 0 -> new Vector3(v, z, x);
+            case 1 -> new Vector3(y, v, x);
+            case 2 -> new Vector3(x, v, z);
+            case 3 -> new Vector3(x, y, v);
+            case 4 -> new Vector3(z, x, v);
+            case 5 -> new Vector3(v, x, y);
+        }
+        throw new IllegalArgumentException("HSV sector fell outside bounds (HOW)");
+    }
+
+    /**
+     * Gets the red color channel (X component).
+     * @return The value.
+     */
+    public double r() { return x; }
+
+    /**
+     * Gets the red color channel between 0 and 255 (X component).
+     * @return The value.
+     */
+    public int ir() { return (int) (x * 255); }
+
+    /**
+     * Gets the green color channel (Y component).
+     * @return The value.
+     */
+    public double g() { return y; }
+
+    /**
+     * Gets the green color channel between 0 and 255 (Y component).
+     * @return The value.
+     */
+    public int ig() { return (int) (y * 255); }
+
+    /**
+     * Gets the blue color channel (Z component).
+     * @return The value.
+     */
+    public double b() { return z; }
+
+    /**
+     * Gets the blue color channel between 0 and 255 (Z component).
+     * @return The value.
+     */
+    public int ib() { return (int) (z * 255); }
+
+    /**
+     * Gets the hue component of this HSV vector (X component).
+     * @return The value.
+     */
+    public double h() { return x; }
+
+    /**
+     * Gets the saturation component of this HSV vector (Y component).
+     * @return The value.
+     */
+    public double s() { return y; }
+
+    /**
+     * Gets the value component of this HSV vector (Z component).
+     * @return The value.
+     */
+    public double v() { return z; }
 
     /**
      * Creates a new vector with the specified component changed.
@@ -471,6 +652,22 @@ public record Vector3(double x, double y, double z) {
      */
     public Coord3 spherical() {
         return coord3(sphericalR(), sphericalYaw(), sphericalPitch());
+    }
+
+    /**
+     * Converts this, as an RGB color, to an HSV color.
+     * @return A vector as an HSV color.
+     */
+    public Vector3 rgbToHsv() {
+        return hsvFromRgb(x, y, z);
+    }
+
+    /**
+     * Converts this, as an HSV color, to an RGB color.
+     * @return A vector as an RGB color.
+     */
+    public Vector3 hsvToRgb() {
+        return rgbFromHsv(x, y, z);
     }
 
     @Override public String toString() { return "(%s, %s, %s)".formatted(""+x, ""+y, ""+z); }

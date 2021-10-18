@@ -29,6 +29,10 @@ public class DurationSerializer implements TypeSerializer<Duration> {
 
     @Override
     public Duration deserialize(Type type, ConfigurationNode node) throws SerializationException {
-        return Duration.duration(require(node, String.class));
+        try {
+            return Duration.duration(require(node, String.class));
+        } catch (IllegalArgumentException e) {
+            throw new SerializationException(node, type, e);
+        }
     }
 }
