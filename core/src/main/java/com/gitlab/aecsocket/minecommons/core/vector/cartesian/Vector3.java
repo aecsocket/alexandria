@@ -655,6 +655,16 @@ public record Vector3(double x, double y, double z) {
     }
 
     /**
+     * Converts this, as an RGB color, to the packed integer format.
+     * @return The packed RGB color.
+     */
+    public int rgb() {
+        return (ir() & 0xff) << 16
+                | (ig() & 0xff) << 8
+                | ib() & 0xff;
+    }
+
+    /**
      * Converts this, as an RGB color, to an HSV color.
      * @return A vector as an HSV color.
      */
