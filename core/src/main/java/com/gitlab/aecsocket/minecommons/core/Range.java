@@ -3,7 +3,8 @@ package com.gitlab.aecsocket.minecommons.core;
 /**
  * An object representing a range between two values, with a minimum and a maximum.
  */
-public interface Range {
+public sealed interface Range
+    permits Range.Integer, Range.Long, Range.Float, Range.Double {
     /**
      * Creates an integer range.
      * @param min The minimum.

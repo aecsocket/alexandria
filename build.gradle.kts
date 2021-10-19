@@ -5,7 +5,7 @@ plugins {
 
 allprojects {
     group = "com.gitlab.aecsocket.minecommons"
-    version = "1.2"
+    version = "1.3"
     description = "Commons library for Minecraft"
 }
 
@@ -13,8 +13,8 @@ subprojects {
     apply<JavaLibraryPlugin>()
 
     java {
-        targetCompatibility = JavaVersion.toVersion(16)
-        sourceCompatibility = JavaVersion.toVersion(16)
+        targetCompatibility = JavaVersion.toVersion(17)
+        sourceCompatibility = JavaVersion.toVersion(17)
     }
 
     repositories {
@@ -30,13 +30,13 @@ subprojects {
     tasks {
         compileJava {
             options.encoding = Charsets.UTF_8.name()
-            options.release.set(16)
+            options.release.set(17)
         }
 
         javadoc {
             val opt = options as StandardJavadocDocletOptions
             opt.encoding = Charsets.UTF_8.name()
-            opt.source("16")
+            opt.source("17")
             opt.linkSource(true)
             opt.author(true)
         }
