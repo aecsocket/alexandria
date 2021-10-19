@@ -2,9 +2,8 @@ package com.gitlab.aecsocket.minecommons.paper;
 
 import com.gitlab.aecsocket.minecommons.core.bounds.Bound;
 import com.gitlab.aecsocket.minecommons.core.bounds.Compound;
-import com.gitlab.aecsocket.minecommons.core.vector.cartesian.Vector3;
-import net.minecraft.core.BlockPosition;
-import net.minecraft.world.phys.AxisAlignedBB;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
@@ -32,10 +31,10 @@ public final class PaperBounds {
      */
     public static Bound from(VoxelShape shape) {
         List<Bound> bounds = new ArrayList<>();
-        for (AxisAlignedBB bb : shape.toList()) {
+        for (AABB bb : shape.toAabbs()) {
             bounds.add(box(
-                    vec3(bb.a, bb.b, bb.c),
-                    vec3(bb.d, bb.e, bb.f)
+                    vec3(bb.minX, bb.minY, bb.minZ),
+                    vec3(bb.maxX, bb.maxY, bb.maxZ)
             ));
         }
         return new Compound(bounds.toArray(new Bound[0]));
@@ -49,7 +48,7 @@ public final class PaperBounds {
     public static Bound from(Block block) {
         VoxelShape shape = ((CraftBlock) block).getNMS().getShape(
                 ((CraftChunk) block.getChunk()).getHandle(),
-                new BlockPosition(block.getX(), block.getY(), block.getZ())
+                new BlockPos(block.getX(), block.getY(), block.getZ())
         );
         return from(shape);
     }

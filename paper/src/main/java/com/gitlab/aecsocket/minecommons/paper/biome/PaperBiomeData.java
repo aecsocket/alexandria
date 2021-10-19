@@ -6,11 +6,10 @@ import com.gitlab.aecsocket.minecommons.core.biome.Geography;
 import com.gitlab.aecsocket.minecommons.core.biome.Precipitation;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import net.minecraft.data.RegistryGeneration;
-import net.minecraft.world.level.biome.BiomeBase;
-import net.minecraft.world.level.biome.BiomeSettingsGeneration;
-import net.minecraft.world.level.biome.BiomeSettingsMobs;
-import org.bukkit.block.Biome;
+import net.minecraft.data.BuiltinRegistries;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.BiomeGenerationSettings;
+import net.minecraft.world.level.biome.MobSpawnSettings;
 import org.bukkit.craftbukkit.v1_17_R1.block.CraftBlock;
 
 import java.util.HashMap;
@@ -26,40 +25,40 @@ public record PaperBiomeData(
         float temperature,
         float humidity,
         PaperBiomeEffects effects,
-        BiomeSettingsMobs mobs,
-        BiomeSettingsGeneration generation
+        MobSpawnSettings mobs,
+        BiomeGenerationSettings generation
 ) implements BiomeData {
     /**
      * A map of NMS precipitation enum values to ours.
      */
-    public static final BiMap<BiomeBase.Precipitation, Precipitation> PRECIPITATION = HashBiMap.create(CollectionBuilder.map(new HashMap<BiomeBase.Precipitation, Precipitation>())
-            .put(BiomeBase.Precipitation.a, Precipitation.NONE)
-            .put(BiomeBase.Precipitation.b, Precipitation.RAIN)
-            .put(BiomeBase.Precipitation.c, Precipitation.SNOW)
+    public static final BiMap<Biome.Precipitation, Precipitation> PRECIPITATION = HashBiMap.create(CollectionBuilder.map(new HashMap<Biome.Precipitation, Precipitation>())
+            .put(Biome.Precipitation.NONE, Precipitation.NONE)
+            .put(Biome.Precipitation.RAIN, Precipitation.RAIN)
+            .put(Biome.Precipitation.SNOW, Precipitation.SNOW)
             .get());
 
     /**
      * A map of NMS geography enum values to ours.
      */
-    public static final BiMap<BiomeBase.Geography, Geography> GEOGRAPHY = HashBiMap.create(CollectionBuilder.map(new HashMap<BiomeBase.Geography, Geography>())
-            .put(BiomeBase.Geography.a, Geography.NONE)
-            .put(BiomeBase.Geography.b, Geography.TAIGA)
-            .put(BiomeBase.Geography.c, Geography.EXTREME_HILLS)
-            .put(BiomeBase.Geography.d, Geography.JUNGLE)
-            .put(BiomeBase.Geography.e, Geography.MESA)
-            .put(BiomeBase.Geography.f, Geography.PLAINS)
-            .put(BiomeBase.Geography.g, Geography.SAVANNA)
-            .put(BiomeBase.Geography.h, Geography.ICY)
-            .put(BiomeBase.Geography.i, Geography.THE_END)
-            .put(BiomeBase.Geography.j, Geography.BEACH)
-            .put(BiomeBase.Geography.k, Geography.FOREST)
-            .put(BiomeBase.Geography.l, Geography.OCEAN)
-            .put(BiomeBase.Geography.m, Geography.DESERT)
-            .put(BiomeBase.Geography.n, Geography.RIVER)
-            .put(BiomeBase.Geography.o, Geography.SWAMP)
-            .put(BiomeBase.Geography.p, Geography.MUSHROOM)
-            .put(BiomeBase.Geography.q, Geography.NETHER)
-            .put(BiomeBase.Geography.r, Geography.UNDERGROUND)
+    public static final BiMap<Biome.BiomeCategory, Geography> GEOGRAPHY = HashBiMap.create(CollectionBuilder.map(new HashMap<Biome.BiomeCategory, Geography>())
+            .put(Biome.BiomeCategory.NONE, Geography.NONE)
+            .put(Biome.BiomeCategory.TAIGA, Geography.TAIGA)
+            .put(Biome.BiomeCategory.EXTREME_HILLS, Geography.EXTREME_HILLS)
+            .put(Biome.BiomeCategory.JUNGLE, Geography.JUNGLE)
+            .put(Biome.BiomeCategory.MESA, Geography.MESA)
+            .put(Biome.BiomeCategory.PLAINS, Geography.PLAINS)
+            .put(Biome.BiomeCategory.SAVANNA, Geography.SAVANNA)
+            .put(Biome.BiomeCategory.ICY, Geography.ICY)
+            .put(Biome.BiomeCategory.THEEND, Geography.THE_END)
+            .put(Biome.BiomeCategory.BEACH, Geography.BEACH)
+            .put(Biome.BiomeCategory.FOREST, Geography.FOREST)
+            .put(Biome.BiomeCategory.OCEAN, Geography.OCEAN)
+            .put(Biome.BiomeCategory.DESERT, Geography.DESERT)
+            .put(Biome.BiomeCategory.RIVER, Geography.RIVER)
+            .put(Biome.BiomeCategory.SWAMP, Geography.SWAMP)
+            .put(Biome.BiomeCategory.MUSHROOM, Geography.MUSHROOM)
+            .put(Biome.BiomeCategory.NETHER, Geography.NETHER)
+            .put(Biome.BiomeCategory.UNDERGROUND, Geography.UNDERGROUND)
             .get());
 
     /**
@@ -67,17 +66,17 @@ public record PaperBiomeData(
      * @param nms The NMS handle.
      * @return The biome data.
      */
-    public static PaperBiomeData from(BiomeBase nms) {
+    public static PaperBiomeData from(Biome nms) {
         return new PaperBiomeData(
-                PRECIPITATION.get(nms.c()),
-                GEOGRAPHY.get(nms.t()),
-                nms.h(), // depth
-                nms.j(), // scale
-                nms.k(), // temperature
-                nms.getHumidity(),
-                PaperBiomeEffects.from(nms.l()), // settings/fog
-                nms.b(), // mobs
-                nms.e() // generation
+                PRECIPITATION.get(nms.getPrecipitation()),
+                GEOGRAPHY.get(nms.getBiomeCategory()),
+                nms.getDepth(),
+                nms.getScale(),
+                nms.getBaseTemperature(),
+                nms.getDownfall(),
+                PaperBiomeEffects.from(nms.getSpecialEffects()),
+                nms.getMobSettings(),
+                nms.getGenerationSettings()
         );
     }
 
@@ -86,26 +85,26 @@ public record PaperBiomeData(
      * @param biome The biome.
      * @return The biome data.
      */
-    public static PaperBiomeData from(Biome biome) {
-        return from(CraftBlock.biomeToBiomeBase(RegistryGeneration.i, biome));
+    public static PaperBiomeData from(org.bukkit.block.Biome biome) {
+        return from(CraftBlock.biomeToBiomeBase(BuiltinRegistries.BIOME, biome));
     }
 
     /**
      * Converts this data to an NMS handle.
      * @return The NMS handle.
      */
-    public BiomeBase toHandle() {
-        return new BiomeBase.a()
-                .a(PRECIPITATION.inverse().get(precipitation))
-                .a(GEOGRAPHY.inverse().get(geography))
-                .a(depth)
-                .b(scale)
-                .c(temperature)
-                .a(BiomeBase.TemperatureModifier.a)
-                .d(humidity)
-                .a(effects.toHandle())
-                .a(mobs)
-                .a(generation)
-                .a();
+    public net.minecraft.world.level.biome.Biome toHandle() {
+        return new Biome.BiomeBuilder()
+                .precipitation(PRECIPITATION.inverse().get(precipitation))
+                .biomeCategory(GEOGRAPHY.inverse().get(geography))
+                .depth(depth)
+                .scale(scale)
+                .temperature(temperature)
+                .temperatureAdjustment(Biome.TemperatureModifier.NONE)
+                .downfall(humidity)
+                .specialEffects(effects.toHandle())
+                .mobSpawnSettings(mobs)
+                .generationSettings(generation)
+                .build();
     }
 }

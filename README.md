@@ -1,11 +1,15 @@
 # Minecommons
 
-Commons library for Minecraft-related projects, with features such as vector manipulation,
+![](banner.svg)
+
+Common utilities for Minecraft-related projects, with features such as vector manipulation,
 event dispatchers and serialization support.
 
 ---
 
 ## Paper
+
+![](banner.svg)
 
 Minecommons is exposed as a Paper plugin, for other plugins to depend on.
 

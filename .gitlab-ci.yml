@@ -2,44 +2,24 @@ image: gradle:jdk17
 
 stages:
   - build
-  - test
   - deploy
 
 variables:
   GRADLE_OPTS: "-Dmaven.repo.local=${CI_PROJECT_DIR}/.m2/repository"
   GRADLE_USER_HOME: "${CI_PROJECT_DIR}/.gradle"
-  MC_VERSION: "1.17.1"
 
 build:
   stage: build
   script:
-    # Install libraries
-    - "mkdir -p libraries && cd libraries"
-    # Paper
-    - "git clone https://github.com/papermc/paper || true"
-    - "cd paper"
-    - "git pull"
-    - "git config --global user.email 'ci'"
-    - "git config --global user.name 'ci'"
-    - "gradle applyPatches"
-    - "gradle publishToMavenLocal"
-
-    # Build project
-    - "cd ../.."
-    - "gradle --build-cache assemble shadowJar"
-
-    # Test
-    - "gradle check"
-
-    # Publish
-    - "gradle publish"
+    - "./gradlew --build-cache assemble shadowJar reobfJar"
+    - "./gradlew check"
+    - "./gradlew publish"
   cache:
     key: "$CI_COMMIT_REF_NAME"
     policy: pull-push
     paths:
       - "*/build"
-      - ".gradle"
-      - "libraries"
+      - "*/.gradle"
       - ".m2/repository"
   artifacts:
     paths:
@@ -59,7 +39,7 @@ pages:
     policy: pull
     paths:
       - "*/build"
-      - ".gradle"
+      - "*/.gradle"
       - ".m2/repository"
   artifacts:
     paths:

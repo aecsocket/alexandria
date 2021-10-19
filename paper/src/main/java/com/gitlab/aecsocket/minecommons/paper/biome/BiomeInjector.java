@@ -1,11 +1,11 @@
 package com.gitlab.aecsocket.minecommons.paper.biome;
 
+import com.gitlab.aecsocket.minecommons.paper.PaperEnvironment;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import net.minecraft.data.RegistryGeneration;
-import net.minecraft.data.worldgen.biome.BiomeRegistry;
+import net.minecraft.data.BuiltinRegistries;
+import net.minecraft.data.worldgen.biome.Biomes;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.level.biome.BiomeBase;
 import org.bukkit.block.Biome;
 import org.bukkit.craftbukkit.v1_17_R1.block.CraftBlock;
 
@@ -29,13 +29,13 @@ public final class BiomeInjector {
         for (var biome : Biome.values())
             biomeData.put(biome, PaperBiomeData.from(biome));
 
-        var registry = RegistryGeneration.i; // WORLDGEN_BIOME
-        Field idsField = BiomeRegistry.class.getDeclaredField("c");
+        var registry = BuiltinRegistries.BIOME;
+        Field idsField = Biomes.class.getDeclaredField(PaperEnvironment.map("TO_NAME", "c"));
         idsField.setAccessible(true);
         @SuppressWarnings("unchecked")
-        var ids = (Int2ObjectMap<ResourceKey<BiomeBase>>) idsField.get(null);
+        var ids = (Int2ObjectMap<ResourceKey<net.minecraft.world.level.biome.Biome>>) idsField.get(null);
         for (var entry : ids.int2ObjectEntrySet())
-            biomeIds.put(entry.getIntKey(), CraftBlock.biomeBaseToBiome(registry, registry.a(entry.getValue())));
+            biomeIds.put(entry.getIntKey(), CraftBlock.biomeBaseToBiome(registry, registry.get(entry.getValue())));
     }
 
     /**

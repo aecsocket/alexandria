@@ -14,13 +14,13 @@ configurations.compileOnlyApi {
 }
 
 dependencies {
-    exposedApi("org.spongepowered", "configurate-hocon", "4.1.1")
     exposedApi("com.google.guava", "guava", "30.1.1-jre")
+    exposedApi("org.spongepowered", "configurate-hocon", "4.1.2")
     exposedApi("net.kyori", "adventure-api", "4.9.2")
     exposedApi("net.kyori", "adventure-serializer-configurate4", "4.9.2")
     exposedApi("org.checkerframework", "checker-qual", "3.15.0")
-    exposedApi("io.leangen.geantyref", "geantyref", "1.3.4")
-    testRuntimeOnly("io.leangen.geantyref", "geantyref", "1.3.4")
+    exposedApi("io.leangen.geantyref", "geantyref", "1.3.11")
+    testRuntimeOnly("io.leangen.geantyref", "geantyref", "1.3.11")
     api("net.kyori", "adventure-text-minimessage", "4.1.0-SNAPSHOT") {
         exclude("net.kyori", "adventure-api")
     }
@@ -35,9 +35,11 @@ tasks {
     javadoc {
         val opt = options as StandardJavadocDocletOptions
         opt.links(
-                "https://docs.oracle.com/en/java/javase/16/docs/api/",
-                "https://configurate.aoeu.xyz/4.1.1/apidocs/",
-                "https://jd.adventure.kyori.net/api/4.8.1/"
+                "https://docs.oracle.com/en/java/javase/17/docs/api/",
+                "https://guava.dev/releases/snapshot-jre/api/docs/",
+                "https://configurate.aoeu.xyz/4.1.2/apidocs/",
+                "https://jd.adventure.kyori.net/api/4.9.2/",
+                "https://www.javadoc.io/doc/io.leangen.geantyref/geantyref/1.3.11/"
         )
     }
 }

@@ -11,8 +11,8 @@ import com.gitlab.aecsocket.minecommons.core.vector.cartesian.Vector3;
 import com.gitlab.aecsocket.minecommons.paper.PaperBounds;
 import com.gitlab.aecsocket.minecommons.paper.PaperUtils;
 import com.google.common.util.concurrent.AtomicDouble;
-import net.minecraft.server.level.WorldServer;
-import net.minecraft.world.phys.AxisAlignedBB;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.phys.AABB;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -396,13 +396,13 @@ public class PaperRaycast extends Raycast<PaperRaycast.PaperBoundable> {
     public Result<PaperBoundable> castEntities(Ray3 ray, double maxDistance, @Nullable Predicate<PaperBoundable> test) {
         Vector3 orig = ray.orig();
         Vector3 end = ray.point(maxDistance);
-        WorldServer world = ((CraftWorld) this.world).getHandle();
+        ServerLevel world = ((CraftWorld) this.world).getHandle();
 
         var nearestResult = new AtomicReference<Raycast.Result<PaperBoundable>>();
         var nearestDist = new AtomicDouble();
         Vector3 min = Vector3.min(orig, end);
         Vector3 max = Vector3.max(orig, end);
-        world.getEntities().a(new AxisAlignedBB(
+        world.getEntities().get(new AABB(
                 min.x() - entityLenience, min.y() - entityLenience, min.z() - entityLenience,
                 max.x() + entityLenience, max.y() + entityLenience, max.z() + entityLenience
         ), ent -> {

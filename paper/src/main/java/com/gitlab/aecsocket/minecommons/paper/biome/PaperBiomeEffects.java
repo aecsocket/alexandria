@@ -2,13 +2,13 @@ package com.gitlab.aecsocket.minecommons.paper.biome;
 
 import com.gitlab.aecsocket.minecommons.core.biome.BiomeEffects;
 import com.gitlab.aecsocket.minecommons.core.vector.cartesian.Vector3;
-import net.minecraft.data.RegistryGeneration;
+import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.sounds.Music;
-import net.minecraft.sounds.SoundEffect;
-import net.minecraft.world.level.biome.BiomeFog;
-import net.minecraft.world.level.biome.BiomeParticles;
-import net.minecraft.world.level.biome.CaveSound;
-import net.minecraft.world.level.biome.CaveSoundSettings;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.level.biome.AmbientAdditionsSettings;
+import net.minecraft.world.level.biome.AmbientMoodSettings;
+import net.minecraft.world.level.biome.AmbientParticleSettings;
+import net.minecraft.world.level.biome.BiomeSpecialEffects;
 import org.bukkit.block.Biome;
 import org.bukkit.craftbukkit.v1_17_R1.block.CraftBlock;
 
@@ -26,11 +26,11 @@ public record PaperBiomeEffects(
         Vector3 sky,
         Optional<Vector3> foliage,
         Optional<Vector3> grass,
-        BiomeFog.GrassColor grassModifier,
-        Optional<BiomeParticles> particles,
-        Optional<SoundEffect> ambientSound,
-        Optional<CaveSoundSettings> moodSound,
-        Optional<CaveSound> additionsSound,
+        BiomeSpecialEffects.GrassColorModifier grassModifier,
+        Optional<AmbientParticleSettings> particles,
+        Optional<SoundEvent> ambientSound,
+        Optional<AmbientMoodSettings> moodSound,
+        Optional<AmbientAdditionsSettings> additionsSound,
         Optional<Music> music
 ) implements BiomeEffects {
     /**
@@ -38,20 +38,20 @@ public record PaperBiomeEffects(
      * @param nms The NMS handle.
      * @return The biome effects.
      */
-    public static PaperBiomeEffects from(BiomeFog nms) {
+    public static PaperBiomeEffects from(BiomeSpecialEffects nms) {
         return new PaperBiomeEffects(
-                rgb(nms.a()), // fog
-                rgb(nms.b()), // water
-                rgb(nms.c()), // waterFog
-                rgb(nms.d()), // sky
-                nms.e().flatMap(v -> Optional.of(rgb(v))), // foliage
-                nms.f().flatMap(v -> Optional.of(rgb(v))), // grass
-                nms.g(), // grassModifier
-                nms.h(), // particles
-                nms.i(), // ambientSound
-                nms.j(), // moodSound
-                nms.k(), // additionsSound
-                nms.l() // music
+                rgb(nms.getFogColor()),
+                rgb(nms.getWaterColor()),
+                rgb(nms.getWaterFogColor()),
+                rgb(nms.getSkyColor()),
+                nms.getFoliageColorOverride().flatMap(v -> Optional.of(rgb(v))),
+                nms.getGrassColorOverride().flatMap(v -> Optional.of(rgb(v))),
+                nms.getGrassColorModifier(),
+                nms.getAmbientParticleSettings(),
+                nms.getAmbientLoopSoundEvent(),
+                nms.getAmbientMoodSettings(),
+                nms.getAmbientAdditionsSettings(),
+                nms.getBackgroundMusic()
         );
     }
 
@@ -61,27 +61,27 @@ public record PaperBiomeEffects(
      * @return The biome effects.
      */
     public static PaperBiomeEffects from(Biome biome) {
-        return from(CraftBlock.biomeToBiomeBase(RegistryGeneration.i, biome).l());
+        return from(CraftBlock.biomeToBiomeBase(BuiltinRegistries.BIOME, biome).getSpecialEffects());
     }
 
     /**
      * Converts this data to an NMS handle.
      * @return The NMS handle.
      */
-    public BiomeFog toHandle() {
-        var builder = new BiomeFog.a()
-                .a(fog.rgb())
-                .b(water.rgb())
-                .c(waterFog.rgb())
-                .d(sky.rgb())
-                .a(grassModifier);
-        foliage.ifPresent(v -> builder.e(v.rgb()));
-        grass.ifPresent(v -> builder.f(v.rgb()));
-        particles.ifPresent(builder::a);
-        ambientSound.ifPresent(builder::a);
-        moodSound.ifPresent(builder::a);
-        additionsSound.ifPresent(builder::a);
-        music.ifPresent(builder::a);
-        return builder.a();
+    public BiomeSpecialEffects toHandle() {
+        var builder = new BiomeSpecialEffects.Builder()
+                .fogColor(fog.rgb())
+                .waterColor(water.rgb())
+                .waterFogColor(waterFog.rgb())
+                .skyColor(sky.rgb())
+                .grassColorModifier(grassModifier);
+        foliage.ifPresent(v -> builder.foliageColorOverride(v.rgb()));
+        grass.ifPresent(v -> builder.grassColorOverride(v.rgb()));
+        particles.ifPresent(builder::ambientParticle);
+        ambientSound.ifPresent(builder::ambientLoopSound);
+        moodSound.ifPresent(builder::ambientMoodSound);
+        additionsSound.ifPresent(builder::ambientAdditionsSound);
+        music.ifPresent(builder::backgroundMusic);
+        return builder.build();
     }
 }

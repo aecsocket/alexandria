@@ -6,16 +6,11 @@ plugins {
 allprojects {
     group = "com.gitlab.aecsocket.minecommons"
     version = "1.3"
-    description = "Commons library for Minecraft"
+    description = "Common utilities for Minecraft projects"
 }
 
 subprojects {
     apply<JavaLibraryPlugin>()
-
-    java {
-        targetCompatibility = JavaVersion.toVersion(17)
-        sourceCompatibility = JavaVersion.toVersion(17)
-    }
 
     repositories {
         //mavenLocal()
