@@ -1,6 +1,6 @@
-# Minecommons
-
 <img src="banner.svg" width="1024"/>
+
+# Minecommons
 
 Common utilities for Minecraft-related projects, with features such as vector manipulation,
 event dispatchers and serialization support.
