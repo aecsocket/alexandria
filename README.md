@@ -1,6 +1,6 @@
 # Minecommons
 
-![](banner.svg)
+<img src="banner.svg" width="1024"/>
 
 Common utilities for Minecraft-related projects, with features such as vector manipulation,
 event dispatchers and serialization support.
@@ -8,8 +8,6 @@ event dispatchers and serialization support.
 ---
 
 ## Paper
-
-![](banner.svg)
 
 Minecommons is exposed as a Paper plugin, for other plugins to depend on.
 

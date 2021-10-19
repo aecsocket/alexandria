@@ -3,8 +3,8 @@
 
 <svg
    width="2048"
-   height="512"
-   viewBox="0 0 541.86666 135.46667"
+   height="320"
+   viewBox="0 0 541.86666 84.666669"
    version="1.1"
    id="svg5"
    inkscape:version="1.1.1 (3bf5ae0d25, 2021-09-20)"
@@ -29,9 +29,9 @@
      units="px"
      width="1024px"
      inkscape:snap-bbox="true"
-     inkscape:zoom="0.35735132"
-     inkscape:cx="514.89945"
-     inkscape:cy="137.11996"
+     inkscape:zoom="0.71470264"
+     inkscape:cx="691.19655"
+     inkscape:cy="279.83666"
      inkscape:window-width="1920"
      inkscape:window-height="1015"
      inkscape:window-x="0"
@@ -67,21 +67,12 @@
          offset="1"
          id="stop1142" />
     </linearGradient>
-    <linearGradient
-       inkscape:collect="always"
-       xlink:href="#linearGradient1144"
-       id="linearGradient1146"
-       x1="135.46667"
-       y1="16.933334"
-       x2="135.46667"
-       y2="50.799999"
-       gradientUnits="userSpaceOnUse" />
     <filter
        style="color-interpolation-filters:sRGB"
        inkscape:label="Drop Shadow"
        id="filter61543"
-       x="-0.077503148"
-       y="-0.070866137"
+       x="-0.077503145"
+       y="-0.070866138"
        width="1.1550063"
        height="1.1417323">
       <feFlood
@@ -116,7 +107,7 @@
        style="color-interpolation-filters:sRGB"
        inkscape:label="Drop Shadow"
        id="filter61555"
-       x="-0.017716536"
+       x="-0.017716523"
        y="-0.14173229"
        width="1.0354331"
        height="1.2834646">
@@ -148,58 +139,104 @@
          result="composite2"
          id="feComposite61553" />
     </filter>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient1144"
+       id="linearGradient1335"
+       x1="270.93335"
+       y1="8.4666672"
+       x2="270.93335"
+       y2="50.799999"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(0,8.4666667)" />
+    <filter
+       style="color-interpolation-filters:sRGB;"
+       inkscape:label="Drop Shadow"
+       id="filter34827"
+       x="-0.026574803"
+       y="-0.21259843"
+       width="1.0531496"
+       height="1.4251969">
+      <feFlood
+         flood-opacity="0.501961"
+         flood-color="rgb(0,0,0)"
+         result="flood"
+         id="feFlood34817" />
+      <feComposite
+         in="flood"
+         in2="SourceGraphic"
+         operator="in"
+         result="composite1"
+         id="feComposite34819" />
+      <feGaussianBlur
+         in="composite1"
+         stdDeviation="6"
+         result="blur"
+         id="feGaussianBlur34821" />
+      <feOffset
+         dx="0"
+         dy="0"
+         result="offset"
+         id="feOffset34823" />
+      <feComposite
+         in="SourceGraphic"
+         in2="offset"
+         operator="over"
+         result="composite2"
+         id="feComposite34825" />
+    </filter>
   </defs>
   <g
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1">
-    <rect
-       style="fill:url(#linearGradient1146);fill-opacity:1;stroke-width:1.00012;filter:url(#filter61555)"
-       id="rect876"
-       width="270.93332"
-       height="33.866665"
-       x="0"
-       y="16.933332"
-       transform="matrix(2,0,0,2,6.6666667e-6,-4.3333333e-6)" />
     <text
        xml:space="preserve"
-       transform="matrix(0.52916666,0,0,0.52916666,6.6666667e-6,-4.3333333e-6)"
+       transform="matrix(0.52916666,0,0,0.52916666,6.6666667e-6,-15.533337)"
        id="text10270"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:40px;line-height:1.25;font-family:Bahnschrift;-inkscape-font-specification:Bahnschrift;white-space:pre;shape-inside:url(#rect10272);fill:#000000;fill-opacity:1;stroke:none" />
-    <text
-       xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:33.8666px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.529166"
-       x="64.756775"
-       y="66.377289"
-       id="text17120"><tspan
-         sodipodi:role="line"
-         id="tspan17118"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:33.8666px;font-family:Bahnschrift;-inkscape-font-specification:Bahnschrift;fill:#ffffff;fill-opacity:1;stroke-width:0.529166"
-         x="64.756775"
-         y="66.377289">Minecommons</tspan></text>
-    <text
-       xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:14.1111px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.529166"
-       x="66.493088"
-       y="86.218338"
-       id="text50132"><tspan
-         sodipodi:role="line"
-         id="tspan50130"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:14.1111px;font-family:Bahnschrift;-inkscape-font-specification:Bahnschrift;fill:#ffffff;fill-opacity:1;stroke-width:0.529166"
-         x="66.493088"
-         y="86.218338">Common utilities for Minecraft projects</tspan></text>
+    <path
+       id="rect1327"
+       style="fill:url(#linearGradient1335);stroke-width:1.00012;filter:url(#filter34827)"
+       d="M 38.1,8.4666667 A 33.866664,33.866664 0 0 0 15.731856,16.933333 H 0 v 50.8 H 15.731856 A 33.866664,33.866664 0 0 0 38.1,76.199999 33.866664,33.866664 0 0 0 60.468144,67.733333 H 541.86666 v -50.8 H 60.499667 A 33.866664,33.866664 0 0 0 38.1,8.4666667 Z" />
     <g
-       id="g3781"
+       id="g3781-5"
        style="stroke-width:8.46667;stroke-miterlimit:4;stroke-dasharray:none"
-       transform="matrix(0.50000003,0,0,0.50000003,-270.94218,101.44656)">
+       transform="matrix(0.50000003,0,0,0.50000003,-266.70885,76.046571)">
       <path
          style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:8.46667;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
          d="m 572.93823,-53.974997 36.66174,21.166657 36.66174,-21.166657 v -25.399999 l -36.66174,21.166666 -36.66174,-21.166666 z"
-         id="path7805-3" />
+         id="path7805-3-3" />
       <path
          style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:8.46667;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
          d="m 572.93823,-81.491663 36.66174,-21.166667 36.66174,21.166667 -21.99704,12.699999 -14.6647,-8.466666 -14.6647,8.466666 z"
-         id="path9079-6" />
+         id="path9079-6-5" />
+    </g>
+    <g
+       id="g34888"
+       transform="translate(-1.23512e-6,2.1477124)">
+      <text
+         xml:space="preserve"
+         style="font-size:28.2222px;line-height:1.25;font-family:'Noto Sans';-inkscape-font-specification:'Noto Sans';stroke-width:0.264583"
+         x="73.719536"
+         y="41.203327"
+         id="text8076"><tspan
+           sodipodi:role="line"
+           id="tspan8074"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:28.2222px;font-family:Bahnschrift;-inkscape-font-specification:Bahnschrift;fill:#ffffff;fill-opacity:1;stroke-width:0.264583"
+           x="73.719536"
+           y="41.203327">Minecommons</tspan></text>
+      <text
+         xml:space="preserve"
+         style="font-size:14.1111px;line-height:1.25;font-family:'Noto Sans';-inkscape-font-specification:'Noto Sans';stroke-width:0.264583"
+         x="75.166473"
+         y="56.688351"
+         id="text28342"><tspan
+           sodipodi:role="line"
+           id="tspan28340"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:14.1111px;font-family:Bahnschrift;-inkscape-font-specification:Bahnschrift;fill:#ffffff;fill-opacity:1;stroke-width:0.264583"
+           x="75.166473"
+           y="56.688351">Common utilities for Minecraft projects</tspan></text>
     </g>
   </g>
 </svg>
