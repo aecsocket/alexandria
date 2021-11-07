@@ -29,6 +29,87 @@ public record PaperBiomeData(
         BiomeGenerationSettings generation
 ) implements BiomeData {
     /**
+     * Creates a copy with the specified value changed.
+     * @param precipitation The new precipitation.
+     * @return The copy.
+     */
+    public PaperBiomeData precipitation(Precipitation precipitation) {
+        return new PaperBiomeData(precipitation, geography, depth, scale, temperature, humidity, effects, mobs, generation);
+    }
+
+    /**
+     * Creates a copy with the specified value changed.
+     * @param geography The new geography.
+     * @return The copy.
+     */
+    public PaperBiomeData geography(Geography geography) {
+        return new PaperBiomeData(precipitation, geography, depth, scale, temperature, humidity, effects, mobs, generation);
+    }
+
+    /**
+     * Creates a copy with the specified value changed.
+     * @param depth The new depth.
+     * @return The copy.
+     */
+    public PaperBiomeData depth(float depth) {
+        return new PaperBiomeData(precipitation, geography, depth, scale, temperature, humidity, effects, mobs, generation);
+    }
+
+    /**
+     * Creates a copy with the specified value changed.
+     * @param scale The new scale.
+     * @return The copy.
+     */
+    public PaperBiomeData scale(float scale) {
+        return new PaperBiomeData(precipitation, geography, depth, scale, temperature, humidity, effects, mobs, generation);
+    }
+
+    /**
+     * Creates a copy with the specified value changed.
+     * @param temperature The new temperature.
+     * @return The copy.
+     */
+    public PaperBiomeData temperature(float temperature) {
+        return new PaperBiomeData(precipitation, geography, depth, scale, temperature, humidity, effects, mobs, generation);
+    }
+
+    /**
+     * Creates a copy with the specified value changed.
+     * @param humidity The new humidity.
+     * @return The copy.
+     */
+    public PaperBiomeData humidity(float humidity) {
+        return new PaperBiomeData(precipitation, geography, depth, scale, temperature, humidity, effects, mobs, generation);
+    }
+
+    /**
+     * Creates a copy with the specified value changed.
+     * @param effects The new effects.
+     * @return The copy.
+     */
+    public PaperBiomeData effects(PaperBiomeEffects effects) {
+        return new PaperBiomeData(precipitation, geography, depth, scale, temperature, humidity, effects, mobs, generation);
+    }
+
+    /**
+     * Creates a copy with the specified value changed.
+     * @param mobs The new mobs.
+     * @return The copy.
+     */
+    public PaperBiomeData mobs(MobSpawnSettings mobs) {
+        return new PaperBiomeData(precipitation, geography, depth, scale, temperature, humidity, effects, mobs, generation);
+    }
+
+    /**
+     * Creates a copy with the specified value changed.
+     * @param generation The new generation.
+     * @return The copy.
+     */
+    public PaperBiomeData generation(BiomeGenerationSettings generation) {
+        return new PaperBiomeData(precipitation, geography, depth, scale, temperature, humidity, effects, mobs, generation);
+    }
+
+    /**
      * A map of NMS precipitation enum values to ours.
      */
     public static final BiMap<Biome.Precipitation, Precipitation> PRECIPITATION = HashBiMap.create(CollectionBuilder.map(new HashMap<Biome.Precipitation, Precipitation>())

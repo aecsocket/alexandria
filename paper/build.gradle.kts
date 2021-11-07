@@ -3,7 +3,7 @@ plugins {
     id("maven-publish")
     id("com.github.johnrengelman.shadow") version "7.0.0"
 
-    id("io.papermc.paperweight.userdev") version "1.1.12"
+    id("io.papermc.paperweight.userdev") version "1.1.14"
     id("net.minecrell.plugin-yml.bukkit") version "0.5.0"
     id("xyz.jpenilla.run-paper") version "1.0.4"
 }
@@ -11,6 +11,7 @@ plugins {
 val exposedApi: Configuration by configurations.creating {
     isTransitive = true
 }
+
 configurations.compileOnlyApi {
     extendsFrom(exposedApi)
 }
@@ -26,11 +27,11 @@ dependencies {
 
     val cloudVersion = "1.5.0"
 
-    api("com.github.stefvanschie.inventoryframework", "IF", "0.10.0")
+    exposedApi("com.github.stefvanschie.inventoryframework", "IF", "0.10.0")
     exposedApi("cloud.commandframework", "cloud-paper", cloudVersion)
     exposedApi("cloud.commandframework", "cloud-minecraft-extras", cloudVersion)
     // Plugins
-    api("com.comphenix.protocol", "ProtocolLib", "4.7.0")
+    compileOnly("com.comphenix.protocol", "ProtocolLib", "4.7.0")
     // Library loader
     library("org.spongepowered", "configurate-hocon", "4.1.1")
     library("net.kyori", "adventure-serializer-configurate4", "4.9.2")
@@ -54,12 +55,22 @@ tasks {
         )
     }
 
+    jar {
+        //archiveFileName.set("${rootProject.name}-${project.name}-${rootProject.version}.jar")
+    }
+
     shadowJar {
-        archiveFileName.set("${rootProject.name}-${project.name}-${rootProject.version}.jar")
+        //archiveFileName.set("${rootProject.name}-${project.name}-${rootProject.version}.jar")
         listOf(
                 "net.kyori.adventure.text.minimessage"
         ).forEach { relocate(it, "${rootProject.group}.lib.$it") }
     }
+
+    // reobfJar must depend on shadowJar
+    //reobfJar {
+    //    dependsOn(jar)
+    //    dependsOn(shadowJar)
+    //}
 
     assemble {
         dependsOn(shadowJar)

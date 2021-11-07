@@ -44,18 +44,7 @@ public record Vector3(double x, double y, double z) {
     }
 
     /**
-     * Creates a color from the red, green, blue components.
-     * @param r The red component.
-     * @param g The green component.
-     * @param b The blue component.
-     * @return The vector.
-     */
-    public static Vector3 rgb(double r, double g, double b) {
-        return new Vector3(r, g, b);
-    }
-
-    /**
-     * Creates a color from the red, green, blue components.
+     * Creates a color from the integer forms of the red, green, blue components, each between 0 and 255.
      * @param r The red component.
      * @param g The green component.
      * @param b The blue component.
@@ -80,17 +69,6 @@ public record Vector3(double x, double y, double z) {
                 (value >> 8) & 0xff,
                 value & 0xff
         );
-    }
-
-    /**
-     * Creates an HSV color from the hue, saturation, value components.
-     * @param h The hue component.
-     * @param s The saturation component.
-     * @param v The value component.
-     * @return The vector.
-     */
-    public static Vector3 hsv(double h, double s, double v) {
-        return new Vector3(h, s, v);
     }
 
     /**
@@ -157,15 +135,15 @@ public record Vector3(double x, double y, double z) {
                 y = v * (1 - s * f),
                 z = v * (1 - s * (1 - f));
 
-        switch (sector) {
+        return switch (sector) {
             case 0 -> new Vector3(v, z, x);
             case 1 -> new Vector3(y, v, x);
             case 2 -> new Vector3(x, v, z);
             case 3 -> new Vector3(x, y, v);
             case 4 -> new Vector3(z, x, v);
             case 5 -> new Vector3(v, x, y);
-        }
-        throw new IllegalArgumentException("HSV sector fell outside bounds (HOW)");
+            default -> throw new IllegalArgumentException("HSV sector fell outside bounds (HOW)");
+        };
     }
 
     /**

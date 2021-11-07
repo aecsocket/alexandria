@@ -11,6 +11,7 @@ import net.minecraft.world.level.biome.AmbientParticleSettings;
 import net.minecraft.world.level.biome.BiomeSpecialEffects;
 import org.bukkit.block.Biome;
 import org.bukkit.craftbukkit.v1_17_R1.block.CraftBlock;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
 
@@ -33,6 +34,114 @@ public record PaperBiomeEffects(
         Optional<AmbientAdditionsSettings> additionsSound,
         Optional<Music> music
 ) implements BiomeEffects {
+    /**
+     * Creates a copy with the specified value changed.
+     * @param fog The new fog.
+     * @return The copy.
+     */
+    public PaperBiomeEffects fog(Vector3 fog) {
+        return new PaperBiomeEffects(fog, water, waterFog, sky, foliage, grass, grassModifier, particles, ambientSound, moodSound, additionsSound, music);
+    }
+
+    /**
+     * Creates a copy with the specified value changed.
+     * @param water The new water.
+     * @return The copy.
+     */
+    public PaperBiomeEffects water(Vector3 water) {
+        return new PaperBiomeEffects(fog, water, waterFog, sky, foliage, grass, grassModifier, particles, ambientSound, moodSound, additionsSound, music);
+    }
+
+    /**
+     * Creates a copy with the specified value changed.
+     * @param waterFog The new water fog.
+     * @return The copy.
+     */
+    public PaperBiomeEffects waterFog(Vector3 waterFog) {
+        return new PaperBiomeEffects(fog, water, waterFog, sky, foliage, grass, grassModifier, particles, ambientSound, moodSound, additionsSound, music);
+    }
+
+    /**
+     * Creates a copy with the specified value changed.
+     * @param sky The new sky.
+     * @return The copy.
+     */
+    public PaperBiomeEffects sky(Vector3 sky) {
+        return new PaperBiomeEffects(fog, water, waterFog, sky, foliage, grass, grassModifier, particles, ambientSound, moodSound, additionsSound, music);
+    }
+
+    /**
+     * Creates a copy with the specified value changed.
+     * @param foliage The new foliage.
+     * @return The copy.
+     */
+    public PaperBiomeEffects foliage(@Nullable Vector3 foliage) {
+        return new PaperBiomeEffects(fog, water, waterFog, sky, Optional.ofNullable(foliage), grass, grassModifier, particles, ambientSound, moodSound, additionsSound, music);
+    }
+
+    /**
+     * Creates a copy with the specified value changed.
+     * @param grass The new grass.
+     * @return The copy.
+     */
+    public PaperBiomeEffects grass(@Nullable Vector3 grass) {
+        return new PaperBiomeEffects(fog, water, waterFog, sky, foliage, Optional.ofNullable(grass), grassModifier, particles, ambientSound, moodSound, additionsSound, music);
+    }
+
+    /**
+     * Creates a copy with the specified value changed.
+     * @param grassModifier The new grass modifier.
+     * @return The copy.
+     */
+    public PaperBiomeEffects grassModifier(BiomeSpecialEffects.GrassColorModifier grassModifier) {
+        return new PaperBiomeEffects(fog, water, waterFog, sky, foliage, grass, grassModifier, particles, ambientSound, moodSound, additionsSound, music);
+    }
+
+    /**
+     * Creates a copy with the specified value changed.
+     * @param particles The new particles.
+     * @return The copy.
+     */
+    public PaperBiomeEffects particles(@Nullable AmbientParticleSettings particles) {
+        return new PaperBiomeEffects(fog, water, waterFog, sky, foliage, grass, grassModifier, Optional.ofNullable(particles), ambientSound, moodSound, additionsSound, music);
+    }
+
+    /**
+     * Creates a copy with the specified value changed.
+     * @param ambientSound The new ambient sound.
+     * @return The copy.
+     */
+    public PaperBiomeEffects ambientSound(@Nullable SoundEvent ambientSound) {
+        return new PaperBiomeEffects(fog, water, waterFog, sky, foliage, grass, grassModifier, particles, Optional.ofNullable(ambientSound), moodSound, additionsSound, music);
+    }
+
+    /**
+     * Creates a copy with the specified value changed.
+     * @param moodSound The new mood sound.
+     * @return The copy.
+     */
+    public PaperBiomeEffects moodSound(@Nullable AmbientMoodSettings moodSound) {
+        return new PaperBiomeEffects(fog, water, waterFog, sky, foliage, grass, grassModifier, particles, ambientSound, Optional.ofNullable(moodSound), additionsSound, music);
+    }
+
+    /**
+     * Creates a copy with the specified value changed.
+     * @param additionsSound The new additions sound.
+     * @return The copy.
+     */
+    public PaperBiomeEffects additionsSound(@Nullable AmbientAdditionsSettings additionsSound) {
+        return new PaperBiomeEffects(fog, water, waterFog, sky, foliage, grass, grassModifier, particles, ambientSound, moodSound, Optional.ofNullable(additionsSound), music);
+    }
+
+    /**
+     * Creates a copy with the specified value changed.
+     * @param music The new music.
+     * @return The copy.
+     */
+    public PaperBiomeEffects music(@Nullable Music music) {
+        return new PaperBiomeEffects(fog, water, waterFog, sky, foliage, grass, grassModifier, particles, ambientSound, moodSound, additionsSound, Optional.ofNullable(music));
+    }
+
     /**
      * Creates biome effects from an NMS handle.
      * @param nms The NMS handle.
