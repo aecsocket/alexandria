@@ -135,8 +135,10 @@ public final class BiomeInjector {
                 key, biomeData
         );
         add(entry);
-        nmsGlobalBiomes.registerOrOverride(OptionalInt.of(id), resource, handle, Lifecycle.stable());
-        nmsCodecBiomes.registerOrOverride(OptionalInt.of(id), resource, handle, Lifecycle.stable());
+        if (!nmsGlobalBiomes.containsKey(resource)) {
+            nmsGlobalBiomes.registerMapping(id, resource, handle, Lifecycle.stable());
+            nmsCodecBiomes.registerMapping(id, resource, handle, Lifecycle.stable());
+        }
         nmsBiomeIds.put(id, resource);
         return entry;
     }
