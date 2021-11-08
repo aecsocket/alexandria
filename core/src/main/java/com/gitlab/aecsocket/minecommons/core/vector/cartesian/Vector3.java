@@ -142,7 +142,7 @@ public record Vector3(double x, double y, double z) {
             case 3 -> new Vector3(x, y, v);
             case 4 -> new Vector3(z, x, v);
             case 5 -> new Vector3(v, x, y);
-            default -> throw new IllegalArgumentException("HSV sector fell outside bounds (HOW)");
+            default -> throw new IllegalArgumentException("HSV sector fell outside bounds: " + sector + " / " + h);
         };
     }
 

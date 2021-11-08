@@ -131,7 +131,7 @@ public final class Numbers {
      */
     public static int wrap(int v, int min, int max) {
         v = ((v - min) % (max - min + 1));
-        return v < 0 ? max + 1 + v : min + v;
+        return (v < 0 ? max : min) + v;
     }
 
     /**
@@ -143,7 +143,7 @@ public final class Numbers {
      */
     public static long wrap(long v, long min, long max) {
         v = ((v - min) % (max - min + 1));
-        return v < 0 ? max + 1 + v : min + v;
+        return (v < 0 ? max : min) + v;
     }
 
     /**
@@ -155,7 +155,7 @@ public final class Numbers {
      */
     public static float wrap(float v, float min, float max) {
         v = ((v - min) % (max - min + 1));
-        return v < 0 ? max + 1 + v : min + v;
+        return (v < 0 ? max : min) + v;
     }
     /**
      * Wraps a value around a minimum and a maximum, doing over/underflow.
@@ -166,7 +166,7 @@ public final class Numbers {
      */
     public static double wrap(double v, double min, double max) {
         v = ((v - min) % (max - min + 1));
-        return v < 0 ? max + 1 + v : min + v;
+        return (v < 0 ? max : min) + v;
     }
 
     /**
