@@ -4,6 +4,7 @@ import cloud.commandframework.ArgumentDescription;
 import cloud.commandframework.Command;
 import cloud.commandframework.arguments.standard.StringArgument;
 import cloud.commandframework.bukkit.arguments.selector.MultiplePlayerSelector;
+import cloud.commandframework.captions.Caption;
 import cloud.commandframework.captions.FactoryDelegatingCaptionRegistry;
 import cloud.commandframework.context.CommandContext;
 import cloud.commandframework.execution.CommandExecutionCoordinator;
@@ -11,6 +12,9 @@ import cloud.commandframework.minecraft.extras.MinecraftExceptionHandler;
 import cloud.commandframework.minecraft.extras.MinecraftHelp;
 import cloud.commandframework.paper.PaperCommandManager;
 import com.gitlab.aecsocket.minecommons.core.translation.Localizer;
+import com.gitlab.aecsocket.minecommons.paper.command.DurationArgument;
+import com.gitlab.aecsocket.minecommons.paper.command.KeyArgument;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginDescriptionFile;
@@ -76,6 +80,8 @@ public class BaseCommand<P extends BasePlugin<P>> {
     protected final PaperCommandManager<CommandSender> manager;
     /** The help command builder. */
     protected final MinecraftHelp<CommandSender> help;
+    /** The factory for caption messages. */
+    protected final BiFunction<Caption, CommandSender, String> captionLocalizer;
     /** The writable version of the caption registry. */
     protected final FactoryDelegatingCaptionRegistry<CommandSender> captions;
     /** The exception handler. */
@@ -104,8 +110,13 @@ public class BaseCommand<P extends BasePlugin<P>> {
         this.rootName = rootName;
         help = new MinecraftHelp<>("/%s help".formatted(rootName), s -> s, manager);
 
+        captionLocalizer = (cap, snd) ->
+                PlainTextComponentSerializer.plainText().serialize(lc.safe(locale(snd), PREFIX_ERROR + ".caption." + cap.getKey()));
+
         if (manager.getCaptionRegistry() instanceof FactoryDelegatingCaptionRegistry<CommandSender> captions) {
             this.captions = captions;
+            captions.registerMessageFactory(DurationArgument.ARGUMENT_PARSE_FAILURE_DURATION, captionLocalizer);
+            captions.registerMessageFactory(KeyArgument.ARGUMENT_PARSE_FAILURE_KEY, captionLocalizer);
         } else
             captions = null;
 

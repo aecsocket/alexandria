@@ -1,5 +1,7 @@
 package com.gitlab.aecsocket.minecommons.core;
 
+import java.util.Locale;
+import java.util.StringJoiner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -13,7 +15,7 @@ public record Duration(long ms) {
     private static final long day = hour * 24;
 
     private static final Pattern pattern = Pattern.compile(
-            "(?:([0-9]+)d)?(?:([0-9]+)h)?(?:([0-9]+)m)?(?:([0-9]+(?:[.,][0-9]+)?)?s)?",
+            "(?:([0-9]+)d(?:\\W+)?)?(?:([0-9]+)h(?:\\W+)?)?(?:([0-9]+)m(?:\\W+)?)?(?:([0-9]+(?:[.,][0-9]+)?)?s(?:\\W+)?)?",
             Pattern.CASE_INSENSITIVE);
 
     /**
@@ -114,17 +116,24 @@ public record Duration(long ms) {
      */
     public long days() { return ms / (1000 * 60 * 60 * 24); }
 
-    @Override
-    public String toString() {
-        StringBuilder result = new StringBuilder();
+    /**
+     * Returns this duration as a displayed string.
+     * @param locale The locale to format numbers with.
+     * @return The string form.
+     */
+    public String asString(Locale locale) {
+        StringJoiner result = new StringJoiner(" ");
         long days = days();
-        if (days > 0) result.append(days).append("d");
+        if (days > 0) result.add(String.format(locale, "%,dd", days));
         long hours = exclHours();
-        if (hours > 0) result.append(hours).append("h");
+        if (hours > 0) result.add(String.format(locale, "%,dh", hours));
         long minutes = exclMinutes();
-        if (minutes > 0) result.append(minutes).append("m");
+        if (minutes > 0) result.add(String.format(locale, "%,dm", minutes));
         long ms = this.ms % (1000 * 60);
-        if (ms > 0 || result.isEmpty()) result.append(ms / 1000d).append("s");
+        if (ms > 0 || result.length() == 0) result.add(String.format(locale, "%,.3fs", ms / 1000d));
         return result.toString();
     }
+
+    @Override
+    public String toString() { return asString(Locale.ROOT); }
 }
