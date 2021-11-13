@@ -80,6 +80,7 @@ public final class BiomeInjector {
             );
             add(addEntry);
         }
+        System.out.println("def entries = " + byKey.keySet());
     }
 
     private void add(Entry entry) {
@@ -104,7 +105,10 @@ public final class BiomeInjector {
      * @param key The key.
      * @return The entry.
      */
-    public Entry get(Key key) { return byKey.get(key); }
+    public Entry get(Key key) {
+        //noinspection PatternValidation
+        return byKey.get(Key.key(key.namespace(), key.value()));
+    }
 
     /**
      * Gets a biome entry by its internal ID.
