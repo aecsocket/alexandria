@@ -1,5 +1,6 @@
 package com.gitlab.aecsocket.minecommons.core.serializers;
 
+import com.gitlab.aecsocket.minecommons.core.ChatPosition;
 import com.gitlab.aecsocket.minecommons.core.Duration;
 import com.gitlab.aecsocket.minecommons.core.Logging;
 import com.gitlab.aecsocket.minecommons.core.Range;
