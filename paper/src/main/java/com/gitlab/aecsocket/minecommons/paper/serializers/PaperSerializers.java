@@ -23,15 +23,15 @@ public final class PaperSerializers {
      * A {@link TypeSerializerCollection} with the default serializers defined in this package.
      */
     public static final TypeSerializerCollection SERIALIZERS = TypeSerializerCollection.builder()
-            .register(BlockData.class, BlockDataSerializer.INSTANCE)
-            .register(World.class, WorldSerializer.INSTANCE)
-            .register(Location.class, LocationSerializer.INSTANCE)
-            .register(Vector.class, VectorSerializer.INSTANCE)
-            .register(ItemSlot.class, ItemSlotSerializer.INSTANCE)
-            .register(PreciseSound.class, PreciseSoundSerializer.INSTANCE)
-            .register(Particles.class, ParticlesSerializer.INSTANCE)
+            .registerExact(BlockData.class, BlockDataSerializer.INSTANCE)
+            .registerExact(World.class, WorldSerializer.INSTANCE)
+            .registerExact(Location.class, LocationSerializer.INSTANCE)
+            .registerExact(Vector.class, VectorSerializer.INSTANCE)
+            .registerExact(ItemSlot.class, ItemSlotSerializer.INSTANCE)
+            .registerExact(PreciseSound.class, PreciseSoundSerializer.INSTANCE)
+            .registerExact(Particles.class, ParticlesSerializer.INSTANCE)
             .registerExact(NamespacedKey.class, NamespacedKeySerializer.INSTANCE)
-            .register(PotionEffectType.class, PotionEffectTypeSerializer.INSTANCE)
-            .register(PotionEffect.class, PotionEffectSerializer.INSTANCE)
+            .registerExact(PotionEffectType.class, PotionEffectTypeSerializer.INSTANCE)
+            .registerExact(PotionEffect.class, PotionEffectSerializer.INSTANCE)
             .build();
 }

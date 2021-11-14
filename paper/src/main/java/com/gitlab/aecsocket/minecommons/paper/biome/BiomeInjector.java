@@ -80,7 +80,6 @@ public final class BiomeInjector {
             );
             add(addEntry);
         }
-        System.out.println("def entries = " + byKey.keySet());
     }
 
     private void add(Entry entry) {

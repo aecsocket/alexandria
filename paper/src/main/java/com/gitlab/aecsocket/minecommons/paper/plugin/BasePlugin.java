@@ -141,8 +141,8 @@ public abstract class BasePlugin<S extends BasePlugin<S>> extends JavaPlugin {
      */
     protected void configOptionsDefaults(TypeSerializerCollection.Builder serializers, ObjectMapper.Factory.Builder mapperFactory) {
         mapperFactory.defaultNamingScheme(NamingSchemes.SNAKE_CASE);
-        serializers.registerAll(Serializers.SERIALIZERS);
         serializers.registerAll(PaperSerializers.SERIALIZERS);
+        serializers.registerAll(Serializers.SERIALIZERS);
         if (protocol != null)
             serializers.registerAll(ProtocolSerializers.SERIALIZERS);
     }
