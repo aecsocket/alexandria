@@ -86,7 +86,10 @@ public final class KeyArgument<C> extends CommandArgument<C, Key> {
         return KeyArgument.<C>newBuilder(name).asOptionalWithDefault(defaultValue.toString()).build();
     }
 
-
+    /**
+     * Builder class.
+     * @param <C> The command sender type.
+     */
     public static final class Builder<C> extends CommandArgument.Builder<C, Key> {
         private Builder(final @NonNull String name) {
             super(Key.class, name);
@@ -110,6 +113,10 @@ public final class KeyArgument<C> extends CommandArgument<C, Key> {
 
     }
 
+    /**
+     * Parser class.
+     * @param <C> The command sender type.
+     */
     public static final class KeyParser<C> implements ArgumentParser<C, Key> {
         @Override
         public @NonNull ArgumentParseResult<Key> parse(
@@ -145,7 +152,16 @@ public final class KeyArgument<C> extends CommandArgument<C, Key> {
         }
     }
 
+    /**
+     * Exception type.
+     */
     public static final class ParseException extends ParserException {
+        /**
+         * Creates an instance.
+         * @param input The input.
+         * @param ctx The context.
+         * @param e The exception.
+         */
         public ParseException(String input, CommandContext<?> ctx, Exception e) {
             super(Key.class, ctx, ARGUMENT_PARSE_FAILURE_KEY,
                     CaptionVariable.of("input", input),

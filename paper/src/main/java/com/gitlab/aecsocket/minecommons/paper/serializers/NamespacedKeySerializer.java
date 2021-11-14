@@ -14,7 +14,7 @@ import static com.gitlab.aecsocket.minecommons.core.serializers.Serializers.requ
 /**
  * Type serializer for a {@link NamespacedKey}.
  * <p>
- * Uses the same format as {@link com.gitlab.aecsocket.minecommons.core.serializers.KeySerializer}.
+ * Uses the same format as {@link net.kyori.adventure.serializer.configurate4.KeySerializer}
  */
 public class NamespacedKeySerializer implements TypeSerializer<NamespacedKey> {
     /** A singleton instance of this serializer. */

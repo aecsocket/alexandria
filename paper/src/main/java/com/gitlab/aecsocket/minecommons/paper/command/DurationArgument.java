@@ -86,7 +86,10 @@ public final class DurationArgument<C> extends CommandArgument<C, Duration> {
         return DurationArgument.<C>newBuilder(name).asOptionalWithDefault(defaultValue.toString()).build();
     }
 
-
+    /**
+     * Builder class.
+     * @param <C> The command sender type.
+     */
     public static final class Builder<C> extends CommandArgument.Builder<C, Duration> {
         private Builder(final @NonNull String name) {
             super(Duration.class, name);
@@ -107,9 +110,12 @@ public final class DurationArgument<C> extends CommandArgument<C, Duration> {
                     this.getDefaultDescription()
             );
         }
-
     }
 
+    /**
+     * Parser class.
+     * @param <C> The command sender type.
+     */
     public static final class DurationParser<C> implements ArgumentParser<C, Duration> {
         @Override
         public @NonNull ArgumentParseResult<Duration> parse(
@@ -143,7 +149,16 @@ public final class DurationArgument<C> extends CommandArgument<C, Duration> {
         }
     }
 
+    /**
+     * Exception type.
+     */
     public static final class ParseException extends ParserException {
+        /**
+         * Creates an instance.
+         * @param input The input.
+         * @param ctx The context.
+         * @param e The exception.
+         */
         public ParseException(String input, CommandContext<?> ctx, Exception e) {
             super(Key.class, ctx, ARGUMENT_PARSE_FAILURE_DURATION,
                     CaptionVariable.of("input", input),
