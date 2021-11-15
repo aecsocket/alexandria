@@ -14,10 +14,13 @@ configurations.compileOnlyApi {
 }
 
 dependencies {
+    val adventureVersion = "4.9.3"
+
     exposedApi("com.google.guava", "guava", "30.1.1-jre")
     exposedApi("org.spongepowered", "configurate-hocon", "4.1.2")
-    exposedApi("net.kyori", "adventure-api", "4.9.2")
-    exposedApi("net.kyori", "adventure-serializer-configurate4", "4.9.2")
+    exposedApi("net.kyori", "adventure-api", adventureVersion)
+    exposedApi("net.kyori", "adventure-serializer-configurate4", adventureVersion)
+    exposedApi("net.kyori", "adventure-text-serializer-plain", adventureVersion)
     exposedApi("org.checkerframework", "checker-qual", "3.15.0")
     exposedApi("io.leangen.geantyref", "geantyref", "1.3.11")
     testRuntimeOnly("io.leangen.geantyref", "geantyref", "1.3.11")
@@ -38,7 +41,7 @@ tasks {
                 "https://docs.oracle.com/en/java/javase/17/docs/api/",
                 "https://guava.dev/releases/snapshot-jre/api/docs/",
                 "https://configurate.aoeu.xyz/4.1.2/apidocs/",
-                "https://jd.adventure.kyori.net/api/4.9.2/",
+                "https://jd.adventure.kyori.net/api/4.9.3/",
                 "https://www.javadoc.io/doc/io.leangen.geantyref/geantyref/1.3.11/"
         )
     }

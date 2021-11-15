@@ -187,7 +187,7 @@ public abstract class BasePlugin<S extends BasePlugin<S>> extends JavaPlugin {
      * Gets the default locale of the plugin.
      * @return The locale.
      */
-    public Locale defaultLocale() { return setting(Locale.US, (n, d) -> n.get(Locale.class, d), "default_locale"); }
+    public Locale defaultLocale() { return setting(Locale.US, (n, d) -> n.get(Locale.class, d), "locale"); }
 
     /**
      * The method that runs on server load.
@@ -294,8 +294,8 @@ public abstract class BasePlugin<S extends BasePlugin<S>> extends JavaPlugin {
      * @param args The arguments.
      */
     public void log(Logging.Level level, String message, Object... args) {
-        for (var line : message.formatted(args).split("\n"))
-            logging.log(level, line);
+        message.formatted(args).lines()
+                .forEach(line -> logging.log(level, line));
     }
 
     /**

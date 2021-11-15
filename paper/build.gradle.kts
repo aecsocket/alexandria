@@ -34,7 +34,7 @@ dependencies {
     compileOnly("com.comphenix.protocol", "ProtocolLib", "4.7.0")
     // Library loader
     library("org.spongepowered", "configurate-hocon", "4.1.1")
-    library("net.kyori", "adventure-serializer-configurate4", "4.9.2")
+    library("net.kyori", "adventure-serializer-configurate4", "4.9.3")
     library("cloud.commandframework", "cloud-paper", cloudVersion)
     library("cloud.commandframework", "cloud-minecraft-extras", cloudVersion)
 }
@@ -46,7 +46,7 @@ tasks {
                 "https://docs.oracle.com/en/java/javase/17/docs/api/",
                 "https://guava.dev/releases/snapshot-jre/api/docs/",
                 "https://configurate.aoeu.xyz/4.1.2/apidocs/",
-                "https://jd.adventure.kyori.net/api/4.9.2/",
+                "https://jd.adventure.kyori.net/api/4.9.3/",
                 "https://www.javadoc.io/doc/io.leangen.geantyref/geantyref/1.3.11/",
 
                 "https://papermc.io/javadocs/paper/1.17/",

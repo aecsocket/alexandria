@@ -2,6 +2,7 @@ package com.gitlab.aecsocket.minecommons.paper.plugin;
 
 import cloud.commandframework.ArgumentDescription;
 import cloud.commandframework.Command;
+import cloud.commandframework.arguments.flags.CommandFlag;
 import cloud.commandframework.arguments.standard.StringArgument;
 import cloud.commandframework.bukkit.arguments.selector.MultiplePlayerSelector;
 import cloud.commandframework.captions.Caption;
@@ -11,14 +12,20 @@ import cloud.commandframework.execution.CommandExecutionCoordinator;
 import cloud.commandframework.minecraft.extras.MinecraftExceptionHandler;
 import cloud.commandframework.minecraft.extras.MinecraftHelp;
 import cloud.commandframework.paper.PaperCommandManager;
+import com.gitlab.aecsocket.minecommons.core.ConfigurationNodes;
+import com.gitlab.aecsocket.minecommons.core.Settings;
 import com.gitlab.aecsocket.minecommons.core.translation.Localizer;
 import com.gitlab.aecsocket.minecommons.paper.command.DurationArgument;
 import com.gitlab.aecsocket.minecommons.paper.command.KeyArgument;
+import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.NodePath;
 
 import java.util.Collections;
 import java.util.List;
@@ -51,12 +58,23 @@ public class BaseCommand<P extends BasePlugin<P>> {
 
         /**
          * Creates an instance.
+         * @param key The localization key.
+         * @param args The localization arguments.
+         * @param cause The cause of this exception.
+         */
+        public CommandException(String key, Object[] args, @Nullable Throwable cause) {
+            super(cause);
+            this.key = key;
+            this.args = args;
+        }
+
+        /**
+         * Creates an instance.
          * @param key The localization key. This is automatically prefixed with {@link #PREFIX_ERROR}.
          * @param args The localization arguments.
          */
         public CommandException(String key, Object[] args) {
-            this.key = key;
-            this.args = args;
+            this(key, args, null);
         }
 
         /**
@@ -146,6 +164,14 @@ public class BaseCommand<P extends BasePlugin<P>> {
                 .literal("reload", ArgumentDescription.of("Reloads all plugin data."))
                 .permission("%s.command.reload".formatted(rootName))
                 .handler(c -> handle(c, this::reload)));
+        manager.command(root
+                .literal("setting", ArgumentDescription.of("Gets a value from the settings file."))
+                .argument(StringArgument.optional("path", StringArgument.StringMode.QUOTED), ArgumentDescription.of("The path to the node."))
+                .flag(CommandFlag.newBuilder("comments")
+                        .withAliases("c")
+                        .withDescription(ArgumentDescription.of("Displays comments.")))
+                .permission("%s.command.setting".formatted(rootName))
+                .handler(c -> handle(c, this::setting)));
     }
 
     /**
@@ -216,8 +242,43 @@ public class BaseCommand<P extends BasePlugin<P>> {
         try {
             handler.handle(ctx, sender, locale, player(sender));
         } catch (CommandException e) {
-            lc.lines(locale, e.key, e.args).ifPresent(m -> m.forEach(sender::sendMessage));
+            sendError(e, locale, sender);
         }
+    }
+
+    /**
+     * Formats and sends a {@link CommandException} to an Audience.
+     * @param error The error.
+     * @param locale The locale.
+     * @param audience The audience.
+     */
+    protected void sendError(CommandException error, Locale locale, Audience audience) {
+        lc.lines(locale, error.key, error.args)
+                .ifPresent(m -> m.forEach(audience::sendMessage));
+        if (error.getCause() != null) {
+            for (Throwable cur = error.getCause(); cur != null; cur = cur.getCause()) {
+                String type = cur.getClass().getSimpleName();
+                String message = cur.getMessage();
+                (message == null
+                        ? lc.lines(locale, PREFIX_ERROR + ".exception.no_message",
+                        "type", type)
+                        : lc.lines(locale, PREFIX_ERROR + ".exception.message",
+                        "type", type,
+                        "message", message)
+                ).ifPresent(m -> m.forEach(audience::sendMessage));
+            }
+        }
+    }
+
+    /**
+     * Creates an error, which is caught by {@link #handle(CommandContext, CommandHandler)}.
+     * @param key The error chat key, localized with prefix {@link #PREFIX_ERROR}.
+     * @param cause The cause of the error. Stack trace will be localized in a user-friendly manner.
+     * @param args The localization arguments.
+     * @return The exception.
+     */
+    protected static CommandException error(String key, Throwable cause, Object... args) {
+        return new CommandException(PREFIX_ERROR + "." + key, args, cause);
     }
 
     /**
@@ -303,5 +364,36 @@ public class BaseCommand<P extends BasePlugin<P>> {
         send(sender, locale, "reload.start");
         plugin.reload();
         send(sender, locale, "reload.end");
+    }
+
+    /**
+     * Command for {@code setting}.
+     * @param ctx The command context.
+     * @param sender The command sender.
+     * @param locale The locale of the sender.
+     * @param pSender The sender as a player, if they are a player, otherwise null.
+     */
+    protected void setting(CommandContext<CommandSender> ctx, CommandSender sender, Locale locale, Player pSender) {
+        Settings settings = plugin.settings;
+        String path = ctx.getOrDefault("path", ".");
+        //noinspection ConstantConditions
+        NodePath nodePath = NodePath.of(path.split("\\."));
+
+        ConfigurationNode node = settings.root().node(nodePath);
+        if (node.virtual())
+            throw error("no_node_value",
+                    "path", nodePath.toString());
+
+        if (node.parent() != null) {
+            ConfigurationNode value = node;
+            node = plugin.loaderBuilder().build().createNode();
+            node.node(value.key()).from(value);
+        }
+        List<Component> lines = ConfigurationNodes.render(node, ConfigurationNodes.RenderOptions.DEFAULT, ctx.flags().isPresent("comments"));
+
+        for (var line : lines) {
+            send(sender, locale, "setting",
+                    "line", line);
+        }
     }
 }
