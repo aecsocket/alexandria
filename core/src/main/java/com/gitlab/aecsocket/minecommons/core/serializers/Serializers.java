@@ -46,7 +46,7 @@ public final class Serializers {
             .registerExact(Point3.class, Point3Serializer.INSTANCE)
             .registerExact(TextColor.class, TextColorSerializer.INSTANCE)
             .registerExact(Duration.class, DurationSerializer.INSTANCE)
-            .registerExact(Range.class, RangeSerializer.INSTANCE)
+            .register(Range.class, RangeSerializer.INSTANCE)
             .registerAll(ConfigurateComponentSerializer.configurate().serializers())
             .build();
 

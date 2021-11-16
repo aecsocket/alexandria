@@ -15,9 +15,27 @@ import static net.kyori.adventure.text.Component.*;
 import static net.kyori.adventure.text.JoinConfiguration.*;
 import static net.kyori.adventure.text.format.Style.*;
 
+/**
+ * Utility class for Configurate configuration nodes.
+ */
 public final class ConfigurationNodes {
     private ConfigurationNodes() {}
 
+    /**
+     * Options on how to render a configuration node.
+     * @param scalar Generic scalar.
+     * @param bool Boolean.
+     * @param number Number.
+     * @param string String.
+     * @param comment Comment.
+     * @param bracket Bracket in an array.
+     * @param key Key of a value in a map.
+     * @param listIndex Index of an element in an array.
+     * @param elementSeparator Element separator in an array.
+     * @param keySeparator Key/value separator in a map.
+     * @param indent Indent.
+     * @param listIndexSuffix Suffix for the element index in an array.
+     */
     public record RenderOptions(
             Style scalar,
             Style bool,
@@ -26,13 +44,16 @@ public final class ConfigurationNodes {
 
             Style comment,
             Style bracket,
-            Style separator,
             Style key,
             Style listIndex,
+            Component elementSeparator,
             Component keySeparator,
             Component indent,
             Component listIndexSuffix
     ) {
+        /**
+         * The default options.
+         */
         public static final RenderOptions DEFAULT = new RenderOptions(
                 style(NamedTextColor.WHITE),
                 style(NamedTextColor.YELLOW),
@@ -40,10 +61,10 @@ public final class ConfigurationNodes {
                 style(NamedTextColor.WHITE),
 
                 style(NamedTextColor.DARK_GREEN),
-                style(NamedTextColor.DARK_GRAY),
                 style(NamedTextColor.GRAY),
                 style(NamedTextColor.GRAY),
                 style(NamedTextColor.WHITE),
+                text(", ", NamedTextColor.DARK_GRAY),
                 text(": ", NamedTextColor.DARK_GRAY),
                 text("  "),
                 text(") ", NamedTextColor.WHITE)
@@ -59,7 +80,7 @@ public final class ConfigurationNodes {
     }
 
     private static List<Component> render(ConfigurationNode node, RenderOptions options, boolean showComments, boolean commentsNow) {
-        JoinConfiguration join = separator(text(", ", options.separator));
+        JoinConfiguration join = separator(options.elementSeparator);
         List<Component> lines = new ArrayList<>();
         if (showComments && commentsNow && node instanceof CommentedConfigurationNode commented)
             addComment(commented, lines, options);
@@ -123,6 +144,13 @@ public final class ConfigurationNodes {
         return lines;
     }
 
+    /**
+     * Renders a configuration node into components.
+     * @param node The node.
+     * @param options The render options.
+     * @param showComments Whether to render comments or not.
+     * @return The rendered lines.
+     */
     public static List<Component> render(ConfigurationNode node, RenderOptions options, boolean showComments) {
         return render(node, options, showComments, true);
     }
