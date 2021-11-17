@@ -30,7 +30,7 @@ public class LevelSerializer implements TypeSerializer<Level> {
         try {
             return Level.parse(node.getString(""));
         } catch (IllegalArgumentException e) {
-            throw new SerializationException(node, type, "Could not parse Level", e);
+            throw new SerializationException(node, type, "Could not parse level", e);
         }
     }
 }

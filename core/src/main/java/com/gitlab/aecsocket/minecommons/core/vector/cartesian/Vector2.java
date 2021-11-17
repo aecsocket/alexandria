@@ -3,6 +3,9 @@ package com.gitlab.aecsocket.minecommons.core.vector.cartesian;
 import com.gitlab.aecsocket.minecommons.core.Validation;
 import com.gitlab.aecsocket.minecommons.core.vector.polar.Coord2;
 
+import java.text.DecimalFormat;
+import java.util.Locale;
+
 import static java.lang.Math.*;
 import static com.gitlab.aecsocket.minecommons.core.Numbers.*;
 
@@ -11,7 +14,7 @@ import static com.gitlab.aecsocket.minecommons.core.Numbers.*;
  * @param x The X component.
  * @param y The Y component.
  */
-public record Vector2(double x, double y) {
+public record Vector2(double x, double y) implements NumericalVector {
     /** An instance with all fields set to 0. */
     public static final Vector2 ZERO = vec2(0);
     /** The north in a Minecraft world, equivalent to (0, -1). */
@@ -270,5 +273,15 @@ public record Vector2(double x, double y) {
         return new Coord2(polarR(), polarAng());
     }
 
-    @Override public String toString() { return "(%s, %s)".formatted(""+x, ""+y); }
+    @Override
+    public String asString(DecimalFormat format) {
+        return "%s, %s".formatted(format.format(x), format.format(y));
+    }
+
+    @Override
+    public String asString(Locale locale, String format) {
+        return String.format(locale, format, x, y);
+    }
+
+    @Override public String toString() { return asString(DEFAULT_FORMAT); }
 }

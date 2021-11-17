@@ -4,8 +4,11 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.TextColor;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Arrays;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static net.kyori.adventure.text.Component.*;
 import static net.kyori.adventure.text.format.TextDecoration.*;
@@ -42,20 +45,56 @@ public final class Components {
     }
 
     /**
-     * Creates a bar from striked-through components and a placeholder character.
+     * A section of a rendered bar.
+     * @param value The percentage this section takes up.
+     * @param color The color of this section.
+     */
+    public record BarSection(double value, TextColor color) {}
+
+    /**
+     * Creates a section of a rendered bar.
+     * @param value The percentage this section takes up.
+     * @param color The color of this section.
+     * @return The section.
+     */
+    public static BarSection barSection(double value, TextColor color) {
+        return new BarSection(value, color);
+    }
+
+    /**
+     * Renders a bar from striked-through components and a placeholder character, with multiple sections.
      * @param length The length of the bar, in characters.
-     * @param value The percentage that the bar is full.
      * @param placeholder The placeholder character.
-     * @param full The color of the full part.
-     * @param empty The color of the empty part.
+     * @param fill The fill for unused sections of the bar. If null, will not render unused sections.
+     * @param sections The sections in the bar.
      * @return The bar.
      */
-    public static Component bar(int length, double value, String placeholder, TextColor full, TextColor empty) {
-        TextComponent[] components = new TextComponent[length];
-        Arrays.fill(components, text(placeholder, empty, STRIKETHROUGH));
-        for (int i = 0; i < Math.min(length, value * length); i++) {
-            components[i] = components[i].color(full);
+    public static Component bar(int length, String placeholder, @Nullable TextColor fill, Iterable<? extends BarSection> sections) {
+        Validation.greaterThanEquals("length", length, 0);
+        TextComponent[] chars = new TextComponent[length];
+        Arrays.fill(chars, fill == null ? text(placeholder).decoration(STRIKETHROUGH) : text(placeholder, fill, STRIKETHROUGH));
+        double cur = 0;
+        int i = 0;
+        for (var section : sections) {
+            int end = Math.min(length, (int) (i + section.value() * length));
+            for (; i < end; i++)
+                chars[i] = chars[i].color(section.color());
         }
-        return join(JoinConfiguration.noSeparators(), components);
+        if (fill == null)
+            return join(JoinConfiguration.noSeparators(), Stream.of(chars).limit(i).collect(Collectors.toList()));
+        else
+            return join(JoinConfiguration.noSeparators(), chars);
+    }
+
+    /**
+     * Renders a bar from striked-through components and a placeholder character, with multiple sections.
+     * @param length The length of the bar, in characters.
+     * @param placeholder The placeholder character.
+     * @param fill The fill for unused sections of the bar. If null, will not render unused sections.
+     * @param sections The sections in the bar.
+     * @return The bar.
+     */
+    public static Component bar(int length, String placeholder, @Nullable TextColor fill, BarSection... sections) {
+        return bar(length, placeholder, fill, Arrays.asList(sections));
     }
 }

@@ -5,6 +5,8 @@ import com.gitlab.aecsocket.minecommons.core.Validation;
 import com.gitlab.aecsocket.minecommons.core.vector.polar.Coord3;
 import org.checkerframework.common.value.qual.IntRange;
 
+import java.text.DecimalFormat;
+import java.util.Locale;
 import java.util.function.Function;
 
 import static com.gitlab.aecsocket.minecommons.core.Numbers.*;
@@ -17,7 +19,7 @@ import static java.lang.Math.*;
  * @param y The Y component.
  * @param z The Z component.
  */
-public record Vector3(double x, double y, double z) {
+public record Vector3(double x, double y, double z) implements NumericalVector {
     private static final double PI2 = PI * 2;
 
     /** An instance with all fields set to 0. */
@@ -658,7 +660,17 @@ public record Vector3(double x, double y, double z) {
         return rgbFromHsv(x, y, z);
     }
 
-    @Override public String toString() { return "(%s, %s, %s)".formatted(""+x, ""+y, ""+z); }
+    @Override
+    public String asString(DecimalFormat format) {
+        return "%s, %s, %s".formatted(format.format(x), format.format(y), format.format(z));
+    }
+
+    @Override
+    public String asString(Locale locale, String format) {
+        return String.format(locale, format, x, y, z);
+    }
+
+    @Override public String toString() { return asString(DEFAULT_FORMAT); }
 
     /**
      * Gets a vector of a combination of the smallest components from each vector.

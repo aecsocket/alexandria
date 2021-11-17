@@ -1,12 +1,15 @@
 package com.gitlab.aecsocket.minecommons.core.vector.cartesian;
 
+import java.text.DecimalFormat;
+import java.util.Locale;
+
 /**
  * An immutable (x, y, z) integer value triplet, using the Cartesian coordinate system.
  * @param x The X component.
  * @param y The Y component.
  * @param z The Z component.
  */
-public record Point3(int x, int y, int z) {
+public record Point3(int x, int y, int z) implements NumericalVector {
     /** An instance with all fields set to 0. */
     public static final Point3 ZERO = point3(0);
 
@@ -57,5 +60,15 @@ public record Point3(int x, int y, int z) {
      */
     public Vector3 vector() { return new Vector3(x, y, z); }
 
-    @Override public String toString() { return "(%d, %d, %d)".formatted(x, y, z); }
+    @Override
+    public String asString(DecimalFormat format) {
+        return "%s, %s, %s".formatted(format.format(x), format.format(y), format.format(z));
+    }
+
+    @Override
+    public String asString(Locale locale, String format) {
+        return String.format(locale, format, x, y, z);
+    }
+
+    @Override public String toString() { return asString(DEFAULT_FORMAT); }
 }
