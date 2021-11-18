@@ -662,7 +662,7 @@ public record Vector3(double x, double y, double z) implements NumericalVector {
 
     @Override
     public String asString(DecimalFormat format) {
-        return "%s, %s, %s".formatted(format.format(x), format.format(y), format.format(z));
+        return "(%s, %s, %s)".formatted(format.format(x), format.format(y), format.format(z));
     }
 
     @Override

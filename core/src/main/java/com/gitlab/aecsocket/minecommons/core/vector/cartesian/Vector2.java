@@ -275,7 +275,7 @@ public record Vector2(double x, double y) implements NumericalVector {
 
     @Override
     public String asString(DecimalFormat format) {
-        return "%s, %s".formatted(format.format(x), format.format(y));
+        return "(%s, %s)".formatted(format.format(x), format.format(y));
     }
 
     @Override

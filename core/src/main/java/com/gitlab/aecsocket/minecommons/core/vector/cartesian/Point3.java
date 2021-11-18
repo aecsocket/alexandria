@@ -62,7 +62,7 @@ public record Point3(int x, int y, int z) implements NumericalVector {
 
     @Override
     public String asString(DecimalFormat format) {
-        return "%s, %s, %s".formatted(format.format(x), format.format(y), format.format(z));
+        return "(%s, %s, %s)".formatted(format.format(x), format.format(y), format.format(z));
     }
 
     @Override
