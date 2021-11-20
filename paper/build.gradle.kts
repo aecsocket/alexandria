@@ -27,7 +27,6 @@ dependencies {
 
     val cloudVersion = "1.5.0"
 
-    exposedApi("com.github.stefvanschie.inventoryframework", "IF", "0.10.0")
     exposedApi("cloud.commandframework", "cloud-paper", cloudVersion)
     exposedApi("cloud.commandframework", "cloud-minecraft-extras", cloudVersion)
     // Plugins
@@ -62,7 +61,8 @@ tasks {
     shadowJar {
         //archiveFileName.set("${rootProject.name}-${project.name}-${rootProject.version}.jar")
         listOf(
-                "net.kyori.adventure.text.minimessage"
+                "net.kyori.adventure.text.minimessage",
+                "org.incendo.interfaces"
         ).forEach { relocate(it, "${rootProject.group}.lib.$it") }
     }
 

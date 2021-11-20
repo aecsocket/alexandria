@@ -2,10 +2,6 @@ plugins {
     id("maven-publish")
 }
 
-repositories {
-    maven("https://oss.sonatype.org/content/repositories/snapshots/")
-}
-
 val exposedApi: Configuration by configurations.creating {
     isTransitive = true
 }
