@@ -1,13 +1,11 @@
 package com.gitlab.aecsocket.minecommons.paper.serializers;
 
 import com.gitlab.aecsocket.minecommons.paper.ItemSlot;
-import com.gitlab.aecsocket.minecommons.paper.display.Particles;
-import com.gitlab.aecsocket.minecommons.paper.display.PreciseSound;
+import com.gitlab.aecsocket.minecommons.paper.effect.ParticleEffect;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.World;
 import org.bukkit.block.data.BlockData;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
@@ -28,10 +26,10 @@ public final class PaperSerializers {
             .registerExact(Location.class, LocationSerializer.INSTANCE)
             .registerExact(Vector.class, VectorSerializer.INSTANCE)
             .registerExact(ItemSlot.class, ItemSlotSerializer.INSTANCE)
-            .registerExact(PreciseSound.class, PreciseSoundSerializer.INSTANCE)
-            .registerExact(Particles.class, ParticlesSerializer.INSTANCE)
+            .registerExact(ParticleEffect.class, ParticleEffectSerializer.INSTANCE)
             .registerExact(NamespacedKey.class, NamespacedKeySerializer.INSTANCE)
             .registerExact(PotionEffectType.class, PotionEffectTypeSerializer.INSTANCE)
             .registerExact(PotionEffect.class, PotionEffectSerializer.INSTANCE)
+            .register(ParticleEffect.class, ParticleEffectSerializer.INSTANCE)
             .build();
 }

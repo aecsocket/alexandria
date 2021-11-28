@@ -165,7 +165,7 @@ public record PaperBiomeEffects(
     }
 
     /**
-     * Creates biome effects from a Bukkit biome.
+     * Creates biome effects from a Paper biome.
      * @param biome The biome.
      * @return The biome effects.
      */

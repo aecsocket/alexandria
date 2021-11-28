@@ -4,6 +4,7 @@ import com.gitlab.aecsocket.minecommons.core.ChatPosition;
 import com.gitlab.aecsocket.minecommons.core.Duration;
 import com.gitlab.aecsocket.minecommons.core.Logging;
 import com.gitlab.aecsocket.minecommons.core.Range;
+import com.gitlab.aecsocket.minecommons.core.effect.SoundEffect;
 import com.gitlab.aecsocket.minecommons.core.expressions.math.MathNode;
 import com.gitlab.aecsocket.minecommons.core.serializers.color.TextColorSerializer;
 import com.gitlab.aecsocket.minecommons.core.serializers.vector.Point2Serializer;
@@ -49,6 +50,7 @@ public final class Serializers {
             .registerExact(Duration.class, DurationSerializer.INSTANCE)
             .registerExact(MathNode.class, MathNodeSerializer.INSTANCE)
             .register(Range.class, RangeSerializer.INSTANCE)
+            .register(SoundEffect.class, SoundEffectSerializer.INSTANCE)
             .registerAll(ConfigurateComponentSerializer.configurate().serializers())
             .build();
 

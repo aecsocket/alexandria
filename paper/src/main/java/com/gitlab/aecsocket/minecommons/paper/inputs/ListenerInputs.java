@@ -93,7 +93,7 @@ public class ListenerInputs extends AbstractInputs implements Listener {
             }
 
             /**
-             * Gets the underlying Bukkit event.
+             * Gets the underlying Paper event.
              * @return The event.
              */
             public abstract PlayerEvent event();

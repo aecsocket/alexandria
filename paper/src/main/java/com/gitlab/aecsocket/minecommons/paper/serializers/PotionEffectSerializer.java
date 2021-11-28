@@ -18,28 +18,41 @@ public class PotionEffectSerializer implements TypeSerializer<PotionEffect> {
     /** A singleton instance of this serializer. */
     public static final PotionEffectSerializer INSTANCE = new PotionEffectSerializer();
 
+    /** The key for the field {@code type}. */
+    public static final String TYPE = "type";
+    /** The key for the field {@code duration}. */
+    public static final String DURATION = "duration";
+    /** The key for the field {@code amplifier}. */
+    public static final String AMPLIFIER = "amplifier";
+    /** The key for the field {@code ambient}. */
+    public static final String AMBIENT = "ambient";
+    /** The key for the field {@code particles}. */
+    public static final String PARTICLES = "particles";
+    /** The key for the field {@code icon}. */
+    public static final String ICON = "icon";
+
     @Override
     public void serialize(Type type, @Nullable PotionEffect obj, ConfigurationNode node) throws SerializationException {
         if (obj == null) node.set(null);
         else {
-            node.node("type").set(obj.getType());
-            node.node("duration").set(obj.getDuration());
-            node.node("amplifier").set(obj.getAmplifier());
-            node.node("ambient").set(obj.isAmbient());
-            node.node("particles").set(obj.hasParticles());
-            node.node("icon").set(obj.hasIcon());
+            node.node(TYPE).set(obj.getType());
+            node.node(DURATION).set(obj.getDuration());
+            node.node(AMPLIFIER).set(obj.getAmplifier());
+            node.node(AMBIENT).set(obj.isAmbient());
+            node.node(PARTICLES).set(obj.hasParticles());
+            node.node(ICON).set(obj.hasIcon());
         }
     }
 
     @Override
     public PotionEffect deserialize(Type type, ConfigurationNode node) throws SerializationException {
         return new PotionEffect(
-                require(node.node("type"), PotionEffectType.class),
-                require(node.node("duration"), int.class),
-                require(node.node("amplifier"), int.class),
-                node.node("ambient").getBoolean(false),
-                node.node("particles").getBoolean(true),
-                node.node("icon").getBoolean(true)
+                require(node.node(TYPE), PotionEffectType.class),
+                require(node.node(DURATION), int.class),
+                require(node.node(AMPLIFIER), int.class),
+                node.node(AMBIENT).getBoolean(false),
+                node.node(PARTICLES).getBoolean(true),
+                node.node(ICON).getBoolean(true)
         );
     }
 }

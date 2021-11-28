@@ -62,30 +62,30 @@ public record ProtocolLibAPI(BasePlugin<?> plugin, ProtocolManager manager) {
     }
 
     /**
-     * Gets a Bukkit angle as its protocol representation.
-     * @param ang The Bukkit angle.
+     * Gets a Paper angle as its protocol representation.
+     * @param ang The Paper angle.
      * @return The protocol angle.
      */
     public byte protocolAngle(float ang) { return (byte) (ang * 256 / 360); }
 
     /**
-     * Gets a protocol angle as its Bukkit representation.
+     * Gets a protocol angle as its Paper representation.
      * @param ang The protocol angle.
-     * @return The Bukkit angle.
+     * @return The Paper angle.
      */
     public float bukkitAngle(byte ang) { return (ang * 360f) / 256; }
 
     /**
-     * Gets a Bukkit distance delta as its protocol representation.
+     * Gets a Paper distance delta as its protocol representation.
      * @param delta The Bukkit distance.
      * @return The protocol distance.
      */
     public short protocolDelta(float delta) { return (short) (delta * 4096); }
 
     /**
-     * Gets a protocol distance delta as its Bukkit representation.
+     * Gets a protocol distance delta as its Paper representation.
      * @param delta The protocol distance.
-     * @return The Bukkit distance.
+     * @return The Paper distance.
      */
     public float bukkitDelta(short delta) { return delta / 4096f; }
 
@@ -158,7 +158,7 @@ public record ProtocolLibAPI(BasePlugin<?> plugin, ProtocolManager manager) {
     }
 
     /**
-     * Gets an NMS version of a Bukkit ItemStack.
+     * Gets an NMS version of a Paper ItemStack.
      * @param itemStack The ItemStack.
      * @return The NMS ItemStack.
      */

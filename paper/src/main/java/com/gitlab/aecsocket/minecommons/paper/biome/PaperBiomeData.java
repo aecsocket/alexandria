@@ -162,7 +162,7 @@ public record PaperBiomeData(
     }
 
     /**
-     * Creates biome data from a Bukkit biome.
+     * Creates biome data from a Paper biome.
      * @param biome The biome.
      * @return The biome data.
      */

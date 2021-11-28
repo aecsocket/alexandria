@@ -78,21 +78,21 @@ public final class PaperUtils {
     }
 
     /**
-     * Converts a commons vector to a Bukkit vector.
+     * Converts a commons vector to a Paper vector.
      * @param vector The original.
      * @return The result.
      */
-    public static Vector toBukkit(Vector3 vector) {
+    public static Vector toPaper(Vector3 vector) {
         return new Vector(vector.x(), vector.y(), vector.z());
     }
 
     /**
-     * Converts a commons vector to a Bukkit location.
+     * Converts a commons vector to a Paper location.
      * @param vector The original.
      * @param world The world used for the location.
      * @return The result.
      */
-    public static Location toBukkit(Vector3 vector, World world) {
+    public static Location toPaper(Vector3 vector, World world) {
         return new Location(world, vector.x(), vector.y(), vector.z());
     }
 
