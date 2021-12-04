@@ -8,9 +8,13 @@ import org.bukkit.plugin.Plugin;
 /**
  * Allows creation of Paper implementations of effectors.
  */
-public class PaperEffectors {
+public final class PaperEffectors {
     private final Plugin plugin;
 
+    /**
+     * Creates an instance.
+     * @param plugin The plugin.
+     */
     public PaperEffectors(Plugin plugin) {
         this.plugin = plugin;
     }
