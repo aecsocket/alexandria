@@ -20,12 +20,12 @@ dependencies {
     exposedApi("net.kyori", "adventure-text-serializer-plain", adventureVersion)
     exposedApi("org.checkerframework", "checker-qual", "3.15.0")
     exposedApi("io.leangen.geantyref", "geantyref", "1.3.11")
+    api("net.kyori", "adventure-text-minimessage", "4.1.0-SNAPSHOT") {
+        exclude("net.kyori", "adventure-api")
+    }
     testRuntimeOnly("io.leangen.geantyref", "geantyref", "1.3.11")
     testRuntimeOnly("net.kyori", "adventure-api", adventureVersion)
     testImplementation("net.kyori", "adventure-text-serializer-gson", adventureVersion)
-    exposedApi("net.kyori", "adventure-text-minimessage", "4.1.0-SNAPSHOT") {
-        exclude("net.kyori", "adventure-api")
-    }
 }
 
 java {

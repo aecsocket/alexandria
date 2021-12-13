@@ -78,7 +78,6 @@ public final class MiniMessageI18N implements MutableI18N {
         }
 
         Format format = formats.get(key);
-        System.out.println(formats.keySet() + " / " + format);
         Style style;
         TemplateContext ctx;
         if (format == null) {
