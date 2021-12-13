@@ -37,18 +37,18 @@ import java.util.function.Function;
  * Utility class for using a Cloud {@link PaperCommandManager}.
  */
 public class BaseCommand<P extends BasePlugin<P>> {
-    public static final String ERROR_COMMAND = "error.command";
-    public static final String ERROR_EXCEPTION_NO_MESSAGE = "error.exception.no_message";
-    public static final String ERROR_EXCEPTION_MESSAGE = "error.exception.message";
-    public static final String ERROR_CAPTION = "error.caption";
-    public static final String ERROR_NO_ARG = "error.no_arg";
-    public static final String ERROR_NO_TARGETS = "error.no_targets";
-    public static final String ERROR_NO_NODE_VALUE = "error.no_node_value";
+    private static final String ERROR_COMMAND = "error.command";
+    private static final String ERROR_EXCEPTION_NO_MESSAGE = "error.exception.no_message";
+    private static final String ERROR_EXCEPTION_MESSAGE = "error.exception.message";
+    private static final String ERROR_CAPTION = "error.caption";
+    private static final String ERROR_NO_ARG = "error.no_arg";
+    private static final String ERROR_NO_TARGETS = "error.no_targets";
+    private static final String ERROR_NO_NODE_VALUE = "error.no_node_value";
 
-    public static final String COMMAND_VERSION = "command.version";
-    public static final String COMMAND_RELOAD_START = "command.reload.start";
-    public static final String COMMAND_RELOAD_END = "command.reload.end";
-    public static final String COMMAND_SETTING = "command.setting";
+    private static final String COMMAND_VERSION = "command.version";
+    private static final String COMMAND_RELOAD_START = "command.reload.start";
+    private static final String COMMAND_RELOAD_END = "command.reload.end";
+    private static final String COMMAND_SETTING = "command.setting";
 
     /**
      * An exception that represents a user-facing error.

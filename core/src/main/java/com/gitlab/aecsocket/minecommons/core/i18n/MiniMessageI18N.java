@@ -8,6 +8,9 @@ import net.kyori.adventure.text.minimessage.Template;
 
 import java.util.*;
 
+/**
+ * An i18n service using the {@link MiniMessage} platform to parse messages.
+ */
 public final class MiniMessageI18N implements MutableI18N {
     private static final JoinConfiguration join = JoinConfiguration.separator(Component.newline());
 
@@ -19,16 +22,34 @@ public final class MiniMessageI18N implements MutableI18N {
     private Locale defaultLocale;
     private Translation defaultTranslation;
 
+    /**
+     * Creates an instance.
+     * @param miniMessage The MiniMessage instance.
+     * @param defaultLocale The default locale.
+     */
     public MiniMessageI18N(MiniMessage miniMessage, Locale defaultLocale) {
         this.miniMessage = miniMessage;
         this.defaultLocale = defaultLocale;
     }
 
+    /**
+     * Gets the MiniMessage instance used.
+     * @return The MiniMessage instance.
+     */
     public MiniMessage miniMessage() { return miniMessage; }
 
+    /**
+     * Gets all formats registered on this.
+     * @return The formats.
+     */
     public Map<String, Format> formats() { return formats; }
+
     @Override public void registerFormat(String key, Format format) { formats.put(key, format); }
 
+    /**
+     * Gets all translations registered on this.
+     * @return The translations.
+     */
     public Map<Locale, Translation> translations() { return translations; }
 
     @Override
@@ -42,6 +63,11 @@ public final class MiniMessageI18N implements MutableI18N {
     }
 
     @Override public Locale defaultLocale() { return defaultLocale; }
+
+    /**
+     * Sets the default locale.
+     * @param defaultLocale The default locale.
+     */
     public void defaultLocale(Locale defaultLocale) { this.defaultLocale = defaultLocale; }
 
     @Override
@@ -51,6 +77,10 @@ public final class MiniMessageI18N implements MutableI18N {
         cache.clear();
     }
 
+    /**
+     * Lazily gets the default translation, based on the {@link #defaultLocale}.
+     * @return The default translation.
+     */
     public Translation defaultTranslation() {
         if (defaultTranslation == null) defaultTranslation = translations.get(defaultLocale);
         if (defaultTranslation == null)
@@ -58,6 +88,12 @@ public final class MiniMessageI18N implements MutableI18N {
         return defaultTranslation;
     }
 
+    /**
+     * Gets a translation.
+     * @param locale The locale.
+     * @param key The translation key.
+     * @return The translation.
+     */
     public List<String> translation(Locale locale, String key) {
         Translation translation = translations.get(locale);
         List<String> value;
