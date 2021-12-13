@@ -6,42 +6,31 @@ import java.util.Queue;
 
 /**
  * Convenience class for returning a list of results from a method.
- * @param <E> The type to store.
+ * @param <T> The type to store.
  */
-public class Callback<E> implements Iterable<E> {
-    private final Queue<E> queue;
+public class Callback<T> implements Iterable<T> {
+    private final Queue<T> queue = new ArrayDeque<>();
+
+    private Callback() {}
 
     /**
-     * Creates an instance.
-     * @param queue The queue.
+     * Creates an empty callback.
+     * @param <E> The type to store.
+     * @return The callback.
      */
-    public Callback(Queue<E> queue) {
-        Validation.notNull("queue", queue);
-        this.queue = queue;
+    public static <E> Callback<E> create() {
+        return new Callback<>();
     }
-
-    /**
-     * Creates an instance.
-     */
-    public Callback() {
-        this(new ArrayDeque<>());
-    }
-
-    /**
-     * Gets the internal queue that this instance uses.
-     * @return The queue.
-     */
-    public Queue<E> queue() { return queue; }
 
     /**
      * Adds a value.
      * @param value The value.
      * @return This instance.
      */
-    public Callback<E> add(E value) {
+    public Callback<T> add(T value) {
         queue.add(value);
         return this;
     }
 
-    @Override public Iterator<E> iterator() { return queue.iterator(); }
+    @Override public Iterator<T> iterator() { return queue.iterator(); }
 }

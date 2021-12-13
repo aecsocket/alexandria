@@ -14,7 +14,7 @@ import cloud.commandframework.minecraft.extras.MinecraftHelp;
 import cloud.commandframework.paper.PaperCommandManager;
 import com.gitlab.aecsocket.minecommons.core.ConfigurationNodes;
 import com.gitlab.aecsocket.minecommons.core.Settings;
-import com.gitlab.aecsocket.minecommons.core.translation.Localizer;
+import com.gitlab.aecsocket.minecommons.core.i18n.I18N;
 import com.gitlab.aecsocket.minecommons.paper.command.DurationArgument;
 import com.gitlab.aecsocket.minecommons.paper.command.KeyArgument;
 import net.kyori.adventure.audience.Audience;
@@ -37,15 +37,18 @@ import java.util.function.Function;
  * Utility class for using a Cloud {@link PaperCommandManager}.
  */
 public class BaseCommand<P extends BasePlugin<P>> {
-    /** The prefix for chat keys. */
-    public static final String PREFIX_CHAT = "chat";
-    /** The prefix for chat command keys. */
-    public static final String PREFIX_COMMAND = PREFIX_CHAT + ".command";
-    /** The prefix for chat error keys. */
-    public static final String PREFIX_ERROR = PREFIX_CHAT + ".error";
+    public static final String ERROR_COMMAND = "error.command";
+    public static final String ERROR_EXCEPTION_NO_MESSAGE = "error.exception.no_message";
+    public static final String ERROR_EXCEPTION_MESSAGE = "error.exception.message";
+    public static final String ERROR_CAPTION = "error.caption";
+    public static final String ERROR_NO_ARG = "error.no_arg";
+    public static final String ERROR_NO_TARGETS = "error.no_targets";
+    public static final String ERROR_NO_NODE_VALUE = "error.no_node_value";
 
-    /** The key for a generic command error. */
-    public static final String KEY_COMMAND_ERROR = PREFIX_COMMAND + ".error";
+    public static final String COMMAND_VERSION = "command.version";
+    public static final String COMMAND_RELOAD_START = "command.reload.start";
+    public static final String COMMAND_RELOAD_END = "command.reload.end";
+    public static final String COMMAND_SETTING = "command.setting";
 
     /**
      * An exception that represents a user-facing error.
@@ -54,31 +57,31 @@ public class BaseCommand<P extends BasePlugin<P>> {
         /** The localization key. */
         private final String key;
         /** The localization arguments. */
-        private final Object[] args;
+        private final I18N.TemplateFactory[] templates;
 
         /**
          * Creates an instance.
          * @param key The localization key.
-         * @param args The localization arguments.
+         * @param templates The localization arguments.
          * @param cause The cause of this exception.
          */
-        public CommandException(String key, Object[] args, @Nullable Throwable cause) {
+        public CommandException(String key, I18N.TemplateFactory[] templates, @Nullable Throwable cause) {
             super(cause);
             this.key = key;
-            this.args = args;
+            this.templates = templates;
         }
 
         /**
          * Creates an instance.
-         * @param key The localization key. This is automatically prefixed with {@link #PREFIX_ERROR}.
-         * @param args The localization arguments.
+         * @param key The localization key.
+         * @param templates The localization arguments.
          */
-        public CommandException(String key, Object[] args) {
-            this(key, args, null);
+        public CommandException(String key, I18N.TemplateFactory... templates) {
+            this(key, templates, null);
         }
 
         /**
-         * Gets the localization key. This is automatically prefixed with {@link #PREFIX_ERROR}.
+         * Gets the localization key.
          * @return The key.
          */
         public String key() { return key; }
@@ -87,13 +90,13 @@ public class BaseCommand<P extends BasePlugin<P>> {
          * Gets the localization arguments.
          * @return The arguments.
          */
-        public Object[] args() { return args; }
+        public I18N.TemplateFactory[] args() { return templates; }
     }
 
     /** The plugin that this command is registered under. */
     protected final P plugin;
     /** The plugin's localizer. */
-    protected final Localizer lc;
+    protected final I18N i18n;
     /** The underlying command manager. */
     protected final PaperCommandManager<CommandSender> manager;
     /** The help command builder. */
@@ -118,7 +121,7 @@ public class BaseCommand<P extends BasePlugin<P>> {
      */
     public BaseCommand(P plugin, String rootName, BiFunction<PaperCommandManager<CommandSender>, String, Command.Builder<CommandSender>> rootFactory) throws Exception {
         this.plugin = plugin;
-        lc = plugin.localizer;
+        i18n = plugin.i18n;
         manager = new PaperCommandManager<>(plugin,
                 CommandExecutionCoordinator.simpleCoordinator(),
                 Function.identity(), Function.identity());
@@ -129,7 +132,7 @@ public class BaseCommand<P extends BasePlugin<P>> {
         help = new MinecraftHelp<>("/%s help".formatted(rootName), s -> s, manager);
 
         captionLocalizer = (cap, snd) ->
-                PlainTextComponentSerializer.plainText().serialize(lc.safe(locale(snd), PREFIX_ERROR + ".caption." + cap.getKey()));
+                PlainTextComponentSerializer.plainText().serialize(i18n.line(locale(snd), ERROR_CAPTION + "." + cap.getKey()));
 
         if (manager.getCaptionRegistry() instanceof FactoryDelegatingCaptionRegistry<CommandSender> captions) {
             this.captions = captions;
@@ -144,9 +147,8 @@ public class BaseCommand<P extends BasePlugin<P>> {
                 .withInvalidSyntaxHandler()
                 .withNoPermissionHandler()
                 .withCommandExecutionHandler()
-                .withDecorator(msg -> lc.get(plugin.defaultLocale(), KEY_COMMAND_ERROR,
-                        "message", msg)
-                        .orElseThrow(() -> new IllegalArgumentException("Could not get command error localization at " + KEY_COMMAND_ERROR)));
+                .withDecorator(msg -> i18n.line(plugin.defaultLocale(), ERROR_COMMAND,
+                        c -> c.of("message", msg)));
         exceptionHandler.apply(manager, s -> s);
 
         root = rootFactory.apply(manager, rootName);
@@ -213,7 +215,7 @@ public class BaseCommand<P extends BasePlugin<P>> {
     protected Locale locale(CommandSender sender) { return plugin().locale(sender); }
 
     /**
-     * Returns a player if the sender if a player, otherwise null.
+     * Returns a player if the sender is a player, otherwise null.
      * @param sender The sender.
      * @return The player, or null.
      */
@@ -247,59 +249,70 @@ public class BaseCommand<P extends BasePlugin<P>> {
     }
 
     /**
-     * Formats and sends a {@link CommandException} to an Audience.
+     * Sends a message to an audience, prefixing with the plugin prefix using {@link BasePlugin#sendMessage(Audience, Locale, Component)}.
+     * @param audience The audience.
+     * @param locale The locale.
+     * @param lines The lines to send.
+     */
+    protected void send(Audience audience, Locale locale, List<Component> lines) {
+        for (var line : lines) {
+            plugin.sendMessage(audience, locale, line);
+        }
+    }
+
+    /**
+     * Sends a message to an audience, localizing using the localizer.
+     * @param audience The audience.
+     * @param locale The locale.
+     * @param key The localization key.
+     * @param templates The localization placeholder templates.
+     */
+    protected void send(Audience audience, Locale locale, String key, I18N.TemplateFactory... templates) {
+        send(audience, locale, i18n.lines(locale, key, templates));
+    }
+
+    /**
+     * Formats and sends a {@link CommandException} to an audience.
      * @param error The error.
      * @param locale The locale.
      * @param audience The audience.
      */
     protected void sendError(CommandException error, Locale locale, Audience audience) {
-        lc.lines(locale, error.key, error.args)
-                .ifPresent(m -> m.forEach(audience::sendMessage));
+        send(audience, locale, error.key, error.templates);
         if (error.getCause() != null) {
             for (Throwable cur = error.getCause(); cur != null; cur = cur.getCause()) {
                 String type = cur.getClass().getSimpleName();
                 String message = cur.getMessage();
-                (message == null
-                        ? lc.lines(locale, PREFIX_ERROR + ".exception.no_message",
-                        "type", type)
-                        : lc.lines(locale, PREFIX_ERROR + ".exception.message",
-                        "type", type,
-                        "message", message)
-                ).ifPresent(m -> m.forEach(audience::sendMessage));
+                send(audience, locale, message == null
+                        ? i18n.lines(locale, ERROR_EXCEPTION_NO_MESSAGE,
+                                c -> c.of("type", type))
+                        : i18n.lines(locale, ERROR_EXCEPTION_MESSAGE,
+                                c -> c.of("type", type),
+                                c -> c.of("message", message))
+                );
             }
         }
     }
 
     /**
      * Creates an error, which is caught by {@link #handle(CommandContext, CommandHandler)}.
-     * @param key The error chat key, localized with prefix {@link #PREFIX_ERROR}.
+     * @param key The error localization key.
      * @param cause The cause of the error. Stack trace will be localized in a user-friendly manner.
      * @param args The localization arguments.
      * @return The exception.
      */
-    protected static CommandException error(String key, Throwable cause, Object... args) {
-        return new CommandException(PREFIX_ERROR + "." + key, args, cause);
+    protected static CommandException error(String key, Throwable cause, I18N.TemplateFactory... args) {
+        return new CommandException(key, args, cause);
     }
 
     /**
      * Creates an error, which is caught by {@link #handle(CommandContext, CommandHandler)}.
-     * @param key The error chat key, localized with prefix {@link #PREFIX_ERROR}.
+     * @param key The error localization key.
      * @param args The localization arguments.
      * @return The exception.
      */
-    protected static CommandException error(String key, Object... args) {
-        return new CommandException(PREFIX_ERROR + "." + key, args);
-    }
-
-    /**
-     * Sends a message to a command sender.
-     * @param sender The sender.
-     * @param locale The locale to generate for.
-     * @param key The chat key, localized with prefix {@link #PREFIX_COMMAND}
-     * @param args The localization arguments.
-     */
-    protected void send(CommandSender sender, Locale locale, String key, Object... args) {
-        lc.lines(locale, PREFIX_COMMAND + "." + key, args).ifPresent(m -> m.forEach(sender::sendMessage));
+    protected static CommandException error(String key, I18N.TemplateFactory... args) {
+        return new CommandException(key, args);
     }
 
     /**
@@ -316,7 +329,8 @@ public class BaseCommand<P extends BasePlugin<P>> {
         return ctx.<T>getOptional(key).orElseGet(() -> {
             T result = pSender == null ? null : ifPlayer.apply(pSender);
             if (result == null)
-                throw error("no_arg", "arg", key);
+                throw error(ERROR_NO_ARG,
+                        c -> c.of("arg", key));
             return result;
         });
     }
@@ -333,7 +347,7 @@ public class BaseCommand<P extends BasePlugin<P>> {
         List<Player> targets = defaultedArg(ctx, key, pSender,
                 p -> new MultiplePlayerSelector("", Collections.singletonList(p))).getPlayers();
         if (targets.size() == 0)
-            throw error("no_targets");
+            throw error(ERROR_NO_TARGETS);
         return targets;
     }
 
@@ -347,10 +361,10 @@ public class BaseCommand<P extends BasePlugin<P>> {
      */
     protected void version(CommandContext<CommandSender> ctx, CommandSender sender, Locale locale, Player pSender) {
         PluginDescriptionFile desc = plugin.getDescription();
-        send(sender, locale, "version",
-                "name", desc.getName(),
-                "version", desc.getVersion(),
-                "authors", String.join(", ", desc.getAuthors()));
+        send(sender, locale, COMMAND_VERSION,
+                c -> c.of("name", desc.getName()),
+                c -> c.of("version", desc.getVersion()),
+                c -> c.of("authors", String.join(", ", desc.getAuthors())));
     }
 
     /**
@@ -361,9 +375,9 @@ public class BaseCommand<P extends BasePlugin<P>> {
      * @param pSender The sender as a player, if they are a player, otherwise null.
      */
     protected void reload(CommandContext<CommandSender> ctx, CommandSender sender, Locale locale, Player pSender) {
-        send(sender, locale, "reload.start");
+        send(sender, locale, COMMAND_RELOAD_START);
         plugin.reload();
-        send(sender, locale, "reload.end");
+        send(sender, locale, COMMAND_RELOAD_END);
     }
 
     /**
@@ -381,8 +395,8 @@ public class BaseCommand<P extends BasePlugin<P>> {
 
         ConfigurationNode node = settings.root().node(nodePath);
         if (node.virtual())
-            throw error("no_node_value",
-                    "path", nodePath.toString());
+            throw error(ERROR_NO_NODE_VALUE,
+                    c -> c.of("path", nodePath.toString()));
 
         if (node.parent() != null) {
             ConfigurationNode value = node;
@@ -392,8 +406,8 @@ public class BaseCommand<P extends BasePlugin<P>> {
         List<Component> lines = ConfigurationNodes.render(node, ConfigurationNodes.RenderOptions.DEFAULT, ctx.flags().isPresent("comments"));
 
         for (var line : lines) {
-            send(sender, locale, "setting",
-                    "line", line);
+            send(sender, locale, COMMAND_SETTING,
+                    c -> c.of("line", line));
         }
     }
 }

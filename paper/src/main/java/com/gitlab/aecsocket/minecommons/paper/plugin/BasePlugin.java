@@ -3,11 +3,15 @@ package com.gitlab.aecsocket.minecommons.paper.plugin;
 import com.gitlab.aecsocket.minecommons.core.Logging;
 import com.gitlab.aecsocket.minecommons.core.Settings;
 import com.gitlab.aecsocket.minecommons.core.Text;
+import com.gitlab.aecsocket.minecommons.core.i18n.I18N;
+import com.gitlab.aecsocket.minecommons.core.i18n.I18NLoader;
+import com.gitlab.aecsocket.minecommons.core.i18n.MiniMessageI18N;
 import com.gitlab.aecsocket.minecommons.core.serializers.Serializers;
-import com.gitlab.aecsocket.minecommons.core.translation.LocalizerLoader;
-import com.gitlab.aecsocket.minecommons.core.translation.MiniMessageLocalizer;
 import com.gitlab.aecsocket.minecommons.paper.serializers.PaperSerializers;
 import com.gitlab.aecsocket.minecommons.paper.serializers.protocol.ProtocolSerializers;
+import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.command.CommandSender;
@@ -22,11 +26,10 @@ import org.spongepowered.configurate.loader.ConfigurationLoader;
 import org.spongepowered.configurate.objectmapping.ObjectMapper;
 import org.spongepowered.configurate.serialize.SerializationException;
 import org.spongepowered.configurate.serialize.TypeSerializerCollection;
+import org.spongepowered.configurate.util.CheckedConsumer;
 import org.spongepowered.configurate.util.NamingSchemes;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.Reader;
+import java.io.*;
 import java.util.*;
 
 /**
@@ -35,6 +38,8 @@ import java.util.*;
 public abstract class BasePlugin<S extends BasePlugin<S>> extends JavaPlugin {
     /** The path to the resources manifest file in the JAR. */
     public static final String PATH_RESOURCES = "resources.conf";
+    /** The localization key for the chat prefix. */
+    public static final String CHAT_PREFIX = "chat_prefix";
 
     /** How detailed stack trace logs will be. */
     public enum StackTraceLogging {
@@ -55,7 +60,7 @@ public abstract class BasePlugin<S extends BasePlugin<S>> extends JavaPlugin {
     /** The settings. */
     protected Settings settings = new Settings();
     /** The localizer. */
-    protected final MiniMessageLocalizer localizer = MiniMessageLocalizer.builder().build();
+    protected final MiniMessageI18N i18n = new MiniMessageI18N(MiniMessage.get(), Locale.US);
     /** The configuration options. */
     protected ConfigurationOptions configOptions = ConfigurationOptions.defaults()
             .serializers(builder -> builder
@@ -163,7 +168,7 @@ public abstract class BasePlugin<S extends BasePlugin<S>> extends JavaPlugin {
      * Gets the localizer.
      * @return The localizer.
      */
-    public MiniMessageLocalizer lc() { return localizer; }
+    public I18N i18n() { return i18n; }
 
     /**
      * Gets the configuration options.
@@ -197,6 +202,19 @@ public abstract class BasePlugin<S extends BasePlugin<S>> extends JavaPlugin {
         load();
     }
 
+    private void loadJarLanguage(String path, String resourceType, CheckedConsumer<Reader, IOException> function) {
+        Reader reader = getTextResource(path);
+        if (reader == null)
+            log(Logging.Level.WARNING, "No JAR " + resourceType + " at %s found", path);
+        else {
+            try {
+                function.accept(reader);
+            } catch (IOException e) {
+                log(Logging.Level.WARNING, e, "Could not load JAR " + resourceType + " from %s", path);
+            }
+        }
+    }
+
     /**
      * Clears and loads all runtime plugin data, including settings and language files.
      */
@@ -213,32 +231,38 @@ public abstract class BasePlugin<S extends BasePlugin<S>> extends JavaPlugin {
         logging.level(setting(Logging.Level.INFO, (n, d) -> n.get(Logging.Level.class, d), "log_level"));
 
         // Language
-        localizer.clear();
-        localizer.defaultLocale(setting(Locale.US, (n, d) -> n.get(Locale.class, d), "locale"));
+        i18n.clear();
+        i18n.defaultLocale(setting(Locale.US, (n, d) -> n.get(Locale.class, d), "locale"));
 
-        for (String path : resourceManifest.language().resources()) {
-            Reader reader = getTextResource(path);
-            if (reader == null) {
-                log(Logging.Level.WARNING, "No JAR translation at %s found", path);
-                continue;
-            }
+        // Formats
+        loadJarLanguage(resourceManifest.language().formats(), "formats", reader -> {
+            var result = I18NLoader.loadFormats(i18n, () -> HoconConfigurationLoader.builder()
+                            .source(() -> new BufferedReader(reader))
+                            .build());
+            log(Logging.Level.VERBOSE, "Loaded %d format(s) from JAR %s", result.size(), resourceManifest.language().formats());
+        });
 
-            try {
-                LocalizerLoader.load(localizer, () -> HoconConfigurationLoader.builder()
-                        .source(() -> new BufferedReader(reader))
-                        .build());
-            } catch (ConfigurateException e) {
-                log(Logging.Level.WARNING, e, "Could not load JAR translation from %s", path);
-            }
+        // Translations
+        for (var path : resourceManifest.language().translations()) {
+            loadJarLanguage(path, "translation", reader -> {
+                var result = I18NLoader.loadTranslations(i18n, reader);
+                log(Logging.Level.VERBOSE, "Loaded %d translation(s) for %s from JAR %s", result.handle().size(), result.locale().toLanguageTag(), path);
+            });
         }
 
-        LocalizerLoader.hocon(file(resourceManifest.language().dataPath()), localizer)
-                .forEach(result -> {
-            if (result.translation() != null)
-                log(Logging.Level.VERBOSE, "Loaded language %s from %s", result.translation().locale().toLanguageTag(), result.path());
-            else if (result.exception() != null)
-                log(Logging.Level.WARNING, result.exception(), "Could not load language file from %s", result.path());
-        });
+        for (var raw : I18NLoader.load(i18n, file(resourceManifest.language().dataPath()), file -> HoconConfigurationLoader.builder()
+                .source(() -> new BufferedReader(new FileReader(file)))
+                .build())) {
+            if (raw instanceof I18NLoader.Result.FormatParseException rs)
+                log(Logging.Level.WARNING, rs.exception(), "Could not parse formats from %s", rs.path());
+            else if (raw instanceof I18NLoader.Result.FileOpenException rs)
+                log(Logging.Level.WARNING, rs.exception(), "Could not open %s for reading translations", rs.path());
+            else if (raw instanceof I18NLoader.Result.FileParseException rs)
+                log(Logging.Level.WARNING, rs.exception(), "Could not parse translations in %s", rs.path());
+            else if (raw instanceof I18NLoader.Result.Success rs)
+                log(Logging.Level.VERBOSE, "Loaded %d translation(s) for %s from %s", rs.translation().handle().size(), rs.translation().locale().toLanguageTag(), rs.path());
+            // else if (raw instanceof I18NLoader.Result.Missing) {}
+        }
     }
 
     /**
@@ -377,6 +401,18 @@ public abstract class BasePlugin<S extends BasePlugin<S>> extends JavaPlugin {
      */
     public NamespacedKey key(String key) {
         return keys.computeIfAbsent(key, k -> new NamespacedKey(this, k));
+    }
+
+    /**
+     * Sends a message to an audience, prepending the chat prefix.
+     * @param audience The audience.
+     * @param locale The locale.
+     * @param component The component.
+     */
+    public void sendMessage(Audience audience, Locale locale, Component component) {
+        audience.sendMessage(Component.empty()
+                        .append(i18n.line(locale, CHAT_PREFIX))
+                        .append(component));
     }
 
     /**

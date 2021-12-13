@@ -33,6 +33,7 @@ dependencies {
     compileOnly("com.comphenix.protocol", "ProtocolLib", "4.7.0")
     // Library loader
     library("org.spongepowered", "configurate-hocon", "4.1.1")
+    library("net.sf.opencsv", "opencsv", "2.3")
     library("net.kyori", "adventure-serializer-configurate4", "4.9.3")
     library("cloud.commandframework", "cloud-paper", cloudVersion)
     library("cloud.commandframework", "cloud-minecraft-extras", cloudVersion)

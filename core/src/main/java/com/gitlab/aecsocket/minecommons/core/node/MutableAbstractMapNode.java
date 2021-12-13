@@ -49,12 +49,12 @@ public abstract class MutableAbstractMapNode<N extends MutableAbstractMapNode<N>
     }
 
     @Override
-    public N removeNode(String key) {
+    public N removeChild(String key) {
         return children.remove(key);
     }
 
     @Override
-    public N node(String key, N val) {
+    public N set(String key, N val) {
         N old = children.get(key);
         if (old != null)
             old.detach();

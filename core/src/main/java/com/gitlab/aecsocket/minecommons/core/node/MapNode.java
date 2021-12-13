@@ -144,7 +144,7 @@ public interface MapNode {
          * @param key The key of the node to remove.
          * @return The removed node.
          */
-        N removeNode(String key);
+        N removeChild(String key);
 
         /**
          * Sets a node, {@link #attach(Mutable, String) attaching} it to this node and
@@ -153,6 +153,6 @@ public interface MapNode {
          * @param val The node to set to.
          * @return The value.
          */
-        N node(String key, N val);
+        N set(String key, N val);
     }
 }

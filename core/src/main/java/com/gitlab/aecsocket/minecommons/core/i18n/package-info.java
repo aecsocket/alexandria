@@ -2,4 +2,4 @@
  * Classes for localization and translation.
  */
 @javax.annotation.ParametersAreNonnullByDefault
-package com.gitlab.aecsocket.minecommons.core.translation;
+package com.gitlab.aecsocket.minecommons.core.i18n;

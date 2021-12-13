@@ -1,23 +1,21 @@
 package com.gitlab.aecsocket.minecommons.core.serializers;
 
-import com.gitlab.aecsocket.minecommons.core.ChatPosition;
 import com.gitlab.aecsocket.minecommons.core.Duration;
 import com.gitlab.aecsocket.minecommons.core.Logging;
 import com.gitlab.aecsocket.minecommons.core.Range;
 import com.gitlab.aecsocket.minecommons.core.effect.SoundEffect;
 import com.gitlab.aecsocket.minecommons.core.expressions.math.MathNode;
+import com.gitlab.aecsocket.minecommons.core.i18n.Format;
 import com.gitlab.aecsocket.minecommons.core.serializers.color.TextColorSerializer;
 import com.gitlab.aecsocket.minecommons.core.serializers.vector.Point2Serializer;
 import com.gitlab.aecsocket.minecommons.core.serializers.vector.Point3Serializer;
 import com.gitlab.aecsocket.minecommons.core.serializers.vector.Vector2Serializer;
 import com.gitlab.aecsocket.minecommons.core.serializers.vector.Vector3Serializer;
-import com.gitlab.aecsocket.minecommons.core.translation.Translation;
 import com.gitlab.aecsocket.minecommons.core.vector.cartesian.Point2;
 import com.gitlab.aecsocket.minecommons.core.vector.cartesian.Point3;
 import com.gitlab.aecsocket.minecommons.core.vector.cartesian.Vector2;
 import com.gitlab.aecsocket.minecommons.core.vector.cartesian.Vector3;
 import io.leangen.geantyref.TypeToken;
-import net.kyori.adventure.key.Key;
 import net.kyori.adventure.serializer.configurate4.ConfigurateComponentSerializer;
 import net.kyori.adventure.text.format.TextColor;
 import org.spongepowered.configurate.ConfigurationNode;
@@ -41,7 +39,6 @@ public final class Serializers {
             .registerExact(Level.class, LevelSerializer.INSTANCE)
             .registerExact(Logging.Level.class, LoggingLevelSerializer.INSTANCE)
             .registerExact(Locale.class, LocaleSerializer.INSTANCE)
-            .registerExact(Translation.class, TranslationSerializer.INSTANCE)
             .registerExact(Vector2.class, Vector2Serializer.INSTANCE)
             .registerExact(Vector3.class, Vector3Serializer.INSTANCE)
             .registerExact(Point2.class, Point2Serializer.INSTANCE)
@@ -49,6 +46,7 @@ public final class Serializers {
             .registerExact(TextColor.class, TextColorSerializer.INSTANCE)
             .registerExact(Duration.class, DurationSerializer.INSTANCE)
             .registerExact(MathNode.class, MathNodeSerializer.INSTANCE)
+            .registerExact(Format.class, I18NFormatSerializer.INSTANCE)
             .register(Range.class, RangeSerializer.INSTANCE)
             .register(SoundEffect.class, SoundEffectSerializer.INSTANCE)
             .registerAll(ConfigurateComponentSerializer.configurate().serializers())
