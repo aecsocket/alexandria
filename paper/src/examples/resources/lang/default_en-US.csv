@@ -14,5 +14,5 @@ error.no_node_value,"No value for node <path>!"
 
 command.version,"<name> v<version> by <authors>"
 command.reload.start,"Reloading..."
-command.reload.end,"Reloaded."," * Check console for details."
+command.reload.end,"Reloaded. Check console for details."
 command.setting,"<line>"
