@@ -19,6 +19,8 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -43,18 +45,30 @@ public final class I18NLoader {
             .serializers(serializers -> serializers
                     .registerExact(Format.class, I18NFormatSerializer.INSTANCE)
                     .registerAll(ConfigurateComponentSerializer.configurate().serializers()));
+    private static final Pattern parsePattern = Pattern.compile("\\\\u([0-9a-f]{4})");
+
+    private static String parse(String line) {
+        Matcher match = parsePattern.matcher(line);
+        return match.replaceAll(result -> {
+            int cp = Integer.parseInt(result.group(1), 16);
+            return String.valueOf(Character.toChars(cp));
+        });
+    }
 
     /**
-     * Loads translations into an i18n through a reader.
+     * Loads a translation into an i18n through a reader.
      * @param i18n The i18n service.
      * @param reader The reader.
      * @return The translation created.
      * @throws IOException If the translation could not be parsed.
      */
-    public static Translation loadTranslations(MutableI18N i18n, Reader reader) throws IOException {
+    public static Translation loadTranslation(MutableI18N i18n, Reader reader) throws IOException {
         CSVReader csv = new CSVReader(reader);
         Locale locale = null;
         Map<String, List<String>> translations = new HashMap<>();
+        // format:
+        //   locale,[locale of translation]
+        //   [key],[comments],[line 1],[line 2],...
         for (var record : csv.readAll()) {
             if (record.length == 0)
                 continue;
@@ -68,7 +82,11 @@ public final class I18NLoader {
                 } else
                     throw new IOException("Record under key `" + LOCALE + "` must have columns [`locale`,translation locale]");
             } else {
-                List<String> value = new ArrayList<>(Arrays.asList(record).subList(1, record.length));
+                List<String> value = new ArrayList<>();
+                for (int i = 2; i < record.length; i++) {
+                    var line = record[i];
+                    value.add(parse(line));
+                }
                 translations.put(key, value);
             }
         }
@@ -270,7 +288,7 @@ public final class I18NLoader {
                 }
 
                 try {
-                    loadTranslations(i18n, reader);
+                    callback.add(new Result.Success(path, loadTranslation(i18n, reader)));
                 } catch (IOException e) {
                     callback.add(new Result.FileParseException(path, e));
                 }

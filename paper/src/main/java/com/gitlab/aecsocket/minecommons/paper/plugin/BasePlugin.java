@@ -253,7 +253,7 @@ public abstract class BasePlugin<S extends BasePlugin<S>> extends JavaPlugin {
         // Translations
         for (var path : resourceManifest.language().translations()) {
             loadJarLanguage(path, "translation", reader -> {
-                var result = I18NLoader.loadTranslations(i18n, reader);
+                var result = I18NLoader.loadTranslation(i18n, reader);
                 log(Logging.Level.VERBOSE, "Loaded %d translation(s) for %s from JAR %s", result.handle().size(), result.locale().toLanguageTag(), path);
             });
         }
