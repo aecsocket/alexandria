@@ -5,7 +5,6 @@ import com.gitlab.aecsocket.minecommons.core.i18n.Renderable;
 import com.gitlab.aecsocket.minecommons.core.i18n.Translation;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import org.junit.jupiter.api.Assertions;
@@ -21,8 +20,8 @@ import static com.gitlab.aecsocket.minecommons.core.i18n.I18N.*;
 import static com.gitlab.aecsocket.minecommons.core.i18n.Translation.*;
 
 public class I18NTest {
-    public static final Style INFO = style(GRAY);
-    public static final Style ACCENT = style(BLUE);
+    public static final String INFO = "info";
+    public static final String ACCENT = "accent";
 
     public static final String BASIC = "basic";
     public static final String FALLBACK = "fallback";
@@ -51,6 +50,9 @@ public class I18NTest {
 
     MiniMessageI18N createI18N() {
         MiniMessageI18N i18n = new MiniMessageI18N(MiniMessage.get(), Locale.US);
+
+        i18n.registerStyle(INFO, style(GRAY));
+        i18n.registerStyle(ACCENT, style(BLUE));
 
         i18n.registerFormat(BASIC, format(INFO));
         i18n.registerFormat(FALLBACK, format(INFO));

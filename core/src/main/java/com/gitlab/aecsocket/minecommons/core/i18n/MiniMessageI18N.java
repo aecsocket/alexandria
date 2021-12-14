@@ -15,6 +15,7 @@ public final class MiniMessageI18N implements MutableI18N {
     private static final JoinConfiguration join = JoinConfiguration.separator(Component.newline());
 
     private final MiniMessage miniMessage;
+    private final Map<String, Style> styles = new HashMap<>();
     private final Map<String, Format> formats = new HashMap<>();
     private final Map<Locale, Translation> translations = new HashMap<>();
     private final Map<String, Map<Locale, List<Component>>> cache = new HashMap<>();
@@ -39,12 +40,26 @@ public final class MiniMessageI18N implements MutableI18N {
     public MiniMessage miniMessage() { return miniMessage; }
 
     /**
-     * Gets all formats registered on this.
+     * Gets all registered styles.
+     * @return The styles.
+     */
+    public Map<String, Style> styles() { return styles; }
+
+    @Override
+    public void registerStyle(String key, Style style) {
+        styles.put(key, style);
+    }
+
+    /**
+     * Gets all registered formats.
      * @return The formats.
      */
     public Map<String, Format> formats() { return formats; }
 
-    @Override public void registerFormat(String key, Format format) { formats.put(key, format); }
+    @Override
+    public void registerFormat(String key, Format format) {
+        formats.put(key, format);
+    }
 
     /**
      * Gets all translations registered on this.
@@ -72,6 +87,7 @@ public final class MiniMessageI18N implements MutableI18N {
 
     @Override
     public void clear() {
+        styles.clear();
         formats.clear();
         translations.clear();
         cache.clear();
@@ -121,8 +137,9 @@ public final class MiniMessageI18N implements MutableI18N {
             style = null;
             ctx = I18N.templateContext(this, locale, k -> null);
         } else {
-            style = format.style();
-            ctx = I18N.templateContext(this, locale, format.templates()::get);
+            style = styles.get(format.style());
+            System.out.println(key + ": " + format.style() + " / " + style + " / " + styles.keySet());
+            ctx = I18N.templateContext(this, locale, k -> styles.get(format.templates().get(k)));
         }
 
         List<Template> placeholders = new ArrayList<>();

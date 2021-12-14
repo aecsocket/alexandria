@@ -234,6 +234,14 @@ public abstract class BasePlugin<S extends BasePlugin<S>> extends JavaPlugin {
         i18n.clear();
         i18n.defaultLocale(setting(Locale.US, (n, d) -> n.get(Locale.class, d), "locale"));
 
+        // Styles
+        loadJarLanguage(resourceManifest.language().styles(), "styles", reader -> {
+            var result = I18NLoader.loadStyles(i18n, () -> HoconConfigurationLoader.builder()
+                    .source(() -> new BufferedReader(reader))
+                    .build());
+            log(Logging.Level.VERBOSE, "Loaded %d style(s) from JAR %s", result.size(), resourceManifest.language().styles());
+        });
+
         // Formats
         loadJarLanguage(resourceManifest.language().formats(), "formats", reader -> {
             var result = I18NLoader.loadFormats(i18n, () -> HoconConfigurationLoader.builder()

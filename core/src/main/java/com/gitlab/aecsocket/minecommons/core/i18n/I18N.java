@@ -15,11 +15,11 @@ import java.util.function.Function;
 public interface I18N {
     /**
      * Creates a message format.
-     * @param style The style of the message.
-     * @param templates The style of placeholders in the message.
+     * @param style The key of the style of the message.
+     * @param templates The keys of the styles of placeholders in the message.
      * @return The format.
      */
-    static Format format(@Nullable Style style, Map<String, Style> templates) {
+    static Format format(@Nullable String style, Map<String, String> templates) {
         return new FormatImpl(style, templates);
     }
 
@@ -30,23 +30,23 @@ public interface I18N {
         /**
          * Adds a style to a placeholder template.
          * @param key The placeholder key.
-         * @param style The style.
+         * @param style The style key.
          * @return This instance.
          */
-        FormatTemplateContext add(String key, Style style);
+        FormatTemplateContext add(String key, String style);
     }
 
     /**
      * Creates a message format.
-     * @param style The style of the message.
-     * @param templates The style of placeholders in the message.
+     * @param style The key of the style of the message.
+     * @param templates The keys of the styles of placeholders in the message.
      * @return The format.
      */
-    static Format format(@Nullable Style style, Consumer<FormatTemplateContext> templates) {
-        Map<String, Style> built = new HashMap<>();
+    static Format format(@Nullable String style, Consumer<FormatTemplateContext> templates) {
+        Map<String, String> built = new HashMap<>();
         templates.accept(new FormatTemplateContext() {
             @Override
-            public FormatTemplateContext add(String key, Style style) {
+            public FormatTemplateContext add(String key, String style) {
                 built.put(key, style);
                 return this;
             }
@@ -56,10 +56,10 @@ public interface I18N {
 
     /**
      * Creates a message format, with no styling for placeholders.
-     * @param style The style of the message.
+     * @param style The key of the style of the message.
      * @return The format.
      */
-    static Format format(@Nullable Style style) {
+    static Format format(@Nullable String style) {
         return new FormatImpl(style, Collections.emptyMap());
     }
 

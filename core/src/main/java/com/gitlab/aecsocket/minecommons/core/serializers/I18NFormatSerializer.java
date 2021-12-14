@@ -3,7 +3,6 @@ package com.gitlab.aecsocket.minecommons.core.serializers;
 import com.gitlab.aecsocket.minecommons.core.i18n.Format;
 import com.gitlab.aecsocket.minecommons.core.i18n.I18N;
 import io.leangen.geantyref.TypeToken;
-import net.kyori.adventure.text.format.Style;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
@@ -12,8 +11,6 @@ import org.spongepowered.configurate.serialize.TypeSerializer;
 import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.Map;
-
-import static com.gitlab.aecsocket.minecommons.core.serializers.Serializers.require;
 
 /**
  * Type serializer for a {@link Format}.
@@ -38,8 +35,8 @@ public class I18NFormatSerializer implements TypeSerializer<Format> {
         var list = node.childrenList();
         ConfigurationNode style = node.node(0);
         return I18N.format(
-                style.empty() ? null : style.get(Style.class),
-                node.node(1).get(new TypeToken<Map<String, Style>>() {}, Collections.emptyMap())
+                style.empty() ? null : style.getString(),
+                node.node(1).get(new TypeToken<Map<String, String>>() {}, Collections.emptyMap())
         );
     }
 }

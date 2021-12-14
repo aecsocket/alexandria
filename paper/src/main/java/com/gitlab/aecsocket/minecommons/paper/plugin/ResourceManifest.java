@@ -19,6 +19,7 @@ import java.util.Set;
     @ConfigSerializable
     /* package */ record Language(
             String dataPath,
+            String styles,
             String formats,
             Set<String> translations
     ) {}

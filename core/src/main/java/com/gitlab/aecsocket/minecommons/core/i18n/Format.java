@@ -1,6 +1,5 @@
 package com.gitlab.aecsocket.minecommons.core.i18n;
 
-import net.kyori.adventure.text.format.Style;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Map;
@@ -10,14 +9,14 @@ import java.util.Map;
  */
 public sealed interface Format permits FormatImpl {
     /**
-     * Gets the style of the message.
+     * Gets the key of the style of the message.
      * @return The style.
      */
-    @Nullable Style style();
+    @Nullable String style();
 
     /**
-     * Gets the style of placeholders in the message.
+     * Gets the keys of the styles of placeholders in the message.
      * @return The template styles.
      */
-    Map<String, Style> templates();
+    Map<String, String> templates();
 }
