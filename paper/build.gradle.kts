@@ -61,10 +61,10 @@ tasks {
 
     shadowJar {
         //archiveFileName.set("${rootProject.name}-${project.name}-${rootProject.version}.jar")
-        listOf(
-                "net.kyori.adventure.text.minimessage",
+        /*listOf(
+                //"net.kyori.adventure.text.minimessage",
                 "org.incendo.interfaces"
-        ).forEach { relocate(it, "${rootProject.group}.lib.$it") }
+        ).forEach { relocate(it, "${rootProject.group}.lib.$it") }*/
     }
 
     // reobfJar must depend on shadowJar

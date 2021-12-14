@@ -138,7 +138,6 @@ public final class MiniMessageI18N implements MutableI18N {
             ctx = I18N.templateContext(this, locale, k -> null);
         } else {
             style = styles.get(format.style());
-            System.out.println(key + ": " + format.style() + " / " + style + " / " + styles.keySet());
             ctx = I18N.templateContext(this, locale, k -> styles.get(format.templates().get(k)));
         }
 
