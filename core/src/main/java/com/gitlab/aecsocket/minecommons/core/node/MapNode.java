@@ -60,6 +60,13 @@ public interface MapNode {
     Collection<? extends MapNode> childValues();
 
     /**
+     * Gets if this node has a node at the specified path as a child.
+     * @param path The path.
+     * @return The result.
+     */
+    boolean has(String path);
+
+    /**
      * Recursively gets a node under this node.
      * @param path The path to the node.
      * @return The node at the path.

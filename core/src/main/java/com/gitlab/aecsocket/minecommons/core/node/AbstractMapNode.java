@@ -97,6 +97,11 @@ public abstract class AbstractMapNode<N extends AbstractMapNode<N>> implements M
     }
 
     @Override
+    public boolean has(String path) {
+        return children.containsKey(path);
+    }
+
+    @Override
     public Optional<N> get(String... path) {
         N current = self();
         for (var part : path) {
