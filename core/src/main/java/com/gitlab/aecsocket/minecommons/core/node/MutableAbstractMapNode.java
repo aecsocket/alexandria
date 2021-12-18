@@ -62,4 +62,16 @@ public abstract class MutableAbstractMapNode<N extends MutableAbstractMapNode<N>
         val.attach(self(), key);
         return val;
     }
+
+    /**
+     * Sets a node without doing any attaching or detaching.
+     * @param key The key under which the value will be located.
+     * @param val The node to set to. If null, the node at the key will be removed.
+     */
+    public void setUnsafe(String key, @Nullable N val) {
+        if (val == null)
+            children.remove(key);
+        else
+            children.put(key, val);
+    }
 }
