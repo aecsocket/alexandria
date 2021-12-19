@@ -2,6 +2,11 @@ plugins {
     id("maven-publish")
 }
 
+repositories {
+    maven("https://oss.sonatype.org/content/repositories/snapshots/")
+    mavenCentral()
+}
+
 dependencies {
     compileOnlyApi(libs.bundles.base)
     compileOnlyApi(libs.bundles.adventure)
