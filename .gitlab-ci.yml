@@ -5,26 +5,19 @@ stages:
   - deploy
 
 variables:
-  GRADLE_OPTS: "-Dmaven.repo.local=${CI_PROJECT_DIR}/.m2/repository"
   GRADLE_USER_HOME: "${CI_PROJECT_DIR}/.gradle"
-
-default:
-  before_script:
-    - "apk add --no-cache git openjdk17"
 
 build:
   stage: build
   script:
-    - "./gradlew --build-cache assemble shadowJar reobfJar"
-    - "./gradlew check"
-    - "./gradlew publish"
+    - "apk add --no-cache git openjdk17"
+    - "./gradlew --build-cache build publish"
   cache:
     key: "$CI_COMMIT_REF_NAME"
     policy: pull-push
     paths:
       - "*/build"
       - "*/.gradle"
-      - ".m2/repository"
   artifacts:
     paths:
       - "*/build/libs/*.jar"
@@ -44,7 +37,6 @@ pages:
     paths:
       - "*/build"
       - "*/.gradle"
-      - ".m2/repository"
   artifacts:
     paths:
       - "public"
