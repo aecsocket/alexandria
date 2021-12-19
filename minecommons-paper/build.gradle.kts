@@ -13,7 +13,7 @@ repositories {
 }
 
 dependencies {
-    api(project(":minecommons-core"))
+    implementation(project(":minecommons-core"))
     paperDevBundle("1.18.1-R0.1-SNAPSHOT")
 
     compileOnlyApi(libs.bundles.paperCloud)

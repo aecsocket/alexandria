@@ -36,8 +36,8 @@ pages:
     - "./gradlew javadoc"
     - "mv src/site public"
     - "mkdir -p public/javadoc"
-    - "mv core/build/docs/javadoc public/javadoc/core"
-    - "mv paper/build/docs/javadoc public/javadoc/paper"
+    - "mv minecommons-core/build/docs/javadoc public/javadoc/minecommons-core"
+    - "mv minecommons-paper/build/docs/javadoc public/javadoc/minecommons-paper"
   cache:
     key: "$CI_COMMIT_REF_NAME"
     policy: pull
