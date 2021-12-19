@@ -8,14 +8,12 @@ plugins {
     id("xyz.jpenilla.run-paper")
 }
 
-val pluginName = "Minecommons"
-
 repositories {
     maven("https://repo.dmulloy2.net/nexus/repository/public/")
 }
 
 dependencies {
-    api(project(":core"))
+    api(project(":minecommons-core"))
     paperDevBundle("1.18.1-R0.1-SNAPSHOT")
 
     compileOnlyApi(libs.bundles.paperCloud)
@@ -39,14 +37,6 @@ tasks {
         )
     }
 
-    base {
-        archivesName.set(pluginName)
-    }
-
-    reobfJar {
-        outputJar.set(layout.buildDirectory.file("libs/${pluginName}-${version}.jar"))
-    }
-
     assemble {
         dependsOn(shadowJar)
     }
@@ -61,8 +51,8 @@ tasks {
 }
 
 bukkit {
-    name = pluginName
-    main = "${project.group}.paper.${pluginName}Plugin"
+    name = "Minecommons"
+    main = "${project.group}.paper.MinecommonsPlugin"
     apiVersion = "1.18"
     softDepend = listOf("ProtocolLib")
     website = "https://gitlab.com/aecsocket/minecommons"

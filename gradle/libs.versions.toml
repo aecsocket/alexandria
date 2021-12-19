@@ -24,10 +24,6 @@ geantyRef = { group = "io.leangen.geantyref", name = "geantyref", version.ref = 
 configurate = { group = "org.spongepowered", name = "configurate-hocon", version.ref = "configurate" }
 openCsv = { group = "net.sf.opencsv", name = "opencsv", version.ref = "openCsv" }
 
-paperCloud = { group = "cloud.commandframework", name = "cloud-paper", version.ref = "paperCloud" }
-paperCloudExtras = { group = "cloud.commandframework", name = "cloud-minecraft-extras", version.ref = "paperCloud" }
-paperProtocolLib = { group = "com.comphenix.protocol", name = "ProtocolLib", version.ref = "paperProtocolLib" }
-
 adventureApi = { group = "net.kyori", name = "adventure-api", version.ref = "adventure" }
 adventureTextMiniMessage = { group = "net.kyori", name = "adventure-text-minimessage", version.ref = "adventureMiniMessage" }
 adventureTextSerializerGson = { group = "net.kyori", name = "adventure-text-serializer-gson", version.ref = "adventure" }
@@ -37,10 +33,14 @@ adventureSerializerConfigurate = { group = "net.kyori", name = "adventure-serial
 jupiterApi = { group = "org.junit.jupiter", name = "junit-jupiter-api", version.ref = "junit" }
 jupiterEngine = { group = "org.junit.jupiter", name = "junit-jupiter-engine", version.ref = "junit" }
 
+paperCloud = { group = "cloud.commandframework", name = "cloud-paper", version.ref = "paperCloud" }
+paperCloudExtras = { group = "cloud.commandframework", name = "cloud-minecraft-extras", version.ref = "paperCloud" }
+paperProtocolLib = { group = "com.comphenix.protocol", name = "ProtocolLib", version.ref = "paperProtocolLib" }
+
 [bundles]
 
 base = [ "guava", "checkerQual", "geantyRef", "configurate", "openCsv" ]
-adventure = [ "adventureApi", "adventureTextMiniMessage", "adventureTextSerializerGson", "adventureTextSerializerPlain", "adventureSerializerConfigurate" ]
+adventure = [ "adventureApi", "adventureTextMiniMessage", "adventureTextSerializerPlain", "adventureSerializerConfigurate" ]
 junit = [ "jupiterApi", "jupiterEngine" ]
 paperCloud = [ "paperCloud", "paperCloudExtras" ]
 paperLibs = [ "configurate", "openCsv", "adventureSerializerConfigurate", "paperCloud", "paperCloudExtras" ]

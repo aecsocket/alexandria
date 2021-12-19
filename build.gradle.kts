@@ -4,7 +4,7 @@ plugins {
 }
 
 allprojects {
-    group = "com.gitlab.aecsocket.minecommons"
+    group = "com.gitlab.aecsocket"
     version = "1.4"
     description = "Common utilities for Minecraft projects"
 }

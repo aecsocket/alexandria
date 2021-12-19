@@ -27,4 +27,4 @@ pluginManagement {
 
 rootProject.name = "minecommons"
 
-include("core", "paper")
+include("minecommons-core", "minecommons-paper")

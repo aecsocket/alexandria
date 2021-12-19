@@ -7,6 +7,7 @@ dependencies {
     compileOnlyApi(libs.bundles.adventure)
 
     testImplementation(libs.bundles.junit)
+    testImplementation(libs.adventureTextSerializerGson)
     testRuntimeOnly(libs.geantyRef)
     testRuntimeOnly(libs.bundles.adventure)
 }

@@ -1,7 +1,7 @@
 package com.gitlab.aecsocket.minecommons.core.effect;
 
 import com.gitlab.aecsocket.minecommons.core.vector.cartesian.Vector3;
-import org.jetbrains.annotations.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * A particle effect.

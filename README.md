@@ -16,7 +16,7 @@ Minecommons is exposed as a Paper plugin, for other plugins to depend on.
 * [Java >=17](https://adoptium.net/)
 * [Paper >=1.18.1](https://papermc.io)
 
-### [Download Version 1.4](https://gitlab.com/api/v4/projects/27049637/jobs/artifacts/master/raw/paper/build/libs/Minecommons-1.4.jar?job=build)
+### [Download Version 1.4](https://gitlab.com/api/v4/projects/27049637/jobs/artifacts/master/raw/minecommons-paper/build/libs/minecommons-paper-1.4.jar?job=build)
 
 ## Development Setup
 
@@ -35,7 +35,7 @@ Repository
 Dependency
 ```xml
 <dependency>
-    <groupId>com.gitlab.aecsocket.minecommons</groupId>
+    <groupId>com.gitlab.aecsocket</groupId>
     <artifactId>[MODULE]</artifactId>
     <version>[VERSION]</version>
 </dependency>
@@ -50,7 +50,7 @@ maven("https://gitlab.com/api/v4/projects/27049637/packages/maven")
 
 Dependency
 ```kotlin
-implementation("com.gitlab.aecsocket.minecommons", "[MODULE]", "[VERSION]")
+implementation("com.gitlab.aecsocket", "[MODULE]", "[VERSION]")
 ```
 
 ### Usage
@@ -59,7 +59,7 @@ implementation("com.gitlab.aecsocket.minecommons", "[MODULE]", "[VERSION]")
 
 ### Modules
 
-* Core `core`
+* Core `minecommons-core`
 
 Implementations:
-* Paper `paper`
+* Paper `minecommons-paper`
