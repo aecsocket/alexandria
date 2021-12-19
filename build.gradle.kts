@@ -5,27 +5,20 @@ plugins {
 
 allprojects {
     group = "com.gitlab.aecsocket.minecommons"
-    version = "1.3"
+    version = "1.4"
     description = "Common utilities for Minecraft projects"
 }
 
 subprojects {
     apply<JavaLibraryPlugin>()
 
-    repositories {
-        //mavenLocal()
-        mavenCentral()
-        maven("https://oss.sonatype.org/content/repositories/snapshots/")
-    }
-
-    dependencies {
-        testImplementation("org.junit.jupiter", "junit-jupiter", "5.7.1")
+    java {
+        toolchain.languageVersion.set(JavaLanguageVersion.of(17))
     }
 
     tasks {
         compileJava {
             options.encoding = Charsets.UTF_8.name()
-            options.release.set(17)
         }
 
         javadoc {

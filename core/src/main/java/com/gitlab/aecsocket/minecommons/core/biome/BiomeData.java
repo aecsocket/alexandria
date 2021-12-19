@@ -17,18 +17,6 @@ public interface BiomeData {
     Geography geography();
 
     /**
-     * Gets the terrain depth.
-     * @return The depth.
-     */
-    float depth();
-
-    /**
-     * Gets the terrain scale.
-     * @return The scale.
-     */
-    float scale();
-
-    /**
      * Gets the temperature.
      * @return The temperature.
      */

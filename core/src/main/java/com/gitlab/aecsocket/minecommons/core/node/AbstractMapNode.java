@@ -22,12 +22,25 @@ public abstract class AbstractMapNode<N extends AbstractMapNode<N>> implements M
     protected final Map<String, N> children = new HashMap<>();
 
     /**
-     * Creates a deep copy instance from another node.
+     * Creates a deep copy instance from another node implementing this class.
      * @param o The other node.
      */
     public AbstractMapNode(AbstractMapNode<N> o) {
         key = o.key;
         for (var entry : o.children.entrySet()) {
+            children.put(entry.getKey(), entry.getValue().copy());
+        }
+    }
+
+    /**
+     * Creates a deep copy instance from another generic node.
+     * @param o The other node.
+     */
+    public AbstractMapNode(MapNode.Scoped<N> o) {
+        //noinspection ConstantConditions
+        key = o.parent() == null
+                ? null : new Key<>(o.parent(), o.key());
+        for (var entry : o.children().entrySet()) {
             children.put(entry.getKey(), entry.getValue().copy());
         }
     }

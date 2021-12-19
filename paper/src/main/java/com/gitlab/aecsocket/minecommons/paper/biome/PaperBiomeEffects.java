@@ -10,7 +10,7 @@ import net.minecraft.world.level.biome.AmbientMoodSettings;
 import net.minecraft.world.level.biome.AmbientParticleSettings;
 import net.minecraft.world.level.biome.BiomeSpecialEffects;
 import org.bukkit.block.Biome;
-import org.bukkit.craftbukkit.v1_17_R1.block.CraftBlock;
+import org.bukkit.craftbukkit.v1_18_R1.block.CraftBlock;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;

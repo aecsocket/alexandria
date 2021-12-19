@@ -10,7 +10,7 @@ import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeGenerationSettings;
 import net.minecraft.world.level.biome.MobSpawnSettings;
-import org.bukkit.craftbukkit.v1_17_R1.block.CraftBlock;
+import org.bukkit.craftbukkit.v1_18_R1.block.CraftBlock;
 
 import java.util.HashMap;
 
@@ -20,8 +20,6 @@ import java.util.HashMap;
 public record PaperBiomeData(
         Precipitation precipitation,
         Geography geography,
-        float depth,
-        float scale,
         float temperature,
         float humidity,
         PaperBiomeEffects effects,
@@ -34,7 +32,7 @@ public record PaperBiomeData(
      * @return The copy.
      */
     public PaperBiomeData precipitation(Precipitation precipitation) {
-        return new PaperBiomeData(precipitation, geography, depth, scale, temperature, humidity, effects, mobs, generation);
+        return new PaperBiomeData(precipitation, geography, temperature, humidity, effects, mobs, generation);
     }
 
     /**
@@ -43,25 +41,7 @@ public record PaperBiomeData(
      * @return The copy.
      */
     public PaperBiomeData geography(Geography geography) {
-        return new PaperBiomeData(precipitation, geography, depth, scale, temperature, humidity, effects, mobs, generation);
-    }
-
-    /**
-     * Creates a copy with the specified value changed.
-     * @param depth The new depth.
-     * @return The copy.
-     */
-    public PaperBiomeData depth(float depth) {
-        return new PaperBiomeData(precipitation, geography, depth, scale, temperature, humidity, effects, mobs, generation);
-    }
-
-    /**
-     * Creates a copy with the specified value changed.
-     * @param scale The new scale.
-     * @return The copy.
-     */
-    public PaperBiomeData scale(float scale) {
-        return new PaperBiomeData(precipitation, geography, depth, scale, temperature, humidity, effects, mobs, generation);
+        return new PaperBiomeData(precipitation, geography, temperature, humidity, effects, mobs, generation);
     }
 
     /**
@@ -70,7 +50,7 @@ public record PaperBiomeData(
      * @return The copy.
      */
     public PaperBiomeData temperature(float temperature) {
-        return new PaperBiomeData(precipitation, geography, depth, scale, temperature, humidity, effects, mobs, generation);
+        return new PaperBiomeData(precipitation, geography, temperature, humidity, effects, mobs, generation);
     }
 
     /**
@@ -79,7 +59,7 @@ public record PaperBiomeData(
      * @return The copy.
      */
     public PaperBiomeData humidity(float humidity) {
-        return new PaperBiomeData(precipitation, geography, depth, scale, temperature, humidity, effects, mobs, generation);
+        return new PaperBiomeData(precipitation, geography, temperature, humidity, effects, mobs, generation);
     }
 
     /**
@@ -88,7 +68,7 @@ public record PaperBiomeData(
      * @return The copy.
      */
     public PaperBiomeData effects(PaperBiomeEffects effects) {
-        return new PaperBiomeData(precipitation, geography, depth, scale, temperature, humidity, effects, mobs, generation);
+        return new PaperBiomeData(precipitation, geography, temperature, humidity, effects, mobs, generation);
     }
 
     /**
@@ -97,7 +77,7 @@ public record PaperBiomeData(
      * @return The copy.
      */
     public PaperBiomeData mobs(MobSpawnSettings mobs) {
-        return new PaperBiomeData(precipitation, geography, depth, scale, temperature, humidity, effects, mobs, generation);
+        return new PaperBiomeData(precipitation, geography, temperature, humidity, effects, mobs, generation);
     }
 
     /**
@@ -106,7 +86,7 @@ public record PaperBiomeData(
      * @return The copy.
      */
     public PaperBiomeData generation(BiomeGenerationSettings generation) {
-        return new PaperBiomeData(precipitation, geography, depth, scale, temperature, humidity, effects, mobs, generation);
+        return new PaperBiomeData(precipitation, geography, temperature, humidity, effects, mobs, generation);
     }
 
     /**
@@ -151,8 +131,6 @@ public record PaperBiomeData(
         return new PaperBiomeData(
                 PRECIPITATION.get(nms.getPrecipitation()),
                 GEOGRAPHY.get(nms.getBiomeCategory()),
-                nms.getDepth(),
-                nms.getScale(),
                 nms.getBaseTemperature(),
                 nms.getDownfall(),
                 PaperBiomeEffects.from(nms.getSpecialEffects()),
@@ -178,8 +156,6 @@ public record PaperBiomeData(
         return new Biome.BiomeBuilder()
                 .precipitation(PRECIPITATION.inverse().get(precipitation))
                 .biomeCategory(GEOGRAPHY.inverse().get(geography))
-                .depth(depth)
-                .scale(scale)
                 .temperature(temperature)
                 .temperatureAdjustment(Biome.TemperatureModifier.NONE)
                 .downfall(humidity)

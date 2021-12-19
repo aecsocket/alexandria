@@ -2,30 +2,13 @@ plugins {
     id("maven-publish")
 }
 
-val exposedApi: Configuration by configurations.creating {
-    isTransitive = true
-}
-configurations.compileOnlyApi {
-    extendsFrom(exposedApi)
-}
-
 dependencies {
-    val adventureVersion = "4.9.3"
+    compileOnlyApi(libs.bundles.base)
+    compileOnlyApi(libs.bundles.adventure)
 
-    exposedApi("com.google.guava", "guava", "30.1.1-jre")
-    exposedApi("net.sf.opencsv", "opencsv", "2.3")
-    exposedApi("org.spongepowered", "configurate-hocon", "4.1.2")
-    exposedApi("net.kyori", "adventure-api", adventureVersion)
-    exposedApi("net.kyori", "adventure-serializer-configurate4", adventureVersion)
-    exposedApi("net.kyori", "adventure-text-serializer-plain", adventureVersion)
-    exposedApi("org.checkerframework", "checker-qual", "3.15.0")
-    exposedApi("io.leangen.geantyref", "geantyref", "1.3.11")
-    api("net.kyori", "adventure-text-minimessage", "4.1.0-SNAPSHOT") {
-        exclude("net.kyori", "adventure-api")
-    }
-    testRuntimeOnly("io.leangen.geantyref", "geantyref", "1.3.11")
-    testRuntimeOnly("net.kyori", "adventure-api", adventureVersion)
-    testImplementation("net.kyori", "adventure-text-serializer-gson", adventureVersion)
+    testImplementation(libs.bundles.junit)
+    testRuntimeOnly(libs.geantyRef)
+    testRuntimeOnly(libs.bundles.adventure)
 }
 
 java {

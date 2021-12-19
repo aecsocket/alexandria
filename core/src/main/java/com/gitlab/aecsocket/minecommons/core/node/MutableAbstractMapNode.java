@@ -9,10 +9,18 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 public abstract class MutableAbstractMapNode<N extends MutableAbstractMapNode<N>>
         extends AbstractMapNode<N> implements MapNode.Mutable<N> {
     /**
-     * Creates a deep copy instance from another node.
+     * Creates a deep copy instance from another node implementing the same class.
      * @param o The other node.
      */
     public MutableAbstractMapNode(AbstractMapNode<N> o) {
+        super(o);
+    }
+
+    /**
+     * Creates a deep copy instance from another generic node.
+     * @param o The other node.
+     */
+    public MutableAbstractMapNode(MapNode.Scoped<N> o) {
         super(o);
     }
 

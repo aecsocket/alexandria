@@ -9,7 +9,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.WritableRegistry;
 import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.data.worldgen.biome.Biomes;
-import net.minecraft.network.protocol.game.ClientboundLevelChunkPacket;
+import net.minecraft.network.protocol.game.ClientboundLevelChunkWithLightPacket;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -17,8 +17,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.chunk.LevelChunk;
 import org.bukkit.Chunk;
-import org.bukkit.craftbukkit.v1_17_R1.CraftChunk;
-import org.bukkit.craftbukkit.v1_17_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_18_R1.CraftChunk;
+import org.bukkit.craftbukkit.v1_18_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
 import java.lang.reflect.Field;
@@ -180,7 +180,8 @@ public final class BiomeInjector {
     public void resendBiomes(Chunk chunk, Player player) {
         LevelChunk nmsChunk = ((CraftChunk) chunk).getHandle();
         ServerPlayer nmsPlayer = ((CraftPlayer) player).getHandle();
-        var packet = new ClientboundLevelChunkPacket(nmsChunk, nmsChunk.level.chunkPacketBlockController.shouldModify(nmsPlayer, nmsChunk));
+        var packet = new ClientboundLevelChunkWithLightPacket(nmsChunk, nmsChunk.level.getLightEngine(), null, null, true,
+                nmsChunk.level.chunkPacketBlockController.shouldModify(nmsPlayer, nmsChunk));
         nmsPlayer.connection.send(packet);
     }
 }
