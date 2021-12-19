@@ -26,6 +26,7 @@ build:
 pages:
   stage: deploy
   script:
+    - "apk add --no-cache openjdk17"
     - "./gradlew javadoc"
     - "mv src/site public"
     - "mkdir -p public/javadoc"
