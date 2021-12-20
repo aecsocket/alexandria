@@ -40,7 +40,7 @@ paperProtocolLib = { group = "com.comphenix.protocol", name = "ProtocolLib", ver
 [bundles]
 
 base = [ "guava", "checkerQual", "geantyRef", "configurate", "openCsv" ]
-adventure = [ "adventureApi", "adventureTextMiniMessage", "adventureTextSerializerPlain", "adventureSerializerConfigurate" ]
+adventure = [ "adventureApi", "adventureTextSerializerPlain", "adventureSerializerConfigurate" ]
 junit = [ "jupiterApi", "jupiterEngine" ]
 paperCloud = [ "paperCloud", "paperCloudExtras" ]
 paperLibs = [ "configurate", "openCsv", "adventureSerializerConfigurate", "paperCloud", "paperCloudExtras" ]

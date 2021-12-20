@@ -10,6 +10,7 @@ repositories {
 dependencies {
     compileOnlyApi(libs.bundles.base)
     compileOnlyApi(libs.bundles.adventure)
+    api(libs.adventureTextMiniMessage)
 
     testImplementation(libs.bundles.junit)
     testImplementation(libs.adventureTextSerializerGson)

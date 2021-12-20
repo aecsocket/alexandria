@@ -1,6 +1,5 @@
 package com.gitlab.aecsocket.minecommons.paper.biome;
 
-import com.gitlab.aecsocket.minecommons.core.CollectionBuilder;
 import com.gitlab.aecsocket.minecommons.core.biome.BiomeData;
 import com.gitlab.aecsocket.minecommons.core.biome.Geography;
 import com.gitlab.aecsocket.minecommons.core.biome.Precipitation;
@@ -13,6 +12,7 @@ import net.minecraft.world.level.biome.MobSpawnSettings;
 import org.bukkit.craftbukkit.v1_18_R1.block.CraftBlock;
 
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Paper implementation of biome data, wrapping a BiomeBase.
@@ -26,6 +26,28 @@ public record PaperBiomeData(
         MobSpawnSettings mobs,
         BiomeGenerationSettings generation
 ) implements BiomeData {
+    /**
+     * A map of NMS precipitation enum values to ours.
+     */
+    public static final BiMap<Biome.Precipitation, Precipitation> PRECIPITATION;
+
+    /**
+     * A map of NMS geography enum values to ours.
+     */
+    public static final BiMap<Biome.BiomeCategory, Geography> GEOGRAPHY;
+
+    static {
+        Map<Biome.Precipitation, Precipitation> precipitation = new HashMap<>();
+        for (int i = 0; i < Biome.Precipitation.values().length; i++)
+            precipitation.put(Biome.Precipitation.values()[i], Precipitation.values()[i]);
+        PRECIPITATION = HashBiMap.create(precipitation);
+
+        Map<Biome.BiomeCategory, Geography> geography = new HashMap<>();
+        for (int i = 0; i < Biome.BiomeCategory.values().length; i++)
+            geography.put(Biome.BiomeCategory.values()[i], Geography.values()[i]);
+        GEOGRAPHY = HashBiMap.create(geography);
+    }
+
     /**
      * Creates a copy with the specified value changed.
      * @param precipitation The new precipitation.
@@ -90,47 +112,18 @@ public record PaperBiomeData(
     }
 
     /**
-     * A map of NMS precipitation enum values to ours.
-     */
-    public static final BiMap<Biome.Precipitation, Precipitation> PRECIPITATION = HashBiMap.create(CollectionBuilder.map(new HashMap<Biome.Precipitation, Precipitation>())
-            .put(Biome.Precipitation.NONE, Precipitation.NONE)
-            .put(Biome.Precipitation.RAIN, Precipitation.RAIN)
-            .put(Biome.Precipitation.SNOW, Precipitation.SNOW)
-            .get());
-
-    /**
-     * A map of NMS geography enum values to ours.
-     */
-    public static final BiMap<Biome.BiomeCategory, Geography> GEOGRAPHY = HashBiMap.create(CollectionBuilder.map(new HashMap<Biome.BiomeCategory, Geography>())
-            .put(Biome.BiomeCategory.NONE, Geography.NONE)
-            .put(Biome.BiomeCategory.TAIGA, Geography.TAIGA)
-            .put(Biome.BiomeCategory.EXTREME_HILLS, Geography.EXTREME_HILLS)
-            .put(Biome.BiomeCategory.JUNGLE, Geography.JUNGLE)
-            .put(Biome.BiomeCategory.MESA, Geography.MESA)
-            .put(Biome.BiomeCategory.PLAINS, Geography.PLAINS)
-            .put(Biome.BiomeCategory.SAVANNA, Geography.SAVANNA)
-            .put(Biome.BiomeCategory.ICY, Geography.ICY)
-            .put(Biome.BiomeCategory.THEEND, Geography.THE_END)
-            .put(Biome.BiomeCategory.BEACH, Geography.BEACH)
-            .put(Biome.BiomeCategory.FOREST, Geography.FOREST)
-            .put(Biome.BiomeCategory.OCEAN, Geography.OCEAN)
-            .put(Biome.BiomeCategory.DESERT, Geography.DESERT)
-            .put(Biome.BiomeCategory.RIVER, Geography.RIVER)
-            .put(Biome.BiomeCategory.SWAMP, Geography.SWAMP)
-            .put(Biome.BiomeCategory.MUSHROOM, Geography.MUSHROOM)
-            .put(Biome.BiomeCategory.NETHER, Geography.NETHER)
-            .put(Biome.BiomeCategory.UNDERGROUND, Geography.UNDERGROUND)
-            .get());
-
-    /**
      * Creates biome data from an NMS handle.
      * @param nms The NMS handle.
      * @return The biome data.
      */
     public static PaperBiomeData from(Biome nms) {
+        Precipitation precipitation = PRECIPITATION.get(nms.getPrecipitation());
+        Geography geography = GEOGRAPHY.get(nms.getBiomeCategory());
+        if (precipitation == null) throw new IllegalArgumentException("NMS precipitation `" + nms.getPrecipitation() + "` cannot be mapped");
+        if (geography == null) throw new IllegalArgumentException("NMS geography `" + nms.getBiomeCategory() + "` cannot be mapped");
         return new PaperBiomeData(
-                PRECIPITATION.get(nms.getPrecipitation()),
-                GEOGRAPHY.get(nms.getBiomeCategory()),
+                precipitation,
+                geography,
                 nms.getBaseTemperature(),
                 nms.getDownfall(),
                 PaperBiomeEffects.from(nms.getSpecialEffects()),
@@ -153,9 +146,13 @@ public record PaperBiomeData(
      * @return The NMS handle.
      */
     public net.minecraft.world.level.biome.Biome toHandle() {
+        Biome.Precipitation precipitation = PRECIPITATION.inverse().get(this.precipitation);
+        Biome.BiomeCategory geography = GEOGRAPHY.inverse().get(this.geography);
+        if (precipitation == null) throw new IllegalArgumentException("Minecommons precipitation `" + this.precipitation + "` cannot be mapped");
+        if (geography == null) throw new IllegalArgumentException("Minecommons geography `" + this.geography + "` cannot be mapped");
         return new Biome.BiomeBuilder()
-                .precipitation(PRECIPITATION.inverse().get(precipitation))
-                .biomeCategory(GEOGRAPHY.inverse().get(geography))
+                .precipitation(precipitation)
+                .biomeCategory(geography)
                 .temperature(temperature)
                 .temperatureAdjustment(Biome.TemperatureModifier.NONE)
                 .downfall(humidity)

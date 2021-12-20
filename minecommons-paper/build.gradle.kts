@@ -52,7 +52,7 @@ tasks {
 
 bukkit {
     name = "Minecommons"
-    main = "${project.group}.paper.MinecommonsPlugin"
+    main = "${project.group}.${rootProject.name}.paper.MinecommonsPlugin"
     apiVersion = "1.18"
     softDepend = listOf("ProtocolLib")
     website = "https://gitlab.com/aecsocket/minecommons"
