@@ -23,7 +23,7 @@ jobs:
             .gradle/caches/VanillaGradle
             .gradle/loom-cache
             paper/.gradle/caches/paperweight
-          key: ${{ runner.os }}-gradle-${{ hashFiles("**/*.gradle", "**/gradle-wrapper.properties") }}
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle', '**/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
       - name: "Build"
