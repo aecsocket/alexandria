@@ -1,0 +1,16 @@
+name: Minecommons
+version: 1.4
+main: com.gitlab.aecsocket.minecommons.paper.MinecommonsPlugin
+description: Common utilities for Minecraft projects
+authors:
+ - aecsocket
+website: https://gitlab.com/aecsocket/minecommons
+libraries:
+ - org.spongepowered:configurate-hocon:4.1.2
+ - net.sf.opencsv:opencsv:2.3
+ - net.kyori:adventure-serializer-configurate4:4.9.3
+ - cloud.commandframework:cloud-paper:1.5.0
+ - cloud.commandframework:cloud-minecraft-extras:1.5.0
+api-version: 1.18
+softdepend:
+ - ProtocolLib

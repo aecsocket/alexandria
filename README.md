@@ -1,6 +1,4 @@
-<img src="banner.png" width="1024"/>
-
-# Minecommons
+<img src="banner.png" width="1024" alt="Minecommons"/>
 
 Common utilities for Minecraft-related projects, with features such as vector manipulation,
 event dispatchers and serialization support.
@@ -16,13 +14,15 @@ Minecommons is exposed as a Paper plugin, for other plugins to depend on.
 * [Java >=17](https://adoptium.net/)
 * [Paper >=1.18.1](https://papermc.io)
 
-### [Download Version 1.4](https://gitlab.com/api/v4/projects/27049637/jobs/artifacts/master/raw/minecommons-paper/build/libs/minecommons-paper-1.4.jar?job=build)
+### Download Version 1.4 (NOT WORKING)
 
 ## Development Setup
 
 ### Coordinates
 
 #### Maven
+
+# THESE INSTRUCTIONS DO NOT WORK
 
 Repository
 ```xml
@@ -55,7 +55,7 @@ implementation("com.gitlab.aecsocket", "[MODULE]", "[VERSION]")
 
 ### Usage
 
-#### [Javadoc](https://aecsocket.gitlab.io/minecommons)
+#### Javadoc (NOT WORKING)
 
 ### Modules
 
