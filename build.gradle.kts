@@ -34,24 +34,3 @@ subprojects {
         }
     }
 }
-
-// publishing {
-//     publications {
-//         create<MavenPublication>("github") {
-//             from(components["java"])
-//         }
-//     }
-
-//     repositories {
-//         maven {
-//             url = uri("https://gitlab.com/api/v4/projects/27049637/packages/maven")
-//             credentials(HttpHeaderCredentials::class) {
-//                 name = "Job-Token"
-//                 value = System.getenv("CI_JOB_TOKEN")
-//             }
-//             authentication {
-//                 create<HttpHeaderAuthentication>("header")
-//             }
-//         }
-//     }
-// }

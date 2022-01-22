@@ -58,24 +58,3 @@ bukkit {
     website = "https://github.com/aecsocket/minecommons"
     authors = listOf("aecsocket")
 }
-
-// publishing {
-//     publications {
-//         create<MavenPublication>("maven") {
-//             from(components["java"])
-//         }
-//     }
-
-//     repositories {
-//         maven {
-//             url = uri("https://gitlab.com/api/v4/projects/27049637/packages/maven")
-//             credentials(HttpHeaderCredentials::class) {
-//                 name = "Job-Token"
-//                 value = System.getenv("CI_JOB_TOKEN")
-//             }
-//             authentication {
-//                 create<HttpHeaderAuthentication>("header")
-//             }
-//         }
-//     }
-// }
