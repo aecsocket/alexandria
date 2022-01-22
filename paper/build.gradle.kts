@@ -22,21 +22,6 @@ dependencies {
 }
 
 tasks {
-    javadoc {
-        val opt = options as StandardJavadocDocletOptions
-        opt.links(
-                "https://docs.oracle.com/en/java/javase/17/docs/api/",
-                "https://guava.dev/releases/snapshot-jre/api/docs/",
-                "https://configurate.aoeu.xyz/4.1.2/apidocs/",
-                "https://jd.adventure.kyori.net/api/4.9.3/",
-                "https://www.javadoc.io/doc/io.leangen.geantyref/geantyref/1.3.11/",
-
-                "https://papermc.io/javadocs/paper/1.18/",
-                "https://javadoc.commandframework.cloud/",
-                "https://aadnk.github.io/ProtocolLib/Javadoc/"
-        )
-    }
-
     assemble {
         dependsOn(shadowJar)
     }

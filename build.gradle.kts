@@ -1,3 +1,5 @@
+import org.gradle.api.tasks.javadoc.Javadoc
+
 plugins {
     id("java-library")
     id("maven-publish")
@@ -17,16 +19,28 @@ subprojects {
     }
 
     tasks {
-        compileJava {
-            options.encoding = Charsets.UTF_8.name()
+        javadoc {
+            var opt = options as StandardJavadocDocletOptions
+            opt.encoding = "UTF-8";
+            opt.links(
+                    "https://docs.oracle.com/en/java/javase/17/docs/api/",
+                    "https://guava.dev/releases/snapshot-jre/api/docs/",
+                    "https://configurate.aoeu.xyz/4.1.2/apidocs/",
+                    "https://jd.adventure.kyori.net/api/4.9.3/",
+                    "https://www.javadoc.io/doc/io.leangen.geantyref/geantyref/1.3.11/",
+
+                    "https://papermc.io/javadocs/paper/1.18/",
+                    "https://javadoc.commandframework.cloud/",
+                    "https://aadnk.github.io/ProtocolLib/Javadoc/"
+            )
+
+            opt.addBooleanOption("html5", true)
+            opt.addStringOption("-release", "17")
+            opt.linkSource()
         }
 
-        javadoc {
-            val opt = options as StandardJavadocDocletOptions
-            opt.encoding = Charsets.UTF_8.name()
-            opt.source("17")
-            opt.linkSource(true)
-            opt.author(true)
+        compileJava {
+            options.encoding = Charsets.UTF_8.name()
         }
 
         test {

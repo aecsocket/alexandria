@@ -228,7 +228,16 @@ public final class BiomeInjector {
         nmsPlayer.connection.send(packet);
     }
 
+    /**
+     * Remaps a biome entry into another by returning the end biome's key.
+     */
+    @FunctionalInterface
     public interface BiomeRemapper {
+        /**
+         * Remaps a biome entry into another by returning the end biome's key.
+         * @param entry The initial biome entry.
+         * @return The resulting biome's key.
+         */
         Key remap(Entry entry);
     }
 
@@ -266,6 +275,11 @@ public final class BiomeInjector {
                 null, chunk.getBlendingData());
     }
 
+    /**
+     * Remaps biomes in a packet event using a remapper function.
+     * @param event The packet event.
+     * @param remapper The remapper.
+     */
     public void remapBiomes(PacketEvent event, BiomeRemapper remapper) {
         PacketContainer packet = event.getPacket();
         Player player = event.getPlayer();
