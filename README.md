@@ -1,9 +1,7 @@
-<img src="banner.png" width="1024" alt="Minecommons"/>
+<img src="banner.png" width="1024" alt="Minecommons" />
 
 Common utilities for Minecraft-related projects, with features such as vector manipulation,
 event dispatchers and serialization support.
-
----
 
 ## Paper
 

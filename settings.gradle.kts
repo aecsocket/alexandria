@@ -20,4 +20,14 @@ pluginManagement {
 
 rootProject.name = "minecommons"
 
-include("minecommons-core", "minecommons-paper")
+subproject("${rootProject.name}-core") {
+    projectDir = file("core");
+}
+subproject("${rootProject.name}-paper") {
+    projectDir = file("paper");
+}
+
+inline fun subproject(name: String, block: ProjectDescriptor.() -> Unit) {
+    include(name);
+    project(":$name").apply(block);
+}
