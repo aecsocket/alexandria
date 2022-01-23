@@ -15,15 +15,6 @@ pluginManagement {
     }
 }
 
-dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-    repositories {
-        maven("https://repo.dmulloy2.net/nexus/repository/public/")
-        maven("https://oss.sonatype.org/content/repositories/snapshots/")
-        mavenCentral()
-    }
-}
-
 rootProject.name = "minecommons"
 
 subproject("${rootProject.name}-core") {

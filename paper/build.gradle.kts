@@ -7,6 +7,11 @@ plugins {
     id("xyz.jpenilla.run-paper")
 }
 
+repositories {
+    maven("https://repo.dmulloy2.net/nexus/repository/public/")
+    mavenCentral()
+}
+
 dependencies {
     implementation(projects.minecommonsCore)
     paperDevBundle("1.18.1-R0.1-SNAPSHOT")
