@@ -2,18 +2,13 @@ plugins {
     id("java-library")
     id("maven-publish")
     id("com.github.johnrengelman.shadow")
-
     id("io.papermc.paperweight.userdev")
     id("net.minecrell.plugin-yml.bukkit")
     id("xyz.jpenilla.run-paper")
 }
 
-repositories {
-    maven("https://repo.dmulloy2.net/nexus/repository/public/")
-}
-
 dependencies {
-    implementation(project(":minecommons-core"))
+    implementation(projects.minecommonsCore)
     paperDevBundle("1.18.1-R0.1-SNAPSHOT")
 
     compileOnlyApi(libs.bundles.paperCloud)
@@ -42,4 +37,12 @@ bukkit {
     softDepend = listOf("ProtocolLib")
     website = "https://github.com/aecsocket/minecommons"
     authors = listOf("aecsocket")
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            from(components["java"])
+        }
+    }
 }
