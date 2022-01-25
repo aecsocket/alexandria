@@ -68,7 +68,7 @@ jobs:
         #  * is a release
         #  * or is a snapshot AND is on main branch
         if: "${{ (env.STATUS == 'release' && github.event_name == 'release') || (env.STATUS != 'release' && github.event_name != 'release' && github.ref == 'refs/heads/main') }}"
-        uses: JamesIves/github-pages-deploy-action@4.2.2
+        uses: JamesIves/github-pages-deploy-action@v4.2.2
         with:
           branch: gh-pages
           folder: build/docs/aggregateJavadoc
