@@ -1,15 +1,17 @@
 plugins {
     id("java-library")
     id("maven-publish")
-    id("io.freefair.aggregate-javadoc-jar")
+    id("io.freefair.aggregate-javadoc")
 }
 
-group = "com.github.aecsocket"
-version = "1.4.0-SNAPSHOT"
-description = "Common utilities for Minecraft projects"
+allprojects {
+    group = "com.github.aecsocket"
+    version = "1.4.0-SNAPSHOT"
+    description = "Common utilities for Minecraft projects"
+}
 
-tasks.named("aggregateJavadoc").configure {
-    val opt = (this as Javadoc).options as StandardJavadocDocletOptions
+tasks.aggregateJavadoc {
+    val opt = this.options as StandardJavadocDocletOptions
     opt.encoding = "UTF-8"
     opt.addBooleanOption("html5", true)
     opt.addStringOption("-release", "17")
