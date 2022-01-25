@@ -28,21 +28,6 @@ tasks.named("aggregateJavadoc").configure {
     )
 }
 
-gitPublish {
-    repoUri.set("git@github.com:aecsocket/minecommons.git")
-    branch.set("gh-pages")
-    contents {
-        from("src/pages")
-        from(tasks.aggregateJavadoc) {
-            into("api")
-        }
-        preserve {
-            include("**/")
-            exclude("/*.html")
-        }
-    }
-}
-
 subprojects {
     apply<JavaLibraryPlugin>()
 

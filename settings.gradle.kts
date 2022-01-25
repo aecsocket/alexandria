@@ -9,7 +9,6 @@ pluginManagement {
 
     plugins {
         id("io.freefair.aggregate-javadoc-jar") version "6.3.0"
-        id("org.ajoberstar.git-publish") version "3.0.0"
 
         id("com.github.johnrengelman.shadow") version "7.1.0"
         id("io.papermc.paperweight.userdev") version "1.3.2"
