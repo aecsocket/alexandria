@@ -8,6 +8,9 @@ pluginManagement {
     }
 
     plugins {
+        id("io.freefair.aggregate-javadoc-jar") version "6.3.0"
+        id("org.ajoberstar.git-publish") version "3.0.0"
+
         id("com.github.johnrengelman.shadow") version "7.1.0"
         id("io.papermc.paperweight.userdev") version "1.3.2"
         id("net.minecrell.plugin-yml.bukkit") version "0.5.1"
@@ -18,13 +21,13 @@ pluginManagement {
 rootProject.name = "minecommons"
 
 subproject("${rootProject.name}-core") {
-    projectDir = file("core");
+    projectDir = file("core")
 }
 subproject("${rootProject.name}-paper") {
-    projectDir = file("paper");
+    projectDir = file("paper")
 }
 
 inline fun subproject(name: String, block: ProjectDescriptor.() -> Unit) {
-    include(name);
-    project(":$name").apply(block);
+    include(name)
+    project(":$name").apply(block)
 }

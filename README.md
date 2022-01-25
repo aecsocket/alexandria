@@ -1,25 +1,51 @@
-<img src="banner.png" width="1024" alt="Minecommons" />
+<div align="center">
 
-Common utilities for Minecraft-related projects, with features such as vector manipulation,
-event dispatchers and serialization support.
+<img src="banner.png" width="1024" alt="Minecommons banner" />
 
-## Paper
+[![Workflow status](https://img.shields.io/github/workflow/status/aecsocket/minecommons/build?style=flat-square)](https://github.com/aecsocket/demeter/actions)
 
-Minecommons is exposed as a Paper plugin, for other plugins to depend on.
+Latest version: `1.4.0-SNAPSHOT`
+
+</div>
+
+Common utilities for Minecraft-related projects, split into
+implementations based on platform.
+
+# Usage
+
+All API is documented using javadoc:
+
+### [Javadoc](https://aecsocket.github.io/minecommons)
+
+# Modules
+
+<details open>
+<summary>Core</summary>
 
 ### Dependencies
 
 * [Java >=17](https://adoptium.net/)
-* [Paper >=1.18.1](https://papermc.io)
 
-## Development
+### Coordinates
 
-### Usage
+TODO coordinates
 
-#### [Javadoc](https://aecsocket.github.io/minecommons)
+### TODO Javadoc
 
-Modules:
-* Core `minecommons-core`
+</details>
 
-Implementations:
-* Paper `minecommons-paper`
+<details open>
+<summary>Paper</summary>
+
+### Dependencies
+
+* [Java >=17](https://adoptium.net/)
+* [Paper >=1.18.1](https://papermc.io/)
+
+### Coordinates
+
+TODO coordinates
+
+### TODO Javadoc
+
+</details>

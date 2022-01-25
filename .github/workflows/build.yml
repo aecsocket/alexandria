@@ -1,4 +1,4 @@
-name: "Build"
+name: "build"
 
 on:
   push:
@@ -16,7 +16,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - name: "Checkout"
+        uses: actions/checkout@v2
       - uses: gradle/wrapper-validation-action@v1
       - name: "Set up Java"
         uses: actions/setup-java@v2
@@ -32,8 +33,38 @@ jobs:
             .gradle/caches/VanillaGradle
             .gradle/loom-cache
             paper/.gradle/caches/paperweight
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle', '**/gradle-wrapper.properties') }}
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle.kts', '**/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
+
       - name: "Build"
         run: ./gradlew build --stacktrace
+      - name: "Archive test results"
+        uses: actions/upload-artifact@v2
+        with:
+          name: "test-results-${{ runner.os }}"
+          path: |
+            build/reports/
+            */build/reports/
+
+      - name: "Determine snapshot or release"
+        run: |
+          if [ "$(./gradlew properties | awk '/^version:/ { print $2; }' | grep '\-SNAPSHOT')" ]; then
+            echo "STATUS=snapshot" >> $GITHUB_ENV
+          else
+            echo "STATUS=release" >> $GITHUB_ENV
+          fi
+      - name: "Publish artifact"
+        run: ./gradlew publish
+        # If:
+        #  * is a release
+        #  * or is a snapshot AND is on main branch
+        if: "${{ (env.STATUS == 'release' && github.event_name == 'release') || (env.STATUS != 'release' && github.event_name != 'release' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/release/'))) }}"
+        env:
+          GPR_ACTOR: "${{ github.actor }}"
+          GPR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+      # - name: "Publish to Pages"
+      #  uses: JamesIves/github-pages-deploy-action@v4.2.2
+      #  with:
+      #    branch: gh-pages
+      #    folder: build
