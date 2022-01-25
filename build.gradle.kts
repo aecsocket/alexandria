@@ -2,7 +2,6 @@ plugins {
     id("java-library")
     id("maven-publish")
     id("io.freefair.aggregate-javadoc-jar")
-    id("org.ajoberstar.git-publish")
 }
 
 group = "com.github.aecsocket"
