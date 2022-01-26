@@ -17,12 +17,33 @@ implementations based on platform.
 Using any package from the GitHub Packages registry requires you to
 authorize with GitHub Packages.
 
+To create a token:
+
+1. Visit https://github.com/settings/tokens/new
+2. Create a token with only the `read:packages` scope
+3. Save that token as an environment variable and use that in builds
+
 **Note: Never include your token directly in your build scripts!**
+Always use an environment variable (or similar).
 
 <details>
 <summary>Maven</summary>
 
 ### [How to authorize](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-apache-maven-registry)
+
+#### In `~/.m2/settings.xml`
+
+```xml
+<servers>
+  <server>
+    <id>github-minecommons</id>
+    <username>[username]</username>
+    <password>[token]</password>
+  </server>
+</servers>
+```
+
+#### In `pom.xml`
 
 Repository
 ```xml
@@ -35,16 +56,6 @@ Repository
     </snapshots>
   </repository>
 </repositories>
-
-<!-- ... -->
-
-<servers>
-  <server>
-    <id>github-minecommons</id>
-    <username>USERNAME</username>
-    <password>TOKEN</password>
-  </server>
-</servers>
 ```
 
 Dependency
@@ -67,14 +78,16 @@ The Kotlin DSL is used here.
 
 ### [How to authorize](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-gradle-registry)
 
+When building, make sure the `GPR_USERNAME` and `GPR_TOKEN` environment variables are set.
+
 Repository
 ```kotlin
 repositories {
     maven {
         url = uri("https://maven.pkg.github.com/aecsocket/minecommons")
         credentials {
-            username = project.findProperty("gpr.user") as String? ?: System.getenv("USERNAME")
-            password = project.findProperty("gpr.key") as String? ?: System.getenv("TOKEN")
+            username = System.getenv("GPR_USERNAME")
+            password = System.getenv("GPR_TOKEN")
         }
     }
 }

@@ -59,8 +59,8 @@ publishing {
             name = "GitHubPackages"
             url = uri("https://maven.pkg.github.com/aecsocket/minecommons")
             credentials {
-                username = project.findProperty("gpr.user") as String? ?: System.getenv("GPR_ACTOR")
-                password = project.findProject("gpr.key") as String? ?: System.getenv("GPR_TOKEN")
+                username = System.getenv("GPR_ACTOR")
+                password = System.getenv("GPR_TOKEN")
             }
         }
     }
