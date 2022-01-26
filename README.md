@@ -1,9 +1,9 @@
 <div align="center">
 
-<img src="banner.png" width="1024" alt="Minecommons banner" />
+<a href="https://aecsocket.gitlab.io/minecommons"><img src="banner.png" width="1024" alt="Minecommons banner" /></a>
 
 `1.4.0-SNAPSHOT`:
-[![Workflow status](https://img.shields.io/github/workflow/status/aecsocket/minecommons/build?style=flat-square)](https://github.com/aecsocket/demeter/actions)
+[![build](https://github.com/aecsocket/minecommons/actions/workflows/build.yml/badge.svg)](https://github.com/aecsocket/minecommons/actions/workflows/build.yml)
 
 </div>
 
@@ -12,24 +12,29 @@ implementations based on platform.
 
 # Usage
 
-### [Documentation](https://aecsocket.github.io/minecommons)
-
-### Usage
+## Packages
 
 Using any package from the GitHub Packages registry requires you to
 authorize with GitHub Packages.
 
-#### Repository
+**Note: Never include your token directly in your build scripts!**
 
-Maven
+<details>
+<summary>Maven</summary>
+
+### [How to authorize](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-apache-maven-registry)
+
+Repository
 ```xml
-<repository>
-  <id>github-minecommons</id>
-  <url>https://maven.pkg.github.com/aecsocket/minecommons</url>
-  <snapshots>
-    <enabled>true</enabled>
-  </snapshots>
-</repository>
+<repositories>
+  <repository>
+    <id>github-minecommons</id>
+    <url>https://maven.pkg.github.com/aecsocket/minecommons</url>
+    <snapshots>
+      <enabled>true</enabled>
+    </snapshots>
+  </repository>
+</repositories>
 
 <!-- ... -->
 
@@ -42,7 +47,27 @@ Maven
 </servers>
 ```
 
-Gradle
+Dependency
+```xml
+<dependencies>
+  <dependency>
+    <groupId>com.github.aecsocket</groupId>
+    <artifactId>minecommons-[module]</artifactId>
+    <version>[version]</version>
+  </dependency>
+</dependencies>
+```
+
+</details>
+
+<details>
+<summary>Gradle</summary>
+
+The Kotlin DSL is used here.
+
+### [How to authorize](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-gradle-registry)
+
+Repository
 ```kotlin
 repositories {
     maven {
@@ -55,28 +80,27 @@ repositories {
 }
 ```
 
-#### Coordinates
-
-Maven
-```xml
-<dependency>
-  <groupId>com.github.aecsocket</groupId>
-  <artifactId>minecommons-[module]</artifactId>
-  <version>[version]</version>
-</dependency>
-```
-
-Gradle
+Dependency
 ```kotlin
-compileOnly("com.github.aecsocket", "minecommons-[module]", "[version]")
+dependencies {
+    compileOnly("com.github.aecsocket", "minecommons-[module]", "[version]")
+}
 ```
+
+</details>
+
+## Documentation
+
+### [Javadoc](https://aecsocket.github.io/minecommons/docs)
 
 # Modules
 
 Select which module is appropriate for your platform.
 
 <details>
-<summary>Core <code>core</code></summary>
+<summary>Core <code>minecommons-core</code></summary>
+
+This contains platform-independent code, shared among all implementations.
 
 ### Dependencies
 
@@ -85,7 +109,9 @@ Select which module is appropriate for your platform.
 </details>
 
 <details>
-<summary>Paper <code>paper</code></summary>
+<summary>Paper <code>minecommons-paper</code></summary>
+
+For the Paper platform.
 
 ### Dependencies
 
