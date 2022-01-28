@@ -1,7 +1,6 @@
 package com.github.aecsocket.minecommons.core.node;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 import java.util.Iterator;
@@ -21,7 +20,7 @@ import java.util.List;
 
     @Override public String toString() { return "[]"; }
 
-    @Override public @NotNull Iterator<String> iterator() { return Collections.emptyIterator(); }
+    @Override public Iterator<String> iterator() { return Collections.emptyIterator(); }
 
     @Override public boolean equals(Object obj) { return obj instanceof EmptyNodePath; }
     @Override public int hashCode() { return getClass().hashCode(); }

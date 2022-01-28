@@ -1,7 +1,6 @@
 package com.github.aecsocket.minecommons.core.node;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;
 import java.util.List;
@@ -24,7 +23,7 @@ import java.util.Objects;
 
     @Override public String toString() { return list.toString(); }
 
-    @Override public @NotNull Iterator<String> iterator() { return list.iterator(); }
+    @Override public Iterator<String> iterator() { return list.iterator(); }
 
     @Override
     public boolean equals(Object o) {

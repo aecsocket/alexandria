@@ -2,7 +2,6 @@ package com.github.aecsocket.minecommons.paper.persistence;
 
 import org.bukkit.persistence.PersistentDataAdapterContext;
 import org.bukkit.persistence.PersistentDataType;
-import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
@@ -39,11 +38,11 @@ public class StringArrayType implements PersistentDataType<byte[], String[]> {
      */
     public Charset getCharset() { return charset; }
 
-    @Override public @NotNull Class<byte[]> getPrimitiveType() { return byte[].class; }
-    @Override public @NotNull Class<String[]> getComplexType() { return String[].class; }
+    @Override public Class<byte[]> getPrimitiveType() { return byte[].class; }
+    @Override public Class<String[]> getComplexType() { return String[].class; }
 
     @Override
-    public byte @NotNull [] toPrimitive(String[] strings, PersistentDataAdapterContext context) {
+    public byte[] toPrimitive(String[] strings, PersistentDataAdapterContext context) {
         byte[][] bytes = new byte[strings.length][];
         int size = 0;
         for (int i = 0; i < bytes.length; i++) {
@@ -62,7 +61,7 @@ public class StringArrayType implements PersistentDataType<byte[], String[]> {
     }
 
     @Override
-    public String @NotNull [] fromPrimitive(byte[] bytes, PersistentDataAdapterContext context) {
+    public String[] fromPrimitive(byte[] bytes, PersistentDataAdapterContext context) {
         ByteBuffer buffer = ByteBuffer.wrap(bytes);
         List<String> strings = new ArrayList<>();
 

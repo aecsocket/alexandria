@@ -4,7 +4,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.AbstractIterator;
 import com.google.common.collect.UnmodifiableIterator;
 import com.google.common.graph.Graph;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -33,7 +32,7 @@ public final class Graphs {
             this.graph = Preconditions.checkNotNull(graph, "graph");
         }
 
-        @Override @NotNull public UnmodifiableIterator<N> iterator() {
+        @Override public UnmodifiableIterator<N> iterator() {
             return new TopologicalOrderIterator<>(graph);
         }
         @Override public int size() { return graph.nodes().size(); }

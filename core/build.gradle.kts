@@ -22,11 +22,6 @@ dependencies {
     testRuntimeOnly(libs.geantyRef)
 }
 
-java {
-    withJavadocJar()
-    withSourcesJar()
-}
-
 publishing {
     publications {
         create<MavenPublication>("maven") {
