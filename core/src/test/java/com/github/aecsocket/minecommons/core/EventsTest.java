@@ -9,7 +9,6 @@ import java.util.function.Consumer;
 import com.github.aecsocket.minecommons.core.event.EventDispatcher;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static java.time.Duration.*;
 
 public class EventsTest {
     static class Event {
@@ -59,10 +58,8 @@ public class EventsTest {
         EventDispatcher<Event> events = new EventDispatcher<>();
         AtomicInteger flag = new AtomicInteger();
         events.register(Event.class, evt -> flag.set(evt.flag));
-        assertTimeout(ofMillis(10), () -> {
-            events.call(new Event(3));
-            assertEquals(3, flag.get());
-        });
+        events.call(new Event(3));
+        assertEquals(3, flag.get());
     }
 
     @Test
@@ -70,10 +67,8 @@ public class EventsTest {
         EventDispatcher<Event> events = new EventDispatcher<>();
         AtomicInteger flag = new AtomicInteger();
         events.register(Event.class, true, evt -> flag.set(evt.flag));
-        assertTimeout(ofMillis(10), () -> {
-            events.call(new SubEvent(3));
-            assertEquals(0, flag.get());
-        });
+        events.call(new SubEvent(3));
+        assertEquals(0, flag.get());
     }
 
     @Test
@@ -83,10 +78,8 @@ public class EventsTest {
         events.register(Event.class, listen("+100", evt -> flag.set(flag.get() + 100)), 1);
         events.register(Event.class, listen("/flag", evt -> flag.set(flag.get() / evt.flag)));
         events.register(Event.class, listen("+10", evt -> flag.set(flag.get() + 10)), -1);
-        assertTimeout(ofMillis(10), () -> {
-            events.call(new Event(2));
-            assertEquals(105, flag.get());
-        });
+        events.call(new Event(2));
+        assertEquals(105, flag.get());
     }
 
     @Test
@@ -101,14 +94,10 @@ public class EventsTest {
 
         assertThrows(ClassCastException.class, () -> events.call(new GenericEvent<>(10L)));
 
-        assertTimeout(ofMillis(10), () -> {
-            events.call(new GenericEvent<>(10));
-            assertEquals(10, flag.get());
-        });
+        events.call(new GenericEvent<>(10));
+        assertEquals(10, flag.get());
 
-        assertTimeout(ofMillis(10), () -> {
-            events.call(new GenericSubEvent<>(20));
-            assertEquals(20, flag.get());
-        });
+        events.call(new GenericSubEvent<>(20));
+        assertEquals(20, flag.get());
     }
 }

@@ -8,14 +8,18 @@ repositories {
 }
 
 dependencies {
-    compileOnlyApi(libs.bundles.base)
+    compileOnlyApi(libs.guava)
+    compileOnlyApi(libs.checkerQual)
+    compileOnlyApi(libs.geantyRef)
+    compileOnlyApi(libs.configurate)
+    compileOnlyApi(libs.openCsv)
+    
     compileOnlyApi(libs.bundles.adventure)
     api(libs.adventureTextMiniMessage)
 
     testImplementation(libs.bundles.junit)
     testImplementation(libs.adventureTextSerializerGson)
     testRuntimeOnly(libs.geantyRef)
-    testRuntimeOnly(libs.bundles.adventure)
 }
 
 java {

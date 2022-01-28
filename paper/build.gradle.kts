@@ -13,12 +13,13 @@ repositories {
 }
 
 dependencies {
-    implementation(projects.minecommonsCore)
+    api(projects.minecommonsCore)
     paperDevBundle("1.18.1-R0.1-SNAPSHOT")
 
-    compileOnlyApi(libs.bundles.paperCloud)
-    compileOnly(libs.paperProtocolLib)
-    library(libs.bundles.paperLibs)
+    // Plugins + library loader
+    compileOnly(libs.bundles.cloudPaper)
+    compileOnly(libs.protocolLib)
+    library(libs.bundles.libsPaper)
 }
 
 tasks {
