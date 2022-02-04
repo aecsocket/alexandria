@@ -79,7 +79,7 @@ public final class Validation {
      * @throws E The exception to throw.
      */
     public static <E extends Throwable> void greaterThan(double actual, double target, E thrown) throws E {
-        if (!(actual > target)) throw thrown;
+        if (actual <= target) throw thrown;
     }
 
     /**
@@ -104,7 +104,7 @@ public final class Validation {
      * @throws E The exception to throw.
      */
     public static <E extends Throwable> void greaterThanEquals(double actual, double target, E thrown) throws E {
-        if (!(actual >= target)) throw thrown;
+        if (actual < target) throw thrown;
     }
 
     /**
@@ -129,7 +129,7 @@ public final class Validation {
      * @throws E The exception to throw.
      */
     public static <E extends Throwable> void lowerThan(double actual, double target, E thrown) throws E {
-        if (!(actual < target)) throw thrown;
+        if (actual >= target) throw thrown;
     }
 
     /**
@@ -154,7 +154,7 @@ public final class Validation {
      * @throws E The exception to throw.
      */
     public static <E extends Throwable> void lowerThanEquals(double actual, double target, E thrown) throws E {
-        if (!(actual <= target)) throw thrown;
+        if (actual > target) throw thrown;
     }
 
     /**
@@ -167,7 +167,7 @@ public final class Validation {
      */
     public static void lowerThanEquals(String name, double actual, double target) {
         lowerThanEquals(actual, target, new IllegalArgumentException(
-                name + ": failed condition " + actual + " <= " + target));
+            name + ": failed condition " + actual + " <= " + target));
     }
 
     /**
@@ -194,6 +194,6 @@ public final class Validation {
      */
     public static void in(String name, double actual, double min, double max) {
         in(actual, min, max, new IllegalArgumentException(
-                name + ": failed condition " + min + " <= " + actual + " <= " + max));
+            name + ": failed condition " + min + " <= " + actual + " <= " + max));
     }
 }

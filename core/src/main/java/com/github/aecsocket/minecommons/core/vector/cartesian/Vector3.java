@@ -4,7 +4,7 @@ import org.checkerframework.common.value.qual.IntRange;
 
 import java.text.DecimalFormat;
 import java.util.Locale;
-import java.util.function.Function;
+import java.util.function.DoubleUnaryOperator;
 
 import com.github.aecsocket.minecommons.core.Numbers;
 import com.github.aecsocket.minecommons.core.Validation;
@@ -54,9 +54,9 @@ public record Vector3(double x, double y, double z) implements NumericalVector {
      * @return The vector.
      */
     public static Vector3 rgb(
-            @IntRange(from = 0x00, to = 0xff) int r,
-            @IntRange(from = 0x00, to = 0xff) int g,
-            @IntRange(from = 0x00, to = 0xff) int b
+        @IntRange(from = 0x00, to = 0xff) int r,
+        @IntRange(from = 0x00, to = 0xff) int g,
+        @IntRange(from = 0x00, to = 0xff) int b
     ) {
         return new Vector3(r / 255d, g / 255d, b / 255d);
     }
@@ -68,9 +68,9 @@ public record Vector3(double x, double y, double z) implements NumericalVector {
      */
     public static Vector3 rgb(int value) {
         return rgb(
-                (value >> 16) & 0xff,
-                (value >> 8) & 0xff,
-                value & 0xff
+            (value >> 16) & 0xff,
+            (value >> 8) & 0xff,
+            value & 0xff
         );
     }
 
@@ -110,9 +110,9 @@ public record Vector3(double x, double y, double z) implements NumericalVector {
      * @return The vector.
      */
     public static Vector3 hsvFromRgb(
-            @IntRange(from = 0x00, to = 0xff) int r,
-            @IntRange(from = 0x00, to = 0xff) int g,
-            @IntRange(from = 0x00, to = 0xff) int b
+        @IntRange(from = 0x00, to = 0xff) int r,
+        @IntRange(from = 0x00, to = 0xff) int g,
+        @IntRange(from = 0x00, to = 0xff) int b
     ) {
         return hsvFromRgb(r / 255d, g / 255d, b / 255d);
     }
@@ -134,9 +134,9 @@ public record Vector3(double x, double y, double z) implements NumericalVector {
         h = Numbers.wrap(h, 0, 1) * 6;
         int sector = (int) h;
         double f = h - sector,
-                x = v * (1 - s),
-                y = v * (1 - s * f),
-                z = v * (1 - s * (1 - f));
+            x = v * (1 - s),
+            y = v * (1 - s * f),
+            z = v * (1 - s * (1 - f));
 
         return switch (sector) {
             case 0 -> new Vector3(v, z, x);
@@ -353,9 +353,9 @@ public record Vector3(double x, double y, double z) implements NumericalVector {
         double cos = cos(ang);
         double sin = sin(ang);
         return new Vector3(
-                x,
-                cos * y - sin * z,
-                sin * y + cos * z
+            x,
+            cos * y - sin * z,
+            sin * y + cos * z
         );
     }
 
@@ -368,9 +368,9 @@ public record Vector3(double x, double y, double z) implements NumericalVector {
         double cos = cos(ang);
         double sin = sin(ang);
         return new Vector3(
-                cos * x + sin * z,
-                y,
-                -sin * x + cos * z
+            cos * x + sin * z,
+            y,
+            -sin * x + cos * z
         );
     }
 
@@ -383,9 +383,9 @@ public record Vector3(double x, double y, double z) implements NumericalVector {
         double cos = cos(ang);
         double sin = sin(ang);
         return new Vector3(
-                cos * x - sin * y,
-                sin * x + cos * y,
-                z
+            cos * x - sin * y,
+            sin * x + cos * y,
+            z
         );
     }
 
@@ -400,9 +400,9 @@ public record Vector3(double x, double y, double z) implements NumericalVector {
         double sin = Math.sin(angle);
         double dot = dot(a);
         return new Vector3(
-                a.x * dot * (1 - cos) + x * cos + (-a.z * y + a.y * z) * sin,
-                a.y * dot * (1 - cos) + y * cos + (a.z * x - a.x * z) * sin,
-                a.z * dot * (1 - cos) + z * cos + (-a.y * x + a.x * y) * sin
+            a.x * dot * (1 - cos) + x * cos + (-a.z * y + a.y * z) * sin,
+            a.y * dot * (1 - cos) + y * cos + (a.z * x - a.x * z) * sin,
+            a.z * dot * (1 - cos) + z * cos + (-a.y * x + a.x * y) * sin
         );
     }
 
@@ -464,8 +464,8 @@ public record Vector3(double x, double y, double z) implements NumericalVector {
      * @param mapper The mapper.
      * @return The new vector.
      */
-    public Vector3 map(Function<Double, Double> mapper) {
-        return new Vector3(mapper.apply(x), mapper.apply(y), mapper.apply(z));
+    public Vector3 map(DoubleUnaryOperator mapper) {
+        return new Vector3(mapper.applyAsDouble(x), mapper.applyAsDouble(y), mapper.applyAsDouble(z));
     }
 
     /**
@@ -495,9 +495,9 @@ public record Vector3(double x, double y, double z) implements NumericalVector {
      */
     public Vector3 lerp(Vector3 o, double f) {
         return new Vector3(
-                x + (o.x - x) * f,
-                y + (o.y - y) * f,
-                z + (o.z - z) * f
+            x + (o.x - x) * f,
+            y + (o.y - y) * f,
+            z + (o.z - z) * f
         );
     }
 
@@ -509,9 +509,9 @@ public record Vector3(double x, double y, double z) implements NumericalVector {
      */
     public Vector3 step(Vector3 o) {
         return new Vector3(
-                o.x < x ? 0 : 1,
-                o.y < y ? 0 : 1,
-                o.z < z ? 0 : 1
+            o.x < x ? 0 : 1,
+            o.y < y ? 0 : 1,
+            o.z < z ? 0 : 1
         );
     }
 
@@ -522,9 +522,9 @@ public record Vector3(double x, double y, double z) implements NumericalVector {
      */
     public Vector3 midpoint(Vector3 o) {
         return new Vector3(
-                (x + o.x) / 2,
-                (y + o.y) / 2,
-                (z + o.z) / 2
+            (x + o.x) / 2,
+            (y + o.y) / 2,
+            (z + o.z) / 2
         );
     }
 
@@ -585,9 +585,9 @@ public record Vector3(double x, double y, double z) implements NumericalVector {
      */
     public Vector3 cross(Vector3 o) {
         return new Vector3(
-                y * o.z - o.y * z,
-                z * o.x - o.z * x,
-                x * o.y - o.x * y
+            y * o.z - o.y * z,
+            z * o.x - o.z * x,
+            x * o.y - o.x * y
         );
     }
 
@@ -641,8 +641,8 @@ public record Vector3(double x, double y, double z) implements NumericalVector {
      */
     public int rgb() {
         return (ir() & 0xff) << 16
-                | (ig() & 0xff) << 8
-                | ib() & 0xff;
+            | (ig() & 0xff) << 8
+            | ib() & 0xff;
     }
 
     /**
@@ -681,9 +681,9 @@ public record Vector3(double x, double y, double z) implements NumericalVector {
      */
     public static Vector3 min(Vector3 a, Vector3 b) {
         return new Vector3(
-                Math.min(a.x, b.x),
-                Math.min(a.y, b.y),
-                Math.min(a.z, b.z)
+            Math.min(a.x, b.x),
+            Math.min(a.y, b.y),
+            Math.min(a.z, b.z)
         );
     }
 
@@ -695,9 +695,9 @@ public record Vector3(double x, double y, double z) implements NumericalVector {
      */
     public static Vector3 max(Vector3 a, Vector3 b) {
         return new Vector3(
-                Math.max(a.x, b.x),
-                Math.max(a.y, b.y),
-                Math.max(a.z, b.z)
+            Math.max(a.x, b.x),
+            Math.max(a.y, b.y),
+            Math.max(a.z, b.z)
         );
     }
 
@@ -722,8 +722,8 @@ public record Vector3(double x, double y, double z) implements NumericalVector {
         Vector3 yTan = xzTan.cross(dir).normalize();
 
         return xzTan
-                .multiply(offset.x)
-                .add(dir.multiply(offset.z)
-                        .add(yTan.multiply(offset.y)));
+            .multiply(offset.x)
+            .add(dir.multiply(offset.z)
+                .add(yTan.multiply(offset.y)));
     }
 }

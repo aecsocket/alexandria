@@ -7,7 +7,6 @@ import net.kyori.adventure.text.format.TextColor;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Arrays;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static net.kyori.adventure.text.Component.*;
@@ -26,8 +25,8 @@ public final class Components {
      * Intended to be used as a parent to item names or lore.
      */
     public static final Component BLANK = empty()
-            .color(WHITE)
-            .decoration(ITALIC, false);
+        .color(WHITE)
+        .decoration(ITALIC, false);
 
     /**
      * Repeats a component a specified amount of times.
@@ -80,7 +79,7 @@ public final class Components {
                 chars[i] = chars[i].color(section.color());
         }
         if (fill == null)
-            return join(JoinConfiguration.noSeparators(), Stream.of(chars).limit(i).collect(Collectors.toList()));
+            return join(JoinConfiguration.noSeparators(), Stream.of(chars).limit(i).toList());
         else
             return join(JoinConfiguration.noSeparators(), chars);
     }

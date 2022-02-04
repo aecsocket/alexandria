@@ -28,9 +28,9 @@ public class SignedPropertySerializer implements TypeSerializer<WrappedSignedPro
     @Override
     public WrappedSignedProperty deserialize(Type type, ConfigurationNode node) throws SerializationException {
         return new WrappedSignedProperty(
-                node.node("name").getString(),
-                node.node("value").getString(),
-                node.node("signature").getString()
+            node.node("name").getString(),
+            node.node("value").getString(),
+            node.node("signature").getString()
         );
     }
 }

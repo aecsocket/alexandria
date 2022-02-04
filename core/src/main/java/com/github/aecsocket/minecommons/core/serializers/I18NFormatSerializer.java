@@ -35,8 +35,8 @@ public class I18NFormatSerializer implements TypeSerializer<Format> {
             throw new SerializationException(node, type, "Node must be list of [optional style, optional templates]");
         ConfigurationNode style = node.node(0);
         return I18N.format(
-                style.empty() ? null : style.getString(),
-                node.node(1).get(new TypeToken<Map<String, String>>() {}, Collections.emptyMap())
+            style.empty() ? null : style.getString(),
+            node.node(1).get(new TypeToken<Map<String, String>>() {}, Collections.emptyMap())
         );
     }
 }

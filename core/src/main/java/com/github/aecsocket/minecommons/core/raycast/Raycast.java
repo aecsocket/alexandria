@@ -14,7 +14,6 @@ import com.github.aecsocket.minecommons.core.vector.cartesian.Vector3;
  * @param <B> The boundable type.
  */
 public abstract class Raycast<B extends Boundable> {
-
     /**
      * A result of a raycast.
      * @param <B> The boundable type.
@@ -24,10 +23,10 @@ public abstract class Raycast<B extends Boundable> {
      * @param hit The info on the collision itself, or null if there was no collision.
      */
     public record Result<B extends Boundable>(
-            Ray3 ray,
-            double distance,
-            Vector3 pos,
-            @Nullable Hit<B> hit
+        Ray3 ray,
+        double distance,
+        Vector3 pos,
+        @Nullable Hit<B> hit
     ) {}
 
     /**
@@ -39,10 +38,10 @@ public abstract class Raycast<B extends Boundable> {
      * @param hit The bound that was hit.
      */
     public record Hit<B extends Boundable>(
-            Vector3 out,
-            Vector3 normal,
-            double penetration,
-            B hit
+        Vector3 out,
+        Vector3 normal,
+        double penetration,
+        B hit
     ) {}
 
     /**
@@ -58,7 +57,7 @@ public abstract class Raycast<B extends Boundable> {
      */
     protected Result<B> hit(Ray3 ray, double distance, Vector3 pos, Vector3 out, Vector3 normal, double penetration, B hit) {
         return new Result<>(ray, distance, pos, new Hit<>(
-                out, normal, penetration, hit
+            out, normal, penetration, hit
         ));
     }
 
@@ -88,11 +87,11 @@ public abstract class Raycast<B extends Boundable> {
         Bound.Collision collision = object.bound().collision(ray);
         if (collision != null) {
             return hit(ray, collision.in(),
-                    ray.point(collision.in()).add(orig),
-                    ray.point(collision.out()).add(orig),
-                    collision.normal(),
-                    collision.out() - collision.in(),
-                    object);
+                ray.point(collision.in()).add(orig),
+                ray.point(collision.out()).add(orig),
+                collision.normal(),
+                collision.out() - collision.in(),
+                object);
         }
         return null;
     }

@@ -23,17 +23,14 @@ public class UserItemStackSerializer implements TypeSerializer<ItemStack> {
     /** A singleton instance of this serializer. */
     public static final UserItemStackSerializer INSTANCE = new UserItemStackSerializer();
 
-    private static final String keyMeta = "meta";
+    private static final String META = "meta";
 
     @Override
     public void serialize(Type type, @Nullable ItemStack obj, ConfigurationNode node) throws SerializationException {
         if (obj == null) node.set(null);
         else {
             var map = obj.serialize();
-            if (map.containsKey(keyMeta)) {
-                var meta = (ItemMeta) map.get(keyMeta);
-                map.put(keyMeta, meta.serialize());
-            }
+            map.computeIfPresent(META, (k, meta) -> ((ItemMeta) meta).serialize());
             node.set(map);
         }
     }
@@ -41,11 +38,11 @@ public class UserItemStackSerializer implements TypeSerializer<ItemStack> {
     @Override
     public ItemStack deserialize(Type type, ConfigurationNode node) throws SerializationException {
         var map = require(node, new TypeToken<Map<String, Object>>() {});
-        if (map.containsKey(keyMeta)) {
+        map.computeIfPresent(META, (k, meta) -> {
             @SuppressWarnings("unchecked")
-            var metaMap = (Map<String, Object>) map.get(keyMeta);
-            map.put(keyMeta, ConfigurationSerialization.deserializeObject(metaMap));
-        }
+            var metaMap = (Map<String, Object>) meta;
+            return ConfigurationSerialization.deserializeObject(metaMap);
+        });
         return ItemStack.deserialize(map);
     }
 }

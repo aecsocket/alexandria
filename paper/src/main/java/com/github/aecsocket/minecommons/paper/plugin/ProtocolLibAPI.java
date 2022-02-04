@@ -33,13 +33,6 @@ public record ProtocolLibAPI(BasePlugin<?> plugin, ProtocolManager manager) {
     }
 
     /**
-     * Gets the underlying plugin.
-     * @return The plugin.
-     */
-    @Override
-    public BasePlugin<?> plugin() { return plugin; }
-
-    /**
      * Builds a packet using a function.
      * @param type The packet type.
      * @param builder The builder.

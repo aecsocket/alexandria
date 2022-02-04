@@ -19,8 +19,8 @@ import org.bukkit.entity.Player;
  * @param player The underlying player.
  */
 public record PlayerEffector(
-        PaperEffectors manager,
-        Player player
+    PaperEffectors manager,
+    Player player
 ) implements Effector {
     @Override
     public void play(SoundEffect effect, Vector3 origin) {
@@ -32,24 +32,25 @@ public record PlayerEffector(
         Bukkit.getScheduler().scheduleSyncDelayedTask(manager.plugin(), () -> {
             Vector3 delta = origin.subtract(dest);
             Vector3 pos = (Double.compare(delta.manhattanLength(), 0) == 0
-                    ? delta
-                    : delta.normalize().multiply(2))
-                    .add(dest);
+                ? delta
+                : delta.normalize().multiply(2))
+                .add(dest);
             float volume = effect.sound().volume() * (float) (1 -
-                    Numbers.clamp01((dist - effect.sqrDropoff()) / (effect.sqrRange() - effect.sqrDropoff())));
+                Numbers.clamp01((dist - effect.sqrDropoff()) / (effect.sqrRange() - effect.sqrDropoff())));
             player.playSound(Sound.sound(
-                    effect.sound().name(), effect.sound().source(),
-                    volume,
-                    effect.sound().pitch()
+                effect.sound().name(), effect.sound().source(),
+                volume,
+                effect.sound().pitch()
             ), pos.x(), pos.y(), pos.z());
         }, (long) ((dist / effect.speed()) * Ticks.TPS));
     }
 
     @Override
     public void spawn(ParticleEffect effect, Vector3 origin) {
-        if (!(effect.name() instanceof Particle particle)) return;
+        if (!(effect.name() instanceof Particle particle))
+            return;
         Vector3 size = effect.size();
         player.spawnParticle(particle, PaperUtils.toPaper(origin, player.getWorld()), effect.count(),
-                size.x(), size.y(), size.z(), effect.speed(), effect.data());
+            size.x(), size.y(), size.z(), effect.speed(), effect.data());
     }
 }

@@ -26,7 +26,7 @@ public class GameProfileSerializer implements TypeSerializer<WrappedGameProfile>
             ConfigurationNode properties = node.node("properties");
             for (var entry : obj.getProperties().asMap().entrySet()) {
                 properties.node(entry.getKey())
-                        .setList(WrappedSignedProperty.class, new ArrayList<>(entry.getValue()));
+                    .setList(WrappedSignedProperty.class, new ArrayList<>(entry.getValue()));
             }
         }
     }
@@ -34,13 +34,13 @@ public class GameProfileSerializer implements TypeSerializer<WrappedGameProfile>
     @Override
     public WrappedGameProfile deserialize(Type type, ConfigurationNode node) throws SerializationException {
         WrappedGameProfile result = new WrappedGameProfile(
-                node.node("id").get(UUID.class),
-                node.node("name").getString()
+            node.node("id").get(UUID.class),
+            node.node("name").getString()
         );
         var properties = node.node("properties").childrenMap();
         for (var entry : properties.entrySet()) {
             result.getProperties().asMap()
-                    .put(entry.getKey().toString(), entry.getValue().getList(WrappedSignedProperty.class));
+                .put(entry.getKey().toString(), entry.getValue().getList(WrappedSignedProperty.class));
         }
         return result;
     }

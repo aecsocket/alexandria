@@ -16,7 +16,7 @@ import java.util.Objects;
 
     @Override public int size() { return list.size(); }
     @Override public String get(int idx) { return list.get(idx); }
-    @Override public @Nullable String last() { return list.size() == 0 ? null : list.get(list.size() - 1); }
+    @Override public @Nullable String last() { return list.isEmpty() ? null : list.get(list.size() - 1); }
 
     @Override public List<String> list() { return list; }
     @Override public String[] array() { return array == null ? array = list.toArray(new String[0]) : array; }

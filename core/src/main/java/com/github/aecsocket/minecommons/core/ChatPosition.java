@@ -83,10 +83,10 @@ public interface ChatPosition {
             for (var val : values()) {
                 result.put(val.name().toLowerCase(Locale.ROOT), val);
             }
-            return Collections.unmodifiableMap(result);
+            return result;
         }
 
         /** A map containing the named chat positions, mapped to their lowercase names. */
-        public static final Map<String, Named> BY_NAME = buildByName();
+        public static final Map<String, Named> BY_NAME = Collections.unmodifiableMap(buildByName());
     }
 }

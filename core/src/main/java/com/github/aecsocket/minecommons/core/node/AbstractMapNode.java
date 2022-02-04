@@ -25,7 +25,7 @@ public abstract class AbstractMapNode<N extends AbstractMapNode<N>> implements M
      * Creates a deep copy instance from another node implementing this class.
      * @param o The other node.
      */
-    public AbstractMapNode(AbstractMapNode<N> o) {
+    protected AbstractMapNode(AbstractMapNode<N> o) {
         key = o.key;
         for (var entry : o.children.entrySet()) {
             children.put(entry.getKey(), entry.getValue().copy());
@@ -36,7 +36,7 @@ public abstract class AbstractMapNode<N extends AbstractMapNode<N>> implements M
      * Creates a deep copy instance from another generic node.
      * @param o The other node.
      */
-    public AbstractMapNode(MapNode.Scoped<N> o) {
+    protected AbstractMapNode(MapNode.Scoped<N> o) {
         //noinspection ConstantConditions
         key = o.parent() == null
                 ? null : new Key<>(o.parent(), o.key());
@@ -58,14 +58,14 @@ public abstract class AbstractMapNode<N extends AbstractMapNode<N>> implements M
      * @param parent The parent of this node.
      * @param key The key under which this node is stored in the parent.
      */
-    public AbstractMapNode(N parent, String key) {
+    protected AbstractMapNode(N parent, String key) {
         this.key = new Key<>(parent, key);
     }
 
     /**
      * Creates an instance with no parent.
      */
-    public AbstractMapNode() {}
+    protected AbstractMapNode() {}
 
     @Override
     public @Nullable N parent() {
@@ -79,9 +79,9 @@ public abstract class AbstractMapNode<N extends AbstractMapNode<N>> implements M
 
     @Override
     public NodePath path() {
-        Stack<String> path = new Stack<>();
+        List<String> path = new ArrayList<>();
         for (var cur = this; cur != null && cur.key != null; cur = cur.parent())
-            path.push(cur.key.key);
+            path.add(cur.key.key);
         return NodePath.path(path);
     }
 

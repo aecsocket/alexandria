@@ -35,8 +35,8 @@ public interface EventInventoryHolder extends InventoryHolder {
 
         private void handle(InventoryEvent event) {
             if (
-                    event.getInventory().getHolder() instanceof EventInventoryHolder holder
-                            && holder.plugin().equals(plugin)
+                event.getInventory().getHolder() instanceof EventInventoryHolder holder
+                && holder.plugin().equals(plugin)
             ) {
                 holder.event(event);
             }

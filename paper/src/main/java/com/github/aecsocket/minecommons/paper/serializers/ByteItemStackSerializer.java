@@ -27,7 +27,7 @@ public class ByteItemStackSerializer implements TypeSerializer<ItemStack> {
         if (obj == null) node.set(null);
         else {
             node.set(obj.getType() == Material.AIR
-                    ? "" : Base64.getEncoder().encodeToString(obj.serializeAsBytes()));
+                ? "" : Base64.getEncoder().encodeToString(obj.serializeAsBytes()));
         }
     }
 

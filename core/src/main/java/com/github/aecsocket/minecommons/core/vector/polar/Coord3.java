@@ -76,9 +76,9 @@ public record Coord3(double r, double yaw, double pitch) {
     public Vector3 cartesian() {
         double xz = cos(pitch);
         return vec3(
-                -xz * sin(yaw),
-                -sin(pitch),
-                xz * cos(yaw)
+            -xz * sin(yaw),
+            -sin(pitch),
+            xz * cos(yaw)
         );
     }
 

@@ -30,7 +30,7 @@ adventureSerializerConfigurate = { group = "net.kyori", name = "adventure-serial
 adventureTextMiniMessage = { group = "net.kyori", name = "adventure-text-minimessage", version.ref = "adventureMiniMessage" }
 
 cloudPaper = { group = "cloud.commandframework", name = "cloud-paper", version.ref = "cloud" }
-cloudPaperExtras = { group = "cloud.commandframework", name = "cloud-minecraft-extras", version.ref = "cloud" }
+cloudExtras = { group = "cloud.commandframework", name = "cloud-minecraft-extras", version.ref = "cloud" }
 protocolLib = { group = "com.comphenix.protocol", name = "ProtocolLib", version.ref = "protocolLib" }
 
 [bundles]
@@ -38,5 +38,5 @@ protocolLib = { group = "com.comphenix.protocol", name = "ProtocolLib", version.
 base = [ "guava", "checkerQual", "geantyRef", "configurate", "openCsv" ]
 adventure = [ "adventureApi", "adventureTextSerializerPlain", "adventureSerializerConfigurate" ]
 junit = [ "jupiterApi", "jupiterEngine" ]
-cloudPaper = [ "cloudPaper", "cloudPaperExtras" ]
-libsPaper = [ "configurate", "openCsv", "adventureSerializerConfigurate", "cloudPaper", "cloudPaperExtras" ]
+cloudPaper = [ "cloudPaper", "cloudExtras" ]
+libsPaper = [ "configurate", "openCsv", "adventureSerializerConfigurate", "cloudPaper", "cloudExtras" ]

@@ -15,8 +15,8 @@ public record Duration(long ms) {
     private static final long day = hour * 24;
 
     private static final Pattern pattern = Pattern.compile(
-            "(?:([0-9]+)d(?:\\W+)?)?(?:([0-9]+)h(?:\\W+)?)?(?:([0-9]+)m(?:\\W+)?)?(?:([0-9]+(?:[.,][0-9]+)?)?s(?:\\W+)?)?",
-            Pattern.CASE_INSENSITIVE);
+        "(?:([0-9]+)d(?:\\W+)?)?(?:([0-9]+)h(?:\\W+)?)?(?:([0-9]+)m(?:\\W+)?)?(?:([0-9]+(?:[.,][0-9]+)?)?s(?:\\W+)?)?",
+        Pattern.CASE_INSENSITIVE);
 
     /**
      * Creates a duration from its millisecond value.

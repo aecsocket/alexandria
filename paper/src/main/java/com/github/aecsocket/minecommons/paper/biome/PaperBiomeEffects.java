@@ -22,18 +22,18 @@ import com.github.aecsocket.minecommons.core.vector.cartesian.Vector3;
  * Paper implementation of biome effects, wrapping a BiomeFog.
  */
 public record PaperBiomeEffects(
-        Vector3 fog,
-        Vector3 water,
-        Vector3 waterFog,
-        Vector3 sky,
-        Optional<Vector3> foliage,
-        Optional<Vector3> grass,
-        BiomeSpecialEffects.GrassColorModifier grassModifier,
-        Optional<AmbientParticleSettings> particles,
-        Optional<SoundEvent> ambientSound,
-        Optional<AmbientMoodSettings> moodSound,
-        Optional<AmbientAdditionsSettings> additionsSound,
-        Optional<Music> music
+    Vector3 fog,
+    Vector3 water,
+    Vector3 waterFog,
+    Vector3 sky,
+    Optional<Vector3> foliage,
+    Optional<Vector3> grass,
+    BiomeSpecialEffects.GrassColorModifier grassModifier,
+    Optional<AmbientParticleSettings> particles,
+    Optional<SoundEvent> ambientSound,
+    Optional<AmbientMoodSettings> moodSound,
+    Optional<AmbientAdditionsSettings> additionsSound,
+    Optional<Music> music
 ) implements BiomeEffects {
     /**
      * Creates a copy with the specified value changed.
@@ -150,18 +150,18 @@ public record PaperBiomeEffects(
      */
     public static PaperBiomeEffects from(BiomeSpecialEffects nms) {
         return new PaperBiomeEffects(
-                rgb(nms.getFogColor()),
-                rgb(nms.getWaterColor()),
-                rgb(nms.getWaterFogColor()),
-                rgb(nms.getSkyColor()),
-                nms.getFoliageColorOverride().flatMap(v -> Optional.of(rgb(v))),
-                nms.getGrassColorOverride().flatMap(v -> Optional.of(rgb(v))),
-                nms.getGrassColorModifier(),
-                nms.getAmbientParticleSettings(),
-                nms.getAmbientLoopSoundEvent(),
-                nms.getAmbientMoodSettings(),
-                nms.getAmbientAdditionsSettings(),
-                nms.getBackgroundMusic()
+            rgb(nms.getFogColor()),
+            rgb(nms.getWaterColor()),
+            rgb(nms.getWaterFogColor()),
+            rgb(nms.getSkyColor()),
+            nms.getFoliageColorOverride().flatMap(v -> Optional.of(rgb(v))),
+            nms.getGrassColorOverride().flatMap(v -> Optional.of(rgb(v))),
+            nms.getGrassColorModifier(),
+            nms.getAmbientParticleSettings(),
+            nms.getAmbientLoopSoundEvent(),
+            nms.getAmbientMoodSettings(),
+            nms.getAmbientAdditionsSettings(),
+            nms.getBackgroundMusic()
         );
     }
 
@@ -180,11 +180,11 @@ public record PaperBiomeEffects(
      */
     public BiomeSpecialEffects toHandle() {
         var builder = new BiomeSpecialEffects.Builder()
-                .fogColor(fog.rgb())
-                .waterColor(water.rgb())
-                .waterFogColor(waterFog.rgb())
-                .skyColor(sky.rgb())
-                .grassColorModifier(grassModifier);
+            .fogColor(fog.rgb())
+            .waterColor(water.rgb())
+            .waterFogColor(waterFog.rgb())
+            .skyColor(sky.rgb())
+            .grassColorModifier(grassModifier);
         foliage.ifPresent(v -> builder.foliageColorOverride(v.rgb()));
         grass.ifPresent(v -> builder.grassColorOverride(v.rgb()));
         particles.ifPresent(builder::ambientParticle);

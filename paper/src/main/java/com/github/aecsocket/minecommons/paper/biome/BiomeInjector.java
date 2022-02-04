@@ -51,16 +51,10 @@ public final class BiomeInjector {
      * @param biomeData The wrapped biome data.
      */
     public record Entry(boolean vanilla, int id,
-                        ResourceKey<Biome> resourceKey, Biome handle,
-                        Key key, PaperBiomeData biomeData) {}
+        ResourceKey<Biome> resourceKey, Biome handle,
+        Key key, PaperBiomeData biomeData
+    ) {}
 
-    /*
-    MappedRegistry:
-        private final ObjectList<T> byId = new ObjectArrayList(256);
-        private final it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap<T> toId = new it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap<T>(2048);
-        private final BiMap<ResourceLocation, T> storage = HashBiMap.create(2048);
-        private final BiMap<ResourceKey<T>, T> keyStorage = HashBiMap.create(2048);
-         */
     private final WritableRegistry<Biome> nmsBiomes;
     private final ObjectList<Biome> nmsById;
     private final Reference2IntOpenHashMap<Biome> nmsToId;
@@ -106,9 +100,9 @@ public final class BiomeInjector {
 
             @SuppressWarnings("PatternValidation")
             Entry newEntry = new Entry(
-                    true, id,
-                    key, biome,
-                    Key.key(location.getNamespace(), location.getPath()), PaperBiomeData.from(biome)
+                true, id,
+                key, biome,
+                Key.key(location.getNamespace(), location.getPath()), PaperBiomeData.from(biome)
             );
             add(newEntry);
         }
@@ -158,7 +152,7 @@ public final class BiomeInjector {
      */
     public Entry inject(Key key, PaperBiomeData biomeData) {
         var existing = byKey.get(key);
-        int id = existing == null ? nmsById.size() : existing.id; // TODO?
+        int id = existing == null ? nmsById.size() : existing.id;
         var resource = ResourceKey.create(Registry.BIOME_REGISTRY, new ResourceLocation(key.namespace(), key.value()));
         Biome handle = biomeData.toHandle();
         Entry entry = new Entry(
@@ -251,7 +245,7 @@ public final class BiomeInjector {
             var origSection = origSections[i];
 
             @SuppressWarnings("ConstantConditions")
-            PalettedContainer<Biome> biomes = new PalettedContainer<>(nmsBiomes, nmsBiomes.getOrThrow(Biomes.PLAINS), PalettedContainer.Strategy.SECTION_BIOMES, null);
+            PalettedContainer<Biome> biomes = new PalettedContainer<>(nmsBiomes, nmsBiomes.getOrThrow(Biomes.PLAINS), PalettedContainer.Strategy.SECTION_BIOMES, new Biome[0]);
             for (int x = 0; x < 4; x++) {
                 for (int y = 0; y < 4; y++) {
                     for (int z = 0; z < 4; z++) {
@@ -264,15 +258,15 @@ public final class BiomeInjector {
                 }
             }
             sections[i] = new LevelChunkSection(origSection.bottomBlockY() >> 4,
-                    origSection.states,
-                    biomes);
+                origSection.states,
+                biomes);
         }
 
         return new LevelChunk(level, pos,
-                chunk.getUpgradeData(),
-                (LevelChunkTicks<Block>) chunk.getBlockTicks(), (LevelChunkTicks<Fluid>) chunk.getFluidTicks(),
-                chunk.getInhabitedTime(), sections,
-                null, chunk.getBlendingData());
+            chunk.getUpgradeData(),
+            (LevelChunkTicks<Block>) chunk.getBlockTicks(), (LevelChunkTicks<Fluid>) chunk.getFluidTicks(),
+            chunk.getInhabitedTime(), sections,
+            null, chunk.getBlendingData());
     }
 
     /**
@@ -285,16 +279,16 @@ public final class BiomeInjector {
         Player player = event.getPlayer();
 
         LevelChunk nmsChunk = ((CraftChunk) player.getWorld().getChunkAt(
-                packet.getIntegers().read(0),
-                packet.getIntegers().read(1)
+            packet.getIntegers().read(0),
+            packet.getIntegers().read(1)
         )).getHandle();
         ServerPlayer nmsPlayer = ((CraftPlayer) player).getHandle();
 
         LevelChunk remappedChunk = remapChunk(nmsChunk, remapper);
         boolean modifyBlocks = nmsChunk.level.chunkPacketBlockController.shouldModify(nmsPlayer, nmsChunk);
         ClientboundLevelChunkWithLightPacket nmsPacket = new ClientboundLevelChunkWithLightPacket(
-                remappedChunk,
-                nmsChunk.level.getLightEngine(), null, null, true, modifyBlocks
+            remappedChunk,
+            nmsChunk.level.getLightEngine(), null, null, true, modifyBlocks
         );
 
         packet.getModifier().write(2, nmsPacket.getChunkData());

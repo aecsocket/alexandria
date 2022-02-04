@@ -41,9 +41,9 @@ public final class I18NLoader {
     public static final Path FORMATS = Path.of("formats.conf");
 
     private static final ConfigurationOptions configOptions = ConfigurationOptions.defaults()
-            .serializers(serializers -> serializers
-                    .registerExact(Format.class, I18NFormatSerializer.INSTANCE)
-                    .registerAll(ConfigurateComponentSerializer.configurate().serializers()));
+        .serializers(serializers -> serializers
+            .registerExact(Format.class, I18NFormatSerializer.INSTANCE)
+            .registerAll(ConfigurateComponentSerializer.configurate().serializers()));
     private static final Pattern parsePattern = Pattern.compile("\\\\u([0-9a-f]{4})");
 
     private static String parse(String line) {

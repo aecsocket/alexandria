@@ -34,8 +34,8 @@ public final class PaperBounds {
         List<Bound> bounds = new ArrayList<>();
         for (AABB bb : shape.toAabbs()) {
             bounds.add(box(
-                    vec3(bb.minX, bb.minY, bb.minZ),
-                    vec3(bb.maxX, bb.maxY, bb.maxZ)
+                vec3(bb.minX, bb.minY, bb.minZ),
+                vec3(bb.maxX, bb.maxY, bb.maxZ)
             ));
         }
         return new Compound(bounds.toArray(new Bound[0]));
@@ -48,8 +48,8 @@ public final class PaperBounds {
      */
     public static Bound from(Block block) {
         VoxelShape shape = ((CraftBlock) block).getNMS().getShape(
-                ((CraftChunk) block.getChunk()).getHandle(),
-                new BlockPos(block.getX(), block.getY(), block.getZ())
+            ((CraftChunk) block.getChunk()).getHandle(),
+            new BlockPos(block.getX(), block.getY(), block.getZ())
         );
         return from(shape);
     }
@@ -64,9 +64,9 @@ public final class PaperBounds {
         Location location = entity.getLocation();
         double x = location.getX(), y = location.getY(), z = location.getZ();
         return box(
-                vec3(box.getMinX() - x, box.getMinY() - y, box.getMinZ() - z),
-                vec3(box.getMaxX() - x, box.getMaxY() - y, box.getMaxZ() - z),
-                location.getYaw()
+            vec3(box.getMinX() - x, box.getMinY() - y, box.getMinZ() - z),
+            vec3(box.getMaxX() - x, box.getMaxY() - y, box.getMaxZ() - z),
+            location.getYaw()
         );
     }
 }

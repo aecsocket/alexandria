@@ -52,26 +52,26 @@ public class ListenerInputs extends AbstractInputs implements Listener {
     private void onEvent(PlayerItemHeldEvent event) {
         handle(new Events.SwapInput(event.getPlayer(), InputType.SWAP, event), () -> event.setCancelled(true));
         handle(new Events.SwapInput(event.getPlayer(),
-                scrollDirection(event.getNewSlot(), event.getPreviousSlot()),
-                event), () -> event.setCancelled(true));
+            scrollDirection(event.getNewSlot(), event.getPreviousSlot()),
+            event), () -> event.setCancelled(true));
     }
 
     @EventHandler
     private void onEvent(PlayerToggleSneakEvent event) {
         handle(new Events.SneakInput(event.getPlayer(), event.isSneaking() ? InputType.SNEAK_START : InputType.SNEAK_STOP, event),
-                () -> event.setCancelled(true));
+            () -> event.setCancelled(true));
     }
 
     @EventHandler
     private void onEvent(PlayerToggleSprintEvent event) {
         handle(new Events.SprintInput(event.getPlayer(), event.isSprinting() ? InputType.SPRINT_START : InputType.SPRINT_STOP, event),
-                () -> event.setCancelled(true));
+            () -> event.setCancelled(true));
     }
 
     @EventHandler
     private void onEvent(PlayerToggleFlightEvent event) {
         handle(new Events.FlightInput(event.getPlayer(), event.isFlying() ? InputType.FLIGHT_START : InputType.FLIGHT_STOP, event),
-                () -> event.setCancelled(true));
+            () -> event.setCancelled(true));
     }
 
     /**
@@ -83,13 +83,13 @@ public class ListenerInputs extends AbstractInputs implements Listener {
         /**
          * Runs when a player makes an input which has an underlying {@link PlayerEvent}.
          */
-        public static abstract class EventInput extends Inputs.Events.Input {
+        public abstract static class EventInput extends Inputs.Events.Input {
             /**
              * Creates an instance.
              * @param player The player.
              * @param input The input type.
              */
-            public EventInput(Player player, InputType input) {
+            protected EventInput(Player player, InputType input) {
                 super(player, input);
             }
 

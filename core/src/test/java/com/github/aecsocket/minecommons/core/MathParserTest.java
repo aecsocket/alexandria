@@ -16,7 +16,7 @@ import com.github.aecsocket.minecommons.core.expressions.parsing.TokenzingExcept
 import static com.github.aecsocket.minecommons.core.expressions.math.MathNode.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class MathParserTest {
+class MathParserTest {
     void testToken(String text, Token... expected) throws TokenzingException {
         Deque<Token> actual = MathParser.tokenize(text);
         var it = actual.iterator();
@@ -64,31 +64,29 @@ public class MathParserTest {
     @Test
     void testArithmetic() throws ParsingException, EvaluationException {
         testNode("1 + 1", 2, sum()
-                .add(constant(1))
-                .add(constant(1))
+            .add(constant(1))
+            .add(constant(1))
         );
         testNode("10 - 5", 5, sum()
-                .add(constant(10))
-                .add(constant(5), false)
+            .add(constant(10))
+            .add(constant(5), false)
         );
         testNode("10 + 5 - 3", 12, sum()
-                .add(constant(10))
-                .add(constant(5))
-                .add(constant(3), false)
+            .add(constant(10))
+            .add(constant(5))
+            .add(constant(3), false)
         );
 
         testNode("3 * 3", 9, product()
-                .add(constant(3))
-                .add(constant(3))
+            .add(constant(3))
+            .add(constant(3))
         );
-
-        // TODO this is wrong
         testNode("10 / 5 / 2", 4, product()
-                .add(constant(10))
-                .add(product()
-                        .add(constant(5))
-                        .add(constant(2), false),
-                false)
+            .add(constant(10))
+            .add(product()
+                .add(constant(5))
+                .add(constant(2), false),
+            false)
         );
     }
 
@@ -96,48 +94,48 @@ public class MathParserTest {
     void testVariables() throws ParsingException, EvaluationException {
         testNode("a", 2, variable("a"), n -> n.set("a", 2));
         testNode("a - b", 1, sum()
-                .add(variable("a"))
-                .add(variable("b"), false),
+            .add(variable("a"))
+            .add(variable("b"), false),
         n -> n.set("a", 3).set("b", 2));
     }
 
     @Test
     void testOrder() throws ParsingException, EvaluationException {
         testNode("2 * 8 + 2", 18, sum()
-                .add(product()
-                        .add(constant(2))
-                        .add(constant(8))
-                )
+            .add(product()
                 .add(constant(2))
+                .add(constant(8))
+            )
+            .add(constant(2))
         );
         testNode("2 * (8 + 2)", 20, product()
+            .add(constant(2))
+            .add(sum()
+                .add(constant(8))
                 .add(constant(2))
-                .add(sum()
-                        .add(constant(8))
-                        .add(constant(2))
-                )
+            )
         );
     }
 
     @Test
     void testExtended() throws ParsingException, EvaluationException {
         testNode("4 ^ 2", 16, exponent(
-                constant(4),
-                constant(2)
+            constant(4),
+            constant(2)
         ));
         testNode("2 ^ 4", 16, exponent(
-                constant(2),
-                constant(4)
+            constant(2),
+            constant(4)
         ));
 
         testNode("sin PI", Math.sin(Math.PI), mathFunction(
-                MathFunction.SIN,
-                variable("PI")
+            MathFunction.SIN,
+            variable("PI")
         ));
 
         testNode("cos PI", Math.cos(Math.PI), mathFunction(
-                MathFunction.COS,
-                variable("PI")
+            MathFunction.COS,
+            variable("PI")
         ));
     }
 }

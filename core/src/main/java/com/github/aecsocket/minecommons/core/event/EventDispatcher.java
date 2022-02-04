@@ -50,12 +50,11 @@ public final class EventDispatcher<E> {
         @Override
         public String toString() {
             return eventType.getSimpleName()
-                    + (specific ? "" : "+")
-                    + " @" + priority;
+                + (specific ? "" : "+")
+                + " @" + priority;
         }
     }
 
-    // TODO find a better data structure
     private final List<Listener<E>> listeners = new ArrayList<>();
 
     /**

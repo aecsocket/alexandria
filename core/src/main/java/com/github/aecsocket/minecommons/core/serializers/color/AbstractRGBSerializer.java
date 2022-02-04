@@ -34,7 +34,7 @@ public abstract class AbstractRGBSerializer<T> implements TypeSerializer<T> {
      * Creates an instance.
      * @param format The format to use.
      */
-    public AbstractRGBSerializer(Format format) {
+    protected AbstractRGBSerializer(Format format) {
         this.format = format;
     }
 
@@ -94,9 +94,9 @@ public abstract class AbstractRGBSerializer<T> implements TypeSerializer<T> {
      */
     protected T of(int r, int g, int b) {
         return of(
-                (r & 0xff) << 16
-                | (g & 0xff) << 8
-                | (b & 0xff)
+            (r & 0xff) << 16
+            | (g & 0xff) << 8
+            | (b & 0xff)
         );
     }
 
@@ -117,9 +117,9 @@ public abstract class AbstractRGBSerializer<T> implements TypeSerializer<T> {
         String hex;
         if (node.isList()) {
             return of(
-                    node.node(0).getInt(0),
-                    node.node(1).getInt(0),
-                    node.node(2).getInt(0)
+                node.node(0).getInt(0),
+                node.node(1).getInt(0),
+                node.node(2).getInt(0)
             );
         } else if ((hex = node.getString("")).startsWith("#")) {
             return of((int) Long.parseLong(hex.substring(1), 16));

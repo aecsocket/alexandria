@@ -1,7 +1,7 @@
 package com.github.aecsocket.minecommons.paper.serializers;
 
 import com.github.aecsocket.minecommons.paper.ItemSlot;
-import com.github.aecsocket.minecommons.paper.effect.ParticleEffect;
+import com.github.aecsocket.minecommons.paper.effect.PaperParticleEffect;
 
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
@@ -22,15 +22,15 @@ public final class PaperSerializers {
      * A {@link TypeSerializerCollection} with the default serializers defined in this package.
      */
     public static final TypeSerializerCollection SERIALIZERS = TypeSerializerCollection.builder()
-            .registerExact(BlockData.class, BlockDataSerializer.INSTANCE)
-            .registerExact(World.class, WorldSerializer.INSTANCE)
-            .registerExact(Location.class, LocationSerializer.INSTANCE)
-            .registerExact(Vector.class, VectorSerializer.INSTANCE)
-            .registerExact(ItemSlot.class, ItemSlotSerializer.INSTANCE)
-            .registerExact(ParticleEffect.class, ParticleEffectSerializer.INSTANCE)
-            .registerExact(NamespacedKey.class, NamespacedKeySerializer.INSTANCE)
-            .registerExact(PotionEffectType.class, PotionEffectTypeSerializer.INSTANCE)
-            .registerExact(PotionEffect.class, PotionEffectSerializer.INSTANCE)
-            .register(ParticleEffect.class, ParticleEffectSerializer.INSTANCE)
-            .build();
+        .registerExact(BlockData.class, BlockDataSerializer.INSTANCE)
+        .registerExact(World.class, WorldSerializer.INSTANCE)
+        .registerExact(Location.class, LocationSerializer.INSTANCE)
+        .registerExact(Vector.class, VectorSerializer.INSTANCE)
+        .registerExact(ItemSlot.class, ItemSlotSerializer.INSTANCE)
+        .registerExact(PaperParticleEffect.class, ParticleEffectSerializer.INSTANCE)
+        .registerExact(NamespacedKey.class, NamespacedKeySerializer.INSTANCE)
+        .registerExact(PotionEffectType.class, PotionEffectTypeSerializer.INSTANCE)
+        .registerExact(PotionEffect.class, PotionEffectSerializer.INSTANCE)
+        .register(PaperParticleEffect.class, ParticleEffectSerializer.INSTANCE)
+        .build();
 }

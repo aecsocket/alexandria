@@ -20,34 +20,34 @@ import static net.kyori.adventure.text.format.NamedTextColor.*;
 import static net.kyori.adventure.text.format.Style.*;
 import static net.kyori.adventure.text.format.TextDecoration.*;
 
-public class I18NTest {
-    public static final String INFO = "info";
-    public static final String ACCENT = "accent";
+class I18NTest {
+    static final String INFO = "info";
+    static final String ACCENT = "accent";
 
-    public static final String BASIC = "basic";
-    public static final String FALLBACK = "fallback";
-    public static final String PLACEHOLDERS = "placeholders";
-    public static final String PLACEHOLDERS_STYLED = "placeholders_styled";
-    public static final String MINIMESSAGE = "minimessage";
-    public static final String CONSTANT = "constant";
-    public static final String STYLED_CONSTANT = "styled_constant";
-    public static final String RENDERABLE = "renderable";
-    public static final String AD_HOC = "ad_hoc";
-    public static final String UNKNOWN_KEY = "unknown_key";
+    static final String BASIC = "basic";
+    static final String FALLBACK = "fallback";
+    static final String PLACEHOLDERS = "placeholders";
+    static final String PLACEHOLDERS_STYLED = "placeholders_styled";
+    static final String MINIMESSAGE = "minimessage";
+    static final String CONSTANT = "constant";
+    static final String STYLED_CONSTANT = "styled_constant";
+    static final String RENDERABLE = "renderable";
+    static final String AD_HOC = "ad_hoc";
+    static final String UNKNOWN_KEY = "unknown_key";
 
-    public static final Translation US = translation(Locale.US, tl -> tl
-            .add(BASIC, "Basic message")
-            .add(FALLBACK, "Fallback message")
-            .add(PLACEHOLDERS, "Placeholder: <target>")
-            .add(PLACEHOLDERS_STYLED, "Styled placeholder: <target>")
-            .add(MINIMESSAGE, "MiniMessage test: <b>bold</b>")
-            .add(CONSTANT, "A constant")
-            .add(STYLED_CONSTANT, "A styled constant")
-            .add(RENDERABLE, "Renderable")
-            .add(AD_HOC, "Ad hoc message"));
-    public static final Translation UK = translation(Locale.UK, tl -> tl
-            .add(BASIC, "UK basic message")
-            .add(RENDERABLE, "UK renderable"));
+    static final Translation US = translation(Locale.US, tl -> tl
+        .add(BASIC, "Basic message")
+        .add(FALLBACK, "Fallback message")
+        .add(PLACEHOLDERS, "Placeholder: <target>")
+        .add(PLACEHOLDERS_STYLED, "Styled placeholder: <target>")
+        .add(MINIMESSAGE, "MiniMessage test: <b>bold</b>")
+        .add(CONSTANT, "A constant")
+        .add(STYLED_CONSTANT, "A styled constant")
+        .add(RENDERABLE, "Renderable")
+        .add(AD_HOC, "Ad hoc message"));
+    static final Translation UK = translation(Locale.UK, tl -> tl
+        .add(BASIC, "UK basic message")
+        .add(RENDERABLE, "UK renderable"));
 
     MiniMessageI18N createI18N() {
         MiniMessageI18N i18n = new MiniMessageI18N(MiniMessage.get(), Locale.US);
@@ -59,7 +59,7 @@ public class I18NTest {
         i18n.registerFormat(FALLBACK, format(INFO));
         i18n.registerFormat(PLACEHOLDERS, format(INFO));
         i18n.registerFormat(PLACEHOLDERS_STYLED, format(INFO, tp -> tp
-                .add("target", ACCENT)));
+            .add("target", ACCENT)));
         i18n.registerFormat(MINIMESSAGE, format(INFO));
         i18n.registerFormat(CONSTANT, format());
         i18n.registerFormat(STYLED_CONSTANT, format(ACCENT));
@@ -100,15 +100,15 @@ public class I18NTest {
     void testPlaceholder() {
         MiniMessageI18N i18n = createI18N();
         assertEquals(text("", GRAY)
-                        .append(text("Placeholder: "))
-                        .append(text("One")),
-                i18n.line(Locale.US, PLACEHOLDERS,
-                        c -> c.of("target", "One")));
+                .append(text("Placeholder: "))
+                .append(text("One")),
+            i18n.line(Locale.US, PLACEHOLDERS,
+                c -> c.of("target", "One")));
         assertEquals(text("", GRAY)
-                        .append(text("Placeholder: "))
-                        .append(text("Two", RED)),
-                i18n.line(Locale.US, PLACEHOLDERS,
-                        c -> c.of("target", text("Two", RED))));
+                .append(text("Placeholder: "))
+                .append(text("Two", RED)),
+            i18n.line(Locale.US, PLACEHOLDERS,
+                c -> c.of("target", text("Two", RED))));
     }
 
     @Test
@@ -117,88 +117,89 @@ public class I18NTest {
         Renderable rr = (i18n1, locale) -> i18n1.line(locale, RENDERABLE);
 
         assertEquals(text("Renderable"),
-                        rr.render(i18n, Locale.US));
+            rr.render(i18n, Locale.US));
         assertEquals(text("UK renderable"),
-                rr.render(i18n, Locale.UK));
+            rr.render(i18n, Locale.UK));
 
         assertEquals(text("", GRAY)
-                        .append(text("Placeholder: "))
-                        .append(text("Renderable")),
-                i18n.line(Locale.US, PLACEHOLDERS,
-                        c -> c.of("target", rr)));
+                .append(text("Placeholder: "))
+                .append(text("Renderable")),
+            i18n.line(Locale.US, PLACEHOLDERS,
+                c -> c.of("target", rr)));
     }
 
-    public record Dummy(int value) {}
+    record Dummy(int value) {}
 
     @Test
     void testPlaceholderFormat() {
         MiniMessageI18N i18n = createI18N();
         assertEquals(text("", GRAY)
-                        .append(text("Placeholder: "))
-                        .append(text("1,234.5")),
-                i18n.line(Locale.US, PLACEHOLDERS,
-                        c -> c.format("target", "%,.1f", 1234.54)));
+                .append(text("Placeholder: "))
+                .append(text("1,234.5")),
+            i18n.line(Locale.US, PLACEHOLDERS,
+                c -> c.format("target", "%,.1f", 1234.54)));
         assertEquals(text("", GRAY)
-                        .append(text("Placeholder: "))
-                        .append(text("1.234,5")),
-                i18n.line(Locale.GERMAN, PLACEHOLDERS,
-                        c -> c.format("target", "%,.1f", 1234.54)));
+                .append(text("Placeholder: "))
+                .append(text("1.234,5")),
+            i18n.line(Locale.GERMAN, PLACEHOLDERS,
+                c -> c.format("target", "%,.1f", 1234.54)));
 
         assertEquals(text("", GRAY)
-                        .append(text("Placeholder: "))
-                        .append(text("Dummy[value=3]")),
-                i18n.line(Locale.US, PLACEHOLDERS,
-                        c -> c.of("target", new Dummy(3))));
+                .append(text("Placeholder: "))
+                .append(text("Dummy[value=3]")),
+            i18n.line(Locale.US, PLACEHOLDERS,
+                c -> c.of("target", new Dummy(3))));
     }
 
     @Test
     void testPlaceholderStyling() {
         MiniMessageI18N i18n = createI18N();
         assertEquals(text("", NamedTextColor.GRAY)
-                        .append(text("Styled placeholder: "))
-                        .append(text("Blue", NamedTextColor.BLUE)),
-                i18n.line(Locale.US, PLACEHOLDERS_STYLED,
-                        c -> c.of("target", "Blue")));
+                .append(text("Styled placeholder: "))
+                .append(text("Blue", NamedTextColor.BLUE)),
+            i18n.line(Locale.US, PLACEHOLDERS_STYLED,
+                    c -> c.of("target", "Blue")));
         assertEquals(text("", NamedTextColor.GRAY)
-                        .append(text("Styled placeholder: "))
-                        .append(text("Green", NamedTextColor.GREEN)),
-                i18n.line(Locale.US, PLACEHOLDERS_STYLED,
-                        c -> c.of("target", text("Green", NamedTextColor.GREEN))));
+                .append(text("Styled placeholder: "))
+                .append(text("Green", NamedTextColor.GREEN)),
+            i18n.line(Locale.US, PLACEHOLDERS_STYLED,
+                    c -> c.of("target", text("Green", NamedTextColor.GREEN))));
     }
 
     @Test
     void testMiniMessage() {
         MiniMessageI18N i18n = createI18N();
         assertEquals(text("", NamedTextColor.GRAY)
-                        .append(text("MiniMessage test: "))
-                        .append(text("bold").decorate(BOLD)),
-                i18n.line(Locale.US, MINIMESSAGE));
+            .append(text("MiniMessage test: "))
+            .append(text("bold").decorate(BOLD)),
+            i18n.line(Locale.US, MINIMESSAGE)
+        );
     }
 
     @Test
     void testNested() {
         MiniMessageI18N i18n = createI18N();
         assertEquals(text("", NamedTextColor.GRAY)
-                        .append(text("Placeholder: "))
-                        .append(text("A constant")),
-                i18n.line(Locale.US, PLACEHOLDERS,
-                        c -> c.line("target", CONSTANT)));
+                .append(text("Placeholder: "))
+                .append(text("A constant")),
+            i18n.line(Locale.US, PLACEHOLDERS,
+                c -> c.line("target", CONSTANT)));
         assertEquals(text("", NamedTextColor.GRAY)
-                        .append(text("Placeholder: "))
-                        .append(text("A styled constant", NamedTextColor.BLUE)),
-                i18n.line(Locale.US, PLACEHOLDERS,
-                        c -> c.line("target", STYLED_CONSTANT)));
+                .append(text("Placeholder: "))
+                .append(text("A styled constant", NamedTextColor.BLUE)),
+            i18n.line(Locale.US, PLACEHOLDERS,
+                c -> c.line("target", STYLED_CONSTANT)));
         assertEquals(text("", NamedTextColor.GRAY)
-                        .append(text("Styled placeholder: "))
-                        .append(text("A styled constant", NamedTextColor.BLUE)),
-                i18n.line(Locale.US, PLACEHOLDERS_STYLED,
-                        c -> c.line("target", STYLED_CONSTANT)));
+                .append(text("Styled placeholder: "))
+                .append(text("A styled constant", NamedTextColor.BLUE)),
+            i18n.line(Locale.US, PLACEHOLDERS_STYLED,
+                c -> c.line("target", STYLED_CONSTANT)));
     }
 
     @Test
     void testAdHoc() {
         MiniMessageI18N i18n = createI18N();
         assertEquals(text("Ad hoc message"),
-                i18n.line(Locale.US, AD_HOC));
+            i18n.line(Locale.US, AD_HOC));
     }
 }

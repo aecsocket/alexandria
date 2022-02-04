@@ -7,7 +7,7 @@ import java.util.Locale;
 import static com.github.aecsocket.minecommons.core.Duration.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class DurationTest {
+class DurationTest {
     @Test
     void testEquality() {
         Duration one = duration(1000 * 60 * 5);

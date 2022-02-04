@@ -1,9 +1,10 @@
 package com.github.aecsocket.minecommons.core;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import com.google.common.collect.ImmutableList;
 
 /**
  * Utilities for Minecraft time, measured in ticks.
@@ -24,12 +25,12 @@ public final class Ticks {
         }
     }
 
-    private static final List<TimeFormat> formats = CollectionBuilder.list(new ArrayList<TimeFormat>())
-            .add(TimeFormat.of("([0-9.]+)(s)", TPS))
-            .add(TimeFormat.of("([0-9.]+)(m)", 60 * TPS))
-            .add(TimeFormat.of("([0-9.]+)(h)", 60 * 60 * TPS))
-            .add(TimeFormat.of("([0-9.]+)(d)", 60 * 60 * 24 * TPS))
-            .build();
+    private static final List<TimeFormat> formats = ImmutableList.<TimeFormat>builder()
+        .add(TimeFormat.of("([0-9.]+)(s)", TPS))
+        .add(TimeFormat.of("([0-9.]+)(m)", 60L * TPS))
+        .add(TimeFormat.of("([0-9.]+)(h)", 60L * 60L * TPS))
+        .add(TimeFormat.of("([0-9.]+)(d)", 60L * 60L * 24L * TPS))
+        .build();
 
     /**
      * Converts ticks to milliseconds.

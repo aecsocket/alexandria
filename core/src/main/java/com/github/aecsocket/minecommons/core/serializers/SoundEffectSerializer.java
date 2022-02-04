@@ -41,10 +41,10 @@ public class SoundEffectSerializer implements TypeSerializer<SoundEffect> {
     @Override
     public SoundEffect deserialize(Type type, ConfigurationNode node) throws SerializationException {
         return SoundEffect.soundEffect(
-                require(node, Sound.class),
-                node.node(DROPOFF).getDouble(0),
-                node.node(RANGE).getDouble(2),
-                node.node(SPEED).getDouble(SoundEffect.SPEED)
+            require(node, Sound.class),
+            node.node(DROPOFF).getDouble(0),
+            node.node(RANGE).getDouble(2),
+            node.node(SPEED).getDouble(SoundEffect.SPEED)
         );
     }
 }

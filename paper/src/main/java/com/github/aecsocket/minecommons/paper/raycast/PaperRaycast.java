@@ -25,7 +25,6 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 
-
 /**
  * A raycast provider for Paper blocks and entities.
  */
@@ -36,8 +35,8 @@ public class PaperRaycast extends Raycast<PaperRaycast.PaperBoundable> {
     public static final class Builder {
         private boolean ignorePassable = true;
         private double entityLenience = 8;
-        private final Map<Material, List<Bounds<Block>>> blockBounds = new HashMap<>();
-        private final Map<EntityType, List<Bounds<Entity>>> entityBounds = new HashMap<>();
+        private final Map<Material, List<Bounds<Block>>> blockBounds = new EnumMap<>(Material.class);
+        private final Map<EntityType, List<Bounds<Entity>>> entityBounds = new EnumMap<>(EntityType.class);
 
         private Builder() {}
 
@@ -168,8 +167,8 @@ public class PaperRaycast extends Raycast<PaperRaycast.PaperBoundable> {
             if ((entity == null) != (that.entity == null) || (block == null) != (that.block == null))
                 return false;
             if (
-                    (entity != null && entity.getEntityId() != that.entity.getEntityId())
-                    || (block != null && !block.getLocation().equals(that.block.getLocation()))
+                (entity != null && entity.getEntityId() != that.entity.getEntityId())
+                || (block != null && !block.getLocation().equals(that.block.getLocation()))
             )
                 return false;
             return origin.equals(that.origin) && name.equals(that.name) && bound.equals(that.bound);
@@ -384,8 +383,8 @@ public class PaperRaycast extends Raycast<PaperRaycast.PaperBoundable> {
         Vector3 min = Vector3.min(orig, end);
         Vector3 max = Vector3.max(orig, end);
         world.getEntities().get(new AABB(
-                min.x() - entityLenience, min.y() - entityLenience, min.z() - entityLenience,
-                max.x() + entityLenience, max.y() + entityLenience, max.z() + entityLenience
+            min.x() - entityLenience, min.y() - entityLenience, min.z() - entityLenience,
+            max.x() + entityLenience, max.y() + entityLenience, max.z() + entityLenience
         ), ent -> {
             Entity entity = ent.getBukkitEntity();
             var result = intersects(ray, boundables(entity), test);
@@ -395,8 +394,8 @@ public class PaperRaycast extends Raycast<PaperRaycast.PaperBoundable> {
             }
         });
         return nearestResult.get() == null
-                ? miss(ray, maxDistance, ray.point(maxDistance))
-                : nearestResult.get();
+            ? miss(ray, maxDistance, ray.point(maxDistance))
+            : nearestResult.get();
     }
 
     @Override

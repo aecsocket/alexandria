@@ -64,8 +64,8 @@ public abstract class BasePlugin<S extends BasePlugin<S>> extends JavaPlugin {
     protected final MiniMessageI18N i18n = new MiniMessageI18N(MiniMessage.get(), Locale.US);
     /** The configuration options. */
     protected ConfigurationOptions configOptions = ConfigurationOptions.defaults()
-            .serializers(builder -> builder
-            .registerAnnotatedObjects(ObjectMapper.factoryBuilder().defaultNamingScheme(NamingSchemes.SNAKE_CASE).build()));
+        .serializers(builder -> builder
+        .registerAnnotatedObjects(ObjectMapper.factoryBuilder().defaultNamingScheme(NamingSchemes.SNAKE_CASE).build()));
     /** The ProtocolLib integration, if loaded. */
     protected ProtocolLibAPI protocol;
     /** The base command. */
@@ -104,9 +104,9 @@ public abstract class BasePlugin<S extends BasePlugin<S>> extends JavaPlugin {
 
         try {
             resourceManifest = loaderBuilder()
-                    .source(() -> new BufferedReader(reader))
-                    .build()
-                    .load().get(ResourceManifest.class);
+                .source(() -> new BufferedReader(reader))
+                .build()
+                .load().get(ResourceManifest.class);
             if (resourceManifest == null)
                 throw new ConfigurateException("null");
         } catch (ConfigurateException e) {
@@ -238,16 +238,16 @@ public abstract class BasePlugin<S extends BasePlugin<S>> extends JavaPlugin {
         // Styles
         loadJarLanguage(resourceManifest.language().styles(), "styles", reader -> {
             var result = I18NLoader.loadStyles(i18n, () -> HoconConfigurationLoader.builder()
-                    .source(() -> new BufferedReader(reader))
-                    .build());
+                .source(() -> new BufferedReader(reader))
+                .build());
             log(Logging.Level.VERBOSE, "Loaded %d style(s) from JAR %s", result.size(), resourceManifest.language().styles());
         });
 
         // Formats
         loadJarLanguage(resourceManifest.language().formats(), "formats", reader -> {
             var result = I18NLoader.loadFormats(i18n, () -> HoconConfigurationLoader.builder()
-                            .source(() -> new BufferedReader(reader))
-                            .build());
+                .source(() -> new BufferedReader(reader))
+                .build());
             log(Logging.Level.VERBOSE, "Loaded %d format(s) from JAR %s", result.size(), resourceManifest.language().formats());
         });
 
@@ -270,7 +270,6 @@ public abstract class BasePlugin<S extends BasePlugin<S>> extends JavaPlugin {
                 log(Logging.Level.WARNING, rs.exception(), "Could not parse translations in %s", rs.path());
             else if (raw instanceof I18NLoader.Result.Success rs)
                 log(Logging.Level.VERBOSE, "Loaded %d translation(s) for %s from %s", rs.translation().handle().size(), rs.translation().locale().toLanguageTag(), rs.path());
-            // else if (raw instanceof I18NLoader.Result.Missing) {}
         }
     }
 
@@ -294,7 +293,7 @@ public abstract class BasePlugin<S extends BasePlugin<S>> extends JavaPlugin {
      */
     public HoconConfigurationLoader.Builder loaderBuilder() {
         return HoconConfigurationLoader.builder()
-                .defaultOptions(configOptions);
+            .defaultOptions(configOptions);
     }
 
     /**
@@ -306,8 +305,8 @@ public abstract class BasePlugin<S extends BasePlugin<S>> extends JavaPlugin {
      */
     public ConfigurationLoader<?> loader(File file) {
         return loaderBuilder()
-                .file(file)
-                .build();
+            .file(file)
+            .build();
     }
 
     /**
@@ -328,7 +327,7 @@ public abstract class BasePlugin<S extends BasePlugin<S>> extends JavaPlugin {
      */
     public void log(Logging.Level level, String message, Object... args) {
         message.formatted(args).lines()
-                .forEach(line -> logging.log(level, line));
+            .forEach(line -> logging.log(level, line));
     }
 
     /**
@@ -350,7 +349,7 @@ public abstract class BasePlugin<S extends BasePlugin<S>> extends JavaPlugin {
                 log(level, message.formatted(args) + ":");
                 for (Throwable cur = thrown; cur != null; cur = cur.getCause()) {
                     log(level, "    " + cur.getClass().getSimpleName() +
-                            (cur.getMessage() == null ? "" : ": " + cur.getMessage()));
+                        (cur.getMessage() == null ? "" : ": " + cur.getMessage()));
                 }
             }
             case MINIMAL -> log(level, message.formatted(args) + ": " + Text.mergeMessages(thrown));
@@ -400,7 +399,7 @@ public abstract class BasePlugin<S extends BasePlugin<S>> extends JavaPlugin {
      * @return The locale.
      */
     public Locale locale(CommandSender sender) {
-        return sender instanceof Player ? ((Player) sender).locale() : defaultLocale();
+        return sender instanceof Player player ? player.locale() : defaultLocale();
     }
 
     /**
@@ -420,8 +419,8 @@ public abstract class BasePlugin<S extends BasePlugin<S>> extends JavaPlugin {
      */
     public void sendMessage(Audience audience, Locale locale, Component component) {
         audience.sendMessage(Component.empty()
-                        .append(i18n.line(locale, CHAT_PREFIX))
-                        .append(component));
+            .append(i18n.line(locale, CHAT_PREFIX))
+            .append(component));
     }
 
     /**

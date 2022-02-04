@@ -14,7 +14,7 @@ public final class ProtocolSerializers {
      * A {@link TypeSerializerCollection} with the default serializers defined in this package.
      */
     public static final TypeSerializerCollection SERIALIZERS = TypeSerializerCollection.builder()
-            .register(WrappedSignedProperty.class, SignedPropertySerializer.INSTANCE)
-            .register(WrappedGameProfile.class, GameProfileSerializer.INSTANCE)
-            .build();
+        .register(WrappedSignedProperty.class, SignedPropertySerializer.INSTANCE)
+        .register(WrappedGameProfile.class, GameProfileSerializer.INSTANCE)
+        .build();
 }

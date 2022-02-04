@@ -46,15 +46,15 @@ public final class MathParser {
 
     /** The singleton tokenizer instance. */
     public static final Tokenizer TOKENIZER = Tokenizer.builder()
-            .add(OPEN_BRACKET_DEF)
-            .add(CLOSE_BRACKET_DEF)
-            .add(EXPONENT_DEF)
-            .add(FUNCTION_DEF)
-            .add(PLUS_MINUS_DEF)
-            .add(MULTIPLY_DIVIDE_DEF)
-            .add(CONSTANT_DEF)
-            .add(VARIABLE_DEF)
-            .build();
+        .add(OPEN_BRACKET_DEF)
+        .add(CLOSE_BRACKET_DEF)
+        .add(EXPONENT_DEF)
+        .add(FUNCTION_DEF)
+        .add(PLUS_MINUS_DEF)
+        .add(MULTIPLY_DIVIDE_DEF)
+        .add(CONSTANT_DEF)
+        .add(VARIABLE_DEF)
+        .build();
 
     /**
      * Tokenizes text input.
@@ -100,8 +100,8 @@ public final class MathParser {
             switch (lookahead.type()) {
                 case PLUS_MINUS -> {
                     MathNode.Sum sum = term.type() == MathNode.Sum.TYPE
-                            ? (MathNode.Sum) term
-                            : MathNode.sum().add(term);
+                        ? (MathNode.Sum) term
+                        : MathNode.sum().add(term);
 
                     boolean positive = lookahead.sequence().equals("+");
                     next();
@@ -125,8 +125,8 @@ public final class MathParser {
                     next();
                     MathNode next = term();
                     return positive
-                            ? next
-                            : MathNode.sum().add(next, false);
+                        ? next
+                        : MathNode.sum().add(next, false);
                 }
             }
             return term();
@@ -152,8 +152,8 @@ public final class MathParser {
             switch (lookahead.type()) {
                 case MULTIPLY_DIVIDE -> {
                     MathNode.Product product = term.type() == MathNode.Product.TYPE
-                            ? (MathNode.Product) term
-                            : MathNode.product().add(term);
+                        ? (MathNode.Product) term
+                        : MathNode.product().add(term);
 
                     boolean multiply = lookahead.sequence().equals("*");
                     next();

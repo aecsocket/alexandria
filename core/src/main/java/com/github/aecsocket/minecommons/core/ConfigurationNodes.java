@@ -37,37 +37,37 @@ public final class ConfigurationNodes {
      * @param listIndexSuffix Suffix for the element index in an array.
      */
     public record RenderOptions(
-            Style scalar,
-            Style bool,
-            Style number,
-            Style string,
+        Style scalar,
+        Style bool,
+        Style number,
+        Style string,
 
-            Style comment,
-            Style bracket,
-            Style key,
-            Style listIndex,
-            Component elementSeparator,
-            Component keySeparator,
-            Component indent,
-            Component listIndexSuffix
+        Style comment,
+        Style bracket,
+        Style key,
+        Style listIndex,
+        Component elementSeparator,
+        Component keySeparator,
+        Component indent,
+        Component listIndexSuffix
     ) {
         /**
          * The default options.
          */
         public static final RenderOptions DEFAULT = new RenderOptions(
-                style(NamedTextColor.WHITE),
-                style(NamedTextColor.YELLOW),
-                style(NamedTextColor.AQUA),
-                style(NamedTextColor.WHITE),
+            style(NamedTextColor.WHITE),
+            style(NamedTextColor.YELLOW),
+            style(NamedTextColor.AQUA),
+            style(NamedTextColor.WHITE),
 
-                style(NamedTextColor.DARK_GREEN),
-                style(NamedTextColor.GRAY),
-                style(NamedTextColor.GRAY),
-                style(NamedTextColor.WHITE),
-                text(", ", NamedTextColor.DARK_GRAY),
-                text(": ", NamedTextColor.DARK_GRAY),
-                text("  "),
-                text(") ", NamedTextColor.WHITE)
+            style(NamedTextColor.DARK_GREEN),
+            style(NamedTextColor.GRAY),
+            style(NamedTextColor.GRAY),
+            style(NamedTextColor.WHITE),
+            text(", ", NamedTextColor.DARK_GRAY),
+            text(": ", NamedTextColor.DARK_GRAY),
+            text("  "),
+            text(") ", NamedTextColor.WHITE)
         );
     }
 
@@ -75,7 +75,7 @@ public final class ConfigurationNodes {
         String comment = commented.comment();
         if (comment != null) {
             comment.lines()
-                    .forEach(line -> lines.add(text("# " + line, options.comment)));
+                .forEach(line -> lines.add(text("# " + line, options.comment)));
         }
     }
 
@@ -88,14 +88,14 @@ public final class ConfigurationNodes {
             for (var entry : node.childrenMap().entrySet()) {
                 ConfigurationNode child = entry.getValue();
                 Component start = text(""+entry.getKey(), options.key)
-                        .append(options.keySeparator);
+                    .append(options.keySeparator);
 
                 if (showComments && child instanceof CommentedConfigurationNode commented)
                     addComment(commented, lines, options);
                 List<Component> childLines = render(child, options, showComments, false);
                 if (childLines.size() == 1) {
                     lines.add(start
-                            .append(childLines.get(0)));
+                        .append(childLines.get(0)));
                 } else {
                     lines.add(start);
                     childLines.forEach(l -> lines.add(options.indent.append(l)));
@@ -116,8 +116,8 @@ public final class ConfigurationNodes {
                 for (var childLines : childrenLines)
                     children.add(childLines.get(0));
                 lines.add(text("[ ", options.bracket)
-                        .append(join(join, children))
-                        .append(text(" ]", options.bracket)));
+                    .append(join(join, children))
+                    .append(text(" ]", options.bracket)));
             } else {
                 for (int i = 0; i < childrenLines.size(); i++) {
                     Component indexRender = text(i + 1, options.listIndex)
@@ -126,10 +126,10 @@ public final class ConfigurationNodes {
                     List<Component> childLines = childrenLines.get(i);
                     for (int j = 0; j < childLines.size(); j++) {
                         lines.add(options.indent
-                                .append(j == 0
-                                        ? indexRender
-                                        : text(" ".repeat(indexLength), options.listIndex))
-                                .append(childLines.get(j)));
+                            .append(j == 0
+                                ? indexRender
+                                : text(" ".repeat(indexLength), options.listIndex))
+                            .append(childLines.get(j)));
                     }
                 }
             }

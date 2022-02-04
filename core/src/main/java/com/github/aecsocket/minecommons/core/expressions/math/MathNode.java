@@ -2,11 +2,11 @@ package com.github.aecsocket.minecommons.core.expressions.math;
 
 import java.util.*;
 
-import com.github.aecsocket.minecommons.core.CollectionBuilder;
 import com.github.aecsocket.minecommons.core.Validation;
 import com.github.aecsocket.minecommons.core.expressions.node.EvaluationException;
 import com.github.aecsocket.minecommons.core.expressions.node.Node;
 import com.github.aecsocket.minecommons.core.expressions.parsing.NodeException;
+import com.google.common.collect.ImmutableMap;
 
 /**
  * A math expression node, which can be evaluated.
@@ -118,7 +118,7 @@ public interface MathNode extends Node<MathVisitor> {
         /**
          * A term in a sequence, which has an operation.
          */
-        interface Term extends Node.Sequence.Term<MathNode, MathVisitor> {
+        static interface Term extends Node.Sequence.Term<MathNode, MathVisitor> {
             /**
              * The operation that this term applies.
              * @return The operation.
@@ -211,10 +211,10 @@ public interface MathNode extends Node<MathVisitor> {
         /**
          * The default variable values that are used on variable nodes.
          */
-        public static final Map<String, Double> DEFAULT_VARIABLES = CollectionBuilder.map(new HashMap<String, Double>())
-                .put("PI", Math.PI)
-                .put("E", Math.E)
-                .build();
+        public static final Map<String, Double> DEFAULT_VARIABLES = ImmutableMap.<String, Double>builder()
+            .put("PI", Math.PI)
+            .put("E", Math.E)
+            .build();
 
         private final String name;
         private Double value;
@@ -532,29 +532,29 @@ public interface MathNode extends Node<MathVisitor> {
         public static final Function LOG = new Function("log", Math::log10);
 
         /** Map of default functions. */
-        public static final Map<String, Function> FUNCTIONS = CollectionBuilder.map(new HashMap<String, Function>())
-                .put(FLOOR.name, FLOOR)
-                .put(CEIL.name, CEIL)
-                .put(ROUND.name, ROUND)
+        public static final Map<String, Function> FUNCTIONS = ImmutableMap.<String, Function>builder()
+            .put(FLOOR.name, FLOOR)
+            .put(CEIL.name, CEIL)
+            .put(ROUND.name, ROUND)
 
-                .put(ABS.name, ABS)
-                .put(SQRT.name, SQRT)
-                .put(EXP.name, EXP)
+            .put(ABS.name, ABS)
+            .put(SQRT.name, SQRT)
+            .put(EXP.name, EXP)
 
-                .put(RAD.name, RAD)
-                .put(DEG.name, DEG)
+            .put(RAD.name, RAD)
+            .put(DEG.name, DEG)
 
-                .put(SIN.name, SIN)
-                .put(COS.name, COS)
-                .put(TAN.name, TAN)
+            .put(SIN.name, SIN)
+            .put(COS.name, COS)
+            .put(TAN.name, TAN)
 
-                .put(ASIN.name, ASIN)
-                .put(ACOS.name, ACOS)
-                .put(ATAN.name, ATAN)
+            .put(ASIN.name, ASIN)
+            .put(ACOS.name, ACOS)
+            .put(ATAN.name, ATAN)
 
-                .put(LN.name, LN)
-                .put(LOG.name, LOG)
-                .build();
+            .put(LN.name, LN)
+            .put(LOG.name, LOG)
+            .build();
 
         private final Function function;
         private final MathNode term;

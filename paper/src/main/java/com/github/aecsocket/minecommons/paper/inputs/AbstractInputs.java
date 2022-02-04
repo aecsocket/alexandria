@@ -31,6 +31,6 @@ public abstract class AbstractInputs implements Inputs {
      */
     public static InputType scrollDirection(int cur, int prv) {
         return (cur < prv || (cur == 8 && prv == 0)) && !(cur == 0 && prv == 8)
-                ? InputType.SCROLL_UP : InputType.SCROLL_DOWN;
+            ? InputType.SCROLL_UP : InputType.SCROLL_DOWN;
     }
 }

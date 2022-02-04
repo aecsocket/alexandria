@@ -1,19 +1,20 @@
 package com.github.aecsocket.minecommons.core;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
+
+import com.google.common.collect.ImmutableMap;
 
 /**
  * Convenience class for pretty logging, regardless of {@link Logger} level.
  */
 public final class Logging {
     /** ANSI color escape sequence start. */
-    private static final String start = "\033[";
+    private static final String START = "\033[";
     /** ANSI color escape sequence split. */
-    private static final String split = ";";
+    private static final String SPLIT = ";";
     /** ANSI color escape sequence end. */
-    private static final String end = "m";
+    private static final String END = "m";
 
     /**
      * A logging level, determining the style and priority of a logging message.
@@ -55,21 +56,21 @@ public final class Logging {
          * @return The prefix.
          */
         private String genPrefix() {
-            return start + bgColor + split + fgColor + end + // Color
-                    " " + prefix + " " + // Prefix
-                    start + "0" + split + textColor + end; // Text color
+            return START + bgColor + SPLIT + fgColor + END + // Color
+                " " + prefix + " " + // Prefix
+                START + "0" + SPLIT + textColor + END; // Text color
         }
 
         /**
          * The default levels, mapped to their {@link #name} field.
          */
-        public static final Map<String, Level> DEFAULTS = CollectionBuilder.map(new HashMap<String, Level>())
-                .put(DEBUG.name, DEBUG)
-                .put(VERBOSE.name, VERBOSE)
-                .put(INFO.name, INFO)
-                .put(WARNING.name, WARNING)
-                .put(ERROR.name, ERROR)
-                .build();
+        public static final Map<String, Level> DEFAULTS = ImmutableMap.<String, Level>builder()
+            .put(DEBUG.name, DEBUG)
+            .put(VERBOSE.name, VERBOSE)
+            .put(INFO.name, INFO)
+            .put(WARNING.name, WARNING)
+            .put(ERROR.name, ERROR)
+            .build();
 
         /**
          * Gets a default level by its {@link #name} field.
@@ -141,6 +142,6 @@ public final class Logging {
     public void log(Level level, String text, Object... args) {
         if (level.level < this.level.level)
             return;
-        logger.log(java.util.logging.Level.INFO, level.genPrefix() + " " + text.formatted(args) + start + "0" + end);
+        logger.log(java.util.logging.Level.INFO, () -> level.genPrefix() + " " + text.formatted(args) + START + "0" + END);
     }
 }

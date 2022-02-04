@@ -45,8 +45,8 @@ public class QuantifierSerializer<T> implements TypeSerializer<Quantifier<T>> {
         if (list.size() != 2)
             throw new SerializationException(node, type, "Node must be list of [object, amount]");
         return new Quantifier<>(
-                Serializers.require(list.get(0), this.type),
-                list.get(1).getInt()
+            Serializers.require(list.get(0), this.type),
+            list.get(1).getInt()
         );
     }
 }

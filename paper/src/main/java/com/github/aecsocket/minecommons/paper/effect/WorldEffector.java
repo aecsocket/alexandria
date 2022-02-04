@@ -2,8 +2,6 @@ package com.github.aecsocket.minecommons.paper.effect;
 
 import org.bukkit.World;
 
-import java.util.stream.Collectors;
-
 import com.github.aecsocket.minecommons.core.effect.Effector;
 import com.github.aecsocket.minecommons.core.effect.ForwardingEffector;
 
@@ -13,11 +11,11 @@ import com.github.aecsocket.minecommons.core.effect.ForwardingEffector;
  * @param world The underlying world.
  */
 public record WorldEffector(
-        PaperEffectors manager,
-        World world
+    PaperEffectors manager,
+    World world
 ) implements ForwardingEffector {
     @Override
     public Iterable<? extends Effector> effectors() {
-        return world.getPlayers().stream().map(manager::ofPlayer).collect(Collectors.toList());
+        return world.getPlayers().stream().map(manager::ofPlayer).toList();
     }
 }

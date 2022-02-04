@@ -66,9 +66,9 @@ public abstract class AbstractVector3DSerializer<T> implements TypeSerializer<T>
     public T deserialize(Type type, ConfigurationNode node) throws SerializationException {
         if (node.isList()) {
             return of(
-                    node.node(0).getDouble(0),
-                    node.node(1).getDouble(0),
-                    node.node(2).getDouble(0)
+                node.node(0).getDouble(0),
+                node.node(1).getDouble(0),
+                node.node(2).getDouble(0)
             );
         } else if (node.raw() instanceof String string) {
             if (string.startsWith("#")) {

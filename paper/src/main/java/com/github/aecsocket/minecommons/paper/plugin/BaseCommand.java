@@ -59,7 +59,7 @@ public class BaseCommand<P extends BasePlugin<P>> {
         /** The localization key. */
         private final String key;
         /** The localization arguments. */
-        private final I18N.TemplateFactory[] templates;
+        private final transient I18N.TemplateFactory[] templates;
 
         /**
          * Creates an instance.
@@ -125,8 +125,8 @@ public class BaseCommand<P extends BasePlugin<P>> {
         this.plugin = plugin;
         i18n = plugin.i18n;
         manager = new PaperCommandManager<>(plugin,
-                CommandExecutionCoordinator.simpleCoordinator(),
-                Function.identity(), Function.identity());
+            CommandExecutionCoordinator.simpleCoordinator(),
+            Function.identity(), Function.identity());
         manager.registerBrigadier();
         manager.registerAsynchronousCompletions();
 
@@ -134,7 +134,7 @@ public class BaseCommand<P extends BasePlugin<P>> {
         help = new MinecraftHelp<>("/%s help".formatted(rootName), s -> s, manager);
 
         captionLocalizer = (cap, snd) ->
-                PlainTextComponentSerializer.plainText().serialize(i18n.line(locale(snd), ERROR_CAPTION + "." + cap.getKey()));
+            PlainTextComponentSerializer.plainText().serialize(i18n.line(locale(snd), ERROR_CAPTION + "." + cap.getKey()));
 
         if (manager.getCaptionRegistry() instanceof FactoryDelegatingCaptionRegistry<CommandSender> captions) {
             this.captions = captions;
@@ -144,38 +144,35 @@ public class BaseCommand<P extends BasePlugin<P>> {
             captions = null;
 
         exceptionHandler = new MinecraftExceptionHandler<CommandSender>()
-                .withArgumentParsingHandler()
-                .withInvalidSenderHandler()
-                .withInvalidSyntaxHandler()
-                .withNoPermissionHandler()
-                .withCommandExecutionHandler()
-                .withDecorator(msg -> i18n.line(plugin.defaultLocale(), ERROR_COMMAND,
-                        c -> c.of("message", msg)));
+            .withArgumentParsingHandler()
+            .withInvalidSenderHandler()
+            .withInvalidSyntaxHandler()
+            .withNoPermissionHandler()
+            .withCommandExecutionHandler()
+            .withDecorator(msg -> i18n.line(plugin.defaultLocale(), ERROR_COMMAND,
+                c -> c.of("message", msg)));
         exceptionHandler.apply(manager, s -> s);
 
         root = rootFactory.apply(manager, rootName);
         manager.command(root
-                .literal("help", ArgumentDescription.of("Lists help information."))
-                .argument(StringArgument.optional("query", StringArgument.StringMode.GREEDY))
-                .handler(ctx -> {
-                    //noinspection ConstantConditions
-                    help.queryCommands(ctx.getOrDefault("query", ""), ctx.getSender());
-                }));
+            .literal("help", ArgumentDescription.of("Lists help information."))
+            .argument(StringArgument.optional("query", StringArgument.StringMode.GREEDY))
+            .handler(ctx -> help.queryCommands(ctx.getOrDefault("query", ""), ctx.getSender()));
         manager.command(root
-                .literal("version", ArgumentDescription.of("Gets version information."))
-                .handler(c -> handle(c, this::version)));
+            .literal("version", ArgumentDescription.of("Gets version information."))
+            .handler(c -> handle(c, this::version)));
         manager.command(root
-                .literal("reload", ArgumentDescription.of("Reloads all plugin data."))
-                .permission("%s.command.reload".formatted(rootName))
-                .handler(c -> handle(c, this::reload)));
+            .literal("reload", ArgumentDescription.of("Reloads all plugin data."))
+            .permission("%s.command.reload".formatted(rootName))
+            .handler(c -> handle(c, this::reload)));
         manager.command(root
-                .literal("setting", ArgumentDescription.of("Gets a value from the settings file."))
-                .argument(StringArgument.optional("path", StringArgument.StringMode.QUOTED), ArgumentDescription.of("The path to the node."))
-                .flag(CommandFlag.newBuilder("comments")
-                        .withAliases("c")
-                        .withDescription(ArgumentDescription.of("Displays comments.")))
-                .permission("%s.command.setting".formatted(rootName))
-                .handler(c -> handle(c, this::setting)));
+            .literal("setting", ArgumentDescription.of("Gets a value from the settings file."))
+            .argument(StringArgument.optional("path", StringArgument.StringMode.QUOTED), ArgumentDescription.of("The path to the node."))
+            .flag(CommandFlag.newBuilder("comments")
+                .withAliases("c")
+                .withDescription(ArgumentDescription.of("Displays comments.")))
+            .permission("%s.command.setting".formatted(rootName))
+            .handler(c -> handle(c, this::setting)));
     }
 
     /**
@@ -221,7 +218,7 @@ public class BaseCommand<P extends BasePlugin<P>> {
      * @param sender The sender.
      * @return The player, or null.
      */
-    protected Player player(CommandSender sender) { return sender instanceof Player ? (Player) sender : null; }
+    protected Player player(CommandSender sender) { return sender instanceof Player player ? player : null; }
 
     /** A command handler, with pre-determined slots. */
     protected interface CommandHandler {
@@ -286,11 +283,11 @@ public class BaseCommand<P extends BasePlugin<P>> {
                 String type = cur.getClass().getSimpleName();
                 String message = cur.getMessage();
                 send(audience, locale, message == null
-                        ? i18n.lines(locale, ERROR_EXCEPTION_NO_MESSAGE,
-                                c -> c.of("type", type))
-                        : i18n.lines(locale, ERROR_EXCEPTION_MESSAGE,
-                                c -> c.of("type", type),
-                                c -> c.of("message", message))
+                    ? i18n.lines(locale, ERROR_EXCEPTION_NO_MESSAGE,
+                        c -> c.of("type", type))
+                    : i18n.lines(locale, ERROR_EXCEPTION_MESSAGE,
+                        c -> c.of("type", type),
+                        c -> c.of("message", message))
                 );
             }
         }
@@ -332,7 +329,7 @@ public class BaseCommand<P extends BasePlugin<P>> {
             T result = pSender == null ? null : ifPlayer.apply(pSender);
             if (result == null)
                 throw error(ERROR_NO_ARG,
-                        c -> c.of("arg", key));
+                    c -> c.of("arg", key));
             return result;
         });
     }
@@ -347,8 +344,8 @@ public class BaseCommand<P extends BasePlugin<P>> {
      */
     protected List<Player> targets(CommandContext<CommandSender> ctx, String key, @Nullable Player pSender) throws CommandException {
         List<Player> targets = defaultedArg(ctx, key, pSender,
-                p -> new MultiplePlayerSelector("", Collections.singletonList(p))).getPlayers();
-        if (targets.size() == 0)
+            p -> new MultiplePlayerSelector("", Collections.singletonList(p))).getPlayers();
+        if (targets.isEmpty())
             throw error(ERROR_NO_TARGETS);
         return targets;
     }
@@ -364,9 +361,9 @@ public class BaseCommand<P extends BasePlugin<P>> {
     protected void version(CommandContext<CommandSender> ctx, CommandSender sender, Locale locale, Player pSender) {
         PluginDescriptionFile desc = plugin.getDescription();
         send(sender, locale, COMMAND_VERSION,
-                c -> c.of("name", desc.getName()),
-                c -> c.of("version", desc.getVersion()),
-                c -> c.of("authors", String.join(", ", desc.getAuthors())));
+            c -> c.of("name", desc.getName()),
+            c -> c.of("version", desc.getVersion()),
+            c -> c.of("authors", String.join(", ", desc.getAuthors())));
     }
 
     /**
@@ -398,7 +395,7 @@ public class BaseCommand<P extends BasePlugin<P>> {
         ConfigurationNode node = settings.root().node(nodePath);
         if (node.virtual())
             throw error(ERROR_NO_NODE_VALUE,
-                    c -> c.of("path", nodePath.toString()));
+                c -> c.of("path", nodePath.toString()));
 
         if (node.parent() != null) {
             ConfigurationNode value = node;
@@ -409,7 +406,7 @@ public class BaseCommand<P extends BasePlugin<P>> {
 
         for (var line : lines) {
             send(sender, locale, COMMAND_SETTING,
-                    c -> c.of("line", line));
+                c -> c.of("line", line));
         }
     }
 }

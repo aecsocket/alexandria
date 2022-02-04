@@ -24,8 +24,8 @@ public class ThreadScheduler implements Scheduler {
         executor.execute(() -> {
             try {
                 long start = System.currentTimeMillis();
-                if (task.delay() > 0) {
-                    synchronized (this) { wait(task.delay()); }
+                while (task.delay() > 0) {
+                    synchronized (this) { wait(1); }
                 }
                 int iteration = 0;
                 long last = System.currentTimeMillis();

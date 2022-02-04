@@ -10,7 +10,6 @@ import cloud.commandframework.context.CommandContext;
 import cloud.commandframework.exceptions.parsing.NoInputProvidedException;
 import cloud.commandframework.exceptions.parsing.ParserException;
 import net.kyori.adventure.key.Key;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import javax.annotation.Nullable;
 
@@ -30,12 +29,11 @@ public final class DurationArgument<C> extends CommandArgument<C, Duration> {
     public static final Caption ARGUMENT_PARSE_FAILURE_DURATION = Caption.of("argument.parse.failure.duration");
 
     private DurationArgument(
-            final boolean required,
-            final @NonNull String name,
-            final @NonNull String defaultValue,
-            final @Nullable BiFunction<@NonNull CommandContext<C>,
-                    @NonNull String, @NonNull List<@NonNull String>> suggestionsProvider,
-            final @NonNull ArgumentDescription defaultDescription
+        final boolean required,
+        final String name,
+        final String defaultValue,
+        final @Nullable BiFunction<CommandContext<C>, String, List<String>> suggestionsProvider,
+        final ArgumentDescription defaultDescription
     ) {
         super(required, name, new DurationParser<>(), defaultValue, Duration.class, suggestionsProvider, defaultDescription);
     }
@@ -47,7 +45,7 @@ public final class DurationArgument<C> extends CommandArgument<C, Duration> {
      * @param <C>    Command sender type
      * @return Created builder
      */
-    public static <C> @NonNull Builder<C> newBuilder(final @NonNull String name) {
+    public static <C> Builder<C> newBuilder(final String name) {
         return new Builder<>(name);
     }
 
@@ -58,7 +56,7 @@ public final class DurationArgument<C> extends CommandArgument<C, Duration> {
      * @param <C>    Command sender type
      * @return Created component
      */
-    public static <C> @NonNull CommandArgument<C, Duration> of(final @NonNull String name) {
+    public static <C> CommandArgument<C, Duration> of(final String name) {
         return DurationArgument.<C>newBuilder(name).asRequired().build();
     }
 
@@ -69,7 +67,7 @@ public final class DurationArgument<C> extends CommandArgument<C, Duration> {
      * @param <C>    Command sender type
      * @return Created component
      */
-    public static <C> @NonNull CommandArgument<C, Duration> optional(final @NonNull String name) {
+    public static <C> CommandArgument<C, Duration> optional(final String name) {
         return DurationArgument.<C>newBuilder(name).asOptional().build();
     }
 
@@ -81,9 +79,9 @@ public final class DurationArgument<C> extends CommandArgument<C, Duration> {
      * @param <C>          Command sender type
      * @return Created component
      */
-    public static <C> @NonNull CommandArgument<C, Duration> optional(
-            final @NonNull String name,
-            final @NonNull Key defaultValue
+    public static <C> CommandArgument<C, Duration> optional(
+        final String name,
+        final Key defaultValue
     ) {
         return DurationArgument.<C>newBuilder(name).asOptionalWithDefault(defaultValue.toString()).build();
     }
@@ -93,7 +91,7 @@ public final class DurationArgument<C> extends CommandArgument<C, Duration> {
      * @param <C> The command sender type.
      */
     public static final class Builder<C> extends CommandArgument.Builder<C, Duration> {
-        private Builder(final @NonNull String name) {
+        private Builder(final String name) {
             super(Duration.class, name);
         }
 
@@ -103,13 +101,13 @@ public final class DurationArgument<C> extends CommandArgument<C, Duration> {
          * @return Constructed component
          */
         @Override
-        public @NonNull DurationArgument<C> build() {
+        public DurationArgument<C> build() {
             return new DurationArgument<>(
-                    this.isRequired(),
-                    this.getName(),
-                    this.getDefaultValue(),
-                    this.getSuggestionsProvider(),
-                    this.getDefaultDescription()
+                this.isRequired(),
+                this.getName(),
+                this.getDefaultValue(),
+                this.getSuggestionsProvider(),
+                this.getDefaultDescription()
             );
         }
     }
@@ -120,15 +118,15 @@ public final class DurationArgument<C> extends CommandArgument<C, Duration> {
      */
     public static final class DurationParser<C> implements ArgumentParser<C, Duration> {
         @Override
-        public @NonNull ArgumentParseResult<Duration> parse(
-                final @NonNull CommandContext<C> ctx,
-                final @NonNull Queue<@NonNull String> inputQueue
+        public ArgumentParseResult<Duration> parse(
+            final CommandContext<C> ctx,
+            final Queue<String> inputQueue
         ) {
             final String input = inputQueue.peek();
             if (input == null) {
                 return ArgumentParseResult.failure(new NoInputProvidedException(
-                        Key.class,
-                        ctx
+                    Key.class,
+                    ctx
                 ));
             }
             inputQueue.remove();
@@ -146,7 +144,7 @@ public final class DurationArgument<C> extends CommandArgument<C, Duration> {
         }
 
         @Override
-        public @NonNull List<@NonNull String> suggestions(@NonNull CommandContext<C> ctx, @NonNull String input) {
+        public List<String> suggestions(CommandContext<C> ctx, String input) {
             return Collections.emptyList();
         }
     }
@@ -163,8 +161,8 @@ public final class DurationArgument<C> extends CommandArgument<C, Duration> {
          */
         public ParseException(String input, CommandContext<?> ctx, Exception e) {
             super(Key.class, ctx, ARGUMENT_PARSE_FAILURE_DURATION,
-                    CaptionVariable.of("input", input),
-                    CaptionVariable.of("error", e.getMessage()));
+                CaptionVariable.of("input", input),
+                CaptionVariable.of("error", e.getMessage()));
         }
     }
 }

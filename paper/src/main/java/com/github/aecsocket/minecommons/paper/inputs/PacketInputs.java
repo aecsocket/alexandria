@@ -31,11 +31,11 @@ import org.bukkit.plugin.Plugin;
 public class PacketInputs extends AbstractInputs implements PacketListener {
     private static final ListeningWhitelist sendingWhitelist = ListeningWhitelist.EMPTY_WHITELIST;
     private static final ListeningWhitelist receivingWhitelist = ListeningWhitelist.newBuilder()
-            .types(PacketType.Play.Client.ARM_ANIMATION, PacketType.Play.Client.BLOCK_PLACE,
-                    PacketType.Play.Client.BLOCK_DIG, PacketType.Play.Client.HELD_ITEM_SLOT,
-                    PacketType.Play.Client.ENTITY_ACTION, PacketType.Play.Client.ABILITIES,
-                    PacketType.Play.Client.ADVANCEMENTS)
-            .build();
+        .types(PacketType.Play.Client.ARM_ANIMATION, PacketType.Play.Client.BLOCK_PLACE,
+            PacketType.Play.Client.BLOCK_DIG, PacketType.Play.Client.HELD_ITEM_SLOT,
+            PacketType.Play.Client.ENTITY_ACTION, PacketType.Play.Client.ABILITIES,
+            PacketType.Play.Client.ADVANCEMENTS)
+        .build();
 
     private final Plugin plugin;
 
@@ -65,13 +65,11 @@ public class PacketInputs extends AbstractInputs implements PacketListener {
         PacketType type = event.getPacketType();
         Player player = event.getPlayer();
 
-        if (type == PacketType.Play.Client.ARM_ANIMATION) {
-            if (packet.getHands().read(0) == EnumWrappers.Hand.MAIN_HAND) {
+        if (packet.getHands().read(0) == EnumWrappers.Hand.MAIN_HAND) {
+            if (type == PacketType.Play.Client.ARM_ANIMATION) {
                 handle(new Events.PacketInput(player, InputType.MOUSE_LEFT, event), () -> event.setCancelled(true));
             }
-        }
-        if (type == PacketType.Play.Client.BLOCK_PLACE) {
-            if (packet.getHands().read(0) == EnumWrappers.Hand.MAIN_HAND) {
+            if (type == PacketType.Play.Client.BLOCK_PLACE) {
                 handle(new Events.PacketInput(player, InputType.MOUSE_RIGHT, event), () -> event.setCancelled(true));
             }
         }
@@ -79,7 +77,7 @@ public class PacketInputs extends AbstractInputs implements PacketListener {
             switch (packet.getPlayerDigTypes().read(0)) {
                 case SWAP_HELD_ITEMS -> handle(new Events.PacketInput(player, InputType.OFFHAND, event), () -> event.setCancelled(true));
                 case DROP_ITEM, DROP_ALL_ITEMS -> handle(new Events.PacketInput(player, InputType.DROP, event), () -> event.setCancelled(true));
-                default -> {}
+                default -> { /* ignore */ }
             }
         }
         if (type == PacketType.Play.Client.HELD_ITEM_SLOT) {
@@ -101,17 +99,18 @@ public class PacketInputs extends AbstractInputs implements PacketListener {
                 case STOP_SNEAKING -> handle(new Events.PacketInput(player, InputType.SNEAK_STOP, event), () -> event.setCancelled(true));
                 case START_SPRINTING -> handle(new Events.PacketInput(player, InputType.SPRINT_START, event), () -> event.setCancelled(true));
                 case STOP_SPRINTING -> handle(new Events.PacketInput(player, InputType.SPRINT_STOP, event), () -> event.setCancelled(true));
-                default -> {}
+                default -> { /* ignore */ }
             }
         }
         if (type == PacketType.Play.Client.ABILITIES) {
-            handle(new Events.PacketInput(player, packet.getBooleans().read(0) ? InputType.FLIGHT_START : InputType.FLIGHT_STOP, event),
+            handle(new Events.PacketInput(player, Boolean.TRUE.equals(packet.getBooleans().read(0)) ? InputType.FLIGHT_START : InputType.FLIGHT_STOP, event),
                     () -> event.setCancelled(true));
         }
-        if (type == PacketType.Play.Client.ADVANCEMENTS) {
-            if (packet.getEnumModifier(AdvancementAction.class, 0).read(0) == AdvancementAction.OPENED_TAB) {
-                handle(new Events.PacketInput(player, InputType.ADVANCEMENTS, event), () -> event.setCancelled(true));
-            }
+        if (
+            type == PacketType.Play.Client.ADVANCEMENTS
+            && packet.getEnumModifier(AdvancementAction.class, 0).read(0) == AdvancementAction.OPENED_TAB
+        ) {
+            handle(new Events.PacketInput(player, InputType.ADVANCEMENTS, event), () -> event.setCancelled(true));
         }
     }
 

@@ -15,7 +15,7 @@ public interface Boundable {
 
     /**
      * The bound that expresses this object.
-     * @return THe bound.
+     * @return The bound.
      */
     Bound bound();
 

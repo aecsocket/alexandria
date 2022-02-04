@@ -8,18 +8,19 @@ repositories {
 }
 
 dependencies {
-    compileOnlyApi(libs.guava)
-    compileOnlyApi(libs.checkerQual)
-    compileOnlyApi(libs.geantyRef)
-    compileOnlyApi(libs.configurate)
-    compileOnlyApi(libs.openCsv)
+    compileOnly(libs.guava)
+    compileOnly(libs.checkerQual)
+    compileOnly(libs.geantyRef)
+    compileOnly(libs.configurate)
+    compileOnly(libs.openCsv)
     
-    compileOnlyApi(libs.bundles.adventure)
+    compileOnly(libs.bundles.adventure)
     api(libs.adventureTextMiniMessage)
 
     testImplementation(libs.bundles.junit)
     testImplementation(libs.adventureTextSerializerGson)
-    testRuntimeOnly(libs.geantyRef)
+    testImplementation(libs.geantyRef)
+    testCompileOnly(libs.checkerQual)
 }
 
 publishing {

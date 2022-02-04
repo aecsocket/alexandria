@@ -18,8 +18,8 @@ import static com.github.aecsocket.minecommons.core.vector.cartesian.Vector3.*;
 import java.util.*;
 import java.util.function.Consumer;
 
-import com.github.aecsocket.minecommons.core.CollectionBuilder;
 import com.github.aecsocket.minecommons.core.vector.cartesian.Vector3;
+import com.google.common.collect.ImmutableMap;
 
 /**
  * Utilities concerning the Paper platform.
@@ -30,13 +30,13 @@ public final class PaperUtils {
     /**
      * A map of block faces to their normal vectors.
      */
-    public static final Map<BlockFace, Vector3> NORMALS = CollectionBuilder.map(new HashMap<BlockFace, Vector3>())
-            .put(BlockFace.UP, vec3(0, 1, 0)).put(BlockFace.DOWN, vec3(0, -1, 0))
-            .put(BlockFace.NORTH, vec3(0, 0, -1)).put(BlockFace.SOUTH, vec3(0, 0, 1))
-            .put(BlockFace.EAST, vec3(-1, 0, 0)).put(BlockFace.WEST, vec3(1, 0, 0))
-            .build();
+    public static final Map<BlockFace, Vector3> NORMALS = ImmutableMap.<BlockFace, Vector3>builder()
+        .put(BlockFace.UP, vec3(0, 1, 0)).put(BlockFace.DOWN, vec3(0, -1, 0))
+        .put(BlockFace.NORTH, vec3(0, 0, -1)).put(BlockFace.SOUTH, vec3(0, 0, 1))
+        .put(BlockFace.EAST, vec3(-1, 0, 0)).put(BlockFace.WEST, vec3(1, 0, 0))
+        .build();
 
-    private static final double rayTraceDistance = 4;
+    private static final double RAY_TRACE_DISTANCE = 4;
 
     /**
      * Checks if an item is null or is of type {@link Material#AIR}.
@@ -71,11 +71,11 @@ public final class PaperUtils {
      * @return The location.
      */
     public static Location target(Player player) {
-        RayTraceResult result = player.rayTraceBlocks(rayTraceDistance);
+        RayTraceResult result = player.rayTraceBlocks(RAY_TRACE_DISTANCE);
         if (result != null)
             return result.getHitPosition().toLocation(player.getWorld());
         Location location = player.getEyeLocation();
-        return location.add(location.getDirection().multiply(rayTraceDistance));
+        return location.add(location.getDirection().multiply(RAY_TRACE_DISTANCE));
     }
 
     /**

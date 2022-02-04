@@ -18,13 +18,13 @@ import java.util.Map;
  * Paper implementation of biome data, wrapping a BiomeBase.
  */
 public record PaperBiomeData(
-        Precipitation precipitation,
-        Geography geography,
-        float temperature,
-        float humidity,
-        PaperBiomeEffects effects,
-        MobSpawnSettings mobs,
-        BiomeGenerationSettings generation
+    Precipitation precipitation,
+    Geography geography,
+    float temperature,
+    float humidity,
+    PaperBiomeEffects effects,
+    MobSpawnSettings mobs,
+    BiomeGenerationSettings generation
 ) implements BiomeData {
     /**
      * A map of NMS precipitation enum values to ours.
@@ -122,13 +122,13 @@ public record PaperBiomeData(
         if (precipitation == null) throw new IllegalArgumentException("NMS precipitation `" + nms.getPrecipitation() + "` cannot be mapped");
         if (geography == null) throw new IllegalArgumentException("NMS geography `" + nms.getBiomeCategory() + "` cannot be mapped");
         return new PaperBiomeData(
-                precipitation,
-                geography,
-                nms.getBaseTemperature(),
-                nms.getDownfall(),
-                PaperBiomeEffects.from(nms.getSpecialEffects()),
-                nms.getMobSettings(),
-                nms.getGenerationSettings()
+            precipitation,
+            geography,
+            nms.getBaseTemperature(),
+            nms.getDownfall(),
+            PaperBiomeEffects.from(nms.getSpecialEffects()),
+            nms.getMobSettings(),
+            nms.getGenerationSettings()
         );
     }
 
@@ -151,14 +151,14 @@ public record PaperBiomeData(
         if (precipitation == null) throw new IllegalArgumentException("Minecommons precipitation `" + this.precipitation + "` cannot be mapped");
         if (geography == null) throw new IllegalArgumentException("Minecommons geography `" + this.geography + "` cannot be mapped");
         return new Biome.BiomeBuilder()
-                .precipitation(precipitation)
-                .biomeCategory(geography)
-                .temperature(temperature)
-                .temperatureAdjustment(Biome.TemperatureModifier.NONE)
-                .downfall(humidity)
-                .specialEffects(effects.toHandle())
-                .mobSpawnSettings(mobs)
-                .generationSettings(generation)
-                .build();
+            .precipitation(precipitation)
+            .biomeCategory(geography)
+            .temperature(temperature)
+            .temperatureAdjustment(Biome.TemperatureModifier.NONE)
+            .downfall(humidity)
+            .specialEffects(effects.toHandle())
+            .mobSpawnSettings(mobs)
+            .generationSettings(generation)
+            .build();
     }
 }

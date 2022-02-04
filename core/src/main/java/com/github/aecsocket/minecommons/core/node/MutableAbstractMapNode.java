@@ -12,7 +12,7 @@ public abstract class MutableAbstractMapNode<N extends MutableAbstractMapNode<N>
      * Creates a deep copy instance from another node implementing the same class.
      * @param o The other node.
      */
-    public MutableAbstractMapNode(AbstractMapNode<N> o) {
+    protected MutableAbstractMapNode(AbstractMapNode<N> o) {
         super(o);
     }
 
@@ -20,7 +20,7 @@ public abstract class MutableAbstractMapNode<N extends MutableAbstractMapNode<N>
      * Creates a deep copy instance from another generic node.
      * @param o The other node.
      */
-    public MutableAbstractMapNode(MapNode.Scoped<N> o) {
+    protected MutableAbstractMapNode(MapNode.Scoped<N> o) {
         super(o);
     }
 
@@ -28,7 +28,7 @@ public abstract class MutableAbstractMapNode<N extends MutableAbstractMapNode<N>
      * Creates an instance.
      * @param key The parent info.
      */
-    public MutableAbstractMapNode(@Nullable Key<N> key) {
+    protected MutableAbstractMapNode(@Nullable Key<N> key) {
         super(key);
     }
 
@@ -37,14 +37,14 @@ public abstract class MutableAbstractMapNode<N extends MutableAbstractMapNode<N>
      * @param parent The parent of this node.
      * @param key The key under which this node is stored in the parent.
      */
-    public MutableAbstractMapNode(N parent, String key) {
+    protected MutableAbstractMapNode(N parent, String key) {
         super(parent, key);
     }
 
     /**
      * Creates an instance with no parent.
      */
-    public MutableAbstractMapNode() {}
+    protected MutableAbstractMapNode() {}
 
     @Override
     public void attach(N parent, String key) {

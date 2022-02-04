@@ -10,7 +10,7 @@ import com.github.aecsocket.minecommons.core.event.EventDispatcher;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class EventsTest {
+class EventsTest {
     static class Event {
         int flag;
 
@@ -92,7 +92,8 @@ public class EventsTest {
 
         events.register(new TypeToken<GenericEvent<Integer>>(){}, evt -> flag.set(evt.value));
 
-        assertThrows(ClassCastException.class, () -> events.call(new GenericEvent<>(10L)));
+        GenericEvent<Long> event = new GenericEvent<>(10L);
+        assertThrows(ClassCastException.class, () -> events.call(event));
 
         events.call(new GenericEvent<>(10));
         assertEquals(10, flag.get());

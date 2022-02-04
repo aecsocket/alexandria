@@ -47,12 +47,12 @@ public class PotionEffectSerializer implements TypeSerializer<PotionEffect> {
     @Override
     public PotionEffect deserialize(Type type, ConfigurationNode node) throws SerializationException {
         return new PotionEffect(
-                require(node.node(TYPE), PotionEffectType.class),
-                require(node.node(DURATION), int.class),
-                require(node.node(AMPLIFIER), int.class),
-                node.node(AMBIENT).getBoolean(false),
-                node.node(PARTICLES).getBoolean(true),
-                node.node(ICON).getBoolean(true)
+            require(node.node(TYPE), PotionEffectType.class),
+            require(node.node(DURATION), int.class),
+            require(node.node(AMPLIFIER), int.class),
+            node.node(AMBIENT).getBoolean(false),
+            node.node(PARTICLES).getBoolean(true),
+            node.node(ICON).getBoolean(true)
         );
     }
 }

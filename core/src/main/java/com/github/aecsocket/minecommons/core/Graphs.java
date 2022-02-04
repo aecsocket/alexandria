@@ -47,15 +47,15 @@ public final class Graphs {
         private TopologicalOrderIterator(Graph<N> graph) {
             this.graph = Preconditions.checkNotNull(graph, "graph");
             this.roots = graph
-                            .nodes()
-                            .stream()
-                            .filter(node -> graph.inDegree(node) == 0)
-                            .collect(Collectors.toCollection(ArrayDeque::new));
+                .nodes()
+                .stream()
+                .filter(node -> graph.inDegree(node) == 0)
+                .collect(Collectors.toCollection(ArrayDeque::new));
             this.nonRootsToInDegree = graph
-                            .nodes()
-                            .stream()
-                            .filter(node -> graph.inDegree(node) > 0)
-                            .collect(Collectors.toMap(node -> node, graph::inDegree, (a, b) -> a, HashMap::new));
+                .nodes()
+                .stream()
+                .filter(node -> graph.inDegree(node) > 0)
+                .collect(Collectors.toMap(node -> node, graph::inDegree, (a, b) -> a, HashMap::new));
         }
 
         @Override
@@ -73,7 +73,7 @@ public final class Graphs {
                 }
                 return next;
             }
-            Preconditions.checkState(nonRootsToInDegree.isEmpty(), "graph has at least one cycle");
+            Validation.assertNot(nonRootsToInDegree.isEmpty(), "Graph has at least one cycle");
             return endOfData();
         }
     }

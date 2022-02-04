@@ -11,7 +11,6 @@ import cloud.commandframework.exceptions.parsing.NoInputProvidedException;
 import cloud.commandframework.exceptions.parsing.ParserException;
 import net.kyori.adventure.key.InvalidKeyException;
 import net.kyori.adventure.key.Key;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
@@ -28,12 +27,11 @@ public final class KeyArgument<C> extends CommandArgument<C, Key> {
     public static final Caption ARGUMENT_PARSE_FAILURE_KEY = Caption.of("argument.parse.failure.key");
 
     private KeyArgument(
-            final boolean required,
-            final @NonNull String name,
-            final @NonNull String defaultValue,
-            final @Nullable BiFunction<@NonNull CommandContext<C>,
-                    @NonNull String, @NonNull List<@NonNull String>> suggestionsProvider,
-            final @NonNull ArgumentDescription defaultDescription
+        final boolean required,
+        final String name,
+        final String defaultValue,
+        final @Nullable BiFunction<CommandContext<C>, String, List<String>> suggestionsProvider,
+        final ArgumentDescription defaultDescription
     ) {
         super(required, name, new KeyParser<>(), defaultValue, Key.class, suggestionsProvider, defaultDescription);
     }
@@ -45,7 +43,7 @@ public final class KeyArgument<C> extends CommandArgument<C, Key> {
      * @param <C>    Command sender type
      * @return Created builder
      */
-    public static <C> @NonNull Builder<C> newBuilder(final @NonNull String name) {
+    public static <C> Builder<C> newBuilder(final String name) {
         return new Builder<>(name);
     }
 
@@ -56,7 +54,7 @@ public final class KeyArgument<C> extends CommandArgument<C, Key> {
      * @param <C>    Command sender type
      * @return Created component
      */
-    public static <C> @NonNull CommandArgument<C, Key> of(final @NonNull String name) {
+    public static <C> CommandArgument<C, Key> of(final String name) {
         return KeyArgument.<C>newBuilder(name).asRequired().build();
     }
 
@@ -67,7 +65,7 @@ public final class KeyArgument<C> extends CommandArgument<C, Key> {
      * @param <C>    Command sender type
      * @return Created component
      */
-    public static <C> @NonNull CommandArgument<C, Key> optional(final @NonNull String name) {
+    public static <C> CommandArgument<C, Key> optional(final String name) {
         return KeyArgument.<C>newBuilder(name).asOptional().build();
     }
 
@@ -79,9 +77,9 @@ public final class KeyArgument<C> extends CommandArgument<C, Key> {
      * @param <C>          Command sender type
      * @return Created component
      */
-    public static <C> @NonNull CommandArgument<C, Key> optional(
-            final @NonNull String name,
-            final @NonNull Key defaultValue
+    public static <C> CommandArgument<C, Key> optional(
+        final String name,
+        final Key defaultValue
     ) {
         return KeyArgument.<C>newBuilder(name).asOptionalWithDefault(defaultValue.toString()).build();
     }
@@ -91,7 +89,7 @@ public final class KeyArgument<C> extends CommandArgument<C, Key> {
      * @param <C> The command sender type.
      */
     public static final class Builder<C> extends CommandArgument.Builder<C, Key> {
-        private Builder(final @NonNull String name) {
+        private Builder(final String name) {
             super(Key.class, name);
         }
 
@@ -101,13 +99,13 @@ public final class KeyArgument<C> extends CommandArgument<C, Key> {
          * @return Constructed component
          */
         @Override
-        public @NonNull KeyArgument<C> build() {
+        public KeyArgument<C> build() {
             return new KeyArgument<>(
-                    this.isRequired(),
-                    this.getName(),
-                    this.getDefaultValue(),
-                    this.getSuggestionsProvider(),
-                    this.getDefaultDescription()
+                this.isRequired(),
+                this.getName(),
+                this.getDefaultValue(),
+                this.getSuggestionsProvider(),
+                this.getDefaultDescription()
             );
         }
 
@@ -119,9 +117,9 @@ public final class KeyArgument<C> extends CommandArgument<C, Key> {
      */
     public static final class KeyParser<C> implements ArgumentParser<C, Key> {
         @Override
-        public @NonNull ArgumentParseResult<Key> parse(
-                final @NonNull CommandContext<C> ctx,
-                final @NonNull Queue<@NonNull String> inputQueue
+        public ArgumentParseResult<Key> parse(
+            final CommandContext<C> ctx,
+            final Queue<String> inputQueue
         ) {
             //noinspection PatternValidation
             final String input = inputQueue.peek();
@@ -147,7 +145,7 @@ public final class KeyArgument<C> extends CommandArgument<C, Key> {
         }
 
         @Override
-        public @NonNull List<@NonNull String> suggestions(@NonNull CommandContext<C> ctx, @NonNull String input) {
+        public List<String> suggestions(CommandContext<C> ctx, String input) {
             return Collections.emptyList();
         }
     }
@@ -164,8 +162,8 @@ public final class KeyArgument<C> extends CommandArgument<C, Key> {
          */
         public ParseException(String input, CommandContext<?> ctx, Exception e) {
             super(Key.class, ctx, ARGUMENT_PARSE_FAILURE_KEY,
-                    CaptionVariable.of("input", input),
-                    CaptionVariable.of("error", e.getMessage()));
+                CaptionVariable.of("input", input),
+                CaptionVariable.of("error", e.getMessage()));
         }
     }
 }

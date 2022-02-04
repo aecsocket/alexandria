@@ -119,7 +119,7 @@ public final class CollectionBuilder {
          * @param collection The values to add.
          * @return This instance.
          */
-        public @SafeVarargs final OfSet<E> add(E... collection) { value.addAll(Arrays.asList(collection)); return this; }
+        @SafeVarargs public final OfSet<E> add(E... collection) { value.addAll(Arrays.asList(collection)); return this; }
 
         /**
          * Gets the internal collection used in this builder (mutable).
@@ -165,7 +165,7 @@ public final class CollectionBuilder {
          * @param collection The values to add.
          * @return This instance.
          */
-        public @SafeVarargs final OfList<E> add(E... collection) { value.addAll(Arrays.asList(collection)); return this; }
+        @SafeVarargs public final OfList<E> add(E... collection) { value.addAll(Arrays.asList(collection)); return this; }
 
         /**
          * Gets the internal collection used in this builder (mutable).

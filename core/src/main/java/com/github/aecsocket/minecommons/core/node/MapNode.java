@@ -60,9 +60,29 @@ public interface MapNode {
     Collection<? extends MapNode> childValues();
 
     /**
+     * Recursively checks if this node has a node at the specified path as a child.
+     * @param path The path.
+     * @return The result.
+     * @see #has(String...)
+     * @see #has(String)
+     */
+    boolean has(NodePath path);
+
+    /**
+     * Recursively checks if this node has a node at the specified path as a child.
+     * @param path The path.
+     * @return The result.
+     * @see #has(NodePath)
+     * @see #has(String)
+     */
+    boolean has(String... path);
+
+    /**
      * Gets if this node has a node at the specified path as a child.
      * @param path The path.
      * @return The result.
+     * @see #has(NodePath)
+     * @see #has(String...)
      */
     boolean has(String path);
 
@@ -70,6 +90,8 @@ public interface MapNode {
      * Recursively gets a node under this node.
      * @param path The path to the node.
      * @return The node at the path.
+     * @see #get(String...)
+     * @see #get(String)
      */
     Optional<? extends MapNode> get(NodePath path);
 
@@ -77,8 +99,19 @@ public interface MapNode {
      * Recursively gets a node under this node.
      * @param path The path to the node.
      * @return The node at the path.
+     * @see #get(NodePath)
+     * @see #get(String)
      */
     Optional<? extends MapNode> get(String... path);
+
+    /**
+     * Gets a node under this node.
+     * @param path The path to the node.
+     * @return The node at the path.
+     * @see #get(NodePath)
+     * @see #get(String...)
+     */
+    Optional<? extends MapNode> get(String path);
 
     /**
      * Visits and applies a function to each node under this node, including itself.

@@ -55,8 +55,8 @@ public abstract class AbstractVector2ISerializer<T> implements TypeSerializer<T>
     public T deserialize(Type type, ConfigurationNode node) throws SerializationException {
         if (node.isList()) {
             return of(
-                    node.node(0).getInt(0),
-                    node.node(1).getInt(0)
+                node.node(0).getInt(0),
+                node.node(1).getInt(0)
             );
         } else {
             int v = node.getInt();

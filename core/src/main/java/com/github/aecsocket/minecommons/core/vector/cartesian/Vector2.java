@@ -188,8 +188,8 @@ public record Vector2(double x, double y) implements NumericalVector {
      */
     public Vector2 lerp(Vector2 o, double f) {
         return new Vector2(
-                x + (o.x() - x) * f,
-                y + (o.y() - y) * f
+            x + (o.x() - x) * f,
+            y + (o.y() - y) * f
         );
     }
 

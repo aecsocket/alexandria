@@ -45,15 +45,12 @@ public class LocationSerializer implements TypeSerializer<Location> {
     @Override
     public Location deserialize(Type type, ConfigurationNode node) throws SerializationException {
         return new Location(
-                node.node(WORLD).get(World.class),
-                node.node(X).getDouble(),
-                node.node(Y).getDouble(),
-                node.node(Z).getDouble(),
-                // I don't remember why you don't just do #getFloat here.
-                // But I'm pretty sure if you use #getFloat, it breaks.
-                // TODO confirm this.
-                (float) node.node(YAW).getDouble(0),
-                (float) node.node(PITCH).getDouble(0)
+            node.node(WORLD).get(World.class),
+            node.node(X).getDouble(),
+            node.node(Y).getDouble(),
+            node.node(Z).getDouble(),
+            node.node(YAW).getFloat(0),
+            node.node(PITCH).getFloat(0)
         );
     }
 }

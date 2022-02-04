@@ -12,9 +12,9 @@ import java.util.function.Function;
 import static net.kyori.adventure.text.Component.*;
 
 /* package */ record TemplateContextImpl(
-        I18N i18n,
-        Locale locale,
-        Function<String, @Nullable Style> styler
+    I18N i18n,
+    Locale locale,
+    Function<String, @Nullable Style> styler
 ) implements I18N.TemplateContext {
     @Override
     public Template of(String key, Component value) {
@@ -51,7 +51,7 @@ import static net.kyori.adventure.text.Component.*;
     @Override
     public Optional<Template> orLine(String key, String i18n, I18N.TemplateFactory... templates) {
         return this.i18n.orLine(locale, i18n, templates)
-                .map(comp -> Template.of(key, style(i18n, comp)));
+            .map(comp -> Template.of(key, style(i18n, comp)));
     }
 
     @Override
