@@ -20,6 +20,7 @@ dependencies {
     testImplementation(libs.bundles.junit)
     testImplementation(libs.adventureTextSerializerGson)
     testImplementation(libs.geantyRef)
+    testImplementation(libs.guava)
     testCompileOnly(libs.checkerQual)
 }
 

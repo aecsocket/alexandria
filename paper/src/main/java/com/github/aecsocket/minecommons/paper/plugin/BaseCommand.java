@@ -157,7 +157,7 @@ public class BaseCommand<P extends BasePlugin<P>> {
         manager.command(root
             .literal("help", ArgumentDescription.of("Lists help information."))
             .argument(StringArgument.optional("query", StringArgument.StringMode.GREEDY))
-            .handler(ctx -> help.queryCommands(ctx.getOrDefault("query", ""), ctx.getSender()));
+            .handler(ctx -> help.queryCommands(ctx.getOrDefault("query", ""), ctx.getSender())));
         manager.command(root
             .literal("version", ArgumentDescription.of("Gets version information."))
             .handler(c -> handle(c, this::version)));
