@@ -149,8 +149,9 @@ public interface MapNode {
         @Override Map<String, N> children();
         @Override Collection<N> childValues();
 
-        @Override Optional<N> get(String... path);
         @Override Optional<N> get(NodePath path);
+        @Override Optional<N> get(String... path);
+        @Override Optional<N> get(String path);
 
         /**
          * Visits and applies a function to each node under this node, including itself.
