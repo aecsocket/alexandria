@@ -37,9 +37,8 @@ public abstract class AbstractMapNode<N extends AbstractMapNode<N>> implements M
      * @param o The other node.
      */
     protected AbstractMapNode(MapNode.Scoped<N> o) {
-        //noinspection ConstantConditions
         key = o.parent() == null
-                ? null : new Key<>(o.parent(), o.key());
+            ? null : new Key<>(o.parent(), o.key());
         for (var entry : o.children().entrySet()) {
             children.put(entry.getKey(), entry.getValue().copy());
         }
@@ -110,6 +109,28 @@ public abstract class AbstractMapNode<N extends AbstractMapNode<N>> implements M
     }
 
     @Override
+    public boolean has(NodePath path) {
+        N current = self();
+        for (var part : path) {
+            current = current.children.get(part);
+            if (current == null)
+                return false;
+        }
+        return true;
+    }
+
+    @Override
+    public boolean has(String... path) {
+        N current = self();
+        for (var part : path) {
+            current = current.children.get(part);
+            if (current == null)
+                return false;
+        }
+        return true;
+    }
+
+    @Override
     public boolean has(String path) {
         return children.containsKey(path);
     }
@@ -134,6 +155,11 @@ public abstract class AbstractMapNode<N extends AbstractMapNode<N>> implements M
                 return Optional.empty();
         }
         return Optional.of(current);
+    }
+
+    @Override
+    public Optional<N> get(String path) {
+        return Optional.ofNullable(children.get(path));
     }
 
     @Override
