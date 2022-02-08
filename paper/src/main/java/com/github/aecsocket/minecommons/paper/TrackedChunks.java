@@ -9,6 +9,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.plugin.Plugin;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,10 +35,14 @@ public final class TrackedChunks {
         }
     }
 
-    private final MinecommonsPlugin plugin;
+    private final Plugin plugin;
     private final Map<Player, LongSet> tracked = new HashMap<>();
 
-    TrackedChunks(MinecommonsPlugin plugin) {
+    /**
+     * Creates an instance.
+     * @param plugin The plugin to register events with.
+     */
+    public TrackedChunks(Plugin plugin) {
         this.plugin = plugin;
     }
 

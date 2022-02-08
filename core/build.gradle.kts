@@ -4,24 +4,23 @@ plugins {
 
 repositories {
     maven("https://oss.sonatype.org/content/repositories/snapshots/")
+    maven("https://repo.incendo.org/content/repositories/snapshots/")
     mavenCentral()
 }
 
 dependencies {
-    compileOnly(libs.guava)
+    implementation(libs.guava)
     compileOnly(libs.checkerQual)
-    compileOnly(libs.geantyRef)
-    compileOnly(libs.configurate)
-    compileOnly(libs.openCsv)
-    
-    compileOnly(libs.bundles.adventure)
+    api(libs.geantyRef)
+    api(libs.configurate)
+    api(libs.openCsv)
+    api(libs.interfaces)
+
+    implementation(libs.bundles.adventure)
     api(libs.adventureTextMiniMessage)
 
     testImplementation(libs.bundles.junit)
     testImplementation(libs.adventureTextSerializerGson)
-    testImplementation(libs.geantyRef)
-    testImplementation(libs.guava)
-    testCompileOnly(libs.checkerQual)
 }
 
 publishing {

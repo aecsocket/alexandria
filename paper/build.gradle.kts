@@ -1,48 +1,32 @@
 plugins {
     id("java-library")
     id("maven-publish")
-    id("com.github.johnrengelman.shadow")
     id("io.papermc.paperweight.userdev")
-    id("net.minecrell.plugin-yml.bukkit")
-    id("xyz.jpenilla.run-paper")
 }
 
 repositories {
+    maven("https://repo.incendo.org/content/repositories/snapshots/")
     maven("https://repo.dmulloy2.net/nexus/repository/public/")
     mavenCentral()
 }
 
 dependencies {
-    api(projects.minecommonsCore)
-    paperDevBundle("1.18.1-R0.1-SNAPSHOT")
+    api(projects.minecommonsCore) {
+        exclude("com.google.guava", "guava")
+        exclude("org.checkerframework", "checker-qual")
+        exclude("net.kyori", "adventure-api")
+        exclude("net.kyori", "adventure-text-serializer-gson")
+        exclude("net.kyori", "adventure-text-serializer-plain")
+    }
+    paperDevBundle("${libs.versions.minecraft.forUseAtConfigurationTime().get()}-R0.1-SNAPSHOT")
 
-    // Plugins + library loader
-    compileOnly(libs.bundles.cloudPaper)
+    api(libs.interfacesPaper)
+    api(libs.cloudPaper)
+    api(libs.cloudExtras) {
+        isTransitive = false
+    }
+
     compileOnly(libs.protocolLib)
-    library(libs.bundles.libsPaper)
-}
-
-tasks {
-    assemble {
-        dependsOn(shadowJar)
-    }
-
-    build {
-        dependsOn(reobfJar)
-    }
-
-    runServer {
-        minecraftVersion("1.18.1")
-    }
-}
-
-bukkit {
-    name = "Minecommons"
-    main = "${project.group}.${rootProject.name}.paper.MinecommonsPlugin"
-    apiVersion = "1.18"
-    softDepend = listOf("ProtocolLib")
-    website = "https://github.com/aecsocket/minecommons"
-    authors = listOf("aecsocket")
 }
 
 publishing {
