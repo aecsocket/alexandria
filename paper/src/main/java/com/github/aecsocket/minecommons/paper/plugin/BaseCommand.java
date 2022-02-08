@@ -220,6 +220,15 @@ public class BaseCommand<P extends BasePlugin<P>> {
      */
     protected Player player(CommandSender sender) { return sender instanceof Player player ? player : null; }
 
+    /**
+     * Registers the {@link #captionLocalizer} message factory for the specified caption,
+     * to allow it to be translated by the plugin.
+     * @param caption The caption.
+     */
+    protected void registerCaption(Caption caption) {
+        captions.registerMessageFactory(caption, captionLocalizer);
+    }
+
     /** A command handler, with pre-determined slots. */
     protected interface CommandHandler {
         /**
