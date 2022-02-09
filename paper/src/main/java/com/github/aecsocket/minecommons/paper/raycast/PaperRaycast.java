@@ -1,6 +1,6 @@
 package com.github.aecsocket.minecommons.paper.raycast;
 
-import com.github.aecsocket.minecommons.core.CollectionBuilder;
+import com.github.aecsocket.minecommons.core.Colls;
 import com.github.aecsocket.minecommons.core.bounds.Bound;
 import com.github.aecsocket.minecommons.core.bounds.OrientedBound;
 import com.github.aecsocket.minecommons.core.raycast.Boundable;
@@ -108,8 +108,8 @@ public class PaperRaycast extends Raycast<PaperRaycast.PaperBoundable> {
          * Creates a bounds builder.
          * @return The builder.
          */
-        public CollectionBuilder.OfMap<String, Bound> boundsBuilder() {
-            return CollectionBuilder.map(new HashMap<>());
+        public Colls.OfMap<String, Bound> boundsBuilder() {
+            return Colls.map(new HashMap<>());
         }
 
         /**
@@ -256,10 +256,10 @@ public class PaperRaycast extends Raycast<PaperRaycast.PaperBoundable> {
      */
     public List<PaperBoundable> boundables(Block block) {
         if (block.getType() == Material.AIR || (ignorePassable && block.isPassable()))
-            return Collections.emptyList();
+            return java.util.Collections.emptyList();
         List<Bounds<Block>> boundsList = blockBounds.get(block.getType());
         if (boundsList == null) {
-            return Collections.singletonList(PaperBoundable.of(block, block.getType().getKey().value(), PaperBounds.from(block)));
+            return java.util.Collections.singletonList(PaperBoundable.of(block, block.getType().getKey().value(), PaperBounds.from(block)));
         }
         for (Bounds<Block> bounds : boundsList) {
             if (bounds.test.test(block)) {
@@ -271,7 +271,7 @@ public class PaperRaycast extends Raycast<PaperRaycast.PaperBoundable> {
                 return result;
             }
         }
-        return Collections.emptyList();
+        return java.util.Collections.emptyList();
     }
 
     /**
@@ -282,7 +282,7 @@ public class PaperRaycast extends Raycast<PaperRaycast.PaperBoundable> {
     public List<PaperBoundable> boundables(Entity entity) {
         List<Bounds<Entity>> boundsList = entityBounds.get(entity.getType());
         if (boundsList == null) {
-            return Collections.singletonList(PaperBoundable.of(entity, entity.getType().getKey().value(), PaperBounds.from(entity)));
+            return java.util.Collections.singletonList(PaperBoundable.of(entity, entity.getType().getKey().value(), PaperBounds.from(entity)));
         }
         for (Bounds<Entity> bounds : boundsList) {
             if (bounds.test.test(entity)) {
@@ -296,7 +296,7 @@ public class PaperRaycast extends Raycast<PaperRaycast.PaperBoundable> {
                 return result;
             }
         }
-        return Collections.emptyList();
+        return java.util.Collections.emptyList();
     }
 
     private double frac(double v) {

@@ -39,18 +39,19 @@ import java.util.function.Function;
  * Utility class for using a Cloud {@link PaperCommandManager}.
  */
 public class BaseCommand<P extends BasePlugin<P>> {
-    private static final String ERROR_COMMAND = "error.command";
-    private static final String ERROR_EXCEPTION_NO_MESSAGE = "error.exception.no_message";
-    private static final String ERROR_EXCEPTION_MESSAGE = "error.exception.message";
-    private static final String ERROR_CAPTION = "error.caption";
-    private static final String ERROR_NO_ARG = "error.no_arg";
-    private static final String ERROR_NO_TARGETS = "error.no_targets";
-    private static final String ERROR_NO_NODE_VALUE = "error.no_node_value";
+    private static final String
+        ERROR_COMMAND = "error.command",
+        ERROR_EXCEPTION_NO_MESSAGE = "error.exception.no_message",
+        ERROR_EXCEPTION_MESSAGE = "error.exception.message",
+        ERROR_CAPTION = "error.caption",
+        ERROR_NO_ARG = "error.no_arg",
+        ERROR_NO_TARGETS = "error.no_targets",
+        ERROR_NO_NODE_VALUE = "error.no_node_value",
 
-    private static final String COMMAND_VERSION = "command.version";
-    private static final String COMMAND_RELOAD_START = "command.reload.start";
-    private static final String COMMAND_RELOAD_END = "command.reload.end";
-    private static final String COMMAND_SETTING = "command.setting";
+        COMMAND_VERSION = "command.version",
+        COMMAND_RELOAD_START = "command.reload.start",
+        COMMAND_RELOAD_END = "command.reload.end",
+        COMMAND_SETTING = "command.setting";
 
     /**
      * An exception that represents a user-facing error.
@@ -171,7 +172,7 @@ public class BaseCommand<P extends BasePlugin<P>> {
             .flag(CommandFlag.newBuilder("comments")
                 .withAliases("c")
                 .withDescription(ArgumentDescription.of("Displays comments.")))
-            .permission("%s.command.setting".formatted(rootName))
+            .permission(permission("setting"))
             .handler(c -> handle(c, this::setting)));
     }
 
@@ -227,6 +228,15 @@ public class BaseCommand<P extends BasePlugin<P>> {
      */
     protected void registerCaption(Caption caption) {
         captions.registerMessageFactory(caption, captionLocalizer);
+    }
+
+    /**
+     * Gets a key for a command permission, in the format {@code <rootName>.command.<key>}.
+     * @param key The key.
+     * @return The full permission key.
+     */
+    protected String permission(String key) {
+        return rootName + ".command." + key;
     }
 
     /** A command handler, with pre-determined slots. */

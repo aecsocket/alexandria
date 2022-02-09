@@ -3,11 +3,61 @@ package com.github.aecsocket.minecommons.core;
 import java.util.*;
 
 /**
- * Allows quickly adding values to different types of
- * collections using a builder pattern.
+ * Utilities for manipulating collections, such as builders.
  */
-public final class CollectionBuilder {
-    private CollectionBuilder() {}
+public final class Colls {
+    private Colls() {}
+
+    /**
+     * Gets the number of total elements in an array of collections.
+     * @param cols The collections.
+     * @return The total number of elements.
+     */
+    public static int size(Collection<?>... cols) {
+        int size = 0;
+        for (var col : cols) {
+            size += col.size();
+        }
+        return size;
+    }
+
+    /**
+     * Joins multiple collections into the target collection.
+     * @param target The target collection which will be mutated.
+     * @param cols The collections to get values from.
+     * @param <E> The element type.
+     * @param <C> The target collection type.
+     * @return The passed, and mutated, target collection.
+     */
+    @SafeVarargs
+    public static <E, C extends Collection<E>> C join(C target, Collection<? extends E>... cols) {
+        for (var col : cols) {
+            target.addAll(col);
+        }
+        return target;
+    }
+
+    /**
+     * Joins multiple collections into a list.
+     * @param cols The collections to get values from.
+     * @param <E> The element type.
+     * @return The new, resulting list.
+     */
+    @SafeVarargs
+    public static <E> List<E> joinList(Collection<? extends E>... cols) {
+        return join(new ArrayList<>(size(cols)), cols);
+    }
+
+    /**
+     * Joins multiple collections into a set.
+     * @param cols The collections to get values from.
+     * @param <E> The element type.
+     * @return The new, resulting set.
+     */
+    @SafeVarargs
+    public static <E> Set<E> joinSet(Collection<? extends E>... cols) {
+        return join(new HashSet<>(size(cols)), cols);
+    }
 
     /**
      * Creates a collection builder which initializes {@link Collection}s.
@@ -85,7 +135,7 @@ public final class CollectionBuilder {
          * Gets an immutable version of the collection being built.
          * @return The collection.
          */
-        public Collection<E> build() { return Collections.unmodifiableCollection(value); }
+        public Collection<E> build() { return java.util.Collections.unmodifiableCollection(value); }
     }
 
     /**
@@ -131,7 +181,7 @@ public final class CollectionBuilder {
          * Gets an immutable version of the collection being built.
          * @return The collection.
          */
-        public Set<E> build() { return Collections.unmodifiableSet(value); }
+        public Set<E> build() { return java.util.Collections.unmodifiableSet(value); }
     }
 
     /**
@@ -177,7 +227,7 @@ public final class CollectionBuilder {
          * Gets an immutable version of the collection being built.
          * @return The collection.
          */
-        public List<E> build() { return Collections.unmodifiableList(value); }
+        public List<E> build() { return java.util.Collections.unmodifiableList(value); }
     }
 
     /**
@@ -218,6 +268,6 @@ public final class CollectionBuilder {
          * Gets an immutable version of the collection being built.
          * @return The collection.
          */
-        public Map<K, V> build() { return Collections.unmodifiableMap(value); }
+        public Map<K, V> build() { return java.util.Collections.unmodifiableMap(value); }
     }
 }

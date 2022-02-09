@@ -1,8 +1,8 @@
 package com.github.aecsocket.minecommons.core.node;
 
+import com.github.aecsocket.minecommons.core.Colls;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -74,8 +74,6 @@ public interface NodePath extends Iterable<String> {
      * @return The new path.
      */
     default NodePath append(String... nodes) {
-        List<String> allNodes = new ArrayList<>(list());
-        allNodes.addAll(Arrays.asList(nodes));
-        return path(allNodes);
+        return path(Colls.joinList(list(), Arrays.asList(nodes)));
     }
 }
