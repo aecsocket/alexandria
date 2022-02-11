@@ -167,7 +167,7 @@ public interface I18N {
      * Gets the default locale of this service.
      * @return The default locale.
      */
-    Locale defaultLocale();
+    Locale locale();
 
     /**
      * Generates lines of a localized message based on a key and placeholder arguments.
@@ -181,6 +181,27 @@ public interface I18N {
     /**
      * Generates lines of a localized message based on a key and placeholder arguments.
      * <p>
+     * Transforms each line before returning.
+     * @param locale The locale.
+     * @param key The localization key.
+     * @param transform The transform to apply to each line.
+     * @param templates The placeholder arguments.
+     * @return The lines of the message.
+     */
+    default Optional<List<Component>> orModLines(Locale locale, String key, Function<Component, Component> transform, TemplateFactory... templates) {
+        return orLines(locale, key, templates)
+            .map(lines -> {
+                List<Component> result = new ArrayList<>();
+                for (var line : lines) {
+                    result.add(transform.apply(line));
+                }
+                return result;
+            });
+    }
+
+    /**
+     * Generates lines of a localized message based on a key and placeholder arguments.
+     * <p>
      * If no translation found, the message will be 1 line consisting of the {@code key} parameter as a text component.
      * @param locale The locale.
      * @param key The localization key.
@@ -189,6 +210,25 @@ public interface I18N {
      */
     List<Component> lines(Locale locale, String key, TemplateFactory... templates);
 
+    /**
+     * Generates lines of a localized message based on a key and placeholder arguments.
+     * <p>
+     * If no translation found, the message will be 1 line consisting of the {@code key} parameter as a text component.
+     * <p>
+     * Transforms each line before returning.
+     * @param locale The locale.
+     * @param key The localization key.
+     * @param transform The transform to apply to each line.
+     * @param templates The placeholder arguments.
+     * @return The lines of the message.
+     */
+    default List<Component> modLines(Locale locale, String key, Function<Component, Component> transform, TemplateFactory... templates) {
+        List<Component> result = new ArrayList<>();
+        for (var line : lines(locale, key, templates)) {
+            result.add(transform.apply(line));
+        }
+        return result;
+    }
 
     /**
      * Generates one component for localized message based on a key and placeholder arguments.
@@ -200,7 +240,6 @@ public interface I18N {
      * @return The lines of the message.
      */
     Optional<Component> orLine(Locale locale, String key, TemplateFactory... templates);
-
 
     /**
      * Generates one component for localized message based on a key and placeholder arguments.

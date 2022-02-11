@@ -20,17 +20,17 @@ public final class MiniMessageI18N implements MutableI18N {
     private final Map<Locale, Translation> translations = new HashMap<>();
     private final Map<String, Map<Locale, List<Component>>> cache = new HashMap<>();
 
-    private Locale defaultLocale;
+    private Locale locale;
     private Translation defaultTranslation;
 
     /**
      * Creates an instance.
      * @param miniMessage The MiniMessage instance.
-     * @param defaultLocale The default locale.
+     * @param locale The default locale.
      */
-    public MiniMessageI18N(MiniMessage miniMessage, Locale defaultLocale) {
+    public MiniMessageI18N(MiniMessage miniMessage, Locale locale) {
         this.miniMessage = miniMessage;
-        this.defaultLocale = defaultLocale;
+        this.locale = locale;
     }
 
     /**
@@ -77,13 +77,13 @@ public final class MiniMessageI18N implements MutableI18N {
             existing.handle().putAll(translation.handle());
     }
 
-    @Override public Locale defaultLocale() { return defaultLocale; }
+    @Override public Locale locale() { return locale; }
 
     /**
      * Sets the default locale.
      * @param defaultLocale The default locale.
      */
-    public void defaultLocale(Locale defaultLocale) { this.defaultLocale = defaultLocale; }
+    public void defaultLocale(Locale defaultLocale) { this.locale = defaultLocale; }
 
     @Override
     public void clear() {
@@ -94,13 +94,13 @@ public final class MiniMessageI18N implements MutableI18N {
     }
 
     /**
-     * Lazily gets the default translation, based on the {@link #defaultLocale}.
+     * Lazily gets the default translation, based on the {@link #locale}.
      * @return The default translation.
      */
     public Translation defaultTranslation() {
-        if (defaultTranslation == null) defaultTranslation = translations.get(defaultLocale);
+        if (defaultTranslation == null) defaultTranslation = translations.get(locale);
         if (defaultTranslation == null)
-            throw new IllegalStateException("No translation for default locale `" + defaultLocale.toLanguageTag() + "`");
+            throw new IllegalStateException("No translation for default locale `" + locale.toLanguageTag() + "`");
         return defaultTranslation;
     }
 

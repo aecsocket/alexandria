@@ -75,6 +75,8 @@ public abstract class BasePlugin<S extends BasePlugin<S>> extends JavaPlugin {
     protected ProtocolLibAPI protocol;
     /** The base command. */
     protected BaseCommand<S> command;
+    /** The cached chat prefix. */
+    protected Component chatPrefix;
 
     @Override
     public void onEnable() {
@@ -266,6 +268,8 @@ public abstract class BasePlugin<S extends BasePlugin<S>> extends JavaPlugin {
         }
 
         log(Logging.Level.INFO, "Loaded %d style(s), %d format(s) for %d locale(s)", i18n.styles().size(), i18n.formats().size(), i18n.translations().size());
+
+        chatPrefix = i18n.line(i18n.locale(), CHAT_PREFIX);
     }
 
     /**
@@ -396,13 +400,23 @@ public abstract class BasePlugin<S extends BasePlugin<S>> extends JavaPlugin {
     /**
      * Sends a message to an audience, prepending the chat prefix.
      * @param audience The audience.
-     * @param locale The locale.
      * @param component The component.
      */
-    public void sendMessage(Audience audience, Locale locale, Component component) {
+    public void send(Audience audience, Component component) {
         audience.sendMessage(Component.empty()
-            .append(i18n.line(locale, CHAT_PREFIX))
+            .append(chatPrefix)
             .append(component));
+    }
+
+    /**
+     * Sends message lines to an audience, prepending the chat prefix to each line.
+     * @param audience The audience.
+     * @param lines The message lines.
+     */
+    public void send(Audience audience, List<Component> lines) {
+        for (var line : lines) {
+            send(audience, line);
+        }
     }
 
     /**

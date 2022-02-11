@@ -267,41 +267,18 @@ public class BaseCommand<P extends BasePlugin<P>> {
     }
 
     /**
-     * Sends a message to an audience, prefixing with the plugin prefix using {@link BasePlugin#sendMessage(Audience, Locale, Component)}.
-     * @param audience The audience.
-     * @param locale The locale.
-     * @param lines The lines to send.
-     */
-    protected void send(Audience audience, Locale locale, List<Component> lines) {
-        for (var line : lines) {
-            plugin.sendMessage(audience, locale, line);
-        }
-    }
-
-    /**
-     * Sends a message to an audience, localizing using the localizer.
-     * @param audience The audience.
-     * @param locale The locale.
-     * @param key The localization key.
-     * @param templates The localization placeholder templates.
-     */
-    protected void send(Audience audience, Locale locale, String key, I18N.TemplateFactory... templates) {
-        send(audience, locale, i18n.lines(locale, key, templates));
-    }
-
-    /**
      * Formats and sends a {@link CommandException} to an audience.
      * @param error The error.
      * @param locale The locale.
      * @param audience The audience.
      */
     protected void sendError(CommandException error, Locale locale, Audience audience) {
-        send(audience, locale, error.key, error.templates);
+        plugin.send(audience, i18n.lines(locale, error.key, error.templates));
         if (error.getCause() != null) {
             for (Throwable cur = error.getCause(); cur != null; cur = cur.getCause()) {
                 String type = cur.getClass().getSimpleName();
                 String message = cur.getMessage();
-                send(audience, locale, message == null
+                plugin.send(audience, message == null
                     ? i18n.lines(locale, ERROR_EXCEPTION_NO_MESSAGE,
                         c -> c.of("type", type))
                     : i18n.lines(locale, ERROR_EXCEPTION_MESSAGE,
@@ -379,10 +356,11 @@ public class BaseCommand<P extends BasePlugin<P>> {
      */
     protected void version(CommandContext<CommandSender> ctx, CommandSender sender, Locale locale, Player pSender) {
         PluginDescriptionFile desc = plugin.getDescription();
-        send(sender, locale, COMMAND_VERSION,
+        plugin.send(sender, i18n.lines(locale, COMMAND_VERSION,
             c -> c.of("name", desc.getName()),
             c -> c.of("version", desc.getVersion()),
-            c -> c.of("authors", String.join(", ", desc.getAuthors())));
+            c -> c.of("authors", String.join(", ", desc.getAuthors())))
+        );
     }
 
     /**
@@ -393,9 +371,9 @@ public class BaseCommand<P extends BasePlugin<P>> {
      * @param pSender The sender as a player, if they are a player, otherwise null.
      */
     protected void reload(CommandContext<CommandSender> ctx, CommandSender sender, Locale locale, Player pSender) {
-        send(sender, locale, COMMAND_RELOAD_START);
+        plugin.send(sender, i18n.lines(locale, COMMAND_RELOAD_START));
         plugin.reload();
-        send(sender, locale, COMMAND_RELOAD_END);
+        plugin.send(sender, i18n.lines(locale, COMMAND_RELOAD_END));
     }
 
     /**
@@ -424,8 +402,8 @@ public class BaseCommand<P extends BasePlugin<P>> {
         List<Component> lines = ConfigurationNodes.render(node, ConfigurationNodes.RenderOptions.DEFAULT, ctx.flags().isPresent("comments"));
 
         for (var line : lines) {
-            send(sender, locale, COMMAND_SETTING,
-                c -> c.of("line", line));
+            plugin.send(sender, i18n.lines(locale, COMMAND_SETTING,
+                c -> c.of("line", line)));
         }
     }
 }
