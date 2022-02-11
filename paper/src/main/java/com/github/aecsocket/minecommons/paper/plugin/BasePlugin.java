@@ -1,5 +1,6 @@
 package com.github.aecsocket.minecommons.paper.plugin;
 
+import com.github.aecsocket.minecommons.core.Callback;
 import com.github.aecsocket.minecommons.core.Logging;
 import com.github.aecsocket.minecommons.core.Settings;
 import com.github.aecsocket.minecommons.core.Text;
@@ -23,7 +24,6 @@ import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.ConfigurationOptions;
 import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
-import org.spongepowered.configurate.loader.ConfigurationLoader;
 import org.spongepowered.configurate.objectmapping.ObjectMapper;
 import org.spongepowered.configurate.serialize.SerializationException;
 import org.spongepowered.configurate.serialize.TypeSerializerCollection;
@@ -31,6 +31,11 @@ import org.spongepowered.configurate.util.CheckedConsumer;
 import org.spongepowered.configurate.util.NamingSchemes;
 
 import java.io.*;
+import java.net.URISyntaxException;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 /**
@@ -222,7 +227,7 @@ public abstract class BasePlugin<S extends BasePlugin<S>> extends JavaPlugin {
     public void load() {
         // Settings
         try {
-            settings = loadSettings(file(resourceManifest.settings()));
+            settings = loadSettings(path(resourceManifest.settings()));
         } catch (ConfigurateException e) {
             settings = new Settings();
             log(Logging.Level.ERROR, e, "Could not load settings from `%s`", resourceManifest.settings());
@@ -235,42 +240,32 @@ public abstract class BasePlugin<S extends BasePlugin<S>> extends JavaPlugin {
         i18n.clear();
         i18n.defaultLocale(setting(Locale.US, (n, d) -> n.get(Locale.class, d), "locale"));
 
-        // Styles
-        loadJarLanguage(resourceManifest.language().styles(), "styles", reader -> {
-            var result = I18NLoader.loadStyles(i18n, () -> HoconConfigurationLoader.builder()
-                .source(() -> new BufferedReader(reader))
-                .build());
-            log(Logging.Level.VERBOSE, "Loaded %d style(s) from JAR %s", result.size(), resourceManifest.language().styles());
-        });
+        Callback<I18NLoader.Result> res = Callback.create();
 
-        // Formats
-        loadJarLanguage(resourceManifest.language().formats(), "formats", reader -> {
-            var result = I18NLoader.loadFormats(i18n, () -> HoconConfigurationLoader.builder()
-                .source(() -> new BufferedReader(reader))
-                .build());
-            log(Logging.Level.VERBOSE, "Loaded %d format(s) from JAR %s", result.size(), resourceManifest.language().formats());
-        });
-
-        // Translations
-        for (var path : resourceManifest.language().translations()) {
-            loadJarLanguage(path, "translation", reader -> {
-                var result = I18NLoader.loadTranslation(i18n, reader);
-                log(Logging.Level.VERBOSE, "Loaded %d translation(s) for %s from JAR %s", result.handle().size(), result.locale().toLanguageTag(), path);
-            });
+        // Read from JAR
+        try (FileSystem jarFs = FileSystems.newFileSystem(Paths.get(getClass().getProtectionDomain().getCodeSource().getLocation().toURI()), Map.of("create", "true"))) {
+            res.then(I18NLoader.load(i18n, jarFs.getPath(resourceManifest.i18n().root()), rd -> HoconConfigurationLoader.builder().source(() -> rd).build()));
+        } catch (URISyntaxException | IOException e) {
+            log(Logging.Level.ERROR, e, "Could not open plugin JAR to read resources");
         }
 
-        for (var raw : I18NLoader.load(i18n, file(resourceManifest.language().dataPath()), file -> HoconConfigurationLoader.builder()
-                .source(() -> new BufferedReader(new FileReader(file)))
-                .build())) {
+        // Read from filesystem
+        res.then(I18NLoader.load(i18n, path(resourceManifest.i18n().root()), rd -> HoconConfigurationLoader.builder().source(() -> rd).build()));
+
+        for (var raw : res) {
             if (raw instanceof I18NLoader.Result.FormatParseException rs)
                 log(Logging.Level.WARNING, rs.exception(), "Could not parse formats from %s", rs.path());
             else if (raw instanceof I18NLoader.Result.FileOpenException rs)
                 log(Logging.Level.WARNING, rs.exception(), "Could not open %s for reading translations", rs.path());
-            else if (raw instanceof I18NLoader.Result.FileParseException rs)
+            else if (raw instanceof I18NLoader.Result.ConfigParseException rs)
+                log(Logging.Level.WARNING, rs.exception(), "Could not parse config options in %s", rs.path());
+            else if (raw instanceof I18NLoader.Result.TranslationParseException rs)
                 log(Logging.Level.WARNING, rs.exception(), "Could not parse translations in %s", rs.path());
-            else if (raw instanceof I18NLoader.Result.Success rs)
+            else if (raw instanceof I18NLoader.Result.OfTranslation rs)
                 log(Logging.Level.VERBOSE, "Loaded %d translation(s) for %s from %s", rs.translation().handle().size(), rs.translation().locale().toLanguageTag(), rs.path());
         }
+
+        log(Logging.Level.INFO, "Loaded %d style(s), %d format(s) for %d locale(s)", i18n.styles().size(), i18n.formats().size(), i18n.translations().size());
     }
 
     /**
@@ -281,11 +276,11 @@ public abstract class BasePlugin<S extends BasePlugin<S>> extends JavaPlugin {
     }
 
     /**
-     * Gets a sub-file of this plugin's {@link #getDataFolder()}.
-     * @param path The path to the file.
-     * @return The file.
+     * Gets a sub-path of this plugin's {@link #getDataFolder()}.
+     * @param path The path to append to the data folder root.
+     * @return The path.
      */
-    public File file(String path) { return new File(getDataFolder(), path); }
+    public Path path(String path) { return getDataFolder().toPath().resolve(path); }
 
     /**
      * Creates a builder for a HOCON loader, using this plugin's configuration options.
@@ -293,30 +288,17 @@ public abstract class BasePlugin<S extends BasePlugin<S>> extends JavaPlugin {
      */
     public HoconConfigurationLoader.Builder loaderBuilder() {
         return HoconConfigurationLoader.builder()
-            .defaultOptions(configOptions);
+                .defaultOptions(configOptions);
     }
 
     /**
-     * Builds a new configuration loader from a file, using this plugin's configuration options.
-     * <p>
-     * By default uses a {@link HoconConfigurationLoader}.
-     * @param file The file.
-     * @return The loader.
-     */
-    public ConfigurationLoader<?> loader(File file) {
-        return loaderBuilder()
-            .file(file)
-            .build();
-    }
-
-    /**
-     * Loads settings from a file, using {@link #loader(File)} as the loader.
-     * @param file The file.
+     * Loads settings from a path.
+     * @param path The path.
      * @return The settings.
      * @throws ConfigurateException If the settings could not be loaded.
      */
-    public Settings loadSettings(File file) throws ConfigurateException {
-        return Settings.loadFrom(loader(file));
+    public Settings loadSettings(Path path) throws ConfigurateException {
+        return Settings.loadFrom(loaderBuilder().path(path).build());
     }
 
     /**

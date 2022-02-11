@@ -7,19 +7,15 @@ import org.spongepowered.configurate.*;
 import org.spongepowered.configurate.loader.ConfigurationLoader;
 import org.spongepowered.configurate.serialize.SerializationException;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.Reader;
-import java.nio.file.Path;
+import java.io.*;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.github.aecsocket.minecommons.core.Callback;
-import com.github.aecsocket.minecommons.core.Files;
 import com.github.aecsocket.minecommons.core.serializers.I18NFormatSerializer;
 import com.github.aecsocket.minecommons.core.serializers.Serializers;
 
@@ -29,16 +25,18 @@ import com.github.aecsocket.minecommons.core.serializers.Serializers;
 public final class I18NLoader {
     private I18NLoader() {}
 
+    /** The extension used to mark files as config files. */
+    public static final String EXT_CONFIG = "conf";
+    /** The extension used to mark files as translation files. */
+    public static final String EXT_TRANSLATION = "csv";
     /** {@code locale}. */
     public static final String LOCALE = "locale";
     /** {@code entries}. */
     public static final String ENTRIES = "entries";
-    /** The extension used to mark files as translation files. */
-    public static final String EXTENSION = "csv";
-    /** {@code styles.conf}. */
-    public static final Path STYLES = Path.of("styles.conf");
-    /** {@code formats.conf}. */
-    public static final Path FORMATS = Path.of("formats.conf");
+    /** {@code styles}. */
+    public static final String STYLES = "styles";
+    /** {@code formats}. */
+    public static final String FORMATS = "formats";
 
     private static final ConfigurationOptions configOptions = ConfigurationOptions.defaults()
         .serializers(serializers -> serializers
@@ -79,7 +77,7 @@ public final class I18NLoader {
                         else
                             throw new IOException("Locale under key `" + LOCALE + "` is defined multiple times");
                     } else
-                        throw new IOException("Record under key `" + LOCALE + "` must have columns [`locale`,translation locale]");
+                        throw new IOException("Record under key `" + LOCALE + "` must have columns [`locale`, <translation locale>]");
                 } else {
                     List<String> value = new ArrayList<>();
                     for (int i = 2; i < record.length; i++) {
@@ -113,18 +111,6 @@ public final class I18NLoader {
         R load(String key, ConfigurationNode node) throws SerializationException;
     }
 
-    private static <R> void loadRecursive(MutableI18N i18n, List<R> result, RecursiveLoader<R> loader, ConfigurationNode root, String... path) throws ConfigurateException {
-        for (var entry : root.childrenMap().entrySet()) {
-            var node = entry.getValue();
-            String[] newPath = Arrays.copyOfRange(path, 0, path.length + 1);
-            newPath[path.length] = ""+entry.getKey();
-            if (node.isMap()) {
-                loadRecursive(i18n, result, loader, node, newPath);
-            } else
-                result.add(loader.load(String.join(".", newPath), node));
-        }
-    }
-
     /**
      * A result of loading a style.
      * @param key The style key.
@@ -133,16 +119,15 @@ public final class I18NLoader {
     public record StyleResult(String key, Style style) implements LoadResult {}
 
     /**
-     * Loads styles into an i18n service from a Configurate configuration loader.
+     * Loads styles into an i18n service from a Configurate node.
      * @param i18n The i18n service.
-     * @param loaderFactory The factory for the configuration loader.
+     * @param node The configuration node.
      * @return The styles created.
-     * @throws ConfigurateException If the styles could not be parsed.
+     * @throws SerializationException If the styles could not be parsed.
      */
-    public static List<StyleResult> loadStyles(MutableI18N i18n, Supplier<ConfigurationLoader<?>> loaderFactory) throws ConfigurateException {
-        ConfigurationNode node = loaderFactory.get().load(configOptions);
+    public static List<StyleResult> loadStyles(MutableI18N i18n, ConfigurationNode node) throws SerializationException {
         if (!node.isMap())
-            throw new ConfigurateException(node, "Entries must be a map");
+            throw new SerializationException(node, Style.class, "Entries must be a map");
         List<StyleResult> result = new ArrayList<>();
         for (var entry : node.childrenMap().entrySet()) {
             String key = ""+entry.getKey();
@@ -161,16 +146,15 @@ public final class I18NLoader {
     public record FormatResult(String key, Format format) implements LoadResult {}
 
     /**
-     * Loads formats into an i18n service from a Configurate configuration loader.
+     * Loads formats into an i18n service from a Configurate node.
      * @param i18n The i18n service.
-     * @param loaderFactory The factory for the configuration loader.
+     * @param node The configuration node.
      * @return The formats created.
-     * @throws ConfigurateException If the formats could not be parsed.
+     * @throws SerializationException If the formats could not be parsed.
      */
-    public static List<FormatResult> loadFormats(MutableI18N i18n, Supplier<ConfigurationLoader<?>> loaderFactory) throws ConfigurateException {
-        ConfigurationNode node = loaderFactory.get().load(configOptions);
+    public static List<FormatResult> loadFormats(MutableI18N i18n, ConfigurationNode node) throws SerializationException {
         if (!node.isMap())
-            throw new ConfigurateException(node, "Entries must be a map");
+            throw new SerializationException(node, Format.class, "Entries must be a map");
         List<FormatResult> result = new ArrayList<>();
         loadRecursive(i18n, result, (k, n) -> new FormatResult(k, Serializers.require(n, Format.class)), node);
         for (var entry : result) {
@@ -179,13 +163,25 @@ public final class I18NLoader {
         return result;
     }
 
+    private static <R> void loadRecursive(MutableI18N i18n, List<R> result, RecursiveLoader<R> loader, ConfigurationNode root, String... path) throws SerializationException {
+        for (var entry : root.childrenMap().entrySet()) {
+            var node = entry.getValue();
+            String[] newPath = Arrays.copyOfRange(path, 0, path.length + 1);
+            newPath[path.length] = ""+entry.getKey();
+            if (node.isMap()) {
+                loadRecursive(i18n, result, loader, node, newPath);
+            } else
+                result.add(loader.load(String.join(".", newPath), node));
+        }
+    }
+
     /**
-     * A result of a loading operation in {@link #load(MutableI18N, File, Function)}.
+     * A result of a loading operation in {@link #load(MutableI18N, Path, Function)}.
      */
     public sealed interface Result permits Result.Missing,
-            Result.StyleParseException, Result.FormatParseException,
-            Result.FileOpenException, Result.FileParseException,
-            Result.Success {
+        Result.StyleParseException, Result.FormatParseException,
+        Result.FileOpenException, Result.ConfigParseException, Result.TranslationParseException,
+        Result.OfConfig, Result.OfTranslation {
         /**
          * Gets the path that the result took place at.
          * @return The path.
@@ -220,67 +216,101 @@ public final class I18NLoader {
         record FileOpenException(Path path, IOException exception) implements Result {}
 
         /**
+         * A config file could not be parsed.
+         * @param path The file path.
+         * @param exception The exception cause.
+         */
+        record ConfigParseException(Path path, IOException exception) implements Result {}
+
+        /**
          * A translation file could not be parsed.
          * @param path The file path.
          * @param exception The exception cause.
          */
-        record FileParseException(Path path, IOException exception) implements Result {}
+        record TranslationParseException(Path path, IOException exception) implements Result {}
+
+        /**
+         * A config file was successfully parsed and registered.
+         * @param path The file path.
+         * @param styles The parsed styles.
+         * @param formats The parsed formats.
+         */
+        record OfConfig(Path path, List<StyleResult> styles, List<FormatResult> formats) implements Result {}
 
         /**
          * A translation file was successfully parsed and registered.
          * @param path The file path.
          * @param translation The parsed translation.
          */
-        record Success(Path path, Translation translation) implements Result {}
+        record OfTranslation(Path path, Translation translation) implements Result {}
     }
 
     private interface SingleLoader {
         void load(File file) throws ConfigurateException;
     }
 
-    private static void loadSingle(Callback<Result> callback, File root, Path path, SingleLoader loader) {
-        File file = root.toPath().resolve(path).toFile();
-        if (file.exists()) {
-            try {
-                loader.load(file);
-            } catch (ConfigurateException e) {
-                callback.add(new Result.FormatParseException(FORMATS, e));
-            }
-        } else
-            callback.add(new Result.Missing(FORMATS));
-    }
-
     /**
      * Recursively loads translations and formats from a file (intended for a data folder).
      * @param i18n The i18n service.
-     * @param root The root file.
-     * @param loaderFactory Maps a file to a configuration loader.
+     * @param root The root path.
+     * @param loaderFactory Maps a reader to a configuration loader.
      * @return The results.
      */
-    public static Callback<Result> load(MutableI18N i18n, File root, Function<File, ConfigurationLoader<?>> loaderFactory) {
+    public static Callback<Result> load(MutableI18N i18n, Path root, Function<BufferedReader, ConfigurationLoader<?>> loaderFactory) {
         Callback<Result> callback = Callback.create();
 
-        loadSingle(callback, root, STYLES, file -> loadStyles(i18n, () -> loaderFactory.apply(file)));
-        loadSingle(callback, root, FORMATS, file -> loadFormats(i18n, () -> loaderFactory.apply(file)));
+        try {
+            Files.walkFileTree(root, new SimpleFileVisitor<>() {
+                @Override
+                public FileVisitResult visitFile(Path path, BasicFileAttributes attr) {
+                    enum FileType {
+                        CONFIG, TRANSLATION
+                    }
 
-        // Load translations
-        Files.recursively(root, (file, path) -> {
-            if (file.getName().endsWith(EXTENSION)) {
-                FileReader reader;
-                try {
-                    reader = new FileReader(file);
-                } catch (IOException e) {
+                    String name = path.toString().toLowerCase(Locale.ROOT);
+                    FileType type = name.endsWith(EXT_CONFIG) ? FileType.CONFIG
+                            : name.endsWith(EXT_TRANSLATION) ? FileType.TRANSLATION
+                            : null;
+
+                    if (type != null) {
+                        try (BufferedReader reader = Files.newBufferedReader(path)) {
+                            switch (type) {
+                                case CONFIG -> {
+                                    try {
+                                        ConfigurationNode node = loaderFactory.apply(reader).load(configOptions);
+                                        callback.add(new Result.OfConfig(
+                                            path,
+                                            loadStyles(i18n, node.node(STYLES)),
+                                            loadFormats(i18n, node.node(FORMATS))
+                                        ));
+                                    } catch (IOException e) {
+                                        callback.add(new Result.ConfigParseException(path, e));
+                                    }
+                                }
+                                case TRANSLATION -> {
+                                    try {
+                                        callback.add(new Result.OfTranslation(path, loadTranslation(i18n, reader)));
+                                    } catch (IOException e) {
+                                        callback.add(new Result.TranslationParseException(path, e));
+                                    }
+                                }
+                            }
+                        } catch (IOException e) {
+                            callback.add(new Result.FileOpenException(path, e));
+                        }
+                    }
+                    return FileVisitResult.CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult visitFileFailed(Path path, IOException e) {
                     callback.add(new Result.FileOpenException(path, e));
-                    return;
+                    return FileVisitResult.CONTINUE;
                 }
-
-                try {
-                    callback.add(new Result.Success(path, loadTranslation(i18n, reader)));
-                } catch (IOException e) {
-                    callback.add(new Result.FileParseException(path, e));
-                }
-            }
-        });
+            });
+        } catch (IOException e) {
+            callback.add(new Result.FileOpenException(root, e));
+        }
 
         return callback;
     }

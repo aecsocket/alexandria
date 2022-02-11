@@ -10,17 +10,15 @@ import java.util.Set;
 @ConfigSerializable
 /* package */ record ResourceManifest(
     String settings,
-    Language language,
+    I18N i18n,
     Set<String> saved
 ) {
     /**
      * Defines language loading options.
      */
     @ConfigSerializable
-    /* package */ record Language(
-        String dataPath,
-        String styles,
-        String formats,
-        Set<String> translations
+    /* package */ record I18N(
+        String root,
+        Set<String> paths
     ) {}
 }
