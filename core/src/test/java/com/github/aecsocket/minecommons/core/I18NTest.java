@@ -85,16 +85,16 @@ class I18NTest {
     @Test
     void testBasic() {
         MiniMessageI18N i18n = createI18N();
-        assertEquals(text("Basic message", GRAY), i18n.line(Locale.US, BASIC));
-        assertEquals(text("UK basic message", GRAY), i18n.line(Locale.UK, BASIC));
+        assertEquals(text("", GRAY).append(text("Basic message")), i18n.line(Locale.US, BASIC));
+        assertEquals(text("", GRAY).append(text("UK basic message")), i18n.line(Locale.UK, BASIC));
     }
 
     @Test
     void testFallbacks() {
         MiniMessageI18N i18n = createI18N();
 
-        assertEquals(text("Fallback message", GRAY), i18n.line(Locale.US, FALLBACK));
-        assertEquals(text("Fallback message", GRAY), i18n.line(Locale.UK, FALLBACK));
+        assertEquals(text("", GRAY).append(text("Fallback message")), i18n.line(Locale.US, FALLBACK));
+        assertEquals(text("", GRAY).append(text("Fallback message")), i18n.line(Locale.UK, FALLBACK));
 
         assertEquals(text(UNKNOWN_KEY), i18n.line(Locale.US, UNKNOWN_KEY));
         assertEquals(text(UNKNOWN_KEY), i18n.line(Locale.UK, UNKNOWN_KEY));
@@ -104,13 +104,15 @@ class I18NTest {
     void testPlaceholder() {
         MiniMessageI18N i18n = createI18N();
         assertEquals(text("", GRAY)
-            .append(text("Placeholder: "))
-            .append(text("One")),
+            .append(text("")
+                .append(text("Placeholder: "))
+                .append(text("One"))),
             i18n.line(Locale.US, PLACEHOLDERS,
                 c -> c.of("target", () -> text("One"))));
         assertEquals(text("", GRAY)
-            .append(text("Placeholder: "))
-            .append(text("Two", RED)),
+            .append(text("")
+                .append(text("Placeholder: "))
+                .append(text("Two", RED))),
             i18n.line(Locale.US, PLACEHOLDERS,
                 c -> c.of("target", () -> text("Two", RED))));
     }
@@ -126,8 +128,9 @@ class I18NTest {
             rr.render(i18n, Locale.UK));
 
         assertEquals(text("", GRAY)
-            .append(text("Placeholder: "))
-            .append(text("Renderable")),
+            .append(text("")
+                .append(text("Placeholder: "))
+                .append(text("Renderable"))),
             i18n.line(Locale.US, PLACEHOLDERS,
                 c -> c.of("target", () -> c.rd(rr))));
     }
@@ -138,19 +141,22 @@ class I18NTest {
     void testPlaceholderFormat() {
         MiniMessageI18N i18n = createI18N();
         assertEquals(text("", GRAY)
-            .append(text("Placeholder: "))
-            .append(text("1,234.5")),
+            .append(text("")
+                .append(text("Placeholder: "))
+                .append(text("1,234.5"))),
             i18n.line(Locale.US, PLACEHOLDERS,
                 c -> c.of("target", () -> c.rd("%,.1f", 1234.54))));
         assertEquals(text("", GRAY)
-            .append(text("Placeholder: "))
-            .append(text("1.234,5")),
+            .append(text("")
+                .append(text("Placeholder: "))
+                .append(text("1.234,5"))),
             i18n.line(Locale.GERMAN, PLACEHOLDERS,
                 c -> c.of("target", () -> c.rd("%,.1f", 1234.54))));
 
         assertEquals(text("", GRAY)
-            .append(text("Placeholder: "))
-            .append(text("Dummy[value=3]")),
+            .append(text("")
+                .append(text("Placeholder: "))
+                .append(text("Dummy[value=3]"))),
             i18n.line(Locale.US, PLACEHOLDERS,
                 c -> c.of("target", () -> text(""+new Dummy(3)))));
     }
@@ -159,13 +165,15 @@ class I18NTest {
     void testPlaceholderStyling() {
         MiniMessageI18N i18n = createI18N();
         assertEquals(text("", NamedTextColor.GRAY)
-            .append(text("Styled placeholder: "))
-            .append(text("Blue", NamedTextColor.BLUE)),
+            .append(text("")
+                .append(text("Styled placeholder: "))
+                .append(text("Blue", NamedTextColor.BLUE))),
             i18n.line(Locale.US, PLACEHOLDERS_STYLED,
                     c -> c.of("target", () -> text("Blue"))));
         assertEquals(text("", NamedTextColor.GRAY)
-            .append(text("Styled placeholder: "))
-            .append(text("Green", NamedTextColor.GREEN)),
+            .append(text("")
+                .append(text("Styled placeholder: "))
+                .append(text("Green", NamedTextColor.GREEN))),
             i18n.line(Locale.US, PLACEHOLDERS_STYLED,
                     c -> c.of("target", () -> text("Green", NamedTextColor.GREEN))));
     }
@@ -174,8 +182,9 @@ class I18NTest {
     void testMiniMessage() {
         MiniMessageI18N i18n = createI18N();
         assertEquals(text("", NamedTextColor.GRAY)
-            .append(text("MiniMessage test: "))
-            .append(text("bold").decorate(BOLD)),
+            .append(text("")
+                .append(text("MiniMessage test: "))
+                .append(text("bold").decorate(BOLD))),
             i18n.line(Locale.US, MINIMESSAGE)
         );
     }
@@ -183,19 +192,24 @@ class I18NTest {
     @Test
     void testNested() {
         MiniMessageI18N i18n = createI18N();
-        assertEquals(text("", NamedTextColor.GRAY)
-            .append(text("Placeholder: "))
-            .append(text("A constant")),
+        assertEquals(text("", GRAY)
+            .append(text("")
+                .append(text("Placeholder: "))
+                .append(text("A constant"))),
             i18n.line(Locale.US, PLACEHOLDERS,
                 c -> c.of("target", () -> c.line(CONSTANT))));
-        assertEquals(text("", NamedTextColor.GRAY)
-            .append(text("Placeholder: "))
-            .append(text("A styled constant", NamedTextColor.BLUE)),
+        assertEquals(text("", GRAY)
+            .append(text("")
+                .append(text("Placeholder: "))
+                .append(text("", BLUE)
+                    .append(text("A styled constant")))),
             i18n.line(Locale.US, PLACEHOLDERS,
                 c -> c.of("target", () -> c.line(STYLED_CONSTANT))));
-        assertEquals(text("", NamedTextColor.GRAY)
-            .append(text("Styled placeholder: "))
-            .append(text("A styled constant", NamedTextColor.BLUE)),
+        assertEquals(text("", GRAY)
+            .append(text("")
+                .append(text("Styled placeholder: "))
+                .append(text("", BLUE)
+                    .append(text("A styled constant")))),
             i18n.line(Locale.US, PLACEHOLDERS_STYLED,
                 c -> c.of("target", () -> c.line(STYLED_CONSTANT))));
     }

@@ -148,7 +148,7 @@ public final class MiniMessageI18N implements MutableI18N {
         List<Component> lines = new ArrayList<>();
         for (var line : translation(locale, key)) {
             Component generated = mm.parse(line);
-            lines.add(style == null ? generated : generated.style(style));
+            lines.add(style == null ? generated : Component.text().append(generated).build().style(style));
         }
 
         if (caches)
