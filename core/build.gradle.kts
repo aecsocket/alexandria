@@ -16,7 +16,7 @@ dependencies {
     api(libs.openCsv)
     api(libs.interfaces)
 
-    implementation(libs.bundles.adventure)
+    api(libs.bundles.adventure)
     api(libs.adventureTextMiniMessage)
 
     testImplementation(libs.bundles.junit)

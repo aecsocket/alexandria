@@ -66,7 +66,7 @@ public abstract class BasePlugin<S extends BasePlugin<S>> extends JavaPlugin {
     /** The settings. */
     protected Settings settings = new Settings();
     /** The localizer. */
-    protected final MiniMessageI18N i18n = new MiniMessageI18N(MiniMessage.get(), Locale.US);
+    protected final MiniMessageI18N i18n = new MiniMessageI18N(MiniMessage::builder, Locale.US);
     /** The configuration options. */
     protected ConfigurationOptions configOptions = ConfigurationOptions.defaults()
         .serializers(builder -> builder
@@ -334,7 +334,7 @@ public abstract class BasePlugin<S extends BasePlugin<S>> extends JavaPlugin {
             case SIMPLIFIED -> {
                 log(level, message.formatted(args) + ":");
                 for (Throwable cur = thrown; cur != null; cur = cur.getCause()) {
-                    log(level, "    " + cur.getClass().getSimpleName() +
+                    log(level, "  " + cur.getClass().getSimpleName() +
                         (cur.getMessage() == null ? "" : ": " + cur.getMessage()));
                 }
             }

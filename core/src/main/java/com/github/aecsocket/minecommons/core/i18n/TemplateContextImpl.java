@@ -2,12 +2,12 @@ package com.github.aecsocket.minecommons.core.i18n;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.Style;
-import net.kyori.adventure.text.minimessage.Template;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Locale;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static net.kyori.adventure.text.Component.*;
 
@@ -17,8 +17,8 @@ import static net.kyori.adventure.text.Component.*;
     Function<String, @Nullable Style> styler
 ) implements I18N.TemplateContext {
     @Override
-    public Template of(String key, Component value) {
-        return Template.of(key, style(key, value));
+    public I18N.Template of(String key, Supplier<Component> value) {
+        return new I18N.Template(key, () -> style(key, value.get()));
     }
 
     private Component style(String key, Component value) {
@@ -29,33 +29,22 @@ import static net.kyori.adventure.text.Component.*;
     }
 
     @Override
-    public Template of(String key, String value) {
-        return Template.of(key, style(key, text(value)));
+    public Component rd(Renderable value) {
+        return value.render(i18n, locale);
     }
 
     @Override
-    public Template of(String key, Renderable value) {
-        return Template.of(key, style(key, value.render(i18n, locale)));
+    public Component rd(String format, Object... args) {
+        return text(String.format(locale, format, args));
     }
 
     @Override
-    public Template of(String key, Object value) {
-        return Template.of(key, style(key, text(""+value)));
+    public Optional<Component> orLine(String key, I18N.TemplateFactory... templates) {
+        return i18n.orLine(locale, key, templates);
     }
 
     @Override
-    public Template format(String key, String format, Object... args) {
-        return Template.of(key, style(key, text(String.format(locale, format, args))));
-    }
-
-    @Override
-    public Optional<Template> orLine(String key, String i18n, I18N.TemplateFactory... templates) {
-        return this.i18n.orLine(locale, i18n, templates)
-            .map(comp -> Template.of(key, style(i18n, comp)));
-    }
-
-    @Override
-    public Template line(String key, String i18n, I18N.TemplateFactory... templates) {
-        return Template.of(key, style(key, this.i18n.line(locale, i18n, templates)));
+    public Component line(String key, I18N.TemplateFactory... templates) {
+        return i18n.line(locale, key, templates);
     }
 }

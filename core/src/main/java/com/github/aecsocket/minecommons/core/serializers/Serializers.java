@@ -1,5 +1,6 @@
 package com.github.aecsocket.minecommons.core.serializers;
 
+import com.github.aecsocket.minecommons.core.node.NodePath;
 import io.leangen.geantyref.TypeToken;
 import net.kyori.adventure.serializer.configurate4.ConfigurateComponentSerializer;
 import net.kyori.adventure.text.format.TextColor;
@@ -49,6 +50,7 @@ public final class Serializers {
         .registerExact(TextColor.class, TextColorSerializer.INSTANCE)
         .registerExact(Duration.class, DurationSerializer.INSTANCE)
         .registerExact(MathNode.class, MathNodeSerializer.INSTANCE)
+        .registerExact(NodePath.class, NodePathSerializer.INSTANCE)
         .registerExact(Format.class, I18NFormatSerializer.INSTANCE)
         .register(Range.class, RangeSerializer.INSTANCE)
         .register(SoundEffect.class, SoundEffectSerializer.INSTANCE)

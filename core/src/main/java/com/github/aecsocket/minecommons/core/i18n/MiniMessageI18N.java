@@ -4,9 +4,9 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import net.kyori.adventure.text.minimessage.Template;
 
 import java.util.*;
+import java.util.function.Supplier;
 
 /**
  * An i18n service using the {@link MiniMessage} platform to parse messages.
@@ -14,7 +14,7 @@ import java.util.*;
 public final class MiniMessageI18N implements MutableI18N {
     private static final JoinConfiguration join = JoinConfiguration.separator(Component.newline());
 
-    private final MiniMessage miniMessage;
+    private final Supplier<MiniMessage.Builder> mmFactory;
     private final Map<String, Style> styles = new HashMap<>();
     private final Map<String, Format> formats = new HashMap<>();
     private final Map<Locale, Translation> translations = new HashMap<>();
@@ -25,19 +25,13 @@ public final class MiniMessageI18N implements MutableI18N {
 
     /**
      * Creates an instance.
-     * @param miniMessage The MiniMessage instance.
+     * @param mmFactory The factory for building MiniMessage builder instances.
      * @param locale The default locale.
      */
-    public MiniMessageI18N(MiniMessage miniMessage, Locale locale) {
-        this.miniMessage = miniMessage;
+    public MiniMessageI18N(Supplier<MiniMessage.Builder> mmFactory, Locale locale) {
+        this.mmFactory = mmFactory;
         this.locale = locale;
     }
-
-    /**
-     * Gets the MiniMessage instance used.
-     * @return The MiniMessage instance.
-     */
-    public MiniMessage miniMessage() { return miniMessage; }
 
     /**
      * Gets all registered styles.
@@ -141,14 +135,19 @@ public final class MiniMessageI18N implements MutableI18N {
             ctx = I18N.templateContext(this, locale, k -> styles.get(format.templates().get(k)));
         }
 
-        List<Template> placeholders = new ArrayList<>();
+        Map<String, Supplier<Component>> placeholders = new HashMap<>();
         for (var factory : templates) {
-            placeholders.add(factory.create(ctx));
+            Template template = factory.create(ctx);
+            placeholders.put(template.key(), template.value());
         }
+
+        MiniMessage mm = mmFactory.get()
+            .placeholderResolver(pKey -> placeholders.containsKey(pKey) ? placeholders.get(pKey).get() : null)
+            .build();
 
         List<Component> lines = new ArrayList<>();
         for (var line : translation(locale, key)) {
-            Component generated = miniMessage.parse(line, placeholders);
+            Component generated = mm.parse(line);
             lines.add(style == null ? generated : generated.style(style));
         }
 

@@ -35,6 +35,8 @@ import java.util.Locale;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import static net.kyori.adventure.text.Component.*;
+
 /**
  * Utility class for using a Cloud {@link PaperCommandManager}.
  */
@@ -151,7 +153,7 @@ public class BaseCommand<P extends BasePlugin<P>> {
             .withNoPermissionHandler()
             .withCommandExecutionHandler()
             .withDecorator(msg -> i18n.line(plugin.defaultLocale(), ERROR_COMMAND,
-                c -> c.of("message", msg)));
+                c -> c.of("message", () -> msg)));
         exceptionHandler.apply(manager, s -> s);
 
         root = rootFactory.apply(manager, rootName);
@@ -280,10 +282,10 @@ public class BaseCommand<P extends BasePlugin<P>> {
                 String message = cur.getMessage();
                 plugin.send(audience, message == null
                     ? i18n.lines(locale, ERROR_EXCEPTION_NO_MESSAGE,
-                        c -> c.of("type", type))
+                        c -> c.of("type", () -> text(type)))
                     : i18n.lines(locale, ERROR_EXCEPTION_MESSAGE,
-                        c -> c.of("type", type),
-                        c -> c.of("message", message))
+                        c -> c.of("type", () -> text(type)),
+                        c -> c.of("message", () -> text(message)))
                 );
             }
         }
@@ -325,7 +327,7 @@ public class BaseCommand<P extends BasePlugin<P>> {
             T result = pSender == null ? null : ifPlayer.apply(pSender);
             if (result == null)
                 throw error(ERROR_NO_ARG,
-                    c -> c.of("arg", key));
+                    c -> c.of("arg", () -> text(key)));
             return result;
         });
     }
@@ -357,9 +359,9 @@ public class BaseCommand<P extends BasePlugin<P>> {
     protected void version(CommandContext<CommandSender> ctx, CommandSender sender, Locale locale, Player pSender) {
         PluginDescriptionFile desc = plugin.getDescription();
         plugin.send(sender, i18n.lines(locale, COMMAND_VERSION,
-            c -> c.of("name", desc.getName()),
-            c -> c.of("version", desc.getVersion()),
-            c -> c.of("authors", String.join(", ", desc.getAuthors())))
+            c -> c.of("name", () -> text(desc.getName())),
+            c -> c.of("version", () -> text(desc.getVersion())),
+            c -> c.of("authors", () -> text(String.join(", ", desc.getAuthors()))))
         );
     }
 
@@ -392,7 +394,7 @@ public class BaseCommand<P extends BasePlugin<P>> {
         ConfigurationNode node = settings.root().node(nodePath);
         if (node.virtual())
             throw error(ERROR_NO_NODE_VALUE,
-                c -> c.of("path", nodePath.toString()));
+                c -> c.of("path", () -> text(nodePath.toString())));
 
         if (node.parent() != null) {
             ConfigurationNode value = node;
@@ -403,7 +405,7 @@ public class BaseCommand<P extends BasePlugin<P>> {
 
         for (var line : lines) {
             plugin.send(sender, i18n.lines(locale, COMMAND_SETTING,
-                c -> c.of("line", line)));
+                c -> c.of("line", () -> line)));
         }
     }
 }
