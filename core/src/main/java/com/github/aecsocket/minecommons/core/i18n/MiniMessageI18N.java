@@ -104,12 +104,12 @@ public final class MiniMessageI18N implements MutableI18N {
      * @param key The translation key.
      * @return The translation.
      */
-    public List<String> translation(Locale locale, String key) {
+    public Optional<List<String>> translation(Locale locale, String key) {
         Translation translation = translations.get(locale);
         List<String> value;
         if (translation == null || (value = translation.get(key)) == null)
-            return defaultTranslation().get(key, Collections.singletonList(key));
-        return value;
+            return Optional.ofNullable(defaultTranslation().get(key));
+        return Optional.of(value);
     }
 
     @Override
@@ -123,55 +123,57 @@ public final class MiniMessageI18N implements MutableI18N {
                 return Optional.of(cacheValue);
         }
 
-        Format format = formats.get(key);
-        Style style;
-        TemplateContext ctx;
-        if (format == null) {
-            // ad-hoc format
-            style = null;
-            ctx = I18N.templateContext(this, locale, k -> null);
-        } else {
-            style = styles.get(format.style());
-            ctx = I18N.templateContext(this, locale, k -> styles.get(format.templates().get(k)));
-        }
+        return translation(locale, key).map(translation -> {
+            Format format = formats.get(key);
+            Style style;
+            TemplateContext ctx;
+            if (format == null) {
+                // ad-hoc format
+                style = null;
+                ctx = I18N.templateContext(this, locale, k -> null);
+            } else {
+                style = styles.get(format.style());
+                ctx = I18N.templateContext(this, locale, k -> styles.get(format.templates().get(k)));
+            }
 
-        Map<String, Supplier<Component>> placeholders = new HashMap<>();
-        for (var factory : templates) {
-            Template template = factory.create(ctx);
-            placeholders.put(template.key(), template.value());
-        }
+            Map<String, Supplier<Component>> placeholders = new HashMap<>();
+            for (var factory : templates) {
+                Template template = factory.create(ctx);
+                placeholders.put(template.key(), template.value());
+            }
 
-        MiniMessage mm = mmFactory.get()
-            .placeholderResolver(pKey -> placeholders.containsKey(pKey) ? placeholders.get(pKey).get() : null)
-            .build();
+            MiniMessage mm = mmFactory.get()
+                .placeholderResolver(pKey -> placeholders.containsKey(pKey) ? placeholders.get(pKey).get() : null)
+                .build();
 
-        List<Component> lines = new ArrayList<>();
-        for (var line : translation(locale, key)) {
-            Component generated = mm.parse(line);
-            lines.add(style == null ? generated : Component.text().append(generated).build().style(style));
-        }
+            List<Component> lines = new ArrayList<>();
+            for (var line : translation) {
+                Component generated = mm.parse(line);
+                lines.add(style == null ? generated : Component.text().append(generated).build().style(style));
+            }
 
-        if (caches)
-            cache.computeIfAbsent(key, k -> new HashMap<>())
-                    .put(locale, lines);
-        return Optional.of(lines);
+            if (caches)
+                cache.computeIfAbsent(key, k -> new HashMap<>())
+                        .put(locale, lines);
+            return lines;
+        });
     }
 
     @Override
     public List<Component> lines(Locale locale, String key, TemplateFactory... templates) {
         return orLines(locale, key, templates)
-                .orElse(Collections.singletonList(Component.text(key)));
+            .orElse(Collections.singletonList(Component.text(key)));
     }
 
     @Override
     public Optional<Component> orLine(Locale locale, String key, TemplateFactory... templates) {
         return orLines(locale, key, templates)
-                .map(comps -> Component.join(join, comps));
+            .map(comps -> Component.join(join, comps));
     }
 
     @Override
     public Component line(Locale locale, String key, TemplateFactory... templates) {
         return orLine(locale, key, templates)
-                .orElse(Component.text(key));
+            .orElse(Component.text(key));
     }
 }

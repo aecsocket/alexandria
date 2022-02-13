@@ -15,15 +15,15 @@ import java.util.function.Function;
  * Type serializer for objects which can be associated with a key.
  */
 public class ByKeySerializer<T> implements TypeSerializer<T> {
-    private final Function<String, T> toT;
-    private final Function<T, String> toKey;
+    private final @Nullable Function<String, T> toT;
+    private final @Nullable Function<T, String> toKey;
 
     /**
      * Creates an instance.
      * @param toT Function mapping a key to a T.
      * @param toKey Function mapping a T to a key.
      */
-    public ByKeySerializer(Function<String, T> toT, Function<T, String> toKey) {
+    public ByKeySerializer(@Nullable Function<String, T> toT, @Nullable Function<T, String> toKey) {
         this.toT = toT;
         this.toKey = toKey;
     }
@@ -51,6 +51,8 @@ public class ByKeySerializer<T> implements TypeSerializer<T> {
 
     @Override
     public void serialize(Type type, @Nullable T obj, ConfigurationNode node) throws SerializationException {
+        if (toKey == null)
+            throw new UnsupportedOperationException();
         if (obj == null) node.set(null);
         else {
             node.set(toKey.apply(obj));
@@ -59,6 +61,8 @@ public class ByKeySerializer<T> implements TypeSerializer<T> {
 
     @Override
     public T deserialize(Type type, ConfigurationNode node) throws SerializationException {
+        if (toT == null)
+            throw new UnsupportedOperationException();
         String key = require(node, String.class);
         T obj = toT.apply(key);
         if (obj == null)
