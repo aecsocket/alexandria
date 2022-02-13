@@ -27,13 +27,17 @@ import org.bukkit.inventory.EquipmentSlot;
 public class ListenerInputs extends AbstractInputs implements Listener {
     @EventHandler
     private void onEvent(PlayerAnimationEvent event) {
+        if (hasDropped(event.getPlayer()))
+            return;
         handle(new Events.AnimationInput(event.getPlayer(), InputType.MOUSE_LEFT, event), () -> event.setCancelled(true));
     }
 
     @EventHandler
     private void onEvent(PlayerInteractEvent event) {
-        if (event.getHand() == EquipmentSlot.HAND &&
-                (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
+        if (
+            event.getHand() == EquipmentSlot.HAND &&
+            (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)
+        ) {
             handle(new Events.InteractInput(event.getPlayer(), InputType.MOUSE_RIGHT, event), () -> event.setCancelled(true));
         }
     }
@@ -46,6 +50,7 @@ public class ListenerInputs extends AbstractInputs implements Listener {
     @EventHandler
     private void onEvent(PlayerDropItemEvent event) {
         handle(new Events.DropInput(event.getPlayer(), InputType.DROP, event), () -> event.setCancelled(true));
+        dropped(event.getPlayer());
     }
 
     @EventHandler

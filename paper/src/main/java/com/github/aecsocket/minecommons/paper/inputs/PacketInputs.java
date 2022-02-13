@@ -65,18 +65,33 @@ public class PacketInputs extends AbstractInputs implements PacketListener {
         PacketType type = event.getPacketType();
         Player player = event.getPlayer();
 
-        if (packet.getHands().read(0) == EnumWrappers.Hand.MAIN_HAND) {
-            if (type == PacketType.Play.Client.ARM_ANIMATION) {
-                handle(new Events.PacketInput(player, InputType.MOUSE_LEFT, event), () -> event.setCancelled(true));
-            }
-            if (type == PacketType.Play.Client.BLOCK_PLACE) {
-                handle(new Events.PacketInput(player, InputType.MOUSE_RIGHT, event), () -> event.setCancelled(true));
+        enum ClickPacket {
+            ARM_ANIMATION, BLOCK_PLACE
+        }
+
+        ClickPacket clickPacket = type == PacketType.Play.Client.ARM_ANIMATION
+            ? ClickPacket.ARM_ANIMATION
+            : type == PacketType.Play.Client.BLOCK_PLACE
+                ? ClickPacket.BLOCK_PLACE
+                : null;
+
+        if (clickPacket != null && packet.getHands().read(0) == EnumWrappers.Hand.MAIN_HAND) {
+            switch (clickPacket) {
+                case ARM_ANIMATION -> {
+                    if (!hasDropped(player))
+                        handle(new Events.PacketInput(player, InputType.MOUSE_LEFT, event), () -> event.setCancelled(true));
+                }
+                case BLOCK_PLACE -> handle(new Events.PacketInput(player, InputType.MOUSE_RIGHT, event), () -> event.setCancelled(true));
             }
         }
+
         if (type == PacketType.Play.Client.BLOCK_DIG) {
             switch (packet.getPlayerDigTypes().read(0)) {
                 case SWAP_HELD_ITEMS -> handle(new Events.PacketInput(player, InputType.OFFHAND, event), () -> event.setCancelled(true));
-                case DROP_ITEM, DROP_ALL_ITEMS -> handle(new Events.PacketInput(player, InputType.DROP, event), () -> event.setCancelled(true));
+                case DROP_ITEM, DROP_ALL_ITEMS -> {
+                    handle(new Events.PacketInput(player, InputType.DROP, event), () -> event.setCancelled(true));
+                    dropped(player);
+                }
                 default -> { /* ignore */ }
             }
         }
@@ -87,10 +102,10 @@ public class PacketInputs extends AbstractInputs implements PacketListener {
                 return;
             handle(new Events.PacketInput(player, InputType.SWAP, event), () -> event.setCancelled(true));
             handle(new Events.PacketInput(event.getPlayer(),
-                    scrollDirection(cur, prv),
-                    event), () -> {
-                event.setCancelled(true);
-                player.getInventory().setHeldItemSlot(prv);
+                scrollDirection(cur, prv),
+                event), () -> {
+                    event.setCancelled(true);
+                    player.getInventory().setHeldItemSlot(prv);
             });
         }
         if (type == PacketType.Play.Client.ENTITY_ACTION) {
@@ -104,7 +119,7 @@ public class PacketInputs extends AbstractInputs implements PacketListener {
         }
         if (type == PacketType.Play.Client.ABILITIES) {
             handle(new Events.PacketInput(player, Boolean.TRUE.equals(packet.getBooleans().read(0)) ? InputType.FLIGHT_START : InputType.FLIGHT_STOP, event),
-                    () -> event.setCancelled(true));
+                () -> event.setCancelled(true));
         }
         if (
             type == PacketType.Play.Client.ADVANCEMENTS

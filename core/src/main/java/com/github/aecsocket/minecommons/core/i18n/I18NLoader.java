@@ -126,6 +126,8 @@ public final class I18NLoader {
      * @throws SerializationException If the styles could not be parsed.
      */
     public static List<StyleResult> loadStyles(MutableI18N i18n, ConfigurationNode node) throws SerializationException {
+        if (node.empty())
+            return Collections.emptyList();
         if (!node.isMap())
             throw new SerializationException(node, Style.class, "Entries must be a map");
         List<StyleResult> result = new ArrayList<>();
@@ -153,6 +155,8 @@ public final class I18NLoader {
      * @throws SerializationException If the formats could not be parsed.
      */
     public static List<FormatResult> loadFormats(MutableI18N i18n, ConfigurationNode node) throws SerializationException {
+        if (node.empty())
+            return Collections.emptyList();
         if (!node.isMap())
             throw new SerializationException(node, Format.class, "Entries must be a map");
         List<FormatResult> result = new ArrayList<>();
