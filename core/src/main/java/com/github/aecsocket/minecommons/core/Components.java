@@ -7,7 +7,6 @@ import net.kyori.adventure.text.format.TextColor;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Arrays;
-import java.util.stream.Stream;
 
 import static net.kyori.adventure.text.Component.*;
 import static net.kyori.adventure.text.format.TextDecoration.*;
@@ -61,27 +60,24 @@ public final class Components {
     }
 
     /**
-     * Renders a bar from striked-through components and a placeholder character, with multiple sections.
+     * Renders a limited bar from striked-through components and a placeholder character, with multiple sections.
      * @param length The length of the bar, in characters.
      * @param placeholder The placeholder character.
-     * @param fill The fill for unused sections of the bar. If null, will not render unused sections.
+     * @param fill The fill for unused sections of the bar.
      * @param sections The sections in the bar.
      * @return The bar.
      */
-    public static Component bar(int length, String placeholder, @Nullable TextColor fill, Iterable<? extends BarSection> sections) {
+    public static Component bar(int length, String placeholder, TextColor fill, Iterable<? extends BarSection> sections) {
         Validation.greaterThanEquals("length", length, 0);
         TextComponent[] chars = new TextComponent[length];
-        Arrays.fill(chars, fill == null ? text(placeholder).decoration(STRIKETHROUGH) : text(placeholder, fill, STRIKETHROUGH));
+        Arrays.fill(chars, text(placeholder, fill, STRIKETHROUGH));
         int i = 0;
         for (var section : sections) {
             int end = Math.min(length, (int) (i + section.value() * length));
             for (; i < end; i++)
                 chars[i] = chars[i].color(section.color());
         }
-        if (fill == null)
-            return join(JoinConfiguration.noSeparators(), Stream.of(chars).limit(i).toList());
-        else
-            return join(JoinConfiguration.noSeparators(), chars);
+        return join(JoinConfiguration.noSeparators(), chars);
     }
 
     /**
