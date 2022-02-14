@@ -62,6 +62,12 @@ public abstract class MutableAbstractMapNode<N extends MutableAbstractMapNode<N>
     }
 
     @Override
+    public N clearChildren() {
+        children.clear();
+        return self();
+    }
+
+    @Override
     public N set(String key, N val) {
         N old = children.get(key);
         if (old != null)

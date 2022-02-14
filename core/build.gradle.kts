@@ -14,7 +14,6 @@ dependencies {
     api(libs.geantyRef)
     api(libs.configurate)
     api(libs.openCsv)
-    api(libs.interfaces)
 
     api(libs.bundles.adventure)
     api(libs.adventureTextMiniMessage)

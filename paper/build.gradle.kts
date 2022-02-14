@@ -20,7 +20,7 @@ dependencies {
     }
     paperDevBundle("${libs.versions.minecraft.forUseAtConfigurationTime().get()}-R0.1-SNAPSHOT")
 
-    api(libs.interfacesPaper)
+    api(libs.inventoryFramework)
     api(libs.cloudPaper)
     api(libs.cloudExtras) {
         isTransitive = false

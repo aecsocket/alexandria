@@ -188,6 +188,12 @@ public interface MapNode {
         N removeChild(String key);
 
         /**
+         * Removes all children from this node.
+         * @return This instance.
+         */
+        N clearChildren();
+
+        /**
          * Sets a node, {@link #attach(Mutable, String) attaching} it to this node and
          * {@link #detach() detaching} the previous node.
          * @param key The key under which the value will be located.
