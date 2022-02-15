@@ -30,6 +30,8 @@ jobs:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
+            .gradle/caches/VanillaGradle
+            .gradle/loom-cache
             paper/.gradle/caches/paperweight
           key: ${{ runner.os }}-gradle-${{ secrets.CACHE_VERSION }}-${{ hashFiles('**/*.gradle.kts', '**/gradle-wrapper.properties') }}
           restore-keys: |
