@@ -13,6 +13,11 @@ public interface ForwardingEffector extends Effector {
     Iterable<? extends Effector> effectors();
 
     @Override
+    default void play(SoundEffect effect, Vector3 origin, double distance) {
+        for (var e : effectors()) e.play(effect, origin, distance);
+    }
+
+    @Override
     default void play(SoundEffect effect, Vector3 origin) {
         for (var e : effectors()) e.play(effect, origin);
     }

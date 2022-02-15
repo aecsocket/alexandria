@@ -20,8 +20,8 @@ public class ParticleEffectSerializer implements TypeSerializer<PaperParticleEff
     /** A singleton instance of this serializer. */
     public static final ParticleEffectSerializer INSTANCE = new ParticleEffectSerializer();
 
-    /** The key for the field {@code particle}. */
-    public static final String PARTICLE = "particle";
+    /** The key for the field {@code name}. */
+    public static final String NAME = "name";
     /** The key for the field {@code count}. */
     public static final String COUNT = "count";
     /** The key for the field {@code size}. */
@@ -35,7 +35,7 @@ public class ParticleEffectSerializer implements TypeSerializer<PaperParticleEff
     public void serialize(Type type, @Nullable PaperParticleEffect obj, ConfigurationNode node) throws SerializationException {
         if (obj == null) node.set(null);
         else {
-            node.node(PARTICLE).set(obj.name());
+            node.node(NAME).set(obj.name());
             node.node(COUNT).set(obj.count());
             node.node(SIZE).set(obj.size());
             node.node(SPEED).set(obj.speed());
@@ -46,10 +46,10 @@ public class ParticleEffectSerializer implements TypeSerializer<PaperParticleEff
 
     @Override
     public PaperParticleEffect deserialize(Type type, ConfigurationNode node) throws SerializationException {
-        Particle particle = require(node.node(PARTICLE), Particle.class);
+        Particle particle = require(node.node(NAME), Particle.class);
         return new PaperParticleEffect(
             particle,
-            node.node(COUNT).getInt(0),
+            node.node(COUNT).getDouble(0),
             node.node(SIZE).get(Vector3.class, Vector3.ZERO),
             node.node(SPEED).getDouble(0),
             particle.getDataType() == void.class ? null : node.node(DATA).get(particle.getDataType())

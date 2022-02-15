@@ -11,7 +11,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  */
 public record PaperParticleEffect(
     Particle name,
-    int count,
+    double count,
     Vector3 size,
     double speed,
     @Nullable Object data

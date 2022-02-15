@@ -18,7 +18,7 @@ public interface ParticleEffect {
      * Gets the count of particles to spawn.
      * @return The count.
      */
-    int count();
+    double count();
 
     /**
      * Gets the size of the particles, used for different effects.

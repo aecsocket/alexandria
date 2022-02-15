@@ -10,6 +10,7 @@ import com.github.aecsocket.minecommons.core.vector.cartesian.Vector3;
 
     private EmptyEffector() {}
 
+    @Override public void play(SoundEffect effect, Vector3 origin, double distance) {}
     @Override public void play(SoundEffect effect, Vector3 origin) {}
     @Override public void spawn(ParticleEffect effect, Vector3 origin) {}
 }

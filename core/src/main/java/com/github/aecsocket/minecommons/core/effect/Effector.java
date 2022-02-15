@@ -15,6 +15,14 @@ public interface Effector {
     }
 
     /**
+     * Plays a sound effect, with a precomputed distance.
+     * @param effect The sound effect.
+     * @param origin The origin position of the sound.
+     * @param distance If already computed, the distance between the effector and the origin.
+     */
+    void play(SoundEffect effect, Vector3 origin, double distance);
+
+    /**
      * Plays a sound effect.
      * @param effect The sound effect.
      * @param origin The origin position of the sound.

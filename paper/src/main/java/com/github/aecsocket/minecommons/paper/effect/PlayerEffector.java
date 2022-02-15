@@ -15,28 +15,22 @@ import org.bukkit.entity.Player;
 
 /**
  * A wrapper of an effector around a player.
- * @param manager The underlying effectors manager.
+ * @param manager The underlying effector manager.
  * @param player The underlying player.
  */
 public record PlayerEffector(
     PaperEffectors manager,
     Player player
 ) implements Effector {
-    @Override
-    public void play(SoundEffect effect, Vector3 origin) {
-        Vector3 dest = PaperUtils.toCommons(player.getLocation());
-        double dist = dest.sqrDistance(origin);
-        if (dist > effect.sqrRange())
-            return;
-
+    private void forcePlay(SoundEffect effect, Vector3 origin, double dist, Vector3 end) {
         Bukkit.getScheduler().scheduleSyncDelayedTask(manager.plugin(), () -> {
-            Vector3 delta = origin.subtract(dest);
+            Vector3 delta = origin.subtract(end);
             Vector3 pos = (Double.compare(delta.manhattanLength(), 0) == 0
                 ? delta
                 : delta.normalize().multiply(2))
-                .add(dest);
+                .add(end);
             float volume = effect.sound().volume() * (float) (1 -
-                Numbers.clamp01((dist - effect.sqrDropoff()) / (effect.sqrRange() - effect.sqrDropoff())));
+                Numbers.clamp01((dist - effect.dropoff()) / (effect.range() - effect.dropoff())));
             player.playSound(Sound.sound(
                 effect.sound().name(), effect.sound().source(),
                 volume,
@@ -46,11 +40,28 @@ public record PlayerEffector(
     }
 
     @Override
+    public void play(SoundEffect effect, Vector3 origin, double dist) {
+        Vector3 end = PaperUtils.toCommons(player.getLocation());
+        if (dist > effect.range())
+            return;
+        forcePlay(effect, origin, dist, end);
+    }
+
+    @Override
+    public void play(SoundEffect effect, Vector3 origin) {
+        Vector3 end = PaperUtils.toCommons(player.getLocation());
+        double distSqr = end.sqrDistance(origin);
+        if (distSqr > effect.sqrRange())
+            return;
+        forcePlay(effect, origin, Math.sqrt(distSqr), end);
+    }
+
+    @Override
     public void spawn(ParticleEffect effect, Vector3 origin) {
         if (!(effect.name() instanceof Particle particle))
             return;
         Vector3 size = effect.size();
-        player.spawnParticle(particle, PaperUtils.toPaper(origin, player.getWorld()), effect.count(),
+        player.spawnParticle(particle, PaperUtils.toPaper(origin, player.getWorld()), (int) effect.count(),
             size.x(), size.y(), size.z(), effect.speed(), effect.data());
     }
 }
