@@ -31,10 +31,19 @@ public abstract class AbstractInputs implements Inputs {
         }
     }
 
+    /**
+     * Call when a player has called a drop input.
+     * @param player The player
+     */
     protected void dropped(Player player) {
         lastDropTick.put(player.getUniqueId(), Bukkit.getCurrentTick());
     }
 
+    /**
+     * Call to check if a player has called a drop input, to cancel arm swing inputs.
+     * @param player The player.
+     * @return If the input should be cancelled.
+     */
     protected boolean hasDropped(Player player) {
         return lastDropTick.getOrDefault(player.getUniqueId(), -1) == Bukkit.getCurrentTick();
     }

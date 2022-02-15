@@ -34,6 +34,8 @@ subprojects {
 
     java {
         toolchain.languageVersion.set(JavaLanguageVersion.of(17))
+        withSourcesJar()
+        withJavadocJar()
     }
 
     tasks {
@@ -43,25 +45,6 @@ subprojects {
 
         test {
             useJUnitPlatform()
-        }
-    }
-}
-
-publishing {
-    publications {
-        create<MavenPublication>("maven") {
-            from(components["java"])
-        }
-    }
-
-    repositories {
-        maven {
-            name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/aecsocket/minecommons")
-            credentials {
-                username = System.getenv("GPR_ACTOR")
-                password = System.getenv("GPR_TOKEN")
-            }
         }
     }
 }
