@@ -1,11 +1,14 @@
 package com.github.aecsocket.minecommons.paper;
 
 import net.kyori.adventure.text.Component;
+import net.minecraft.world.phys.AABB;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.craftbukkit.v1_18_R1.CraftWorld;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -17,6 +20,7 @@ import static com.github.aecsocket.minecommons.core.vector.cartesian.Vector3.*;
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import com.github.aecsocket.minecommons.core.vector.cartesian.Vector3;
 import com.google.common.collect.ImmutableMap;
@@ -183,5 +187,55 @@ public final class PaperUtils {
         if (result == null)
             throw new IllegalArgumentException("Invalid block face: accepts " + NORMALS.keySet());
         return result;
+    }
+
+    /**
+     * Collects all entities near a location.
+     * <p>
+     * This method applies a mapper function to entities. If the mapper returns null, the entity
+     * is not added to the final result.
+     * @param loc The center of the search radius.
+     * @param size The size of the search box, as a square radius.
+     * @param mapper The mapper function. If returns null, then the entity is not added to the result.
+     * @param <E> The mapped entity type.
+     * @return The entities.
+     */
+    public static <E extends Entity> Set<E> nearbyEntities(Location loc, Vector3 size, Function<Entity, @Nullable E> mapper) {
+        Set<E> entities = new HashSet<>();
+        ((CraftWorld) loc.getWorld()).getHandle().getEntities((net.minecraft.world.entity.Entity) null, new AABB(
+            loc.getX() - size.x(), loc.getY() - size.y(), loc.getZ() - size.z(),
+            loc.getX() + size.x(), loc.getY() + size.y(), loc.getZ() + size.z()
+        ), entity -> {
+            E result = mapper.apply(entity.getBukkitEntity());
+            if (result != null)
+                entities.add(result);
+            return false;
+        });
+        return entities;
+    }
+
+    /**
+     * Collects all entities near a location, with the result sorted by distance from center.
+     * <p>
+     * This method applies a mapper function to entities. If the mapper returns null, the entity
+     * is not added to the final result.
+     * @param loc The center of the search radius.
+     * @param size The size of the search box, as a square radius.
+     * @param mapper The mapper function. If returns null, then the entity is not added to the result.
+     * @param <E> The mapped entity type.
+     * @return The entities, sorted by distance from center.
+     */
+    public static <E extends Entity> Set<E> nearbyEntitiesSorted(Location loc, Vector3 size, Function<Entity, @Nullable E> mapper) {
+        Set<E> entities = new TreeSet<>(Comparator.comparingDouble(ent -> ent.getLocation().distanceSquared(loc)));
+        ((CraftWorld) loc.getWorld()).getHandle().getEntities((net.minecraft.world.entity.Entity) null, new AABB(
+                loc.getX() - size.x(), loc.getY() - size.y(), loc.getZ() - size.z(),
+                loc.getX() + size.x(), loc.getY() + size.y(), loc.getZ() + size.z()
+        ), entity -> {
+            E result = mapper.apply(entity.getBukkitEntity());
+            if (result != null)
+                entities.add(result);
+            return false;
+        });
+        return entities;
     }
 }

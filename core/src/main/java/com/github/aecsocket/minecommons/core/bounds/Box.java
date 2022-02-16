@@ -10,6 +10,9 @@ import com.github.aecsocket.minecommons.core.vector.cartesian.Vector3;
 
 /**
  * A cuboid-shaped volume.
+ * <p>
+ * This implementation considers rays that are on the same plane as a side
+ * to be NOT intersecting.
  * @param min The corner with the smallest coordinates.
  * @param max The corner with the largest coordinates.
  * @param angle The rotation of the box clockwise on the vertical axis.
@@ -90,9 +93,9 @@ public record Box(Vector3 min, Vector3 max, Vector3 extent, double angle) implem
         if (near > far || far < 0)
             return null;
         Vector3 normal = dir.sign().neg()
-                .multiply(vec3(t1.y(), t1.z(), t1.x()).step(t1))
-                .multiply(vec3(t1.z(), t1.x(), t1.y()).step(t1))
-                .rotateY(angle);
+            .multiply(vec3(t1.y(), t1.z(), t1.x()).step(t1))
+            .multiply(vec3(t1.z(), t1.x(), t1.y()).step(t1))
+            .rotateY(angle);
         return new Collision(near, far, normal);
     }
 

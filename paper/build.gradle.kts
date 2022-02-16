@@ -31,23 +31,27 @@ dependencies {
     compileOnly(libs.protocolLib)
 }
 
-/*
-  TODO this is kind of a hack.
-  If this isn't here, gradle makes a .module file, which
-  forces dependents to use the -dev jar, which is
-  remapped, so cannot be shaded in without a mojmap
-  server.
- */
-tasks.withType<GenerateModuleMetadata> {
-    enabled = false
+tasks {
+    jar {
+        archiveClassifier.set("jar")
+    }
 }
 
-publishing {
-    publications {
-        create<MavenPublication>("maven") {
-            from(components["java"])
-            artifact(tasks.reobfJar)
+fun addReobfTo(target: NamedDomainObjectProvider<Configuration>) {
+    target.get().let {
+        it.outgoing.artifact(tasks.reobfJar.get().outputJar) {
+            classifier = "reobf"
         }
+        (components["java"] as AdhocComponentWithVariants).addVariantsFromConfiguration(it) {}
+    }
+}
+
+addReobfTo(configurations.apiElements)
+addReobfTo(configurations.runtimeElements)
+
+publishing {
+    publications.create<MavenPublication>("maven") {
+        from(components["java"])
     }
 
     repositories {
