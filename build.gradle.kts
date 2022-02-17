@@ -6,7 +6,7 @@ plugins {
 
 allprojects {
     group = "com.github.aecsocket"
-    version = "1.4.0-SNAPSHOT"
+    version = "1.4.1-SNAPSHOT"
     description = "Common utilities for Minecraft projects"
 }
 
