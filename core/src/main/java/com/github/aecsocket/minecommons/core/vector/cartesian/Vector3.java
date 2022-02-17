@@ -150,6 +150,15 @@ public record Vector3(double x, double y, double z) implements NumericalVector {
     }
 
     /**
+     * Gets a component by its index.
+     * @param i The index.
+     * @return The component. If not between 0 and 2, returns 0.
+     */
+    public double get(int i) {
+        return i == 0 ? x : i == 1 ? y : i == 2 ? z : 0;
+    }
+
+    /**
      * Gets the red color channel (X component).
      * @return The value.
      */
@@ -610,12 +619,6 @@ public record Vector3(double x, double y, double z) implements NumericalVector {
     }
 
     /**
-     * Gets the spherical radius component.
-     * @return The component.
-     */
-    public double sphericalR() { return sqrt(sqr(x) + sqr(y) + sqr(z)); }
-
-    /**
      * Gets the spherical yaw component.
      * @return The component.
      */
@@ -628,11 +631,22 @@ public record Vector3(double x, double y, double z) implements NumericalVector {
     public double sphericalPitch() { return atan(-y / sqrt(x*x + z*z)); }
 
     /**
-     * Converts this to the spherical coordinate system.
+     * Converts this to the spherical coordinate system, with a custom length.
+     * @param length The length.
+     * @return A vector in the spherical coordinate system.
+     */
+    public Coord3 spherical(double length) {
+        return coord3(length, sphericalYaw(), sphericalPitch());
+    }
+
+    /**
+     * Converts this to the spherical coordinate system, computing the length of this vector.
+     * <p>
+     * If you have already computed the length of this vector, use {@link #spherical(double)}.
      * @return A vector in the spherical coordinate system.
      */
     public Coord3 spherical() {
-        return coord3(sphericalR(), sphericalYaw(), sphericalPitch());
+        return coord3(length(), sphericalYaw(), sphericalPitch());
     }
 
     /**

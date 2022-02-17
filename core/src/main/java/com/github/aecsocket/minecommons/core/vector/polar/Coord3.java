@@ -79,7 +79,7 @@ public record Coord3(double r, double yaw, double pitch) {
             -xz * sin(yaw),
             -sin(pitch),
             xz * cos(yaw)
-        );
+        ).multiply(r);
     }
 
     @Override public String toString() { return "(%s, %.1f°, %.1f°)".formatted(""+r, Math.toDegrees(yaw), Math.toDegrees(pitch)); }
