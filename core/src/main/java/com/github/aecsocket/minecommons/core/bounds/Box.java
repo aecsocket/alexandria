@@ -86,33 +86,19 @@ public record Box(Vector3 min, Vector3 max, Vector3 extent, double angle) implem
             invDir = dir.reciprocal();
         }
 
-        // https://tavianator.com/2015/ray_box_nan.html
-        double t1 = (min.x() - orig.x()) * invDir.x();
-        double t2 = (max.x() - orig.x()) * invDir.x();
-
-        double tMin = Math.min(t1, t2);
-        double tMax = Math.max(t1, t2);
-
-        for (int i = 1; i < 3; i++) {
-            t1 = (min.get(i) - orig.get(i)) * invDir.get(i);
-            t2 = (max.get(i) - orig.get(i)) * invDir.get(i);
-
-            tMin = Math.max(tMin, Math.min(Math.min(t1, t2), tMax));
-            tMax = Math.min(tMax, Math.max(Math.max(t1, t2), tMin));
-        }
-
-        if (tMax <= Math.max(tMin, 0))
+        Vector3 n = invDir.multiply(orig);
+        Vector3 k = invDir.abs().multiply(extent.divide(2));
+        Vector3 t1 = n.neg().subtract(k);
+        Vector3 t2 = n.neg().add(k);
+        double near = t1.maxComponent();
+        double far = t2.minComponent();
+        if (near > far || far < 0)
             return null;
-
-        // https://blog.johnnovak.net/2016/10/22/the-nim-ray-tracer-project-part-4-calculating-box-normals/
-        Vector3 p = ray.point(tMin).subtract(center);
-        Vector3 d = min.subtract(max).multiply(0.5);
-        return new Collision(tMin, tMax, vec3(
-            (int) (p.x() / Math.abs(d.x()) * BIAS),
-            (int) (p.y() / Math.abs(d.y()) * BIAS),
-            (int) (p.z() / Math.abs(d.z()) * BIAS)
-        ));
-        // We don't normalize here because it might be slow. I don't care about corner edge cases.
+        Vector3 normal = dir.sign().neg()
+            .multiply(vec3(t1.y(), t1.z(), t1.x()).step(t1))
+            .multiply(vec3(t1.z(), t1.x(), t1.y()).step(t1))
+            .rotateY(angle);
+        return new Collision(near, far, normal);
     }
 
     @Override
