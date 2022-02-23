@@ -16,18 +16,13 @@ public class LocationSerializer implements TypeSerializer<Location> {
     /** A singleton instance of this serializer. */
     public static final LocationSerializer INSTANCE = new LocationSerializer();
 
-    /** The key for the field {@code world}. */
-    public static final String WORLD = "world";
-    /** The key for the field {@code x}. */
-    public static final String X = "x";
-    /** The key for the field {@code y}. */
-    public static final String Y = "y";
-    /** The key for the field {@code z}. */
-    public static final String Z = "z";
-    /** The key for the field {@code yaw}. */
-    public static final String YAW = "yaw";
-    /** The key for the field {@code pitch}. */
-    public static final String PITCH = "pitch";
+    private static final String
+        WORLD = "world",
+        X = "x",
+        Y = "y",
+        Z = "z",
+        YAW = "yaw",
+        PITCH = "pitch";
 
     @Override
     public void serialize(Type type, @Nullable Location obj, ConfigurationNode node) throws SerializationException {

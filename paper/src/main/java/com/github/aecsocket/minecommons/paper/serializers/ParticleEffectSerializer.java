@@ -20,16 +20,12 @@ public class ParticleEffectSerializer implements TypeSerializer<PaperParticleEff
     /** A singleton instance of this serializer. */
     public static final ParticleEffectSerializer INSTANCE = new ParticleEffectSerializer();
 
-    /** The key for the field {@code name}. */
-    public static final String NAME = "name";
-    /** The key for the field {@code count}. */
-    public static final String COUNT = "count";
-    /** The key for the field {@code size}. */
-    public static final String SIZE = "size";
-    /** The key for the field {@code speed}. */
-    public static final String SPEED = "speed";
-    /** The key for the field {@code data}. */
-    public static final String DATA = "data";
+    private static final String
+        NAME = "name",
+        COUNT = "count",
+        SIZE = "size",
+        SPEED = "speed",
+        DATA = "data";
 
     @Override
     public void serialize(Type type, @Nullable PaperParticleEffect obj, ConfigurationNode node) throws SerializationException {

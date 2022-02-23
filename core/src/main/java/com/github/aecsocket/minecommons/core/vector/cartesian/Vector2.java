@@ -254,23 +254,36 @@ public record Vector2(double x, double y) implements NumericalVector {
     }
 
     /**
-     * Gets the polar radius component.
+     * Gets the spherical ang component.
      * @return The component.
      */
-    public double polarR() { return sqrt(sqr(x) + sqr(y)); }
+    public double sphericalAng() { return atan2(y, x); }
 
     /**
-     * Gets the polar ang component.
-     * @return The component.
+     * Converts this to the spherical coordinate system, with a custom length.
+     * @param length The length.
+     * @return A vector in the spherical coordinate system.
      */
-    public double polarAng() { return atan2(y, x); }
+    public Coord2 spherical(double length) {
+        return new Coord2(length, sphericalAng());
+    }
 
     /**
-     * Converts this to the polar coordinate system.
-     * @return A vector in the polar coordinate system.
+     * Converts this to the spherical coordinate system, computing the length of this vector.
+     * <p>
+     * If you have already computed the length of this vector, use {@link #spherical(double)}.
+     * @return A vector in the spherical coordinate system.
      */
-    public Coord2 polar() {
-        return new Coord2(polarR(), polarAng());
+    public Coord2 spherical() {
+        return new Coord2(length(), sphericalAng());
+    }
+
+    /**
+     * Converts this to an integer-vector Point instance.
+     * @return The point.
+     */
+    public Point2 point() {
+        return new Point2((int) x, (int) y);
     }
 
     @Override

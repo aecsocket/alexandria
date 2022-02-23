@@ -11,7 +11,6 @@ import com.github.aecsocket.minecommons.core.Validation;
 import com.github.aecsocket.minecommons.core.vector.polar.Coord3;
 
 import static com.github.aecsocket.minecommons.core.Numbers.*;
-import static com.github.aecsocket.minecommons.core.vector.polar.Coord3.*;
 import static java.lang.Math.*;
 
 /**
@@ -636,7 +635,7 @@ public record Vector3(double x, double y, double z) implements NumericalVector {
      * @return A vector in the spherical coordinate system.
      */
     public Coord3 spherical(double length) {
-        return coord3(length, sphericalYaw(), sphericalPitch());
+        return new Coord3(length, sphericalYaw(), sphericalPitch());
     }
 
     /**
@@ -646,7 +645,15 @@ public record Vector3(double x, double y, double z) implements NumericalVector {
      * @return A vector in the spherical coordinate system.
      */
     public Coord3 spherical() {
-        return coord3(length(), sphericalYaw(), sphericalPitch());
+        return new Coord3(length(), sphericalYaw(), sphericalPitch());
+    }
+
+    /**
+     * Converts this to an integer-vector Point instance.
+     * @return The point.
+     */
+    public Point3 point() {
+        return new Point3((int) x, (int) y, (int) z);
     }
 
     /**

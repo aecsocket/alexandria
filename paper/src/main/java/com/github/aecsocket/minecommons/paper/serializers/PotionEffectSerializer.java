@@ -18,18 +18,13 @@ public class PotionEffectSerializer implements TypeSerializer<PotionEffect> {
     /** A singleton instance of this serializer. */
     public static final PotionEffectSerializer INSTANCE = new PotionEffectSerializer();
 
-    /** The key for the field {@code type}. */
-    public static final String TYPE = "type";
-    /** The key for the field {@code duration}. */
-    public static final String DURATION = "duration";
-    /** The key for the field {@code amplifier}. */
-    public static final String AMPLIFIER = "amplifier";
-    /** The key for the field {@code ambient}. */
-    public static final String AMBIENT = "ambient";
-    /** The key for the field {@code particles}. */
-    public static final String PARTICLES = "particles";
-    /** The key for the field {@code icon}. */
-    public static final String ICON = "icon";
+    private static final String
+        TYPE = "type",
+        DURATION = "duration",
+        AMPLIFIER = "amplifier",
+        AMBIENT = "ambient",
+        PARTICLES = "particles",
+        ICON = "icon";
 
     @Override
     public void serialize(Type type, @Nullable PotionEffect obj, ConfigurationNode node) throws SerializationException {

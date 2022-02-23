@@ -38,9 +38,11 @@ public abstract class Raycast<B extends Boundable> {
      * @param hit The bound that was hit.
      */
     public record Hit<B extends Boundable>(
+        double distIn,
+        double distOut,
+        double penetration,
         Vector3 out,
         Vector3 normal,
-        double penetration,
         B hit
     ) {}
 
@@ -48,16 +50,17 @@ public abstract class Raycast<B extends Boundable> {
      * Creates a raycast result which hit.
      * @param ray The ray used to get this result.
      * @param distance The distance travelled from the origin to the final position.
-     * @param pos The position that the ray entered a bound.
-     * @param out The position that the ray exited a bound.
+     * @param in The position that the ray enters the bound.
+     * @param out The position that the ray exits the bound.
      * @param normal The normal of the surface hit.
-     * @param penetration The distance travelled through the bound.
+     * @param distIn The distance along the ray at which it enters the bound.
+     * @param distOut The distance along the ray at which it exits the bound.
      * @param hit The bound that was hit.
      * @return The result.
      */
-    protected Result<B> hit(Ray3 ray, double distance, Vector3 pos, Vector3 out, Vector3 normal, double penetration, B hit) {
-        return new Result<>(ray, distance, pos, new Hit<>(
-            out, normal, penetration, hit
+    protected Result<B> hit(Ray3 ray, double distance, Vector3 in, Vector3 out, Vector3 normal, double distIn, double distOut, B hit) {
+        return new Result<>(ray, distance, in, new Hit<>(
+            distIn, distOut, distOut - distIn, out, normal, hit
         ));
     }
 
@@ -90,7 +93,8 @@ public abstract class Raycast<B extends Boundable> {
                 ray.point(collision.in()).add(orig),
                 ray.point(collision.out()).add(orig),
                 collision.normal(),
-                collision.out() - collision.in(),
+                collision.in(),
+                collision.out(),
                 object);
         }
         return null;
@@ -99,7 +103,7 @@ public abstract class Raycast<B extends Boundable> {
     /**
      * Checks if a ray intersects with any of the objects provided.
      * @param ray The ray.
-     * @param objects The set of objects object.
+     * @param objects The set of objects.
      * @param test The test which determines if an object is eligible to be intersected.
      * @return The intersection result, or null no object intersected.
      */
@@ -120,7 +124,6 @@ public abstract class Raycast<B extends Boundable> {
      * @return The cast result.
      */
     public abstract Result<B> cast(Ray3 ray, double maxDistance, @Nullable Predicate<B> test);
-
 
     /**
      * Tests for intersections between the provided ray, and the objects determined by this raycast.

@@ -46,10 +46,12 @@ public record Point2(int x, int y) implements NumericalVector {
     public Point2 y(int y) { return new Point2(x, y); }
 
     /**
-     * Creates this point as a vector.
+     * Converts this to a decimal-vector Vector instance.
      * @return The vector.
      */
-    public Vector2 vector() { return new Vector2(x, y); }
+    public Vector2 vector() {
+        return new Vector2(x, y);
+    }
 
     @Override
     public String asString(DecimalFormat format) {

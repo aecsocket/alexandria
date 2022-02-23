@@ -55,10 +55,12 @@ public record Point3(int x, int y, int z) implements NumericalVector {
     public Point3 z(int z) { return new Point3(x, y, z); }
 
     /**
-     * Creates this point as a vector.
+     * Converts this to a decimal-vector Vector instance.
      * @return The vector.
      */
-    public Vector3 vector() { return new Vector3(x, y, z); }
+    public Vector3 vector() {
+        return new Vector3(x, y, z);
+    }
 
     @Override
     public String asString(DecimalFormat format) {
