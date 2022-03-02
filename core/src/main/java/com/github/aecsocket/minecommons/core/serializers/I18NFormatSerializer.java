@@ -1,5 +1,6 @@
 package com.github.aecsocket.minecommons.core.serializers;
 
+import com.github.aecsocket.minecommons.core.i18n.I18N;
 import io.leangen.geantyref.TypeToken;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.configurate.ConfigurationNode;
@@ -11,7 +12,6 @@ import java.util.Collections;
 import java.util.Map;
 
 import com.github.aecsocket.minecommons.core.i18n.Format;
-import com.github.aecsocket.minecommons.core.i18n.I18N;
 
 /**
  * Type serializer for a {@link Format}.

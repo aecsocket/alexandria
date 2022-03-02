@@ -10,6 +10,9 @@ import com.github.aecsocket.minecommons.core.Logging;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
+import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
+import net.minecraft.server.network.ServerGamePacketListenerImpl;
+import org.bukkit.craftbukkit.v1_18_R1.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_18_R1.inventory.CraftItemStack;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -158,6 +161,14 @@ public record ProtocolLibAPI(BasePlugin<?> plugin, ProtocolManager manager) {
      */
     public Object itemStack(ItemStack itemStack) {
         return CraftItemStack.asNMSCopy(itemStack);
+    }
+
+    private static Set<ClientboundPlayerPositionPacket.RelativeArgument> ROTATE_FLAGS = Set.of(ClientboundPlayerPositionPacket.RelativeArgument.values());
+
+    public void rotate(Player player, float yaw, float pitch) {
+        ((CraftPlayer) player).getHandle().connection.connection.channel.writeAndFlush(WirePacket.fromPacket(
+            new ClientboundPlayerPositionPacket(0, 0, 0, yaw, pitch, ROTATE_FLAGS, 0, false)
+        ));
     }
 
     /**

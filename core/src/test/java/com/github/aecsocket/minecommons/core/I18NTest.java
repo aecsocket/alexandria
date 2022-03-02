@@ -11,7 +11,7 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import com.github.aecsocket.minecommons.core.i18n.MiniMessageI18N;
+import com.github.aecsocket.minecommons.core.i18n.I18N;
 import com.github.aecsocket.minecommons.core.i18n.Renderable;
 import com.github.aecsocket.minecommons.core.i18n.Translation;
 
@@ -53,8 +53,8 @@ class I18NTest {
         .add(BASIC, "UK basic message")
         .add(RENDERABLE, "UK renderable"));
 
-    MiniMessageI18N createI18N() {
-        MiniMessageI18N i18n = new MiniMessageI18N(MiniMessage::builder, Locale.US);
+    I18N createI18N() {
+        I18N i18n = new I18N(MiniMessage.miniMessage(), Locale.US);
 
         i18n.registerStyle(INFO, style(GRAY));
         i18n.registerStyle(ACCENT, style(BLUE));
@@ -84,14 +84,14 @@ class I18NTest {
 
     @Test
     void testBasic() {
-        MiniMessageI18N i18n = createI18N();
+        I18N i18n = createI18N();
         assertComponentEquals(text("", GRAY).append(text("Basic message")), i18n.line(Locale.US, BASIC));
         assertComponentEquals(text("", GRAY).append(text("UK basic message")), i18n.line(Locale.UK, BASIC));
     }
 
     @Test
     void testFallbacks() {
-        MiniMessageI18N i18n = createI18N();
+        I18N i18n = createI18N();
 
         assertComponentEquals(text("", GRAY).append(text("Fallback message")), i18n.line(Locale.US, FALLBACK));
         assertComponentEquals(text("", GRAY).append(text("Fallback message")), i18n.line(Locale.UK, FALLBACK));
@@ -105,11 +105,9 @@ class I18NTest {
 
     @Test
     void testPlaceholder() {
-        MiniMessageI18N i18n = createI18N();
+        I18N i18n = createI18N();
         assertComponentEquals(text("", GRAY)
-            .append(text("")
-                .append(text("Placeholder: "))
-                .append(text("One"))),
+            .append(text("Placeholder: One")),
             i18n.line(Locale.US, PLACEHOLDERS,
                 c -> c.of("target", () -> text("One"))));
         assertComponentEquals(text("", GRAY)
@@ -122,7 +120,7 @@ class I18NTest {
 
     @Test
     void testRenderable() {
-        MiniMessageI18N i18n = createI18N();
+        I18N i18n = createI18N();
         Renderable rr = (i18n1, locale) -> i18n1.line(locale, RENDERABLE);
 
         assertComponentEquals(text("Renderable"),
@@ -142,7 +140,7 @@ class I18NTest {
 
     @Test
     void testPlaceholderFormat() {
-        MiniMessageI18N i18n = createI18N();
+        I18N i18n = createI18N();
         assertComponentEquals(text("", GRAY)
             .append(text("")
                 .append(text("Placeholder: "))
@@ -166,7 +164,7 @@ class I18NTest {
 
     @Test
     void testPlaceholderStyling() {
-        MiniMessageI18N i18n = createI18N();
+        I18N i18n = createI18N();
         assertComponentEquals(text("", NamedTextColor.GRAY)
             .append(text("")
                 .append(text("Styled placeholder: "))
@@ -183,7 +181,7 @@ class I18NTest {
 
     @Test
     void testMiniMessage() {
-        MiniMessageI18N i18n = createI18N();
+        I18N i18n = createI18N();
         assertComponentEquals(text("", NamedTextColor.GRAY)
             .append(text("")
                 .append(text("MiniMessage test: "))
@@ -194,7 +192,7 @@ class I18NTest {
 
     @Test
     void testNested() {
-        MiniMessageI18N i18n = createI18N();
+        I18N i18n = createI18N();
         assertComponentEquals(text("", GRAY)
             .append(text("")
                 .append(text("Placeholder: "))
@@ -219,14 +217,14 @@ class I18NTest {
 
     @Test
     void testAdHoc() {
-        MiniMessageI18N i18n = createI18N();
+        I18N i18n = createI18N();
         assertComponentEquals(text("Ad hoc message"),
             i18n.line(Locale.US, AD_HOC));
     }
 
     @Test
     void testSideEffects() {
-        MiniMessageI18N i18n = createI18N();
+        I18N i18n = createI18N();
 
         // The `basic` key doesn't have the <target> template
         // So the side effect code isn't ran

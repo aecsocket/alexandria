@@ -12,6 +12,9 @@ import com.github.aecsocket.minecommons.core.vector.cartesian.Vector3;
  * @param pitch The pitch (theta).
  */
 public record Coord3(double r, double yaw, double pitch) {
+    /** An instance with radius 1 angles 0. */
+    public static final Coord3 ZERO = coord3(1, 0, 0);
+
     private static final double pi2 = Math.PI * 2;
 
     private static double normalize(double v) {

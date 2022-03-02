@@ -102,18 +102,22 @@ public abstract class Raycast<B extends Boundable> {
 
     /**
      * Checks if a ray intersects with any of the objects provided.
+     * <p>
+     * This checks all objects provided and returns the closest intersection.
      * @param ray The ray.
      * @param objects The set of objects.
      * @param test The test which determines if an object is eligible to be intersected.
      * @return The intersection result, or null no object intersected.
      */
     protected @Nullable Result<B> intersects(Ray3 ray, Collection<? extends B> objects, @Nullable Predicate<B> test) {
+        Result<B> closest = null;
         for (B object : objects) {
             var result = intersects(ray, object, test);
-            if (result != null)
-                return result;
+            if (result != null && (closest == null || result.distance < closest.distance)) {
+                closest = result;
+            }
         }
-        return null;
+        return closest;
     }
 
     /**

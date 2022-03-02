@@ -8,6 +8,9 @@ import com.github.aecsocket.minecommons.core.vector.cartesian.Vector2;
  * @param ang The angle in radians.
  */
 public record Coord2(double r, double ang) {
+    /** An instance with radius 1 angle 0. */
+    public static final Coord2 ZERO = coord2(1, 0);
+
     private static final double pi2 = Math.PI * 2;
 
     private static double normalize(double v) {

@@ -24,6 +24,8 @@ public record Vector3(double x, double y, double z) implements NumericalVector {
 
     /** An instance with all fields set to 0. */
     public static final Vector3 ZERO = vec3(0);
+    /** An instance with all fields set to 1. */
+    public static final Vector3 ONE = vec3(1);
 
     /**
      * Creates a vector.

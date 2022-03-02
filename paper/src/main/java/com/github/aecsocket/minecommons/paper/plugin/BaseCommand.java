@@ -62,7 +62,7 @@ public class BaseCommand<P extends BasePlugin<P>> {
         /** The localization key. */
         private final String key;
         /** The localization arguments. */
-        private final transient I18N.TemplateFactory[] templates;
+        private final transient I18N.Tags[] templates;
 
         /**
          * Creates an instance.
@@ -70,7 +70,7 @@ public class BaseCommand<P extends BasePlugin<P>> {
          * @param templates The localization arguments.
          * @param cause The cause of this exception.
          */
-        public CommandException(String key, I18N.TemplateFactory[] templates, @Nullable Throwable cause) {
+        public CommandException(String key, I18N.Tags[] templates, @Nullable Throwable cause) {
             super(cause);
             this.key = key;
             this.templates = templates;
@@ -81,7 +81,7 @@ public class BaseCommand<P extends BasePlugin<P>> {
          * @param key The localization key.
          * @param templates The localization arguments.
          */
-        public CommandException(String key, I18N.TemplateFactory... templates) {
+        public CommandException(String key, I18N.Tags... templates) {
             this(key, templates, null);
         }
 
@@ -95,7 +95,7 @@ public class BaseCommand<P extends BasePlugin<P>> {
          * Gets the localization arguments.
          * @return The arguments.
          */
-        public I18N.TemplateFactory[] args() { return templates; }
+        public I18N.Tags[] args() { return templates; }
     }
 
     /** The plugin that this command is registered under. */
@@ -298,7 +298,7 @@ public class BaseCommand<P extends BasePlugin<P>> {
      * @param args The localization arguments.
      * @return The exception.
      */
-    protected static CommandException error(String key, Throwable cause, I18N.TemplateFactory... args) {
+    protected static CommandException error(String key, Throwable cause, I18N.Tags... args) {
         return new CommandException(key, args, cause);
     }
 
@@ -308,7 +308,7 @@ public class BaseCommand<P extends BasePlugin<P>> {
      * @param args The localization arguments.
      * @return The exception.
      */
-    protected static CommandException error(String key, I18N.TemplateFactory... args) {
+    protected static CommandException error(String key, I18N.Tags... args) {
         return new CommandException(key, args);
     }
 

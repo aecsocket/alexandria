@@ -1,5 +1,7 @@
 package com.github.aecsocket.minecommons.paper.plugin;
 
+import com.comphenix.protocol.reflect.EquivalentConverter;
+import com.comphenix.protocol.utility.MinecraftReflection;
 import com.comphenix.protocol.wrappers.EnumWrappers;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
@@ -34,4 +36,12 @@ public final class ProtocolConstants {
         .put(EquipmentSlot.HEAD, 39)
         .put(EquipmentSlot.OFF_HAND, 40)
         .build();
+
+    public enum PlayerTeleportFlag {
+        X, Y, Z, Y_ROT, X_ROT
+    }
+
+    public static final EquivalentConverter<PlayerTeleportFlag> TELEPORT_FLAG_CONVERTER = EnumWrappers.getGenericConverter(MinecraftReflection
+        .getMinecraftClass("RelativeArgument",
+            "ClientboundPlayerPositionPacket$RelativeArgument", "PacketPlayOutPosition$EnumPlayerTeleportFlags", "sz$a"), PlayerTeleportFlag.class);
 }

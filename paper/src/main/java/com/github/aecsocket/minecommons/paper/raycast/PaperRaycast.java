@@ -2,6 +2,7 @@ package com.github.aecsocket.minecommons.paper.raycast;
 
 import com.github.aecsocket.minecommons.core.Colls;
 import com.github.aecsocket.minecommons.core.bounds.Bound;
+import com.github.aecsocket.minecommons.core.bounds.Box;
 import com.github.aecsocket.minecommons.core.bounds.OrientedBound;
 import com.github.aecsocket.minecommons.core.raycast.Boundable;
 import com.github.aecsocket.minecommons.core.raycast.Raycast;
@@ -10,6 +11,7 @@ import com.github.aecsocket.minecommons.core.vector.cartesian.Vector3;
 import com.github.aecsocket.minecommons.paper.PaperBounds;
 import com.github.aecsocket.minecommons.paper.PaperUtils;
 import com.google.common.util.concurrent.AtomicDouble;
+import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.phys.AABB;
 import org.bukkit.Location;
@@ -17,6 +19,7 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
+import org.bukkit.block.data.Waterlogged;
 import org.bukkit.craftbukkit.v1_18_R1.CraftWorld;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -25,12 +28,18 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
  * A raycast provider for Paper blocks and entities.
  */
 public class PaperRaycast extends Raycast<PaperRaycast.PaperBoundable> {
+    /** The bound name for a waterlogged part. */
+    public static final String WATERLOGGED = "__waterlogged";
+    /** The bound for a waterlogged part. */
+    public static final Box WATERLOGGED_BOUND = Box.box(Vector3.ZERO, Vector3.vec3(1));
+
     /**
      * The options for a raycast.
      * @param block The block options.
@@ -44,7 +53,7 @@ public class PaperRaycast extends Raycast<PaperRaycast.PaperBoundable> {
          * The default options.
          */
         public static final Options DEFAULT = new Options(
-            new OfBlock(true, true, null),
+            new OfBlock(true, true, true, null),
             new OfEntity(null)
         );
 
@@ -52,11 +61,14 @@ public class PaperRaycast extends Raycast<PaperRaycast.PaperBoundable> {
          * Options for raycasting blocks.
          * @param ignoreAir If bound checks with air should be skipped.
          * @param ignorePassable If bound checks with {@link Block#isPassable()} should be skipped.
+         * @param doWaterlogging If waterlogged parts of blocks should also be collided with, under the
+         *                       bound name {@link #WATERLOGGED}.
          * @param test The specific test for blocks.
          */
         public record OfBlock(
             boolean ignoreAir,
             boolean ignorePassable,
+            boolean doWaterlogging,
             @Nullable Predicate<Block> test
         ) {}
 
@@ -182,17 +194,19 @@ public class PaperRaycast extends Raycast<PaperRaycast.PaperBoundable> {
      * @param origin The handle location.
      * @param name The name of the bound.
      * @param bound The bound.
+     * @param hasWater If the bound has water in it.
      */
-    public record PaperBoundable(@Nullable Block block, @Nullable Entity entity, Vector3 origin, String name, Bound bound) implements Boundable {
+    public record PaperBoundable(@Nullable Block block, @Nullable Entity entity, Vector3 origin, String name, Bound bound, boolean hasWater) implements Boundable {
         /**
          * Creates a boundable of a block.
          * @param block The underlying block.
          * @param name The name of the bound.
          * @param bound The bound.
+         * @param hasWater If this bound has water.
          * @return The boundable.
          */
-        public static PaperBoundable of(Block block, String name, Bound bound) {
-            return new PaperBoundable(block, null, PaperUtils.toCommons(block.getLocation()), name, bound);
+        public static PaperBoundable of(Block block, String name, Bound bound, boolean hasWater) {
+            return new PaperBoundable(block, null, PaperUtils.toCommons(block.getLocation()), name, bound, hasWater);
         }
 
         /**
@@ -200,10 +214,38 @@ public class PaperRaycast extends Raycast<PaperRaycast.PaperBoundable> {
          * @param entity The underlying entity.
          * @param name The name of the bound.
          * @param bound The bound.
+         * @param hasWater If this bound has water.
          * @return The boundable.
          */
-        public static PaperBoundable of(Entity entity, String name, Bound bound) {
-            return new PaperBoundable(null, entity, PaperUtils.toCommons(entity.getLocation()), name, bound);
+        public static PaperBoundable of(Entity entity, String name, Bound bound, boolean hasWater) {
+            return new PaperBoundable(null, entity, PaperUtils.toCommons(entity.getLocation()), name, bound, hasWater);
+        }
+
+        /**
+         * Runs a function depending on which of the two hit types are present.
+         * @param ifBlock If the block is present.
+         * @param ifEntity If the entity is present.
+         */
+        public void ifPresent(Consumer<Block> ifBlock, Consumer<Entity> ifEntity) {
+            if (block != null)
+                ifBlock.accept(block);
+            else if (entity != null)
+                ifEntity.accept(entity);
+        }
+
+        /**
+         * Maps the hit to a value depending on which of the two hit types are present.
+         * @param ifBlock If the block is present.
+         * @param ifEntity If the entity is present.
+         * @param <U> The function return type.
+         * @return The mapped value.
+         */
+        public <U> U map(Function<Block, U> ifBlock, Function<Entity, U> ifEntity) {
+            if (block != null)
+                return ifBlock.apply(block);
+            else if (entity != null)
+                return ifEntity.apply(entity);
+            throw new IllegalStateException("neither value present");
         }
 
         @Override
@@ -295,23 +337,33 @@ public class PaperRaycast extends Raycast<PaperRaycast.PaperBoundable> {
      * @return The boundables.
      */
     public List<PaperBoundable> boundables(Block block) {
+        List<PaperBoundable> res = null;
         Vector3 origin = PaperUtils.toCommons(block.getLocation());
+        BlockData data = block.getBlockData();
+        boolean isWater = block.getType() == Material.WATER;
         var boundsList = blockBounds.get(block.getType());
         if (boundsList == null) {
-            return Collections.singletonList(PaperBoundable.of(block, block.getType().getKey().value(), PaperBounds.from(block)));
-        }
-        BlockData data = block.getBlockData();
-        for (var bounds : boundsList) {
-            if (bounds.test.test(data)) {
-                List<PaperBoundable> result = new ArrayList<>();
-                for (var entry : bounds.bounds.entrySet()) {
-                    Bound bound = entry.getValue();
-                    result.add(PaperBoundable.of(block, entry.getKey(), bound));
+            res = new ArrayList<>();
+            res.add(PaperBoundable.of(block, block.getType().getKey().value(), PaperBounds.from(block), isWater));
+        } else {
+            for (var bounds : boundsList) {
+                if (bounds.test.test(data)) {
+                    List<PaperBoundable> thisRes = new ArrayList<>();
+                    for (var entry : bounds.bounds.entrySet()) {
+                        Bound bound = entry.getValue();
+                        thisRes.add(PaperBoundable.of(block, entry.getKey(), bound, isWater));
+                    }
+                    res = thisRes;
+                    break;
                 }
-                return result;
             }
+            if (res == null)
+                res = new ArrayList<>();
         }
-        return Collections.emptyList();
+        if (options.block.doWaterlogging && data instanceof Waterlogged wl && wl.isWaterlogged()) {
+            res.add(PaperBoundable.of(block, WATERLOGGED, WATERLOGGED_BOUND, true));
+        }
+        return res;
     }
 
     /**
@@ -322,7 +374,7 @@ public class PaperRaycast extends Raycast<PaperRaycast.PaperBoundable> {
     public List<PaperBoundable> boundables(Entity entity) {
         var boundsList = entityBounds.get(entity.getType());
         if (boundsList == null) {
-            return Collections.singletonList(PaperBoundable.of(entity, entity.getType().getKey().value(), PaperBounds.from(entity)));
+            return Collections.singletonList(PaperBoundable.of(entity, entity.getType().getKey().value(), PaperBounds.from(entity), false));
         }
         for (var bounds : boundsList) {
             if (bounds.test.test(entity)) {
@@ -331,7 +383,7 @@ public class PaperRaycast extends Raycast<PaperRaycast.PaperBoundable> {
                 for (var entry : bounds.bounds.entrySet()) {
                     Bound bound = entry.getValue();
                     bound = bound instanceof OrientedBound oriented ? oriented.angle(oriented.angle() + angle) : bound;
-                    result.add(PaperBoundable.of(entity, entry.getKey(), bound));
+                    result.add(PaperBoundable.of(entity, entry.getKey(), bound, false));
                 }
                 return result;
             }
@@ -378,9 +430,6 @@ public class PaperRaycast extends Raycast<PaperRaycast.PaperBoundable> {
 
         Result<PaperBoundable> result = null;
         while (true) {
-            if (xb > 1 && yb > 1 && zb > 1)
-                break;
-
             Block block = world.getBlockAt(xi, yi, zi);
             if (
                 (block.getType() != Material.AIR || !options.block.ignoreAir)
@@ -408,8 +457,10 @@ public class PaperRaycast extends Raycast<PaperRaycast.PaperBoundable> {
                 zb += za;
             }
 
-            if (!new Location(world, xi, yi, zi).isChunkLoaded())
-                break;
+            if (
+                xb > 1 && yb > 1 && zb > 1
+                || !new Location(world, xi, yi, zi).isChunkLoaded()
+            ) break;
         }
 
         return result == null
@@ -456,5 +507,15 @@ public class PaperRaycast extends Raycast<PaperRaycast.PaperBoundable> {
         var block = castBlocks(ray, maxDistance, test);
         var entity = castEntities(ray, maxDistance, test);
         return block.distance() < entity.distance() ? block : entity;
+    }
+
+    /**
+     * Gets if some block data is either water, or is waterlogged.
+     * @param block The block data.
+     * @return The water state.
+     */
+    public static boolean hasWater(BlockData block) {
+        return block.getMaterial() == Material.WATER
+            || block instanceof Waterlogged wl && wl.isWaterlogged();
     }
 }

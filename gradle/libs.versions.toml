@@ -8,8 +8,7 @@ checkerQual = "3.18.0"
 geantyRef = "1.3.11"
 configurate = "4.1.2"
 openCsv = "2.3"
-adventure = "4.9.3"
-adventureMiniMessage = "4.1.0-SNAPSHOT"
+adventure = "4.10.0"
 
 cloud = "1.6.1"
 inventoryFramework = "0.10.4"
@@ -29,7 +28,7 @@ adventureApi = { group = "net.kyori", name = "adventure-api", version.ref = "adv
 adventureTextSerializerGson = { group = "net.kyori", name = "adventure-text-serializer-gson", version.ref = "adventure" }
 adventureTextSerializerPlain = { group = "net.kyori", name = "adventure-text-serializer-plain", version.ref = "adventure" }
 adventureSerializerConfigurate = { group = "net.kyori", name = "adventure-serializer-configurate4", version.ref = "adventure" }
-adventureTextMiniMessage = { group = "net.kyori", name = "adventure-text-minimessage", version.ref = "adventureMiniMessage" }
+adventureTextMiniMessage = { group = "net.kyori", name = "adventure-text-minimessage", version.ref = "adventure" }
 
 cloudPaper = { group = "cloud.commandframework", name = "cloud-paper", version.ref = "cloud" }
 cloudExtras = { group = "cloud.commandframework", name = "cloud-minecraft-extras", version.ref = "cloud" }

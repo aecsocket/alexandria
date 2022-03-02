@@ -4,9 +4,8 @@ import com.github.aecsocket.minecommons.core.Callback;
 import com.github.aecsocket.minecommons.core.Logging;
 import com.github.aecsocket.minecommons.core.Settings;
 import com.github.aecsocket.minecommons.core.Text;
-import com.github.aecsocket.minecommons.core.i18n.I18N;
 import com.github.aecsocket.minecommons.core.i18n.I18NLoader;
-import com.github.aecsocket.minecommons.core.i18n.MiniMessageI18N;
+import com.github.aecsocket.minecommons.core.i18n.I18N;
 import com.github.aecsocket.minecommons.core.serializers.Serializers;
 import com.github.aecsocket.minecommons.paper.serializers.PaperSerializers;
 import com.github.aecsocket.minecommons.paper.serializers.protocol.ProtocolSerializers;
@@ -66,7 +65,7 @@ public abstract class BasePlugin<S extends BasePlugin<S>> extends JavaPlugin {
     /** The settings. */
     protected Settings settings = new Settings();
     /** The localizer. */
-    protected final MiniMessageI18N i18n = new MiniMessageI18N(MiniMessage::builder, Locale.US);
+    protected final I18N i18n = new I18N(MiniMessage.miniMessage(), Locale.US);
     /** The configuration options. */
     protected ConfigurationOptions configOptions = ConfigurationOptions.defaults()
         .serializers(builder -> builder

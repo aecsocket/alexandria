@@ -2,6 +2,7 @@ package com.github.aecsocket.minecommons.core.vector.cartesian;
 
 import java.text.DecimalFormat;
 import java.util.Locale;
+import java.util.function.DoubleUnaryOperator;
 
 import com.github.aecsocket.minecommons.core.Validation;
 import com.github.aecsocket.minecommons.core.vector.polar.Coord2;
@@ -17,6 +18,8 @@ import static java.lang.Math.*;
 public record Vector2(double x, double y) implements NumericalVector {
     /** An instance with all fields set to 0. */
     public static final Vector2 ZERO = vec2(0);
+    /** An instance with all fields set to 1. */
+    public static final Vector2 ONE = vec2(1);
     /** The north in a Minecraft world, equivalent to (0, -1). */
     public static final Vector2 NORTH = vec2(0, -1);
 
@@ -53,6 +56,14 @@ public record Vector2(double x, double y) implements NumericalVector {
      */
     public Vector2 y(double y) { return new Vector2(x, y); }
 
+    /**
+     * Creates a new vector, with each component mapped to a different number through a mapper function.
+     * @param mapper The mapper.
+     * @return The new vector.
+     */
+    public Vector2 map(DoubleUnaryOperator mapper) {
+        return new Vector2(mapper.applyAsDouble(x), mapper.applyAsDouble(y));
+    }
 
     /**
      * {@code (x1 + x2, y1 + y2)}.

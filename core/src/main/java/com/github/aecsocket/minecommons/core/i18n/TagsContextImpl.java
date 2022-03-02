@@ -2,6 +2,8 @@ package com.github.aecsocket.minecommons.core.i18n;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.Style;
+import net.kyori.adventure.text.minimessage.tag.Inserting;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Locale;
@@ -11,14 +13,15 @@ import java.util.function.Supplier;
 
 import static net.kyori.adventure.text.Component.*;
 
-/* package */ record TemplateContextImpl(
+/* package */ record TagsContextImpl(
     I18N i18n,
     Locale locale,
     Function<String, @Nullable Style> styler
-) implements I18N.TemplateContext {
+) implements I18N.TagsContext {
     @Override
-    public I18N.Template of(String key, Supplier<Component> value) {
-        return new I18N.Template(key, () -> style(key, value.get()));
+    public TagResolver of(String name, Supplier<Component> value) {
+        //noinspection NullableProblems - what can I do here??
+        return TagResolver.resolver(name, (Inserting) value::get);
     }
 
     private Component style(String key, Component value) {
@@ -39,12 +42,12 @@ import static net.kyori.adventure.text.Component.*;
     }
 
     @Override
-    public Optional<Component> orLine(String key, I18N.TemplateFactory... templates) {
-        return i18n.orLine(locale, key, templates);
+    public Optional<Component> orLine(String key, I18N.Tags... tags) {
+        return i18n.orLine(locale, key, tags);
     }
 
     @Override
-    public Component line(String key, I18N.TemplateFactory... templates) {
-        return i18n.line(locale, key, templates);
+    public Component line(String key, I18N.Tags... tags) {
+        return i18n.line(locale, key, tags);
     }
 }

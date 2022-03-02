@@ -20,7 +20,7 @@ import com.github.aecsocket.minecommons.core.serializers.I18NFormatSerializer;
 import com.github.aecsocket.minecommons.core.serializers.Serializers;
 
 /**
- * Provides utilities to load formats and translations into a {@link MutableI18N} from external sources.
+ * Provides utilities to load formats and translations into a {@link I18N} from external sources.
  */
 public final class I18NLoader {
     private I18NLoader() {}
@@ -59,7 +59,7 @@ public final class I18NLoader {
      * @return The translation created.
      * @throws IOException If the translation could not be parsed.
      */
-    public static Translation loadTranslation(MutableI18N i18n, Reader reader) throws IOException {
+    public static Translation loadTranslation(I18N i18n, Reader reader) throws IOException {
         try (CSVReader csv = new CSVReader(reader)) {
             Locale locale = null;
             Map<String, List<String>> translations = new HashMap<>();
@@ -125,7 +125,7 @@ public final class I18NLoader {
      * @return The styles created.
      * @throws SerializationException If the styles could not be parsed.
      */
-    public static List<StyleResult> loadStyles(MutableI18N i18n, ConfigurationNode node) throws SerializationException {
+    public static List<StyleResult> loadStyles(I18N i18n, ConfigurationNode node) throws SerializationException {
         if (node.empty())
             return Collections.emptyList();
         if (!node.isMap())
@@ -154,7 +154,7 @@ public final class I18NLoader {
      * @return The formats created.
      * @throws SerializationException If the formats could not be parsed.
      */
-    public static List<FormatResult> loadFormats(MutableI18N i18n, ConfigurationNode node) throws SerializationException {
+    public static List<FormatResult> loadFormats(I18N i18n, ConfigurationNode node) throws SerializationException {
         if (node.empty())
             return Collections.emptyList();
         if (!node.isMap())
@@ -167,7 +167,7 @@ public final class I18NLoader {
         return result;
     }
 
-    private static <R> void loadRecursive(MutableI18N i18n, List<R> result, RecursiveLoader<R> loader, ConfigurationNode root, String... path) throws SerializationException {
+    private static <R> void loadRecursive(I18N i18n, List<R> result, RecursiveLoader<R> loader, ConfigurationNode root, String... path) throws SerializationException {
         for (var entry : root.childrenMap().entrySet()) {
             var node = entry.getValue();
             String[] newPath = Arrays.copyOfRange(path, 0, path.length + 1);
@@ -180,7 +180,7 @@ public final class I18NLoader {
     }
 
     /**
-     * A result of a loading operation in {@link #load(MutableI18N, Path, Function)}.
+     * A result of a loading operation in {@link #load(I18N, Path, Function)}.
      */
     public sealed interface Result permits Result.Missing,
         Result.StyleParseException, Result.FormatParseException,
@@ -260,7 +260,7 @@ public final class I18NLoader {
      * @param loaderFactory Maps a reader to a configuration loader.
      * @return The results.
      */
-    public static Callback<Result> load(MutableI18N i18n, Path root, Function<BufferedReader, ConfigurationLoader<?>> loaderFactory) {
+    public static Callback<Result> load(I18N i18n, Path root, Function<BufferedReader, ConfigurationLoader<?>> loaderFactory) {
         Callback<Result> callback = Callback.create();
 
         try {
