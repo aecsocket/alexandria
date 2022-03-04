@@ -50,7 +50,7 @@ jobs:
         with:
           name: "jar"
           path: |
-            *build/libs/*.jar
+            */build/libs/*.jar
 
       - name: "Determine snapshot or release"
         run: |
