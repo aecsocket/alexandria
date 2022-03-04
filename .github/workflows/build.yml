@@ -39,13 +39,18 @@ jobs:
 
       - name: "Build"
         run: ./gradlew build --stacktrace
-      - name: "Archive test results"
+      - name: "Upload test results artifact"
         uses: actions/upload-artifact@v2
         with:
           name: "test-results-${{ runner.os }}"
           path: |
-            build/reports/
-            */build/reports/
+            *build/reports/
+      - name: "Upload JAR artifact"
+        uses: actions/upload-artifact@v2
+        with:
+          name: "jar"
+          path: |
+            *build/libs/*.jar
 
       - name: "Determine snapshot or release"
         run: |
