@@ -305,7 +305,10 @@ public final class I18N {
             List<Component> lines = new ArrayList<>();
             for (var line : translation) {
                 Component generated = miniMessage.deserialize(line, tagResolvers);
-                lines.add(style == null ? generated : Component.text().append(generated).build().style(style));
+                if (style != null) {
+                    generated = generated.style(style);
+                }
+                lines.add(generated);
             }
 
             if (caches)

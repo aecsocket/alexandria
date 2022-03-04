@@ -1,7 +1,6 @@
 package com.github.aecsocket.minecommons.core;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import org.junit.jupiter.api.Assertions;
@@ -85,16 +84,16 @@ class I18NTest {
     @Test
     void testBasic() {
         I18N i18n = createI18N();
-        assertComponentEquals(text("", GRAY).append(text("Basic message")), i18n.line(Locale.US, BASIC));
-        assertComponentEquals(text("", GRAY).append(text("UK basic message")), i18n.line(Locale.UK, BASIC));
+        assertComponentEquals(text("Basic message", GRAY), i18n.line(Locale.US, BASIC));
+        assertComponentEquals(text("UK basic message", GRAY), i18n.line(Locale.UK, BASIC));
     }
 
     @Test
     void testFallbacks() {
         I18N i18n = createI18N();
 
-        assertComponentEquals(text("", GRAY).append(text("Fallback message")), i18n.line(Locale.US, FALLBACK));
-        assertComponentEquals(text("", GRAY).append(text("Fallback message")), i18n.line(Locale.UK, FALLBACK));
+        assertComponentEquals(text("Fallback message", GRAY), i18n.line(Locale.US, FALLBACK));
+        assertComponentEquals(text("Fallback message", GRAY), i18n.line(Locale.UK, FALLBACK));
 
         assertComponentEquals(text(UNKNOWN_KEY), i18n.line(Locale.US, UNKNOWN_KEY));
         assertComponentEquals(text(UNKNOWN_KEY), i18n.line(Locale.UK, UNKNOWN_KEY));
@@ -106,14 +105,11 @@ class I18NTest {
     @Test
     void testPlaceholder() {
         I18N i18n = createI18N();
-        assertComponentEquals(text("", GRAY)
-            .append(text("Placeholder: One")),
+        assertComponentEquals(text("Placeholder: One", GRAY),
             i18n.line(Locale.US, PLACEHOLDERS,
                 c -> c.of("target", () -> text("One"))));
-        assertComponentEquals(text("", GRAY)
-            .append(text("")
-                .append(text("Placeholder: "))
-                .append(text("Two", RED))),
+        assertComponentEquals(text("Placeholder: ", GRAY)
+            .append(text("Two", RED)),
             i18n.line(Locale.US, PLACEHOLDERS,
                 c -> c.of("target", () -> text("Two", RED))));
     }
@@ -128,10 +124,7 @@ class I18NTest {
         assertComponentEquals(text("UK renderable"),
             rr.render(i18n, Locale.UK));
 
-        assertComponentEquals(text("", GRAY)
-            .append(text("")
-                .append(text("Placeholder: "))
-                .append(text("Renderable"))),
+        assertComponentEquals(text("Placeholder: Renderable", GRAY),
             i18n.line(Locale.US, PLACEHOLDERS,
                 c -> c.of("target", () -> c.rd(rr))));
     }
@@ -141,23 +134,14 @@ class I18NTest {
     @Test
     void testPlaceholderFormat() {
         I18N i18n = createI18N();
-        assertComponentEquals(text("", GRAY)
-            .append(text("")
-                .append(text("Placeholder: "))
-                .append(text("1,234.5"))),
+        assertComponentEquals(text("Placeholder: 1,234.5", GRAY),
             i18n.line(Locale.US, PLACEHOLDERS,
                 c -> c.of("target", () -> c.rd("%,.1f", 1234.54))));
-        assertComponentEquals(text("", GRAY)
-            .append(text("")
-                .append(text("Placeholder: "))
-                .append(text("1.234,5"))),
+        assertComponentEquals(text("Placeholder: 1.234,5", GRAY),
             i18n.line(Locale.GERMAN, PLACEHOLDERS,
                 c -> c.of("target", () -> c.rd("%,.1f", 1234.54))));
 
-        assertComponentEquals(text("", GRAY)
-            .append(text("")
-                .append(text("Placeholder: "))
-                .append(text("Dummy[value=3]"))),
+        assertComponentEquals(text("Placeholder: Dummy[value=3]", GRAY),
             i18n.line(Locale.US, PLACEHOLDERS,
                 c -> c.of("target", () -> text(""+new Dummy(3)))));
     }
@@ -165,27 +149,21 @@ class I18NTest {
     @Test
     void testPlaceholderStyling() {
         I18N i18n = createI18N();
-        assertComponentEquals(text("", NamedTextColor.GRAY)
-            .append(text("")
-                .append(text("Styled placeholder: "))
-                .append(text("Blue", NamedTextColor.BLUE))),
+        assertComponentEquals(text("Styled placeholder: ", GRAY)
+            .append(text("Blue", BLUE)),
             i18n.line(Locale.US, PLACEHOLDERS_STYLED,
-                    c -> c.of("target", () -> text("Blue"))));
-        assertComponentEquals(text("", NamedTextColor.GRAY)
-            .append(text("")
-                .append(text("Styled placeholder: "))
-                .append(text("Green", NamedTextColor.GREEN))),
+                c -> c.of("target", () -> text("Blue"))));
+        assertComponentEquals(text("Styled placeholder: ", GRAY)
+            .append(text("Green", GREEN)),
             i18n.line(Locale.US, PLACEHOLDERS_STYLED,
-                    c -> c.of("target", () -> text("Green", NamedTextColor.GREEN))));
+                c -> c.of("target", () -> text("Green", GREEN))));
     }
 
     @Test
     void testMiniMessage() {
         I18N i18n = createI18N();
-        assertComponentEquals(text("", NamedTextColor.GRAY)
-            .append(text("")
-                .append(text("MiniMessage test: "))
-                .append(text("bold").decorate(BOLD))),
+        assertComponentEquals(text("MiniMessage test: ", GRAY)
+            .append(text("bold").decorate(BOLD)),
             i18n.line(Locale.US, MINIMESSAGE)
         );
     }
@@ -193,24 +171,15 @@ class I18NTest {
     @Test
     void testNested() {
         I18N i18n = createI18N();
-        assertComponentEquals(text("", GRAY)
-            .append(text("")
-                .append(text("Placeholder: "))
-                .append(text("A constant"))),
+        assertComponentEquals(text("Placeholder: A constant", GRAY),
             i18n.line(Locale.US, PLACEHOLDERS,
                 c -> c.of("target", () -> c.line(CONSTANT))));
-        assertComponentEquals(text("", GRAY)
-            .append(text("")
-                .append(text("Placeholder: "))
-                .append(text("", BLUE)
-                    .append(text("A styled constant")))),
+        assertComponentEquals(text("Placeholder: ", GRAY)
+            .append(text("A styled constant", BLUE)),
             i18n.line(Locale.US, PLACEHOLDERS,
                 c -> c.of("target", () -> c.line(STYLED_CONSTANT))));
-        assertComponentEquals(text("", GRAY)
-            .append(text("")
-                .append(text("Styled placeholder: "))
-                .append(text("", BLUE)
-                    .append(text("A styled constant")))),
+        assertComponentEquals(text("Styled placeholder: ", GRAY)
+            .append(text("A styled constant", BLUE)),
             i18n.line(Locale.US, PLACEHOLDERS_STYLED,
                 c -> c.of("target", () -> c.line(STYLED_CONSTANT))));
     }
