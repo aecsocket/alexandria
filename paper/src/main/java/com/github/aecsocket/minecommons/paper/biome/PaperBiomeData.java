@@ -3,14 +3,16 @@ package com.github.aecsocket.minecommons.paper.biome;
 import com.github.aecsocket.minecommons.core.biome.BiomeData;
 import com.github.aecsocket.minecommons.core.biome.Geography;
 import com.github.aecsocket.minecommons.core.biome.Precipitation;
+import com.github.aecsocket.minecommons.paper.PaperEnvironment;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeGenerationSettings;
 import net.minecraft.world.level.biome.MobSpawnSettings;
-import org.bukkit.craftbukkit.v1_18_R1.block.CraftBlock;
+import org.bukkit.craftbukkit.v1_18_R2.block.CraftBlock;
 
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,6 +37,8 @@ public record PaperBiomeData(
      * A map of NMS geography enum values to ours.
      */
     public static final BiMap<Biome.BiomeCategory, Geography> GEOGRAPHY;
+
+    private static Field BIOME_CATEGORY;
 
     static {
         Map<Biome.Precipitation, Precipitation> precipitation = new HashMap<>();
@@ -112,15 +116,36 @@ public record PaperBiomeData(
     }
 
     /**
+     * Gets the geography of an NMS biome.
+     * @param nms The NMS handle.
+     * @return The geography.
+     */
+    public static Geography geography(Biome nms) {
+        if (BIOME_CATEGORY == null) {
+            try {
+                BIOME_CATEGORY = Biome.class.getDeclaredField(PaperEnvironment.map("biomeCategory", "m"));
+                BIOME_CATEGORY.setAccessible(true);
+            } catch (NoSuchFieldException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        try {
+            return GEOGRAPHY.get((Biome.BiomeCategory) BIOME_CATEGORY.get(nms));
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
      * Creates biome data from an NMS handle.
      * @param nms The NMS handle.
      * @return The biome data.
      */
     public static PaperBiomeData from(Biome nms) {
         Precipitation precipitation = PRECIPITATION.get(nms.getPrecipitation());
-        Geography geography = GEOGRAPHY.get(nms.getBiomeCategory());
+        Geography geography = geography(nms);
         if (precipitation == null) throw new IllegalArgumentException("NMS precipitation `" + nms.getPrecipitation() + "` cannot be mapped");
-        if (geography == null) throw new IllegalArgumentException("NMS geography `" + nms.getBiomeCategory() + "` cannot be mapped");
+        if (geography == null) throw new IllegalArgumentException("NMS geography `" + geography(nms) + "` cannot be mapped");
         return new PaperBiomeData(
             precipitation,
             geography,
@@ -138,7 +163,7 @@ public record PaperBiomeData(
      * @return The biome data.
      */
     public static PaperBiomeData from(org.bukkit.block.Biome biome) {
-        return from(CraftBlock.biomeToBiomeBase(BuiltinRegistries.BIOME, biome));
+        return from(CraftBlock.biomeToBiomeBase(BuiltinRegistries.BIOME, biome).value());
     }
 
     /**

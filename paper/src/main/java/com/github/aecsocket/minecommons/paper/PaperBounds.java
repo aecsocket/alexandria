@@ -5,8 +5,8 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
-import org.bukkit.craftbukkit.v1_18_R1.CraftChunk;
-import org.bukkit.craftbukkit.v1_18_R1.block.CraftBlock;
+import org.bukkit.craftbukkit.v1_18_R2.CraftChunk;
+import org.bukkit.craftbukkit.v1_18_R2.block.CraftBlock;
 import org.bukkit.entity.Entity;
 import org.bukkit.util.BoundingBox;
 

@@ -129,13 +129,13 @@ public final class I18N {
     }
 
     /**
-     * Creates a template context.
+     * Creates a tags context.
      * @param i18n The i18n service.
      * @param locale The locale.
      * @param styler The function mapping a message key to a style.
      * @return The context.
      */
-    public static I18N.TagsContext templateContext(I18N i18n, Locale locale, Function<String, @Nullable Style> styler) {
+    public static I18N.TagsContext tagsContext(I18N i18n, Locale locale, Function<String, @Nullable Style> styler) {
         return new TagsContextImpl(i18n, locale, styler);
     }
 
@@ -287,16 +287,16 @@ public final class I18N {
         return translation(locale, key).map(translation -> {
             Format format = formats.get(key);
             Style style;
+
             TagsContext ctx;
             if (format == null) {
                 // ad-hoc format
                 style = null;
-                ctx = I18N.templateContext(this, locale, k -> null);
+                ctx = I18N.tagsContext(this, locale, k -> null);
             } else {
                 style = styles.get(format.style());
-                ctx = I18N.templateContext(this, locale, k -> styles.get(format.templates().get(k)));
+                ctx = I18N.tagsContext(this, locale, k -> styles.get(format.templates().get(k)));
             }
-
             TagResolver[] tagResolvers = new TagResolver[tags.length];
             for (int i = 0; i < tags.length; i++) {
                 tagResolvers[i] = tags[i].create(ctx);

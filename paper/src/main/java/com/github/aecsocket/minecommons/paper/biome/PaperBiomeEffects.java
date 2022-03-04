@@ -8,7 +8,7 @@ import net.minecraft.world.level.biome.AmbientMoodSettings;
 import net.minecraft.world.level.biome.AmbientParticleSettings;
 import net.minecraft.world.level.biome.BiomeSpecialEffects;
 import org.bukkit.block.Biome;
-import org.bukkit.craftbukkit.v1_18_R1.block.CraftBlock;
+import org.bukkit.craftbukkit.v1_18_R2.block.CraftBlock;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.github.aecsocket.minecommons.core.vector.cartesian.Vector3.rgb;
@@ -171,7 +171,7 @@ public record PaperBiomeEffects(
      * @return The biome effects.
      */
     public static PaperBiomeEffects from(Biome biome) {
-        return from(CraftBlock.biomeToBiomeBase(BuiltinRegistries.BIOME, biome).getSpecialEffects());
+        return from(CraftBlock.biomeToBiomeBase(BuiltinRegistries.BIOME, biome).value().getSpecialEffects());
     }
 
     /**

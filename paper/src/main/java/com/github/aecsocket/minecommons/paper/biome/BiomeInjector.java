@@ -11,6 +11,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.objects.ObjectList;
 import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
 import net.kyori.adventure.key.Key;
+import net.minecraft.core.Holder;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.core.WritableRegistry;
@@ -30,8 +31,8 @@ import net.minecraft.world.level.chunk.PalettedContainer;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.ticks.LevelChunkTicks;
 import org.bukkit.Chunk;
-import org.bukkit.craftbukkit.v1_18_R1.CraftChunk;
-import org.bukkit.craftbukkit.v1_18_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_18_R2.CraftChunk;
+import org.bukkit.craftbukkit.v1_18_R2.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
 import java.lang.reflect.Field;
@@ -244,16 +245,16 @@ public final class BiomeInjector {
         for (int i = 0; i < origSections.length; i++) {
             var origSection = origSections[i];
 
-            @SuppressWarnings("ConstantConditions")
-            PalettedContainer<Biome> biomes = new PalettedContainer<>(nmsBiomes, nmsBiomes.getOrThrow(Biomes.PLAINS), PalettedContainer.Strategy.SECTION_BIOMES, new Biome[0]);
+            PalettedContainer<Holder<Biome>> biomes = new PalettedContainer<>(nmsBiomes.asHolderIdMap(), nmsBiomes.getHolderOrThrow(Biomes.PLAINS), PalettedContainer.Strategy.SECTION_BIOMES, null);
             for (int x = 0; x < 4; x++) {
                 for (int y = 0; y < 4; y++) {
                     for (int z = 0; z < 4; z++) {
-                        Biome oldBiome = biomes.get(x, y, z);
+                        Biome oldBiome = biomes.get(x, y, z).value();
                         Entry entry = byNmsKey.get(nmsBiomes.getKey(oldBiome));
                         Key newKey = remapper.remap(entry);
                         Biome newBiome = byKey.get(newKey).handle;
-                        biomes.set(x, y, z, newBiome);
+                        // TODO is this wrong?
+                        biomes.set(x, y, z, Holder.direct(newBiome));
                     }
                 }
             }
