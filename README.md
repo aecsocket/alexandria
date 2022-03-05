@@ -2,7 +2,7 @@
 
 <a href="https://aecsocket.gitlab.io/minecommons"><img src="banner.png" width="1024" alt="Minecommons banner" /></a>
 
-`1.4.0-SNAPSHOT`:
+`1.4.2-SNAPSHOT`:
 [![build](https://github.com/aecsocket/minecommons/actions/workflows/build.yml/badge.svg)](https://github.com/aecsocket/minecommons/actions/workflows/build.yml)
 
 </div>
