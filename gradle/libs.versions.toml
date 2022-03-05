@@ -12,7 +12,7 @@ adventure = "4.10.0"
 
 cloud = "1.6.2"
 inventoryFramework = "0.10.4"
-protocolLib = "4.8.0-SNAPSHOT"
+packetEvents = "2.0-SNAPSHOT"
 
 [libraries]
 
@@ -33,7 +33,7 @@ adventureTextMiniMessage = { group = "net.kyori", name = "adventure-text-minimes
 cloudPaper = { group = "cloud.commandframework", name = "cloud-paper", version.ref = "cloud" }
 cloudExtras = { group = "cloud.commandframework", name = "cloud-minecraft-extras", version.ref = "cloud" }
 inventoryFramework = { group = "com.github.stefvanschie.inventoryframework", name = "IF", version.ref = "inventoryFramework" }
-protocolLib = { group = "com.comphenix.protocol", name = "ProtocolLib", version.ref = "protocolLib" }
+packetEvents = { group = "com.github.retrooper.packetevents", name = "spigot", version.ref = "packetEvents" }
 
 [bundles]
 

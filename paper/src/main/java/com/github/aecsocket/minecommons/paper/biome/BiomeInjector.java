@@ -1,7 +1,5 @@
 package com.github.aecsocket.minecommons.paper.biome;
 
-import com.comphenix.protocol.events.PacketContainer;
-import com.comphenix.protocol.events.PacketEvent;
 import com.github.aecsocket.minecommons.paper.PaperEnvironment;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
@@ -268,30 +266,5 @@ public final class BiomeInjector {
             (LevelChunkTicks<Block>) chunk.getBlockTicks(), (LevelChunkTicks<Fluid>) chunk.getFluidTicks(),
             chunk.getInhabitedTime(), sections,
             null, chunk.getBlendingData());
-    }
-
-    /**
-     * Remaps biomes in a packet event using a remapper function.
-     * @param event The packet event.
-     * @param remapper The remapper.
-     */
-    public void remapBiomes(PacketEvent event, BiomeRemapper remapper) {
-        PacketContainer packet = event.getPacket();
-        Player player = event.getPlayer();
-
-        LevelChunk nmsChunk = ((CraftChunk) player.getWorld().getChunkAt(
-            packet.getIntegers().read(0),
-            packet.getIntegers().read(1)
-        )).getHandle();
-        ServerPlayer nmsPlayer = ((CraftPlayer) player).getHandle();
-
-        LevelChunk remappedChunk = remapChunk(nmsChunk, remapper);
-        boolean modifyBlocks = nmsChunk.level.chunkPacketBlockController.shouldModify(nmsPlayer, nmsChunk);
-        ClientboundLevelChunkWithLightPacket nmsPacket = new ClientboundLevelChunkWithLightPacket(
-            remappedChunk,
-            nmsChunk.level.getLightEngine(), null, null, true, modifyBlocks
-        );
-
-        packet.getModifier().write(2, nmsPacket.getChunkData());
     }
 }

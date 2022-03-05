@@ -10,6 +10,7 @@ repositories {
     maven("https://repo.incendo.org/content/repositories/snapshots/")
     maven("https://repo.dmulloy2.net/nexus/repository/public/")
     mavenCentral()
+    maven("https://jitpack.io")
 }
 
 dependencies {
@@ -28,7 +29,9 @@ dependencies {
         isTransitive = false
     }
 
-    compileOnly(libs.protocolLib)
+    implementation(libs.packetEvents) {
+        exclude("net.kyori")
+    }
 }
 
 tasks {

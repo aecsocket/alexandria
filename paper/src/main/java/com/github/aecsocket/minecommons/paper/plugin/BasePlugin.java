@@ -8,7 +8,6 @@ import com.github.aecsocket.minecommons.core.i18n.I18NLoader;
 import com.github.aecsocket.minecommons.core.i18n.I18N;
 import com.github.aecsocket.minecommons.core.serializers.Serializers;
 import com.github.aecsocket.minecommons.paper.serializers.PaperSerializers;
-import com.github.aecsocket.minecommons.paper.serializers.protocol.ProtocolSerializers;
 
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
@@ -70,8 +69,6 @@ public abstract class BasePlugin<S extends BasePlugin<S>> extends JavaPlugin {
     protected ConfigurationOptions configOptions = ConfigurationOptions.defaults()
         .serializers(builder -> builder
         .registerAnnotatedObjects(ObjectMapper.factoryBuilder().defaultNamingScheme(NamingSchemes.SNAKE_CASE).build()));
-    /** The ProtocolLib integration, if loaded. */
-    protected ProtocolLibAPI protocol;
     /** The base command. */
     protected BaseCommand<S> command;
     /** The cached chat prefix. */
@@ -79,9 +76,6 @@ public abstract class BasePlugin<S extends BasePlugin<S>> extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        if (hasDependency(getDescription(), "ProtocolLib") && Bukkit.getPluginManager().isPluginEnabled("ProtocolLib"))
-            protocol = new ProtocolLibAPI(this);
-
         loadResourceManifest();
         saveResources();
 
@@ -155,8 +149,6 @@ public abstract class BasePlugin<S extends BasePlugin<S>> extends JavaPlugin {
         mapperFactory.defaultNamingScheme(NamingSchemes.SNAKE_CASE);
         serializers.registerAll(PaperSerializers.SERIALIZERS);
         serializers.registerAll(Serializers.SERIALIZERS);
-        if (protocol != null)
-            serializers.registerAll(ProtocolSerializers.SERIALIZERS);
     }
 
     /**
@@ -182,12 +174,6 @@ public abstract class BasePlugin<S extends BasePlugin<S>> extends JavaPlugin {
      * @return The configuration options.
      */
     public ConfigurationOptions configOptions() { return configOptions; }
-
-    /**
-     * Gets the ProtocolLib integration.
-     * @return The integration.
-     */
-    public ProtocolLibAPI protocol() { return protocol; }
 
     /**
      * Gets the root command.

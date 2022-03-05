@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 /**
  * An abstract implementation of an input manager.
@@ -29,6 +30,17 @@ public abstract class AbstractInputs implements Inputs {
         if (events.call(event).cancelled()) {
             ifCancelled.run();
         }
+    }
+
+    /**
+     * Handles an input event.
+     * <p>
+     * Passes {@code true} to the cancelled consumer.
+     * @param event The incoming input event.
+     * @param ifCancelled The code to accept {@code true} if cancelled.
+     */
+    protected void handle(Events.Input event, Consumer<Boolean> ifCancelled) {
+        handle(event, () -> ifCancelled.accept(true));
     }
 
     /**
