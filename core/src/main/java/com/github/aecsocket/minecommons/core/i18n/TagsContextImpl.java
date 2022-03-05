@@ -2,8 +2,7 @@ package com.github.aecsocket.minecommons.core.i18n;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.Style;
-import net.kyori.adventure.text.minimessage.MiniMessage;
-import net.kyori.adventure.text.minimessage.tag.Inserting;
+import net.kyori.adventure.text.minimessage.tag.Tag;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -20,14 +19,14 @@ import static net.kyori.adventure.text.Component.*;
     Function<String, @Nullable Style> styler
 ) implements I18N.TagsContext {
     @Override
-    public TagResolver of(String name, Supplier<Component> value) {
-        return TagResolver.resolver(name, (Inserting) () -> style(name, value.get()));
+    public TagResolver of(String key, Supplier<Component> value) {
+        return TagResolver.resolver(key, (args, ctx) -> Tag.selfClosingInserting(style(key, value.get())));
     }
 
-    private Component style(String name, Component value) {
+    private Component style(String key, Component value) {
         if (value.hasStyling())
             return value;
-        Style style = styler.apply(name);
+        Style style = styler.apply(key);
         return style == null ? value : value.style(style);
     }
 

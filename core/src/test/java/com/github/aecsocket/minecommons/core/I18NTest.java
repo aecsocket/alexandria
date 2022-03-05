@@ -31,6 +31,8 @@ class I18NTest {
         FALLBACK = "fallback",
         PLACEHOLDERS = "placeholders",
         PLACEHOLDERS_STYLED = "placeholders_styled",
+        PLACEHOLDERS_MULTIPLE = "placeholders_multiple",
+        PLACEHOLDERS_MULTIPLE_STYLED = "placeholders_multiple_styled",
         MINIMESSAGE = "minimessage",
         CONSTANT = "constant",
         STYLED_CONSTANT = "styled_constant",
@@ -43,6 +45,8 @@ class I18NTest {
         .add(FALLBACK, "Fallback message")
         .add(PLACEHOLDERS, "Placeholder: <target>")
         .add(PLACEHOLDERS_STYLED, "Styled placeholder: <target>")
+        .add(PLACEHOLDERS_MULTIPLE, "Placeholders: [<one>, <two>]")
+        .add(PLACEHOLDERS_MULTIPLE_STYLED, "Styled placeholders: [<one>, <two>]")
         .add(MINIMESSAGE, "MiniMessage test: <b>bold</b>")
         .add(CONSTANT, "A constant")
         .add(STYLED_CONSTANT, "A styled constant")
@@ -63,6 +67,9 @@ class I18NTest {
         i18n.registerFormat(PLACEHOLDERS, format(INFO));
         i18n.registerFormat(PLACEHOLDERS_STYLED, format(INFO, tp -> tp
             .add("target", ACCENT)));
+        i18n.registerFormat(PLACEHOLDERS_MULTIPLE, format(INFO));
+        i18n.registerFormat(PLACEHOLDERS_MULTIPLE_STYLED, format(INFO, tp -> tp
+            .add("one", ACCENT)));
         i18n.registerFormat(MINIMESSAGE, format(INFO));
         i18n.registerFormat(CONSTANT, format());
         i18n.registerFormat(STYLED_CONSTANT, format(ACCENT));
@@ -157,6 +164,32 @@ class I18NTest {
             .append(text("Green", GREEN)),
             i18n.line(Locale.US, PLACEHOLDERS_STYLED,
                 c -> c.of("target", () -> text("Green", GREEN))));
+    }
+
+    @Test
+    void testPlaceholderMultiple() {
+        I18N i18n = createI18N();
+        assertComponentEquals(text("Placeholders: [One, Two]", GRAY),
+            i18n.line(Locale.US, PLACEHOLDERS_MULTIPLE,
+                c -> c.of("one", () -> text("One")),
+                c -> c.of("two", () -> text("Two")))
+        );
+        assertComponentEquals(text("Placeholders: [One, ", GRAY)
+            .append(text("Two", BLUE))
+            .append(text("]")),
+            i18n.line(Locale.US, PLACEHOLDERS_MULTIPLE,
+                c -> c.of("one", () -> text("One")),
+                c -> c.of("two", () -> text("Two", BLUE)))
+        );
+        assertComponentEquals(text("Styled placeholders: [", GRAY)
+            .append(text("One", BLUE))
+            .append(text(", "))
+            .append(text("Two", GREEN))
+            .append(text("]")),
+            i18n.line(Locale.US, PLACEHOLDERS_MULTIPLE_STYLED,
+                c -> c.of("one", () -> text("One")),
+                c -> c.of("two", () -> text("Two", GREEN)))
+        );
     }
 
     @Test
