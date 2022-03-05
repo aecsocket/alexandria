@@ -25,7 +25,7 @@ tasks.aggregateJavadoc {
 
         "https://papermc.io/javadocs/paper/1.18/",
         "https://javadoc.commandframework.cloud/",
-        "https://aadnk.github.io/ProtocolLib/Javadoc/"
+        "https://packetevents.github.io/javadocs/"
     )
 }
 

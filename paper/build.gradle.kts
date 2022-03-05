@@ -28,8 +28,7 @@ dependencies {
     api(libs.cloudExtras) {
         isTransitive = false
     }
-
-    implementation(libs.packetEvents) {
+    api(libs.packetEvents) {
         exclude("net.kyori")
     }
 }

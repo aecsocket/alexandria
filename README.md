@@ -129,30 +129,3 @@ dependencies {
 ## Documentation
 
 ### [Javadoc](https://aecsocket.github.io/minecommons/docs)
-
-# Modules
-
-Select which module is appropriate for your platform.
-
-<details>
-<summary>Core <code>minecommons-core</code></summary>
-
-This contains platform-independent code, shared among all implementations.
-
-### Dependencies
-
-* [Java >=17](https://adoptium.net/)
-
-</details>
-
-<details>
-<summary>Paper <code>minecommons-paper</code></summary>
-
-For the Paper platform.
-
-### Dependencies
-
-* [Java >=17](https://adoptium.net/)
-* [Paper >=1.18.1](https://papermc.io/)
-
-</details>
