@@ -29,6 +29,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.NodePath;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -62,27 +63,27 @@ public class BaseCommand<P extends BasePlugin<P>> {
         /** The localization key. */
         private final String key;
         /** The localization arguments. */
-        private final transient I18N.Tags[] templates;
+        private final transient I18N.Tags[] tags;
 
         /**
          * Creates an instance.
          * @param key The localization key.
-         * @param templates The localization arguments.
+         * @param tags The localization arguments.
          * @param cause The cause of this exception.
          */
-        public CommandException(String key, I18N.Tags[] templates, @Nullable Throwable cause) {
+        public CommandException(String key, I18N.Tags[] tags, @Nullable Throwable cause) {
             super(cause);
             this.key = key;
-            this.templates = templates;
+            this.tags = tags;
         }
 
         /**
          * Creates an instance.
          * @param key The localization key.
-         * @param templates The localization arguments.
+         * @param tags The localization arguments.
          */
-        public CommandException(String key, I18N.Tags... templates) {
-            this(key, templates, null);
+        public CommandException(String key, I18N.Tags... tags) {
+            this(key, tags, null);
         }
 
         /**
@@ -95,7 +96,7 @@ public class BaseCommand<P extends BasePlugin<P>> {
          * Gets the localization arguments.
          * @return The arguments.
          */
-        public I18N.Tags[] args() { return templates; }
+        public I18N.Tags[] args() { return tags; }
     }
 
     /** The plugin that this command is registered under. */
@@ -269,25 +270,36 @@ public class BaseCommand<P extends BasePlugin<P>> {
     }
 
     /**
+     * Formats and localizes the lines of a thrown error.
+     * @param error The error.
+     * @param locale The locale.
+     * @return The lines.
+     */
+    protected List<Component> errorLines(Throwable error, Locale locale) {
+        List<Component> res = new ArrayList<>();
+        for (Throwable cur = error; cur != null; cur = cur.getCause()) {
+            String type = cur.getClass().getSimpleName();
+            String message = cur.getMessage();
+            res.addAll(message == null
+                ? i18n.lines(locale, ERROR_EXCEPTION_NO_MESSAGE,
+                    c -> c.of("type", () -> text(type)))
+                : i18n.lines(locale, ERROR_EXCEPTION_MESSAGE,
+                    c -> c.of("type", () -> text(type)),
+                    c -> c.of("message", () -> text(message))));
+        }
+        return res;
+    }
+
+    /**
      * Formats and sends a {@link CommandException} to an audience.
      * @param error The error.
      * @param locale The locale.
      * @param audience The audience.
      */
     protected void sendError(CommandException error, Locale locale, Audience audience) {
-        plugin.send(audience, i18n.lines(locale, error.key, error.templates));
+        plugin.send(audience, i18n.lines(locale, error.key, error.tags));
         if (error.getCause() != null) {
-            for (Throwable cur = error.getCause(); cur != null; cur = cur.getCause()) {
-                String type = cur.getClass().getSimpleName();
-                String message = cur.getMessage();
-                plugin.send(audience, message == null
-                    ? i18n.lines(locale, ERROR_EXCEPTION_NO_MESSAGE,
-                        c -> c.of("type", () -> text(type)))
-                    : i18n.lines(locale, ERROR_EXCEPTION_MESSAGE,
-                        c -> c.of("type", () -> text(type)),
-                        c -> c.of("message", () -> text(message)))
-                );
-            }
+            plugin.send(audience, errorLines(error.getCause(), locale));
         }
     }
 

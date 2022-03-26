@@ -1,5 +1,6 @@
 package com.github.aecsocket.minecommons.core.event;
 
+import io.leangen.geantyref.GenericTypeReflector;
 import io.leangen.geantyref.TypeToken;
 
 import java.lang.reflect.*;
@@ -12,7 +13,6 @@ import com.github.aecsocket.minecommons.core.Validation;
  * Responsible for managing listeners: registration and sending events to listeners.
  * @param <E> The base event type.
  */
-@SuppressWarnings("UnstableApiUsage")
 public final class EventDispatcher<E> {
     /** The default priority of listeners. */
     public static final int DEFAULT_PRIORITY = 0;
@@ -25,7 +25,7 @@ public final class EventDispatcher<E> {
      * @param listener The function to run on event call.
      * @param priority The numerical order in which this listener will be ran.
      */
-    public record Listener<E>(Class<E> eventType, boolean specific, Consumer<E> listener, int priority) {
+    public record Listener<E>(Type eventType, boolean specific, Consumer<E> listener, int priority) {
         /**
          * Creates an instance.
          * @param eventType The event type.
@@ -39,51 +39,97 @@ public final class EventDispatcher<E> {
         }
 
         /**
+         * Creates an instance.
+         * @param eventType The event type.
+         * @param specific If the listener only listens to the exact event type specified, or all subclasses too.
+         * @param listener The function to run on event call.
+         * @param priority The numerical order in which this listener will be ran.
+         */
+        public Listener(TypeToken<E> eventType, boolean specific, Consumer<E> listener, int priority) {
+            this(eventType.getType(), specific, listener, priority);
+        }
+
+        /**
+         * Creates an instance.
+         * @param eventType The event type.
+         * @param specific If the listener only listens to the exact event type specified, or all subclasses too.
+         * @param listener The function to run on event call.
+         * @param priority The numerical order in which this listener will be ran.
+         */
+        public Listener(Class<E> eventType, boolean specific, Consumer<E> listener, int priority) {
+            this((Type) eventType, specific, listener, priority);
+        }
+
+        /**
          * Checks if a type provided will be listened to by this listener.
          * @param checkType The type to check.
          * @return The result.
          */
-        public boolean acceptsType(Class<? extends E> checkType) {
-            return checkType == eventType || (!specific && eventType.isAssignableFrom(checkType));
+        public boolean acceptsType(Type checkType) {
+            return eventType == checkType || (!specific && GenericTypeReflector.isSuperType(eventType, checkType));
         }
 
         @Override
         public String toString() {
-            return eventType.getSimpleName()
+            return eventType.getTypeName()
                 + (specific ? "" : "+")
                 + " @" + priority;
         }
     }
 
-    private final List<Listener<E>> listeners = new ArrayList<>();
+    private final List<Listener<? extends E>> listeners = new ArrayList<>();
 
     /**
      * Gets all registered listeners.
      * @return The listeners.
      */
-    public Collection<Listener<E>> listeners() { return listeners; }
+    public Collection<Listener<? extends E>> listeners() { return listeners; }
 
     /**
      * Gets all registered listeners for a specific event type.
      * <p>
-     * Uses {@link Listener#acceptsType(Class)} to check if a listener is applicable for this.
+     * Uses {@link Listener#acceptsType(Type)} to check if a listener is applicable for this.
      * @param eventType The event type.
-     * @param <F> The event type.
+     * @param <F> The resulting event type.
      * @return The listeners.
      */
-    public <F extends E> List<Listener<F>> listenersOf(Class<F> eventType) {
+    public <F extends E> List<Listener<F>> listenersOfType(Type eventType) {
         List<Listener<F>> result = new ArrayList<>();
-        for (Listener<E> listener : listeners) {
+        for (var listener : listeners) {
             if (listener.acceptsType(eventType)) {
                 @SuppressWarnings("unchecked")
-                Listener<F> fListener = (Listener<F>) listener;
-                result.add(fListener);
+                Listener<F> casted = (Listener<F>) listener;
+                result.add(casted);
             }
         }
         return result;
     }
 
     /**
+     * Gets all registered listeners for a specific event type.
+     * <p>
+     * Uses {@link Listener#acceptsType(Type)} to check if a listener is applicable for this.
+     * @param eventType The event type.
+     * @param <F> The resulting event type.
+     * @return The listeners.
+     */
+    public <F extends E> List<Listener<F>> listenersOf(TypeToken<F> eventType) {
+        return listenersOfType(eventType.getType());
+    }
+
+    /**
+     * Gets all registered listeners for a specific event type.
+     * <p>
+     * Uses {@link Listener#acceptsType(Type)} to check if a listener is applicable for this.
+     * @param eventType The event type.
+     * @param <F> The resulting event type.
+     * @return The listeners.
+     */
+    public <F extends E> List<Listener<F>> listenersOf(Class<? extends F> eventType) {
+        return listenersOfType(eventType);
+    }
+
+    /**
      * Registers a listener, receiving event calls.
      * @param eventType The event type.
      * @param specific If the specific event type should be listened for, or all subtypes as well.
@@ -92,9 +138,8 @@ public final class EventDispatcher<E> {
      * @param <F> The event type.
      * @return The listener created.
      */
-    public <F extends E> Listener<E> register(TypeToken<F> eventType, boolean specific, Consumer<F> listener, int priority) {
-        @SuppressWarnings("unchecked")
-        Listener<E> registered = (Listener<E>) new Listener<>((Class<F>) rawType(eventType.getType()), specific, listener, priority);
+    public <F extends E> Listener<F> register(TypeToken<F> eventType, boolean specific, Consumer<F> listener, int priority) {
+        Listener<F> registered = new Listener<>(eventType, specific, listener, priority);
         listeners.add(registered);
         listeners.sort(Comparator.comparingInt(Listener::priority));
         return registered;
@@ -109,9 +154,8 @@ public final class EventDispatcher<E> {
      * @param <F> The event type.
      * @return The listener created.
      */
-    public <F extends E> Listener<E> register(Class<F> eventType, boolean specific, Consumer<F> listener, int priority) {
-        @SuppressWarnings("unchecked")
-        Listener<E> registered = (Listener<E>) new Listener<>(eventType, specific, listener, priority);
+    public <F extends E> Listener<F> register(Class<F> eventType, boolean specific, Consumer<F> listener, int priority) {
+        Listener<F> registered = new Listener<>(eventType, specific, listener, priority);
         listeners.add(registered);
         listeners.sort(Comparator.comparingInt(Listener::priority));
         return registered;
@@ -125,7 +169,7 @@ public final class EventDispatcher<E> {
      * @param <F> The event type.
      * @return The listener created.
      */
-    public <F extends E> Listener<E> register(TypeToken<F> eventType, Consumer<F> listener, int priority) {
+    public <F extends E> Listener<F> register(TypeToken<F> eventType, Consumer<F> listener, int priority) {
         return register(eventType, false, listener, priority);
     }
 
@@ -137,7 +181,7 @@ public final class EventDispatcher<E> {
      * @param <F> The event type.
      * @return The listener created.
      */
-    public <F extends E> Listener<E> register(Class<F> eventType, Consumer<F> listener, int priority) {
+    public <F extends E> Listener<F> register(Class<F> eventType, Consumer<F> listener, int priority) {
         return register(eventType, false, listener, priority);
     }
 
@@ -149,7 +193,7 @@ public final class EventDispatcher<E> {
      * @param <F> The event type.
      * @return The listener created.
      */
-    public <F extends E> Listener<E> register(TypeToken<F> eventType, boolean specific, Consumer<F> listener) {
+    public <F extends E> Listener<F> register(TypeToken<F> eventType, boolean specific, Consumer<F> listener) {
         return register(eventType, specific, listener, DEFAULT_PRIORITY);
     }
 
@@ -161,7 +205,7 @@ public final class EventDispatcher<E> {
      * @param <F> The event type.
      * @return The listener created.
      */
-    public <F extends E> Listener<E> register(Class<F> eventType, boolean specific, Consumer<F> listener) {
+    public <F extends E> Listener<F> register(Class<F> eventType, boolean specific, Consumer<F> listener) {
         return register(eventType, specific, listener, DEFAULT_PRIORITY);
     }
 
@@ -172,7 +216,7 @@ public final class EventDispatcher<E> {
      * @param <F> The event type.
      * @return The listener created.
      */
-    public <F extends E> Listener<E> register(TypeToken<F> eventType, Consumer<F> listener) {
+    public <F extends E> Listener<F> register(TypeToken<F> eventType, Consumer<F> listener) {
         return register(eventType, false, listener, DEFAULT_PRIORITY);
     }
 
@@ -183,7 +227,7 @@ public final class EventDispatcher<E> {
      * @param <F> The event type.
      * @return The listener created.
      */
-    public <F extends E> Listener<E> register(Class<F> eventType, Consumer<F> listener) {
+    public <F extends E> Listener<F> register(Class<F> eventType, Consumer<F> listener) {
         return register(eventType, false, listener, DEFAULT_PRIORITY);
     }
 
@@ -200,7 +244,7 @@ public final class EventDispatcher<E> {
     /**
      * Unregisters all listeners for a specific type.
      * <p>
-     * Uses {@link Listener#acceptsType(Class)} to check if a listener is applicable for this.
+     * Uses {@link Listener#acceptsType(Type)} to check if a listener is applicable for this.
      * @param eventType The event type.
      * @return This instance.
      */
@@ -226,25 +270,10 @@ public final class EventDispatcher<E> {
      */
     public <F extends E> F call(F event) {
         @SuppressWarnings("unchecked")
-        Class<F> eventType = (Class<F>) event.getClass();
-        for (Listener<F> listener : listenersOf(eventType)) {
+        Class<F> clazz = (Class<F>) event.getClass();
+        for (var listener : listenersOf(clazz)) {
             listener.listener.accept(event);
         }
         return event;
-    }
-
-    private static Class<?> rawType(Type type) {
-        // https://github.com/google/gson/blob/master/gson/src/main/java/com/google/gson/internal/%24Gson%24Types.java
-        if (type instanceof Class<?> t)
-            return t;
-        else if (type instanceof ParameterizedType t)
-            return (Class<?>) t.getRawType();
-        else if (type instanceof GenericArrayType t)
-            return Array.newInstance(rawType(t.getGenericComponentType()), 0).getClass();
-        else if (type instanceof TypeVariable)
-            return Object.class;
-        else if (type instanceof WildcardType t)
-            return rawType(t.getUpperBounds()[0]);
-        throw new IllegalArgumentException("Could not get raw type from a " + type.getClass().getName());
     }
 }
