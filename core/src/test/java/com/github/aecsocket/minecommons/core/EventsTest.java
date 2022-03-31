@@ -57,7 +57,7 @@ class EventsTest {
     void testDispatch() {
         EventDispatcher<Event> events = new EventDispatcher<>();
         AtomicInteger flag = new AtomicInteger();
-        events.register(Event.class, evt -> flag.set(evt.flag));
+        events.register(Event.class, false, 0, evt -> flag.set(evt.flag));
         events.call(new Event(3));
         assertEquals(3, flag.get());
     }
@@ -66,7 +66,7 @@ class EventsTest {
     void testSpecific() {
         EventDispatcher<Event> events = new EventDispatcher<>();
         AtomicInteger flag = new AtomicInteger();
-        events.register(Event.class, true, evt -> flag.set(evt.flag));
+        events.register(Event.class, true, 0, evt -> flag.set(evt.flag));
         events.call(new SubEvent(3));
         assertEquals(0, flag.get());
     }
@@ -75,9 +75,10 @@ class EventsTest {
     void testPriority() {
         EventDispatcher<Event> events = new EventDispatcher<>();
         AtomicInteger flag = new AtomicInteger();
-        events.register(Event.class, listen("+100", evt -> flag.set(flag.get() + 100)), 1);
-        events.register(Event.class, listen("/flag", evt -> flag.set(flag.get() / evt.flag)));
-        events.register(Event.class, listen("+10", evt -> flag.set(flag.get() + 10)), -1);
+        // performed in reverse order
+        events.register(Event.class, false, 1, listen("+100", evt -> flag.set(flag.get() + 100)));
+        events.register(Event.class, false, 0, listen("/flag", evt -> flag.set(flag.get() / evt.flag)));
+        events.register(Event.class, false, -1, listen("+10", evt -> flag.set(flag.get() + 10)));
         events.call(new Event(2));
         assertEquals(105, flag.get());
     }
@@ -87,13 +88,12 @@ class EventsTest {
     void testGenerics() {
         EventDispatcher<GenericEvent<?>> events = new EventDispatcher<>();
         AtomicInteger flag = new AtomicInteger();
+
         // check if non-parameterized types don't error out
-        events.register(new TypeToken<GenericEvent>(){}, evt -> {});
+        events.register(new TypeToken<GenericEvent>(){}, false, 0, evt -> {});
+        events.register(new TypeToken<GenericEvent<Integer>>(){}, false, 0, evt -> flag.set(evt.value));
 
-        events.register(new TypeToken<GenericEvent<Integer>>(){}, evt -> flag.set(evt.value));
-
-        GenericEvent<Long> event = new GenericEvent<>(10L);
-        assertThrows(ClassCastException.class, () -> events.call(event));
+        assertThrows(ClassCastException.class, () -> events.call(new GenericEvent<>(10L)));
 
         events.call(new GenericEvent<>(10));
         assertEquals(10, flag.get());

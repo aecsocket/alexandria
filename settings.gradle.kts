@@ -9,7 +9,7 @@ pluginManagement {
 
     plugins {
         id("io.freefair.aggregate-javadoc") version "6.3.0"
-        id("io.papermc.paperweight.userdev") version "1.3.4"
+        id("io.papermc.paperweight.userdev") version "1.3.5"
     }
 }
 

@@ -14,24 +14,21 @@ import com.github.aecsocket.minecommons.core.Validation;
  * @param <E> The base event type.
  */
 public final class EventDispatcher<E> {
-    /** The default priority of listeners. */
-    public static final int DEFAULT_PRIORITY = 0;
-
     /**
      * A registered listener.
      * @param <E> The event type.
      * @param eventType The event type.
      * @param specific If the listener only listens to the exact event type specified, or all subclasses too.
+     * @param priority The numerical order in which this listener will be run.
      * @param listener The function to run on event call.
-     * @param priority The numerical order in which this listener will be ran.
      */
-    public record Listener<E>(Type eventType, boolean specific, Consumer<E> listener, int priority) {
+    public record Listener<E>(Type eventType, boolean specific, int priority, Consumer<E> listener) {
         /**
          * Creates an instance.
          * @param eventType The event type.
          * @param specific If the listener only listens to the exact event type specified, or all subclasses too.
          * @param listener The function to run on event call.
-         * @param priority The numerical order in which this listener will be ran.
+         * @param priority The numerical order in which this listener will be run.
          */
         public Listener {
             Validation.notNull("eventType", eventType);
@@ -43,10 +40,10 @@ public final class EventDispatcher<E> {
          * @param eventType The event type.
          * @param specific If the listener only listens to the exact event type specified, or all subclasses too.
          * @param listener The function to run on event call.
-         * @param priority The numerical order in which this listener will be ran.
+         * @param priority The numerical order in which this listener will be run.
          */
-        public Listener(TypeToken<E> eventType, boolean specific, Consumer<E> listener, int priority) {
-            this(eventType.getType(), specific, listener, priority);
+        public Listener(TypeToken<E> eventType, boolean specific, int priority, Consumer<E> listener) {
+            this(eventType.getType(), specific, priority, listener);
         }
 
         /**
@@ -54,10 +51,10 @@ public final class EventDispatcher<E> {
          * @param eventType The event type.
          * @param specific If the listener only listens to the exact event type specified, or all subclasses too.
          * @param listener The function to run on event call.
-         * @param priority The numerical order in which this listener will be ran.
+         * @param priority The numerical order in which this listener will be run.
          */
-        public Listener(Class<E> eventType, boolean specific, Consumer<E> listener, int priority) {
-            this((Type) eventType, specific, listener, priority);
+        public Listener(Class<E> eventType, boolean specific, int priority, Consumer<E> listener) {
+            this((Type) eventType, specific, priority, listener);
         }
 
         /**
@@ -77,13 +74,13 @@ public final class EventDispatcher<E> {
         }
     }
 
-    private final List<Listener<? extends E>> listeners = new ArrayList<>();
+    private final Queue<Listener<? extends E>> listeners = new PriorityQueue<>(Comparator.comparingInt(Listener::priority));
 
     /**
      * Gets all registered listeners.
      * @return The listeners.
      */
-    public Collection<Listener<? extends E>> listeners() { return listeners; }
+    public Queue<Listener<? extends E>> listeners() { return listeners; }
 
     /**
      * Gets all registered listeners for a specific event type.
@@ -133,15 +130,14 @@ public final class EventDispatcher<E> {
      * Registers a listener, receiving event calls.
      * @param eventType The event type.
      * @param specific If the specific event type should be listened for, or all subtypes as well.
+     * @param priority The event priority.
      * @param listener The action to run for the event.
-     * @param priority The event priority. Default is {@link #DEFAULT_PRIORITY}.
      * @param <F> The event type.
      * @return The listener created.
      */
-    public <F extends E> Listener<F> register(TypeToken<F> eventType, boolean specific, Consumer<F> listener, int priority) {
-        Listener<F> registered = new Listener<>(eventType, specific, listener, priority);
+    public <F extends E> Listener<F> register(TypeToken<F> eventType, boolean specific, int priority, Consumer<F> listener) {
+        Listener<F> registered = new Listener<>(eventType, specific, priority, listener);
         listeners.add(registered);
-        listeners.sort(Comparator.comparingInt(Listener::priority));
         return registered;
     }
 
@@ -149,86 +145,15 @@ public final class EventDispatcher<E> {
      * Registers a listener, receiving event calls.
      * @param eventType The event type.
      * @param specific If the specific event type should be listened for, or all subtypes as well.
+     * @param priority The event priority.
      * @param listener The action to run for the event.
-     * @param priority The event priority. Default is {@link #DEFAULT_PRIORITY}.
      * @param <F> The event type.
      * @return The listener created.
      */
-    public <F extends E> Listener<F> register(Class<F> eventType, boolean specific, Consumer<F> listener, int priority) {
-        Listener<F> registered = new Listener<>(eventType, specific, listener, priority);
+    public <F extends E> Listener<F> register(Class<F> eventType, boolean specific, int priority, Consumer<F> listener) {
+        Listener<F> registered = new Listener<>(eventType, specific, priority, listener);
         listeners.add(registered);
-        listeners.sort(Comparator.comparingInt(Listener::priority));
         return registered;
-    }
-
-    /**
-     * Registers a listener, receiving event calls.
-     * @param eventType The event type.
-     * @param listener The action to run for the event.
-     * @param priority The event priority. Default is {@link #DEFAULT_PRIORITY}.
-     * @param <F> The event type.
-     * @return The listener created.
-     */
-    public <F extends E> Listener<F> register(TypeToken<F> eventType, Consumer<F> listener, int priority) {
-        return register(eventType, false, listener, priority);
-    }
-
-    /**
-     * Registers a listener, receiving event calls.
-     * @param eventType The event type.
-     * @param listener The action to run for the event.
-     * @param priority The event priority. Default is {@link #DEFAULT_PRIORITY}.
-     * @param <F> The event type.
-     * @return The listener created.
-     */
-    public <F extends E> Listener<F> register(Class<F> eventType, Consumer<F> listener, int priority) {
-        return register(eventType, false, listener, priority);
-    }
-
-    /**
-     * Registers a listener, receiving event calls.
-     * @param eventType The event type.
-     * @param specific If the specific event type should be listened for, or all subtypes as well.
-     * @param listener The action to run for the event.
-     * @param <F> The event type.
-     * @return The listener created.
-     */
-    public <F extends E> Listener<F> register(TypeToken<F> eventType, boolean specific, Consumer<F> listener) {
-        return register(eventType, specific, listener, DEFAULT_PRIORITY);
-    }
-
-    /**
-     * Registers a listener, receiving event calls.
-     * @param eventType The event type.
-     * @param specific If the specific event type should be listened for, or all subtypes as well.
-     * @param listener The action to run for the event.
-     * @param <F> The event type.
-     * @return The listener created.
-     */
-    public <F extends E> Listener<F> register(Class<F> eventType, boolean specific, Consumer<F> listener) {
-        return register(eventType, specific, listener, DEFAULT_PRIORITY);
-    }
-
-    /**
-     * Registers a listener, receiving event calls.
-     * @param eventType The event type.
-     * @param listener The action to run for the event.
-     * @param <F> The event type.
-     * @return The listener created.
-     */
-    public <F extends E> Listener<F> register(TypeToken<F> eventType, Consumer<F> listener) {
-        return register(eventType, false, listener, DEFAULT_PRIORITY);
-    }
-
-    /**
-     * Registers a listener, receiving event calls.
-     * @param eventType The event type.
-     * @param listener The action to run for the event.
-     * @param <F> The event type.
-     * @return The listener created.
-     */
-    public <F extends E> Listener<F> register(Class<F> eventType, Consumer<F> listener) {
-        return register(eventType, false, listener, DEFAULT_PRIORITY);
     }
 
     /**
