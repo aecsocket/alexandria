@@ -68,19 +68,22 @@ public final class EventDispatcher<E> {
 
         @Override
         public String toString() {
-            return eventType.getTypeName()
-                + (specific ? "" : "+")
+            return listener + " for " + eventType.getTypeName()
+                + (specific ? " (specific)" : "")
                 + " @" + priority;
         }
     }
 
-    private final Queue<Listener<? extends E>> listeners = new PriorityQueue<>(Comparator.comparingInt(Listener::priority));
+    // we still want to allow duplicates, but we sort by priority first
+    private final Set<Listener<? extends E>> listeners = new TreeSet<>(Comparator
+        .comparingInt((Listener<? extends E> a) -> a.priority)
+        .thenComparingInt(Object::hashCode));
 
     /**
      * Gets all registered listeners.
      * @return The listeners.
      */
-    public Queue<Listener<? extends E>> listeners() { return listeners; }
+    public Set<Listener<? extends E>> listeners() { return listeners; }
 
     /**
      * Gets all registered listeners for a specific event type.
@@ -197,6 +200,7 @@ public final class EventDispatcher<E> {
         @SuppressWarnings("unchecked")
         Class<F> clazz = (Class<F>) event.getClass();
         for (var listener : listenersOf(clazz)) {
+            System.out.println(" CALL " + listener);
             listener.listener.accept(event);
         }
         return event;

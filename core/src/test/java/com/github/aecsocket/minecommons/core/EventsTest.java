@@ -39,9 +39,9 @@ class EventsTest {
         }
     }
 
-    static record Listener(String name, Consumer<Event> consumer) implements Consumer<Event> {
+    record Listener<E>(String name, Consumer<E> consumer) implements Consumer<E> {
         @Override
-        public void accept(Event event) {
+        public void accept(E event) {
             consumer.accept(event);
         }
 
@@ -49,8 +49,8 @@ class EventsTest {
         public String toString() { return name; }
     }
 
-    Listener listen(String name, Consumer<Event> consumer) {
-        return new Listener(name, consumer);
+    <E> Listener<E> listen(String name, Consumer<E> consumer) {
+        return new Listener<>(name, consumer);
     }
 
     @Test
@@ -75,12 +75,32 @@ class EventsTest {
     void testPriority() {
         EventDispatcher<Event> events = new EventDispatcher<>();
         AtomicInteger flag = new AtomicInteger();
-        // performed in reverse order
-        events.register(Event.class, false, 1, listen("+100", evt -> flag.set(flag.get() + 100)));
+
+        events.register(Event.class, false, -1, listen("+10", evt -> flag.set(flag.get() + 10)));
         events.register(Event.class, false, 0, listen("/flag", evt -> flag.set(flag.get() / evt.flag)));
+        events.register(Event.class, false, 1, listen("+100", evt -> flag.set(flag.get() + 100)));
+        events.call(new Event(2));
+        assertEquals(105, flag.get());
+
+        flag.set(0);
+        events.unregisterAll();
+        // make sure the register order doesn't matter
+        events.register(Event.class, false, 0, listen("/flag", evt -> flag.set(flag.get() / evt.flag)));
+        events.register(Event.class, false, 1, listen("+100", evt -> flag.set(flag.get() + 100)));
         events.register(Event.class, false, -1, listen("+10", evt -> flag.set(flag.get() + 10)));
         events.call(new Event(2));
         assertEquals(105, flag.get());
+    }
+
+    @Test
+    void testDuplicatePriority() {
+        EventDispatcher<Event> events = new EventDispatcher<>();
+        AtomicInteger flag = new AtomicInteger();
+
+        events.register(Event.class, false, 0, listen("1", evt -> flag.addAndGet(evt.flag)));
+        events.register(Event.class, false, 0, listen("2", evt -> flag.addAndGet(evt.flag)));
+        events.call(new Event(10));
+        assertEquals(20, flag.get());
     }
 
     @Test
@@ -90,8 +110,8 @@ class EventsTest {
         AtomicInteger flag = new AtomicInteger();
 
         // check if non-parameterized types don't error out
-        events.register(new TypeToken<GenericEvent>(){}, false, 0, evt -> {});
-        events.register(new TypeToken<GenericEvent<Integer>>(){}, false, 0, evt -> flag.set(evt.value));
+        events.register(new TypeToken<GenericEvent>(){}, false, 0, this.listen("non-param", evt -> {}));
+        events.register(new TypeToken<GenericEvent<Integer>>(){}, false, 0, listen("flag set", evt -> flag.set(evt.value)));
 
         assertThrows(ClassCastException.class, () -> events.call(new GenericEvent<>(10L)));
 
