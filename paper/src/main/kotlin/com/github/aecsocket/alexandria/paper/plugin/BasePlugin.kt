@@ -1,4 +1,4 @@
-package com.github.aecsocket.alexandria.core.paper.plugin
+package com.github.aecsocket.alexandria.paper.plugin
 
 import com.github.aecsocket.alexandria.core.ExceptionLogStrategy
 import com.github.aecsocket.alexandria.core.LogLevel
@@ -7,7 +7,7 @@ import com.github.aecsocket.alexandria.core.Logging
 import com.github.aecsocket.alexandria.core.extension.force
 import com.github.aecsocket.alexandria.core.extension.register
 import com.github.aecsocket.alexandria.core.serializer.Serializers
-import com.github.aecsocket.alexandria.core.paper.plugin.serializer.PaperSerializers
+import com.github.aecsocket.alexandria.paper.serializer.PaperSerializers
 import com.github.aecsocket.glossa.adventure.*
 import com.github.aecsocket.glossa.configurate.I18NLoader
 import com.github.aecsocket.glossa.core.I18N
@@ -42,12 +42,12 @@ import java.nio.charset.StandardCharsets
 import java.nio.file.*
 import java.nio.file.attribute.BasicFileAttributes
 
-const val PATH_MANIFEST = "manifest.conf"
-const val PATH_SETTINGS = "settings.conf"
-const val PATH_LANG = "lang"
-const val LOG_LEVEL = "log_level"
-const val LOCALE = "locale"
-const val EXCEPTION_LOGGING = "exception_logging"
+private const val PATH_MANIFEST = "manifest.conf"
+private const val PATH_SETTINGS = "settings.conf"
+private const val PATH_LANG = "lang"
+private const val LOG_LEVEL = "log_level"
+private const val LOCALE = "locale"
+private const val EXCEPTION_LOGGING = "exception_logging"
 
 @ConfigSerializable
 data class PluginManifest(
@@ -230,7 +230,3 @@ fun JavaPlugin.scheduleRepeating(delay: Long = 0, period: Long = 0, task: () -> 
     Bukkit.getScheduler().scheduleSyncRepeatingTask(this, task, delay, period)
 
 fun JavaPlugin.disable() = Bukkit.getPluginManager().disablePlugin(this)
-
-fun Cancellable.cancel() {
-    isCancelled = true
-}
