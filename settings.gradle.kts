@@ -1,5 +1,4 @@
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
-enableFeaturePreview("VERSION_CATALOGS")
 
 pluginManagement {
     repositories {
@@ -8,21 +7,21 @@ pluginManagement {
     }
 
     plugins {
-        id("io.freefair.aggregate-javadoc") version "6.3.0"
-        id("io.papermc.paperweight.userdev") version "1.3.5"
+        kotlin("jvm") version "1.6.21"
+        id("org.jetbrains.dokka") version "1.6.21"
+        id("io.papermc.paperweight.userdev") version "1.3.6"
     }
 }
 
-rootProject.name = "minecommons"
+rootProject.name = "alexandria"
 
-subproject("${rootProject.name}-core") {
-    projectDir = file("core")
-}
-subproject("${rootProject.name}-paper") {
-    projectDir = file("paper")
-}
-
-inline fun subproject(name: String, block: ProjectDescriptor.() -> Unit) {
+listOf(
+    "core",
+    "paper"
+).forEach {
+    val name = "${rootProject.name}-$it"
     include(name)
-    project(":$name").apply(block)
+    project(":$name").apply {
+        projectDir = file(it)
+    }
 }

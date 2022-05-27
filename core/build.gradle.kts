@@ -1,41 +1,18 @@
 plugins {
-    id("maven-publish")
+    kotlin("jvm")
 }
 
 repositories {
-    maven("https://oss.sonatype.org/content/repositories/snapshots/")
+    mavenLocal()
     mavenCentral()
+    maven("https://jitpack.io")
 }
 
 dependencies {
-    implementation(libs.guava)
-    compileOnly(libs.checkerQual)
-    api(libs.geantyRef)
-    api(libs.configurate)
-    api(libs.openCsv)
+    implementation(libs.adventureApi)
+    implementation(libs.adventureExtraKotlin)
+    api(libs.configurateCore)
+    api(libs.configurateExtraKotlin)
 
-    api(libs.bundles.adventure)
-    api(libs.adventureTextMiniMessage)
-
-    testImplementation(libs.bundles.junit)
-    testImplementation(libs.adventureTextSerializerGson)
-}
-
-publishing {
-    publications {
-        create<MavenPublication>("maven") {
-            from(components["java"])
-        }
-    }
-
-    repositories {
-        maven {
-            name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/aecsocket/minecommons")
-            credentials {
-                username = System.getenv("GPR_ACTOR")
-                password = System.getenv("GPR_TOKEN")
-            }
-        }
-    }
+    testImplementation(kotlin("test"))
 }
