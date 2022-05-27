@@ -1,4 +1,4 @@
-package com.github.aecsocket.alexandria.paper.plugin
+package com.github.aecsocket.alexandria.core.paper.plugin
 
 import com.github.aecsocket.alexandria.core.ExceptionLogStrategy
 import com.github.aecsocket.alexandria.core.LogLevel
@@ -7,7 +7,7 @@ import com.github.aecsocket.alexandria.core.Logging
 import com.github.aecsocket.alexandria.core.extension.force
 import com.github.aecsocket.alexandria.core.extension.register
 import com.github.aecsocket.alexandria.core.serializer.Serializers
-import com.github.aecsocket.alexandria.paper.plugin.serializer.PaperSerializers
+import com.github.aecsocket.alexandria.core.paper.plugin.serializer.PaperSerializers
 import com.github.aecsocket.glossa.adventure.*
 import com.github.aecsocket.glossa.configurate.I18NLoader
 import com.github.aecsocket.glossa.core.I18N

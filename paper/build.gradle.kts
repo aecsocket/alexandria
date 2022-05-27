@@ -14,9 +14,7 @@ repositories {
 
 dependencies {
     compileOnly("io.papermc.paper", "paper-api", "$minecraftVersion-R0.1-SNAPSHOT")
-    api(projects.alexandriaCore) {
-        exclude("net.kyori.adventure")
-    }
+    api(projects.alexandriaCore)
     api(libs.glossaAdventure)
     api(libs.glossaConfigurate)
     implementation(libs.adventureExtraKotlin)

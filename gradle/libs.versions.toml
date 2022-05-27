@@ -3,7 +3,7 @@
 minecraft = "1.18.2"
 
 adventure = "4.10.1"
-glossa = "0.3.0-SNAPSHOT"
+glossa = "0.3.0"
 configurate = "4.1.2"
 cloud = "1.6.2"
 

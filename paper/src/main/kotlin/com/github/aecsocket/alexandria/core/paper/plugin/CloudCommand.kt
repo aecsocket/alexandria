@@ -1,4 +1,4 @@
-package com.github.aecsocket.alexandria.paper.plugin
+package com.github.aecsocket.alexandria.core.paper.plugin
 
 import cloud.commandframework.ArgumentDescription
 import cloud.commandframework.Command

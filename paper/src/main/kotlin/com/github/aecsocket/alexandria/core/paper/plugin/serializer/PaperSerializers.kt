@@ -1,4 +1,4 @@
-package com.github.aecsocket.alexandria.paper.plugin.serializer
+package com.github.aecsocket.alexandria.core.paper.plugin.serializer
 
 import com.github.aecsocket.glossa.configurate.I18NSerializers
 import org.spongepowered.configurate.serialize.TypeSerializerCollection
