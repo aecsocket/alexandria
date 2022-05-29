@@ -1,5 +1,8 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
     kotlin("jvm")
+    id("java-library")
     id("maven-publish")
     id("org.jetbrains.dokka")
 }
@@ -12,6 +15,7 @@ allprojects {
 subprojects {
     apply<JavaLibraryPlugin>()
     apply(plugin = "org.jetbrains.dokka")
+    apply(plugin = "java-library")
     apply(plugin = "maven-publish")
 
     publishing {
@@ -25,6 +29,12 @@ subprojects {
     tasks {
         test {
             useJUnitPlatform()
+        }
+    }
+
+    java {
+        toolchain {
+            languageVersion.set(JavaLanguageVersion.of(18))
         }
     }
 }
