@@ -16,8 +16,8 @@ import com.github.aecsocket.glossa.core.I18N
 import com.github.aecsocket.glossa.core.Translation
 import net.kyori.adventure.audience.Audience
 import net.kyori.adventure.extra.kotlin.join
-import net.kyori.adventure.extra.kotlin.plus
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.Component.text
 import net.kyori.adventure.text.JoinConfiguration
 import net.kyori.adventure.text.format.Style
 import org.bukkit.command.CommandSender
@@ -110,7 +110,7 @@ abstract class BasePlugin : JavaPlugin() {
 
     fun send(audience: Audience, lines: List<Component>) {
         lines.forEach {
-            audience.sendMessage(chatPrefix + it)
+            audience.sendMessage(text().append(chatPrefix).append(it))
         }
     }
 
