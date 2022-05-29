@@ -13,7 +13,6 @@ repositories {
 }
 
 dependencies {
-    //compileOnly("io.papermc.paper", "paper-api", "$minecraftVersion-R0.1-SNAPSHOT")
     paperDevBundle("$minecraftVersion-R0.1-SNAPSHOT")
     api(projects.alexandriaCore)
     api(libs.glossaAdventure)
