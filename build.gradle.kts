@@ -6,7 +6,7 @@ plugins {
 
 allprojects {
     group = "com.github.aecsocket.alexandria"
-    version = "0.3.3-SNAPSHOT"
+    version = "0.3.3"
 }
 
 subprojects {

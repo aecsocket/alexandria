@@ -7,6 +7,8 @@ import com.github.aecsocket.alexandria.core.Logging
 import com.github.aecsocket.alexandria.core.extension.force
 import com.github.aecsocket.alexandria.core.extension.register
 import com.github.aecsocket.alexandria.core.serializer.Serializers
+import com.github.aecsocket.alexandria.paper.extension.disable
+import com.github.aecsocket.alexandria.paper.extension.scheduleDelayed
 import com.github.aecsocket.alexandria.paper.serializer.PaperSerializers
 import com.github.aecsocket.glossa.adventure.*
 import com.github.aecsocket.glossa.configurate.I18NLoader
@@ -18,16 +20,15 @@ import net.kyori.adventure.extra.kotlin.plus
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.JoinConfiguration
 import net.kyori.adventure.text.format.Style
-import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
-import org.bukkit.event.Cancellable
 import org.bukkit.plugin.java.JavaPlugin
 import org.spongepowered.configurate.ConfigurateException
 import org.spongepowered.configurate.ConfigurationNode
 import org.spongepowered.configurate.ConfigurationOptions
 import org.spongepowered.configurate.hocon.HoconConfigurationLoader
 import org.spongepowered.configurate.kotlin.dataClassFieldDiscoverer
+import org.spongepowered.configurate.loader.AbstractConfigurationLoader
 import org.spongepowered.configurate.objectmapping.ConfigSerializable
 import org.spongepowered.configurate.objectmapping.ObjectMapper
 import org.spongepowered.configurate.serialize.SerializationException
@@ -116,7 +117,7 @@ abstract class BasePlugin : JavaPlugin() {
     fun send(audience: Audience, content: I18N<Component>.() -> List<Component>) =
         send(audience, content(i18n))
 
-    fun loaderBuilder() = HoconConfigurationLoader.builder()
+    fun loaderBuilder(): AbstractConfigurationLoader.Builder<*, *> = HoconConfigurationLoader.builder()
         .defaultOptions(configOptions)
 
     fun resource(path: String): InputStream {
@@ -174,9 +175,10 @@ abstract class BasePlugin : JavaPlugin() {
         i18n = AdventureI18NBuilder(settings.node(LOCALE).force()).apply {
             val translations = ArrayList<Translation.Root>()
             val styles = HashMap<String, Style>()
+            val formats = HashMap<List<String>, I18NFormat>()
 
             fun loadI18N(level: LogLevel, path: String, source: () -> BufferedReader) {
-                val (newTls, newStyles) = try {
+                val (newTls, newStyles, newFormats) = try {
                     val node = loaderBuilder().source(source).build().load()
                     I18NLoader.loadAll(node)
                 } catch (ex: ConfigurateException) {
@@ -185,6 +187,7 @@ abstract class BasePlugin : JavaPlugin() {
                 }
                 translations.addAll(newTls)
                 styles.putAll(newStyles)
+                formats.putAll(newFormats)
             }
 
             fun loadLang(root: Path) {
@@ -214,19 +217,12 @@ abstract class BasePlugin : JavaPlugin() {
             // Apply loaded
             translations.forEach(::register)
             styles.forEach(::registerStyle)
+            formats.forEach(::registerFormat)
 
-            log.line(LogLevel.INFO) { "Loaded ${translations.size} translation(s), ${styles.size} style(s), ${"TODO"} format(s)" }
+            log.line(LogLevel.INFO) { "Loaded ${translations.size} translation(s), ${styles.size} style(s), ${formats.size} format(s)" }
         }.build()
 
         chatPrefix = i18n.safe("chat_prefix").join(JoinConfiguration.noSeparators())
         return true
     }
 }
-
-fun JavaPlugin.scheduleDelayed(delay: Long = 0, task: () -> Unit) =
-    Bukkit.getScheduler().scheduleSyncDelayedTask(this, task, delay)
-
-fun JavaPlugin.scheduleRepeating(delay: Long = 0, period: Long = 0, task: () -> Unit) =
-    Bukkit.getScheduler().scheduleSyncRepeatingTask(this, task, delay, period)
-
-fun JavaPlugin.disable() = Bukkit.getPluginManager().disablePlugin(this)
