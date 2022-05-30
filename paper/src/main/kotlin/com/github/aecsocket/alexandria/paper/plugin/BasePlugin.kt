@@ -20,6 +20,7 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.Component.text
 import net.kyori.adventure.text.JoinConfiguration
 import net.kyori.adventure.text.format.Style
+import org.bukkit.NamespacedKey
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.plugin.java.JavaPlugin
@@ -81,6 +82,7 @@ abstract class BasePlugin : JavaPlugin() {
                 .build())
         }
     var chatPrefix: Component = Component.empty()
+    private val keys = HashMap<String, NamespacedKey>()
 
     override fun onEnable() {
         super.onEnable()
@@ -127,6 +129,8 @@ abstract class BasePlugin : JavaPlugin() {
         conn.useCaches = false
         return conn.getInputStream()
     }
+
+    fun key(value: String) = keys.computeIfAbsent(value) { NamespacedKey(this, it) }
 
     protected open fun serverLoad() {
         configOptions = ConfigurationOptions.defaults().serializers {

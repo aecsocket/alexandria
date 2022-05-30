@@ -11,7 +11,11 @@ import cloud.commandframework.execution.CommandExecutionCoordinator
 import cloud.commandframework.minecraft.extras.MinecraftExceptionHandler
 import cloud.commandframework.minecraft.extras.MinecraftHelp
 import cloud.commandframework.paper.PaperCommandManager
+import com.github.aecsocket.alexandria.core.ExceptionLogStrategy
+import com.github.aecsocket.glossa.core.I18N
 import net.kyori.adventure.extra.kotlin.join
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.Component.text
 import net.kyori.adventure.text.JoinConfiguration
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import org.bukkit.command.CommandSender
@@ -56,7 +60,9 @@ open class CloudCommand<P : BasePlugin>(
             .withNoPermissionHandler()
             .withCommandExecutionHandler()
             .withDecorator { msg -> plugin.i18n.safe(plugin.defaultLocale(), "error.command") {
-                sub("message") { listOf(msg)}
+                list("lines") {
+                    sub(listOf(msg))
+                }
             }.join(JoinConfiguration.newlines()) }
             .apply(manager) { it }
 
@@ -80,6 +86,15 @@ open class CloudCommand<P : BasePlugin>(
 
     protected fun perm(vararg string: String) = "$rootName.command.${string.joinToString(".")}"
 
+    class CommandException(val lines: List<Component>, cause: Throwable?) : RuntimeException(cause)
+
+    protected fun error(
+        cause: Throwable? = null,
+        content: I18N<Component>.() -> List<Component>
+    ): Nothing {
+        throw CommandException(content(plugin.i18n), cause)
+    }
+
     protected fun handle(
         ctx: CommandContext<CommandSender>,
         handler: (CommandContext<CommandSender>, CommandSender, Locale) -> Unit
@@ -89,11 +104,14 @@ open class CloudCommand<P : BasePlugin>(
         try {
             handler(ctx, sender, locale)
         } catch (ex: CommandException) {
-            // todo
+            val hover = ExceptionLogStrategy.SIMPLE.format(ex).map { text(it) }.join(JoinConfiguration.newlines())
+            plugin.send(sender) { safe(locale, "error.command") {
+                list("lines") { ex.lines.forEach { line ->
+                    sub(listOf(line.hoverEvent(hover)))
+                } }
+            } }
         }
     }
-
-    class CommandException(cause: Throwable?) : RuntimeException(cause)
 
     fun version(ctx: CommandContext<CommandSender>, sender: CommandSender, locale: Locale) {
         val desc = plugin.description

@@ -21,6 +21,7 @@ dependencies {
     implementation(libs.configurateHocon)
     api(libs.cloudPaper)
     api(libs.cloudMinecraftExtras) { isTransitive = false }
+    compileOnly(libs.packetEvents)
 
     testImplementation(kotlin("test"))
 }

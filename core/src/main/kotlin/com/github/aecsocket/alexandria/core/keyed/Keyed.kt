@@ -4,7 +4,7 @@ import org.intellij.lang.annotations.Pattern
 
 interface Keyed {
     @get:Pattern("[a-z0-9_]")
-    val key: String
+    val id: String
 
     class ValidationException(key: String, index: Int, char: Char)
         : RuntimeException("Invalid character in '$key' at position ${index+1} '$char', allowed: [$CHARACTERS]")
