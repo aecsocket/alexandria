@@ -6,7 +6,7 @@ plugins {
 
 allprojects {
     group = "com.github.aecsocket.alexandria"
-    version = "0.3.4"
+    version = "0.3.5"
 }
 
 subprojects {
@@ -30,7 +30,7 @@ subprojects {
 
     java {
         toolchain {
-            languageVersion.set(JavaLanguageVersion.of(18))
+            languageVersion.set(JavaLanguageVersion.of(17))
         }
     }
 }

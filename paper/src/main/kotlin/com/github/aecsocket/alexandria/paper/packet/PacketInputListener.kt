@@ -71,9 +71,7 @@ class PacketInputListener(
         when (event.packetType) {
             Client.ANIMATION -> {
                 val packet = WrapperPlayClientAnimation(event)
-                player.sendMessage(" > hand = ${packet.hand} | dropping = ${dropping(player)}")
                 if (packet.hand == InteractionHand.MAIN_HAND && !dropping(player)) {
-                    player.sendMessage(" > called")
                     call(Mouse(MOUSE_LEFT, MOUSE_UNDEFINED))
                 }
             }
@@ -153,7 +151,9 @@ class PacketInputListener(
 }
 
 fun scrollDirection(next: Int, last: Int): Int {
-    return if (next < last && next != 0 && last != 8) SCROLL_DOWN
-        else if (next > last && next != 8 && last != 0) SCROLL_UP
+    return if (next == 0 && last == 8) SCROLL_DOWN
+        else if (next == 8 && last == 0) SCROLL_UP
+        else if (next > last) SCROLL_DOWN
+        else if (last > next) SCROLL_UP
         else 0
 }
