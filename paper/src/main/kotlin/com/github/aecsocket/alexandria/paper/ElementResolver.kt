@@ -24,6 +24,7 @@ import org.bukkit.NamespacedKey
 import org.bukkit.World
 import org.bukkit.block.Block
 import org.bukkit.block.Container
+import org.bukkit.block.TileState
 import org.bukkit.craftbukkit.v1_18_R2.CraftServer
 import org.bukkit.craftbukkit.v1_18_R2.CraftWorld
 import org.bukkit.craftbukkit.v1_18_R2.entity.CraftEntity
@@ -31,6 +32,7 @@ import org.bukkit.entity.Entity
 import org.bukkit.entity.Item
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.PlayerInventory
+import org.bukkit.inventory.meta.ItemMeta
 import java.util.*
 
 enum class ElementType {
@@ -79,7 +81,7 @@ sealed interface ServerElement {
         }
     }
 
-    data class OfBlock(val block: Block) : ServerElement {
+    data class OfBlock(val block: Block, val state: TileState) : ServerElement {
         override fun toString() = format(block)
     }
 }
@@ -134,10 +136,9 @@ sealed interface StackHolder {
 
     data class ByBlock(
         val block: Block,
+        val state: Container,
         override val slotNumber: Int
     ) : ByInventory {
-        val state = block.state as Container
-
         override val inventory: Inventory
             get() = state.inventory
 
@@ -310,8 +311,9 @@ class ElementResolver(
 
             val pos = block.blockPos
             val bukkit = world.getBlockAt(pos.x, pos.y, pos.z)
+            val state by lazy { bukkit.getState(false) as TileState }
             if (block.persistentDataContainer.has(marker)) {
-                callback(ServerElement.OfBlock(bukkit))
+                callback(ServerElement.OfBlock(bukkit, state))
                 resolved.marked++
             }
 
@@ -320,7 +322,7 @@ class ElementResolver(
 
             if (block is BaseContainerBlockEntity) {
                 block.contents.forEachIndexed { idx, stack ->
-                    applyStack(stack, StackHolder.ByBlock(bukkit, idx))
+                    applyStack(stack, StackHolder.ByBlock(bukkit, state as Container, idx))
                 }
             }
         }
