@@ -5,9 +5,10 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
 
 inline fun <reified M : ItemMeta> ItemStack.withMeta(action: (M) -> Unit): ItemStack {
-    val meta = itemMeta
-    action(meta as M)
-    itemMeta = meta
+    itemMeta?.let { meta ->
+        action(meta as M)
+        itemMeta = meta
+    }
     return this
 }
 

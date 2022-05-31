@@ -1,6 +1,7 @@
 package com.github.aecsocket.alexandria.paper.extension
 
 import com.github.aecsocket.alexandria.core.vector.Point3
+import com.github.aecsocket.alexandria.core.vector.Polar3
 import com.github.aecsocket.alexandria.core.vector.Vector3
 import org.bukkit.Location
 import org.bukkit.World
@@ -68,3 +69,4 @@ fun Location.copy(
 ) = Location(world, x, y, z, yaw, pitch)
 fun Location.vector() = Vector3(x, y, z)
 fun Location.point() = Point3(blockX, blockY, blockZ)
+fun Location.polar() = Polar3(1.0, yaw.toDouble(), pitch.toDouble())
