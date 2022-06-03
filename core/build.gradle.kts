@@ -5,11 +5,14 @@ plugins {
 repositories {
     mavenLocal()
     mavenCentral()
+    maven("https://jitpack.io")
 }
 
 dependencies {
-    implementation(libs.adventureApi)
-    implementation(libs.adventureExtraKotlin)
+    api(libs.adventureApi)
+    api(libs.adventureExtraKotlin)
+    api(libs.glossaAdventure)
+    api(libs.glossaConfigurate)
     api(libs.configurateCore)
     api(libs.configurateExtraKotlin)
 

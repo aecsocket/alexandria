@@ -15,10 +15,7 @@ repositories {
 dependencies {
     paperDevBundle("$minecraftVersion-R0.1-SNAPSHOT")
     api(projects.alexandriaCore)
-    api(libs.glossaAdventure)
-    api(libs.glossaConfigurate)
-    implementation(libs.adventureExtraKotlin)
-    implementation(libs.configurateHocon)
+    api(libs.configurateHocon)
     api(libs.cloudPaper)
     api(libs.cloudMinecraftExtras) { isTransitive = false }
     compileOnly(libs.packetEvents)
