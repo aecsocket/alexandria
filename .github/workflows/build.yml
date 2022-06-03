@@ -27,9 +27,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-${{ secrets.CACHE_VERSION }}-
 
-      - name: "Build docs"
-        run: ./gradlew dokkaHtmlMultiModule
-      - uses: JamesIves/github-pages-deploy-action@v4
+      - name: "Build"
+        run: ./gradlew build
       - name: "Upload test results"
         uses: actions/upload-artifact@v3
         with:
