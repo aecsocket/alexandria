@@ -6,7 +6,12 @@ plugins {
 
 allprojects {
     group = "com.github.aecsocket.alexandria"
-    version = "0.3.5"
+    version = "0.3.6"
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
 }
 
 subprojects {

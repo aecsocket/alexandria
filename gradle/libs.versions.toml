@@ -3,7 +3,7 @@
 minecraft = "1.18.2"
 
 adventure = "4.10.1"
-glossa = "0.3.1"
+glossa = "0.3.2"
 configurate = "4.1.2"
 cloud = "1.6.2"
 packetEvents = "2.0-SNAPSHOT"

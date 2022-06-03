@@ -1,10 +1,8 @@
-name: "Build"
+name: "Publish docs"
 
 on:
   push:
-    branches: [ "**" ]
-    tags-ignore: [ "**" ]
-  pull_request:
+    branches: [ main ]
 
 jobs:
   build:
@@ -29,16 +27,12 @@ jobs:
 
       - name: "Build docs"
         run: ./gradlew dokkaHtmlMultiModule
-      - uses: JamesIves/github-pages-deploy-action@v4
-      - name: "Upload test results"
-        uses: actions/upload-artifact@v3
+      - uses: JamesIves/github-pages-deploy-action@v4.3.3
         with:
-          name: "test-results-${{ runner.os }}"
-          path: |
-            *build/reports/*
-      - name: "Upload JAR"
-        uses: actions/upload-artifact@v3
-        with:
-          name: "jar"
-          path: |
-            *build/libs/*.jar
+          token: ${{ secrets.DOCS_TOKEN }}
+          repository-name: aecsocket/aecsocket.github.io
+          branch: gh-pages
+          folder: build/dokka/htmlMultiModule
+          target-folder: alexandria/dokka
+          git-config-name: github-actions[bot]
+          git-config-email: 41898282+github-actions[bot]@users.noreply.github.com
