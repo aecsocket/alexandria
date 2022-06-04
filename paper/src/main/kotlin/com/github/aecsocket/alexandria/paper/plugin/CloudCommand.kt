@@ -61,7 +61,7 @@ open class CloudCommand<P : BasePlugin>(
             .withCommandExecutionHandler()
             .withDecorator { msg -> plugin.i18n.safe(plugin.defaultLocale(), "error.command") {
                 list("lines") {
-                    sub(listOf(msg))
+                    sub(msg)
                 }
             }.join(JoinConfiguration.newlines()) }
             .apply(manager) { it }
@@ -107,7 +107,7 @@ open class CloudCommand<P : BasePlugin>(
             val hover = ExceptionLogStrategy.SIMPLE.format(ex).map { text(it) }.join(JoinConfiguration.newlines())
             plugin.send(sender) { safe(locale, "error.command") {
                 list("lines") { ex.lines.forEach { line ->
-                    sub(listOf(line.hoverEvent(hover)))
+                    sub(line.hoverEvent(hover))
                 } }
             } }
         }
@@ -133,7 +133,7 @@ open class CloudCommand<P : BasePlugin>(
         plugin.send(sender) { safe(locale, "command.reload.post") {
             raw("qt_entries") { log.size }
             list("entries") { log.map { record ->
-                sub(safe("command.reload.entry.${record.level.name}") {
+                subList(safe("command.reload.entry.${record.level.name}") {
                     list("lines") { record.lines().map {
                         raw(it)
                     } }
