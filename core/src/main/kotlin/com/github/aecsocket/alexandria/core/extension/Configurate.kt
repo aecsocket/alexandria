@@ -1,6 +1,14 @@
 package com.github.aecsocket.alexandria.core.extension
 
 import io.leangen.geantyref.TypeToken
+import net.kyori.adventure.extra.kotlin.join
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.Component.text
+import net.kyori.adventure.text.JoinConfiguration
+import net.kyori.adventure.text.format.NamedTextColor.*
+import net.kyori.adventure.text.format.Style
+import net.kyori.adventure.text.format.Style.style
+import org.spongepowered.configurate.CommentedConfigurationNode
 import org.spongepowered.configurate.ConfigurationNode
 import org.spongepowered.configurate.serialize.SerializationException
 import org.spongepowered.configurate.serialize.TypeSerializer
@@ -33,3 +41,82 @@ fun ConfigurationNode.forceMap(type: Type) = if (isMap) childrenMap()
 
 fun <T : Any> TypeSerializerCollection.Builder.register(type: KClass<T>, serializer: TypeSerializer<T>) =
     register(type.java, serializer)
+
+data class NodeRenderOptions(
+    val boolean: Style = style(GOLD),
+    val number: Style = style(AQUA),
+    val string: Style = style(WHITE),
+    val scalar: Style = style(WHITE),
+
+    val comment: Style = style(DARK_GREEN),
+    val bracket: Style = style(GRAY),
+    val key: Style = style(YELLOW),
+    val listIndex: Style = style(GRAY),
+
+    val keySeparator: Style = style(GRAY),
+    val itemSeparator: Style = style(GRAY)
+) {
+    companion object {
+        val DEFAULT = NodeRenderOptions()
+    }
+}
+
+fun ConfigurationNode.render(
+    options: NodeRenderOptions = NodeRenderOptions.DEFAULT,
+    showComments: Boolean = true
+): List<Component> {
+    val margin = text("  ")
+
+    val res = when {
+        isMap -> childrenMap()
+            .filter { (_, child) -> !child.empty() }
+            .flatMap { (key, child) ->
+            val start = text()
+                .append(text(key.toString(), options.key))
+                .append(text(": ", options.keySeparator))
+                .build()
+
+            val lines = child.render(options, showComments)
+            if (lines.size == 1) {
+                listOf(start.append(lines[0]))
+            } else {
+                listOf(start) + lines.map { text().append(margin).append(it).build() }
+            }
+        }
+        isList -> {
+            val parts = childrenList().map { it.render(options, showComments) }
+            if (parts.any { it.size != 1 }) {
+                parts.flatMapIndexed { idx, lines ->
+                    val prefix = "${idx+1}. "
+                    val padding = text(" ".repeat(prefix.length))
+                    val start = text(prefix, options.listIndex)
+
+                    if (lines.isEmpty())
+                        listOf(start)
+                    else lines.mapIndexed { cIdx, line ->
+                        (if (cIdx == 0) start else padding).append(line)
+                    }
+                }
+            } else {
+                listOf(text()
+                    .append(text("[", options.bracket))
+                    .append(parts.map { it[0] }.join(JoinConfiguration.separator(text(", ", options.itemSeparator))))
+                    .append(text("]", options.bracket))
+                    .build())
+            }
+        }
+        else -> when (val raw = raw()) {
+            is Boolean -> listOf(text(raw.toString(), options.boolean))
+            is Number -> listOf(text(raw.toString(), options.number))
+            is String -> raw.split('\n').map { text(it, options.string) }
+            else -> listOf(text(raw.toString(), options.scalar))
+        }
+    }
+
+
+    return if (showComments && this is CommentedConfigurationNode) {
+        comment()?.let { comment ->
+            comment.lines().map { text("# $it", options.comment) } + res
+        } ?: res
+    } else res
+}
