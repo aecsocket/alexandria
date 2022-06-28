@@ -38,7 +38,7 @@ data class Sphere(
 data class Box(
     val min: Vector3,
     val max: Vector3,
-    override val angle: Double
+    override val angle: Double = 0.0
 ) : Bound.Oriented {
     val extent by lazy { max - min }
 
@@ -67,8 +67,20 @@ data class Box(
         val far = t2.minComponent
         if (near > far || far < 0)
             return null
-        val normal = (-dir.sign * (t1.yzx.step(t1)) * (t1.zxy.step(t1))).rotateY(angle)
+        /*val normal = (((-dir.sign) *
+                t1.yzx.step(t1)) *
+                t1.zxy.step(t1))
+            .rotateY(angle)*/
+        /*val normal = dir.sign.negated
+            .times(Vector3(t1.y, t1.z, t1.x).step(t1))
+            .times(Vector3(t1.z, t1.x, t1.y).step(t1))
+            .rotateY(angle)*/
+        val normal = (-dir.sign * t1.yzx.step(t1) * t1.zxy.step(t1)).rotateY(angle)
         return Bound.Intersection(near, far, normal)
+    }
+
+    companion object {
+        val ZERO_ONE = Box(Vector3.ZERO, Vector3.ONE)
     }
 }
 

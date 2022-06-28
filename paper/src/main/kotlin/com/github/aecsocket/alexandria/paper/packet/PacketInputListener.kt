@@ -2,15 +2,8 @@ package com.github.aecsocket.alexandria.paper.packet
 
 import com.github.aecsocket.alexandria.core.Input
 import com.github.aecsocket.alexandria.core.Input.*
-import com.github.aecsocket.alexandria.core.Input.Companion.MENU_ADVANCEMENTS
-import com.github.aecsocket.alexandria.core.Input.Companion.MENU_HORSE
-import com.github.aecsocket.alexandria.core.Input.Companion.MOUSE_DOWN
-import com.github.aecsocket.alexandria.core.Input.Companion.MOUSE_LEFT
-import com.github.aecsocket.alexandria.core.Input.Companion.MOUSE_RIGHT
-import com.github.aecsocket.alexandria.core.Input.Companion.MOUSE_UNDEFINED
-import com.github.aecsocket.alexandria.core.Input.Companion.MOUSE_UP
-import com.github.aecsocket.alexandria.core.Input.Companion.SCROLL_DOWN
-import com.github.aecsocket.alexandria.core.Input.Companion.SCROLL_UP
+import com.github.aecsocket.alexandria.core.Input.MouseButton.*
+import com.github.aecsocket.alexandria.core.Input.MenuType.*
 import com.github.retrooper.packetevents.event.PacketListener
 import com.github.retrooper.packetevents.event.PacketReceiveEvent
 import com.github.retrooper.packetevents.protocol.packettype.PacketType.Play.Client
@@ -72,7 +65,7 @@ class PacketInputListener(
             Client.ANIMATION -> {
                 val packet = WrapperPlayClientAnimation(event)
                 if (packet.hand == InteractionHand.MAIN_HAND && !dropping(player)) {
-                    call(Mouse(MOUSE_LEFT, MOUSE_UNDEFINED))
+                    call(Mouse(LEFT, MouseState.UNDEFINED))
                 }
             }
             Client.USE_ITEM -> {
@@ -80,16 +73,16 @@ class PacketInputListener(
                 if (packet.hand == InteractionHand.MAIN_HAND) {
                     // if the item has an animation (e.g. eating, using bow)
                     // client will later send a PLAYER_BLOCK_PLACEMENT to cancel this action
-                    call(Mouse(MOUSE_RIGHT, when ((player.inventory.itemInMainHand as CraftItemStack).handle.useAnimation) {
-                        UseAnim.NONE -> MOUSE_UNDEFINED
-                        else -> MOUSE_DOWN
+                    call(Mouse(RIGHT, when ((player.inventory.itemInMainHand as CraftItemStack).handle.useAnimation) {
+                        UseAnim.NONE -> MouseState.UNDEFINED
+                        else -> MouseState.DOWN
                     }))
                 }
             }
             Client.PLAYER_BLOCK_PLACEMENT -> {
                 val packet = WrapperPlayClientPlayerBlockPlacement(event)
                 if (packet.hand == InteractionHand.MAIN_HAND) {
-                    call(Mouse(MOUSE_RIGHT, MOUSE_UNDEFINED))
+                    call(Mouse(RIGHT, MouseState.UNDEFINED))
                 }
             }
             Client.PLAYER_DIGGING -> {
@@ -103,11 +96,11 @@ class PacketInputListener(
                         dropped(player)
                     }
 
-                    DiggingAction.START_DIGGING -> call(Mouse(MOUSE_LEFT, MOUSE_DOWN))
+                    DiggingAction.START_DIGGING -> call(Mouse(LEFT, MouseState.DOWN))
                     DiggingAction.CANCELLED_DIGGING,
-                    DiggingAction.FINISHED_DIGGING -> call(Mouse(MOUSE_LEFT, MOUSE_UP))
+                    DiggingAction.FINISHED_DIGGING -> call(Mouse(LEFT, MouseState.UP))
 
-                    DiggingAction.RELEASE_USE_ITEM -> call(Mouse(MOUSE_RIGHT, MOUSE_UP))
+                    DiggingAction.RELEASE_USE_ITEM -> call(Mouse(RIGHT, MouseState.UP))
                     else -> {}
                 }
             }
@@ -115,8 +108,10 @@ class PacketInputListener(
                 val packet = WrapperPlayClientHeldItemChange(event)
                 val next = packet.slot
                 val last = player.inventory.heldItemSlot
-                call(HeldItem(scrollDirection(next, last))) {
-                    player.inventory.heldItemSlot = last
+                scrollDirection(next, last)?.let { direction ->
+                    call(HeldItem(direction)) {
+                        player.inventory.heldItemSlot = last
+                    }
                 }
             }
             Client.ENTITY_ACTION -> {
@@ -127,7 +122,7 @@ class PacketInputListener(
                     WrapperPlayClientEntityAction.Action.START_SPRINTING -> Sprint(true)
                     WrapperPlayClientEntityAction.Action.STOP_SPRINTING -> Sprint(false)
                     WrapperPlayClientEntityAction.Action.LEAVE_BED -> LeaveBed
-                    WrapperPlayClientEntityAction.Action.OPEN_HORSE_INVENTORY -> Menu(MENU_HORSE, true)
+                    WrapperPlayClientEntityAction.Action.OPEN_HORSE_INVENTORY -> Menu(HORSE, true)
                     WrapperPlayClientEntityAction.Action.START_JUMPING_WITH_HORSE -> HorseJump(true)
                     WrapperPlayClientEntityAction.Action.STOP_JUMPING_WITH_HORSE -> HorseJump(false)
                     WrapperPlayClientEntityAction.Action.START_FLYING_WITH_ELYTRA -> ElytraFlight
@@ -141,8 +136,8 @@ class PacketInputListener(
             Client.ADVANCEMENT_TAB -> {
                 val packet = WrapperPlayClientAdvancementTab(event)
                 when (packet.action) {
-                    WrapperPlayClientAdvancementTab.Action.OPENED_TAB -> Menu(MENU_ADVANCEMENTS, true)
-                    WrapperPlayClientAdvancementTab.Action.CLOSED_SCREEN -> Menu(MENU_ADVANCEMENTS, false)
+                    WrapperPlayClientAdvancementTab.Action.OPENED_TAB -> Menu(ADVANCEMENTS, true)
+                    WrapperPlayClientAdvancementTab.Action.CLOSED_SCREEN -> Menu(ADVANCEMENTS, false)
                     else -> null
                 }?.let { call(it) }
             }
@@ -150,10 +145,10 @@ class PacketInputListener(
     }
 }
 
-fun scrollDirection(next: Int, last: Int): Int {
-    return if (next == 0 && last == 8) SCROLL_DOWN
-        else if (next == 8 && last == 0) SCROLL_UP
-        else if (next > last) SCROLL_DOWN
-        else if (last > next) SCROLL_UP
-        else 0
+fun scrollDirection(next: Int, last: Int): ScrollDirection? {
+    return if (next == 0 && last == 8) ScrollDirection.DOWN
+        else if (next == 8 && last == 0) ScrollDirection.UP
+        else if (next > last) ScrollDirection.DOWN
+        else if (last > next) ScrollDirection.UP
+        else null
 }

@@ -42,6 +42,9 @@ fun ConfigurationNode.forceMap(type: Type) = if (isMap) childrenMap()
 fun <T : Any> TypeSerializerCollection.Builder.register(type: KClass<T>, serializer: TypeSerializer<T>) =
     register(type.java, serializer)
 
+fun <T : Any> TypeSerializerCollection.Builder.registerExact(type: KClass<T>, serializer: TypeSerializer<T>) =
+    registerExact(type.java, serializer)
+
 data class NodeRenderOptions(
     val boolean: Style = style(GOLD),
     val number: Style = style(AQUA),
@@ -54,7 +57,7 @@ data class NodeRenderOptions(
     val listIndex: Style = style(GRAY),
 
     val keySeparator: Style = style(GRAY),
-    val itemSeparator: Style = style(GRAY)
+    val itemSeparator: Style = style(GRAY),
 ) {
     companion object {
         val DEFAULT = NodeRenderOptions()

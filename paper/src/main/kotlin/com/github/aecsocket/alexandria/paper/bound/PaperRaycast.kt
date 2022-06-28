@@ -4,8 +4,10 @@ import com.github.aecsocket.alexandria.core.bound.*
 import com.github.aecsocket.alexandria.core.vector.Vector3
 import com.github.aecsocket.alexandria.paper.extension.vector
 import net.minecraft.world.phys.AABB
+import org.bukkit.Material
 import org.bukkit.World
 import org.bukkit.block.Block
+import org.bukkit.block.data.Waterlogged
 import org.bukkit.craftbukkit.v1_18_R2.CraftWorld
 import org.bukkit.entity.Entity
 import kotlin.math.sign
@@ -18,33 +20,40 @@ possible optimizations:
  */
 
 sealed interface PaperBoundable : Boundable {
-    val name: String
-    val isWater: Boolean
+    val fluid: Material?
 
     data class OfBlock(
         val block: Block,
-        override val name: String,
-        override val isWater: Boolean
+        override val bound: Bound,
+        override val fluid: Material?
     ) : PaperBoundable {
         override val origin = block.location.vector()
-        override val bound = block.bound()
+
+        override fun toString() =
+            "OfBlock(${block.type} fluid=$fluid)"
     }
 
     data class OfEntity(
-        val entity: Entity,
-        override val name: String
+        val entity: Entity
     ) : PaperBoundable {
         override val origin = entity.location.vector()
         override val bound = entity.bound()
-        override val isWater: Boolean
-            get() = false
+        override val fluid: Material?
+            get() = null
+
+        override fun toString() =
+            "OfEntity(${entity.name})"
     }
 }
 
 class PaperRaycast(
     val world: World,
-    val epsilon: Double
+    val options: Options
 ) : Raycast<PaperBoundable>() {
+    data class Options(
+        val epsilon: Double = 1.0
+    )
+
     override fun cast(
         ray: Ray,
         maxDistance: Double,
@@ -93,21 +102,45 @@ class PaperRaycast(
             while (true) {
                 i++
                 val block = world.getBlockAt(xi, yi, zi)
-                val boundable = PaperBoundable.OfBlock(block, "block", false) // todo
-                if (!test(boundable))
-                    continue
-                /*
-                TODO: this intersection test is ran in world space rather than block-bound space
-                e.g. a block at (10, 20, 30) would have a ray around (10, 20, 30) intersect a bound
-                {min = (10, 20, 30) max = (11, 21, 31)}.
-                this completely screws up oriented bounds and rotations, and should be fixed,
-                because the rotation origin is (0, 0, 0) yet that's the *world origin*
-                and I don't think using (0.5, 0.5, 0.5) and intersecting in block-bound space is a solution
-                either, because different parts of a block may want to have a different rotation origin
-                 */
-                intersects(ray, boundable)?.let {
-                    return it
+
+                val boundables = when (val type = block.type) {
+                    Material.AIR, Material.WATER, Material.LAVA -> listOf(PaperBoundable.OfBlock(block, Box.ZERO_ONE, type))
+                    else -> {
+                        if (type.isOccluding)
+                            listOf(PaperBoundable.OfBlock(block, Box.ZERO_ONE, null))
+                        else {
+                            val blockData = block.blockData
+                            listOf(
+                                PaperBoundable.OfBlock(block, block.bound(), null)
+                            ) + if (blockData is Waterlogged && blockData.isWaterlogged)
+                                listOf(PaperBoundable.OfBlock(block, Box.ZERO_ONE, Material.WATER))
+                            else emptyList()
+                        }
+                    }
                 }
+
+                boundables
+                    .filter(test)
+                    .mapNotNull {
+                        /*
+                        this intersection test is ran in world space rather than block-bound space
+                        e.g. a block at (10, 20, 30) would have a ray around (10, 20, 30) intersect a bound
+                        {min = (10, 20, 30) max = (11, 21, 31)}.
+                        this completely screws up oriented bounds and rotations, and should be fixed,
+                        because the rotation origin is (0, 0, 0) yet that's the *world origin*
+                        and I don't think using (0.5, 0.5, 0.5) and intersecting in block-bound space is a solution
+                        either, because different parts of a block may want to have a different rotation origin
+
+                        tldr: if you're not using oriented bounds for this, it works fine
+                              otherwise it will break completely
+
+                        update: block bounds cannot be overridden, so rotatable bounds will never be tested here
+                         */
+                        intersects(ray, it)
+                    }
+                    .minByOrNull { it.tIn }?.let {
+                        return it
+                    }
 
                 if (xb < yb) {
                     if (xb < zb) {
@@ -145,11 +178,11 @@ class PaperRaycast(
 
         var closest: Result.Hit<PaperBoundable.OfEntity>? = null
         world.entities.get(AABB(
-            min.x - epsilon, min.y - epsilon, min.z - epsilon,
-            max.x + epsilon, max.y + epsilon, max.z + epsilon
+            min.x - options.epsilon, min.y - options.epsilon, min.z - options.epsilon,
+            max.x + options.epsilon, max.y + options.epsilon, max.z + options.epsilon
         )) { nms ->
             val entity = nms.bukkitEntity
-            val boundable = PaperBoundable.OfEntity(entity, "entity") // todo
+            val boundable = PaperBoundable.OfEntity(entity) // todo
             if (test(boundable)) {
                 intersects(ray, boundable)?.let { hit ->
                     closest = closest?.let {
@@ -162,5 +195,5 @@ class PaperRaycast(
         return closest ?: Result.Miss(ray, maxDistance)
     }
 
-    fun inWorld(world: World) = PaperRaycast(world, epsilon)
+    fun inWorld(world: World) = PaperRaycast(world, options)
 }

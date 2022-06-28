@@ -9,8 +9,8 @@ fun File.walkPathed(
         if (!onEnter(file, name, path))
             return
         if (file.isDirectory) {
-            list()?.forEach { name ->
-                walk(resolve(name), name, path + name)
+            list()?.forEach { child ->
+                walk(resolve(child), child, path + child)
             }
         }
     }

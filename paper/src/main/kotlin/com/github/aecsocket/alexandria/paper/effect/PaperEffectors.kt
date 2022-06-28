@@ -62,6 +62,6 @@ class PaperEffectors(
     fun world(world: World): Effector = WorldEffector(world)
 
     companion object {
-        fun particleByKey(key: Key) = Registry.PARTICLE_TYPE.get(key.asLocation())?.let { CraftParticle.toBukkit(it) }
+        fun particleByKey(key: Key) = Registry.PARTICLE_TYPE.get(key.location())?.let { CraftParticle.toBukkit(it) }
     }
 }

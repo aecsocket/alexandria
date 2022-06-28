@@ -12,13 +12,12 @@ abstract class Raycast<B : Boundable> {
     sealed interface Result<out B> {
         val ray: Ray
         val travelled: Double
-        val position: Vector3
 
         data class Miss<B>(
             override val ray: Ray,
             override val travelled: Double
         ) : Result<B> {
-            override val position by lazy { ray.point(travelled) }
+            val position by lazy { ray.point(travelled) }
         }
 
         data class Hit<B>(
@@ -34,8 +33,6 @@ abstract class Raycast<B : Boundable> {
             override val travelled = tIn
 
             val posIn by lazy { ray.point(tIn) }
-
-            override val position = posIn
 
             val posOut by lazy { ray.point(tOut) }
 

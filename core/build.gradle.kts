@@ -15,6 +15,7 @@ dependencies {
     api(libs.glossaConfigurate)
     api(libs.configurateCore)
     api(libs.configurateExtraKotlin)
+    api(libs.cloudCore)
 
     testImplementation(kotlin("test"))
 }

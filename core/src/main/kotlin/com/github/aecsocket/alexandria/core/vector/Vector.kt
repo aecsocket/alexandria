@@ -56,7 +56,7 @@ abstract class Vector<T : Vector<T>> {
 
     fun angle(to: T) = acos(clamp(dot(to) / (length * to.length), -1.0, 1.0))
 
-    fun step(other: T) = map(other) { a, b -> if (a >= b) 1.0 else 0.0 }
+    fun step(other: T) = map(other) { a, b -> if (b < a) 0.0 else 1.0 }
 
     companion object {
         fun <V : Vector<V>> lerp(from: V, to: V, factor: Double) = from.map(to) { a, b -> a + (b - a) * factor }

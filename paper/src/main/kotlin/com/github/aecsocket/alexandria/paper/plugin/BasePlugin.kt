@@ -20,7 +20,6 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.Component.text
 import net.kyori.adventure.text.JoinConfiguration
 import net.kyori.adventure.text.format.Style
-import org.bukkit.NamespacedKey
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.plugin.java.JavaPlugin
@@ -51,6 +50,8 @@ private const val LOG_LEVEL = "log_level"
 private const val LOCALE = "locale"
 private const val EXCEPTION_LOGGING = "exception_logging"
 
+typealias ConfigOptionsAction = (TypeSerializerCollection.Builder, ObjectMapper.Factory.Builder) -> Unit
+
 @ConfigSerializable
 data class PluginManifest(
     val savedPaths: Map<String, ResourceEntry> = emptyMap(),
@@ -69,7 +70,11 @@ data class PluginManifest(
     }
 }
 
-abstract class BasePlugin : JavaPlugin() {
+abstract class BasePlugin<S : BasePlugin.LoadScope> : JavaPlugin() {
+    interface LoadScope {
+        fun onConfigOptionsSetup(action: ConfigOptionsAction)
+    }
+
     protected lateinit var manifest: PluginManifest
     lateinit var i18n: I18N<Component>
     val log = Logging(logger)
@@ -82,7 +87,11 @@ abstract class BasePlugin : JavaPlugin() {
                 .build())
         }
     var chatPrefix: Component = Component.empty()
-    private val keys = HashMap<String, NamespacedKey>()
+
+    protected abstract fun createLoadScope(configOptionActions: MutableList<ConfigOptionsAction>): S
+
+    private val onLoad = ArrayList<S.() -> Unit>()
+    private var loaded = false
 
     override fun onEnable() {
         super.onEnable()
@@ -110,11 +119,10 @@ abstract class BasePlugin : JavaPlugin() {
 
     fun locale(sender: CommandSender) = if (sender is Player) sender.locale() else defaultLocale()
 
-    fun send(audience: Audience, lines: List<Component>) {
-        lines.forEach {
-            audience.sendMessage(text().append(chatPrefix).append(it))
-        }
-    }
+    fun asChat(lines: List<Component>) = lines.map { text().append(chatPrefix).append(it) }
+
+    fun send(audience: Audience, lines: List<Component>) =
+        asChat(lines).forEach { audience.sendMessage(it) }
 
     fun send(audience: Audience, content: I18N<Component>.() -> List<Component>) =
         send(audience, content(i18n))
@@ -130,19 +138,29 @@ abstract class BasePlugin : JavaPlugin() {
         return conn.getInputStream()
     }
 
-    fun key(value: String) = keys.computeIfAbsent(value) { NamespacedKey(this, it) }
+    fun onLoad(action: S.() -> Unit) {
+        if (loaded)
+            throw IllegalStateException("Plugin has already been loaded")
+        onLoad.add(action)
+    }
 
-    protected open fun serverLoad() {
+    protected open fun serverLoad(): Boolean {
+        val configOptionsActions = ArrayList<ConfigOptionsAction>()
+        onLoad.forEach { it(createLoadScope(configOptionsActions)) }
+        loaded = true
         configOptions = ConfigurationOptions.defaults().serializers {
-            val mapper =  ObjectMapper.factoryBuilder().addDiscoverer(dataClassFieldDiscoverer())
+            val mapper = ObjectMapper.factoryBuilder().addDiscoverer(dataClassFieldDiscoverer())
             setupConfigOptions(it, mapper)
+            configOptionsActions.forEach { func -> func(it, mapper) }
             it.registerAnnotatedObjects(mapper.build())
         }
         val (loadLog, success) = load()
         loadLog.forEach { log.record(it) }
         if (!success) {
             disable()
+            return false
         }
+        return true
     }
 
     protected open fun setupConfigOptions(
