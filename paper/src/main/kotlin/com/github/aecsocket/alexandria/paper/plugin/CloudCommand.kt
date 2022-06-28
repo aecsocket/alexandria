@@ -17,6 +17,7 @@ import cloud.commandframework.paper.PaperCommandManager
 import com.github.aecsocket.alexandria.core.ExceptionLogStrategy
 import com.github.aecsocket.alexandria.core.extension.render
 import com.github.aecsocket.glossa.core.I18N
+import io.papermc.paper.util.StacktraceDeobfuscator
 import net.kyori.adventure.extra.kotlin.join
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.Component.newline
@@ -142,6 +143,7 @@ open class CloudCommand<P : BasePlugin<*>>(
             handler(ctx, sender, locale)
         } catch (ex: CommandException) {
             ex.cause?.let { cause ->
+                StacktraceDeobfuscator.INSTANCE.deobfuscateThrowable(cause)
                 val stackTrace = cause.render()
                 val hover = (
                     stackTrace + newline() + plugin.i18n.safe("click_to_copy")
@@ -162,7 +164,9 @@ open class CloudCommand<P : BasePlugin<*>>(
                 } }
             } ?: run {
                 plugin.send(sender) { safe(locale, "error.command") {
-                    list("lines") { ex.lines }
+                    list("lines") { ex.lines.forEach {
+                        sub(it)
+                    } }
                 } }
             }
         }

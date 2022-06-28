@@ -58,8 +58,8 @@ private fun Throwable.renderInternal(
 
     val margin = text("  ")
 
-    val ourTrace = stackTrace
-    val lines: MutableList<Component> = ourTrace.dropLast(framesInCommon).map { element ->
+    val stackTrace = this.stackTrace
+    val lines: MutableList<Component> = stackTrace.dropLast(framesInCommon).map { element ->
         text { res ->
             res.append(margin)
             val classSegments = element.className.split('.')
@@ -100,7 +100,8 @@ private fun Throwable.renderInternal(
     }
 
     suppressed.forEach { ex ->
-        val (exSummary, exLines) = ex.renderInternal(options, framesInCommon(ex.stackTrace, ourTrace))
+        val childTrace = ex.stackTrace
+        val (exSummary, exLines) = ex.renderInternal(options, framesInCommon(childTrace, stackTrace))
         lines.add(text()
             .append(text("Suppressed: ", options.suppressed))
             .append(exSummary)
@@ -116,7 +117,8 @@ private fun Throwable.renderInternal(
     }
 
     cause?.let { ex ->
-        val (exSummary, exLines) = ex.renderInternal(options, framesInCommon(ex.stackTrace, ourTrace))
+        val childTrace = ex.stackTrace
+        val (exSummary, exLines) = ex.renderInternal(options, framesInCommon(childTrace, stackTrace))
         lines.add(text()
             .append(text("Caused by: ", options.causedBy))
             .append(exSummary)
