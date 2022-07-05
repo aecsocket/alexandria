@@ -5,8 +5,8 @@ import net.kyori.adventure.key.Key
 
 data class ParticleEffect(
     val particle: Key,
-    val count: Double,
-    val size: Vector3,
-    val speed: Double,
+    val count: Double = 0.0,
+    val size: Vector3 = Vector3.Zero,
+    val speed: Double = 0.0,
     val data: Any? = null
 )

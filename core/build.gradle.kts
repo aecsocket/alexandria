@@ -11,6 +11,7 @@ repositories {
 dependencies {
     api(libs.adventureApi)
     api(libs.adventureExtraKotlin)
+    api(libs.adventureTextLoggerSlf4j)
     api(libs.glossaAdventure)
     api(libs.glossaConfigurate)
     api(libs.configurateCore)

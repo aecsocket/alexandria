@@ -18,16 +18,14 @@ import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.plugin.Plugin
 
-class PaperEffectors(
-    plugin: Plugin
-) {
+class PaperEffectors {
     private val players = HashMap<Player, PlayerEffector>()
 
-    init {
+    fun init(plugin: Plugin) {
         plugin.registerEvents(object : Listener {
             @EventHandler
-            fun onQuit(event: PlayerQuitEvent) {
-                players.remove(event.player)
+            fun PlayerQuitEvent.on() {
+                players.remove(player)
             }
         })
     }
@@ -60,8 +58,6 @@ class PaperEffectors(
     fun player(player: Player): Effector = players.computeIfAbsent(player) { PlayerEffector(it) }
 
     fun world(world: World): Effector = WorldEffector(world)
-
-    companion object {
-        fun particleByKey(key: Key) = Registry.PARTICLE_TYPE.get(key.location())?.let { CraftParticle.toBukkit(it) }
-    }
 }
+
+fun particleByKey(key: Key) = Registry.PARTICLE_TYPE.get(key.location())?.let { CraftParticle.toBukkit(it) }

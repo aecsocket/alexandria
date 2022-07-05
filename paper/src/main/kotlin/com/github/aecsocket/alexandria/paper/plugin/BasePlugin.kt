@@ -1,11 +1,11 @@
 package com.github.aecsocket.alexandria.paper.plugin
 
-import com.github.aecsocket.alexandria.core.ExceptionLogStrategy
 import com.github.aecsocket.alexandria.core.LogLevel
 import com.github.aecsocket.alexandria.core.LogList
 import com.github.aecsocket.alexandria.core.Logging
 import com.github.aecsocket.alexandria.core.extension.force
 import com.github.aecsocket.alexandria.core.extension.register
+import com.github.aecsocket.alexandria.core.loggingOf
 import com.github.aecsocket.alexandria.core.serializer.Serializers
 import com.github.aecsocket.alexandria.paper.extension.disable
 import com.github.aecsocket.alexandria.paper.extension.scheduleDelayed
@@ -48,7 +48,6 @@ private const val PATH_SETTINGS = "settings.conf"
 private const val PATH_LANG = "lang"
 private const val LOG_LEVEL = "log_level"
 private const val LOCALE = "locale"
-private const val EXCEPTION_LOGGING = "exception_logging"
 
 typealias ConfigOptionsAction = (TypeSerializerCollection.Builder, ObjectMapper.Factory.Builder) -> Unit
 
@@ -77,7 +76,7 @@ abstract class BasePlugin<S : BasePlugin.LoadScope> : JavaPlugin() {
 
     protected lateinit var manifest: PluginManifest
     lateinit var i18n: I18N<Component>
-    val log = Logging(logger)
+    val log = loggingOf(logger)
     var configOptions: ConfigurationOptions = ConfigurationOptions.defaults()
         .serializers {
             it.register(PluginManifest.ResourceEntry::class, PluginManifest.ResourceEntry.Serializer)
@@ -121,8 +120,19 @@ abstract class BasePlugin<S : BasePlugin.LoadScope> : JavaPlugin() {
 
     fun asChat(lines: List<Component>) = lines.map { text().append(chatPrefix).append(it) }
 
-    fun send(audience: Audience, lines: List<Component>) =
-        asChat(lines).forEach { audience.sendMessage(it) }
+    fun send(audience: Audience, lines: List<Component>) {
+        asChat(lines).forEach {
+            // send as separate messages instead of joined with newlines
+            // because console logging:
+            /*
+            [12:40:20 INFO]: {sokol} Reloaded with 3 messages:
+            {sokol}   · Loaded 3 translation(s), 7 style(s), 24 format(s)
+            {sokol}   · Registered 2x PaperComponent
+            {sokol}   · Registered 1x PaperBlueprint
+             */
+            audience.sendMessage(it)
+        }
+    }
 
     fun send(audience: Audience, content: I18N<Component>.() -> List<Component>) =
         send(audience, content(i18n))
@@ -184,7 +194,7 @@ abstract class BasePlugin<S : BasePlugin.LoadScope> : JavaPlugin() {
             if (!loadInternal(log, settings))
                 return LoadResult(log, false)
         } catch (ex: Exception) {
-            log.line(LogLevel.ERROR, ex) { "Could not load settings from $PATH_SETTINGS" }
+            log.line(LogLevel.Error, ex) { "Could not load settings from $PATH_SETTINGS" }
             return LoadResult(log, false)
         }
         return LoadResult(log, true)
@@ -192,7 +202,6 @@ abstract class BasePlugin<S : BasePlugin.LoadScope> : JavaPlugin() {
 
     protected open fun loadInternal(log: LogList, settings: ConfigurationNode): Boolean {
         this.log.level = LogLevel.valueOf(settings.node(LOG_LEVEL).force())
-        this.log.exceptionStrategy = ExceptionLogStrategy.valueOf(settings.node(EXCEPTION_LOGGING).force())
 
         i18n = AdventureI18NBuilder(settings.node(LOCALE).force()).apply {
             val translations = ArrayList<Translation.Root>()
@@ -215,14 +224,14 @@ abstract class BasePlugin<S : BasePlugin.LoadScope> : JavaPlugin() {
             fun loadLang(root: Path) {
                 Files.walkFileTree(root, object : SimpleFileVisitor<Path>() {
                     override fun visitFile(path: Path, attrs: BasicFileAttributes): FileVisitResult {
-                        loadI18N(LogLevel.WARNING, path.toString()) {
+                        loadI18N(LogLevel.Warning, path.toString()) {
                             Files.newBufferedReader(path, StandardCharsets.UTF_8)
                         }
                         return FileVisitResult.CONTINUE
                     }
 
                     override fun visitFileFailed(path: Path, ex: IOException): FileVisitResult {
-                        log.line(LogLevel.WARNING, ex) { "Could not view language resource $path" }
+                        log.line(LogLevel.Warning, ex) { "Could not view language resource $path" }
                         return FileVisitResult.CONTINUE
                     }
                 })
@@ -230,7 +239,7 @@ abstract class BasePlugin<S : BasePlugin.LoadScope> : JavaPlugin() {
 
             // Load from jar
             for (path in manifest.langPaths) {
-                loadI18N(LogLevel.ERROR, "(jar) $path") { resource(path).bufferedReader() }
+                loadI18N(LogLevel.Error, "(jar) $path") { resource(path).bufferedReader() }
             }
 
             // Load from fs
@@ -241,7 +250,7 @@ abstract class BasePlugin<S : BasePlugin.LoadScope> : JavaPlugin() {
             styles.forEach(::registerStyle)
             formats.forEach(::registerFormat)
 
-            log.line(LogLevel.INFO) { "Loaded ${translations.size} translation(s), ${styles.size} style(s), ${formats.size} format(s)" }
+            log.line(LogLevel.Info) { "Loaded ${translations.size} translation(s), ${styles.size} style(s), ${formats.size} format(s)" }
         }.build()
 
         chatPrefix = i18n.safe("chat_prefix").join(JoinConfiguration.noSeparators())

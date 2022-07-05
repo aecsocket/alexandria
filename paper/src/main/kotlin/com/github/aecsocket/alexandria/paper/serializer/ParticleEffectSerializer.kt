@@ -3,11 +3,10 @@ package com.github.aecsocket.alexandria.paper.serializer
 import com.github.aecsocket.alexandria.core.effect.ParticleEffect
 import com.github.aecsocket.alexandria.core.extension.force
 import com.github.aecsocket.alexandria.core.vector.Vector3
-import com.github.aecsocket.alexandria.paper.effect.PaperEffectors
+import com.github.aecsocket.alexandria.paper.effect.particleByKey
 import net.kyori.adventure.key.Key
 import org.spongepowered.configurate.ConfigurationNode
 import org.spongepowered.configurate.kotlin.extensions.get
-import org.spongepowered.configurate.serialize.SerializationException
 import org.spongepowered.configurate.serialize.TypeSerializer
 import java.lang.reflect.Type
 
@@ -31,7 +30,7 @@ object ParticleEffectSerializer : TypeSerializer<ParticleEffect> {
 
     override fun deserialize(type: Type, node: ConfigurationNode): ParticleEffect {
         val particle = node.node(PARTICLE).force<Key>()
-        val data = PaperEffectors.particleByKey(particle)?.let {
+        val data = particleByKey(particle)?.let {
             when (val dataType = it.dataType) {
                 Void::class.java -> null
                 /* note: it's valid to have the data be null here
@@ -44,7 +43,7 @@ object ParticleEffectSerializer : TypeSerializer<ParticleEffect> {
         return ParticleEffect(
             node.node(PARTICLE).force(),
             node.node(COUNT).get { 0.0 },
-            node.node(SIZE).get { Vector3.ZERO },
+            node.node(SIZE).get { Vector3.Zero },
             node.node(SPEED).get { 0.0 },
             data
         )

@@ -38,15 +38,16 @@ data class Sphere(
 data class Box(
     val min: Vector3,
     val max: Vector3,
+    val origin: Vector3 = Vector3.Zero,
     override val angle: Double = 0.0
 ) : Bound.Oriented {
     val extent by lazy { max - min }
 
     val center by lazy { min.midpoint(max) }
 
-    override fun translated(vector: Vector3) = Box(min + vector, max + vector, angle)
+    override fun translated(vector: Vector3) = Box(min + vector, max + vector, origin + vector, angle)
 
-    override fun oriented(angle: Double) = Box(min, max, angle)
+    override fun oriented(angle: Double) = Box(min, max, origin, angle)
 
     override fun intersects(ray: Ray): Bound.Intersection? {
         val offset = -center
@@ -54,7 +55,7 @@ data class Box(
         val (orig, dir) = if (angle.compareTo(0) == 0) {
             ray.origin + offset to ray.direction
         } else {
-            (ray.origin - center).rotateY(-angle) + center + offset to
+            (ray.origin - origin).rotateY(-angle) + origin + offset to
                 ray.direction.rotateY(-angle)
         }
         val invDir = dir.reciprocal
@@ -67,20 +68,13 @@ data class Box(
         val far = t2.minComponent
         if (near > far || far < 0)
             return null
-        /*val normal = (((-dir.sign) *
-                t1.yzx.step(t1)) *
-                t1.zxy.step(t1))
-            .rotateY(angle)*/
-        /*val normal = dir.sign.negated
-            .times(Vector3(t1.y, t1.z, t1.x).step(t1))
-            .times(Vector3(t1.z, t1.x, t1.y).step(t1))
-            .rotateY(angle)*/
         val normal = (-dir.sign * t1.yzx.step(t1) * t1.zxy.step(t1)).rotateY(angle)
         return Bound.Intersection(near, far, normal)
     }
 
     companion object {
-        val ZERO_ONE = Box(Vector3.ZERO, Vector3.ONE)
+        val ZeroOne = Box(Vector3.Zero, Vector3.One, Vector3.Zero)
+        val CenteredOne = Box(Vector3(-0.5), Vector3(0.5))
     }
 }
 

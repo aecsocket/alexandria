@@ -204,8 +204,8 @@ data class Vector3(val x: Double, val y: Double, val z: Double) : Vector<Vector3
     override fun toString() = "($x, $y, $z)"
 
     companion object {
-        val ZERO = Vector3(0.0)
-        val ONE = Vector3(1.0)
+        val Zero = Vector3(0.0)
+        val One = Vector3(1.0)
 
         fun lerp(from: Vector3, to: Vector3, factor: Double) = Vector.lerp(from, to, factor)
 

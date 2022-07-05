@@ -1,8 +1,8 @@
 package com.github.aecsocket.alexandria.core
 
+import com.github.aecsocket.alexandria.core.extension.render
 import net.kyori.adventure.text.Component
-import java.io.PrintWriter
-import java.io.StringWriter
+import net.kyori.adventure.text.Component.text
 import java.util.logging.Level
 import java.util.logging.Logger
 
@@ -14,72 +14,25 @@ data class LogLevel(
     val prefix: String
 ) {
     companion object {
-        @JvmStatic
-        fun escape(text: String) = "\u001b[${text}m"
+        private fun esc(text: String) = "\u001b[${text}m"
 
-        @JvmStatic
-        fun prefix(name: String, background: Int, post: Int? = null) =
-            escape("30;4${background}") + " $name " + escape("0${if (post == null) "" else ";3$post"}")
+        private fun prefix(symbol: String, background: Int, post: Int? = null, foreground: Int = 0) =
+            esc("38;5;${foreground};48;5;${background}") + " $symbol " + esc("0${if (post == null) "" else ";3$post"}")
 
-        @JvmStatic val VERBOSE =  LogLevel("verbose", -1, prefix("VRB", 4))
-        @JvmStatic val INFO =  LogLevel( "info", 0, prefix("INF", 2))
-        @JvmStatic val WARNING =  LogLevel( "warning", 1, prefix("WRN", 3, 3))
-        @JvmStatic val ERROR = LogLevel( "error", 2, prefix("ERR", 1, 1))
+        val Verbose =  LogLevel("verbose", -1, prefix("V", 4, 7))
+        val Info =  LogLevel( "info", 0, prefix("I", 2))
+        val Warning =  LogLevel( "warning", 1, prefix("W", 3, 3))
+        val Error = LogLevel( "error", 2, prefix("E", 1, 1))
 
-        @JvmStatic val VALUES = mapOf(
-            VERBOSE.name to VERBOSE,
-            INFO.name to INFO,
-            WARNING.name to WARNING,
-            ERROR.name to ERROR
+        val Values = mapOf(
+            Verbose.name to Verbose,
+            Info.name to Info,
+            Warning.name to Warning,
+            Error.name to Error
         )
 
-        @JvmStatic
-        fun valueOf(name: String) = VALUES[name]
-            ?: throw IllegalArgumentException("Invalid log level '$name', allowed: ${VALUES.keys}")
-    }
-}
-
-fun interface ExceptionLogStrategy {
-    fun format(ex: Throwable): List<String>
-
-    companion object {
-        @JvmStatic
-        val COMPACT = ExceptionLogStrategy { ex ->
-            ex.message?.let { listOf(it) } ?: emptyList()
-        }
-
-        @JvmStatic
-        val SIMPLE = ExceptionLogStrategy { ex ->
-            fun lines(ex: Throwable): List<String> {
-                val type = ex.javaClass.simpleName
-                val lines = ex.message?.split('\n') ?: emptyList()
-                return (if (lines.isEmpty()) listOf(type) else {
-                    val prefix = "$type: "
-                    val padding = " ".repeat(prefix.length)
-                    lines.mapIndexed { idx, line ->
-                        (if (idx == 0) prefix else padding) + line
-                    }
-                }) +
-                    (ex.cause?.let { lines(it) } ?: emptyList())
-            }
-            lines(ex)
-        }
-
-        @JvmStatic
-        val FULL = ExceptionLogStrategy { ex ->
-            StringWriter().apply { ex.printStackTrace(PrintWriter(this)) }.buffer
-                .toString().split('\n').filter { it.isNotEmpty() }
-        }
-
-        @JvmStatic val VALUES = mapOf(
-            "compact" to COMPACT,
-            "simple" to SIMPLE,
-            "full" to FULL
-        )
-
-        @JvmStatic
-        fun valueOf(name: String) = VALUES[name]
-            ?: throw IllegalArgumentException("Invalid exception log strategy '$name', allowed: ${VALUES.keys}")
+        fun valueOf(name: String) = Values[name]
+            ?: throw IllegalArgumentException("Invalid log level '$name', allowed: ${Values.keys}")
     }
 }
 
@@ -95,25 +48,29 @@ interface LogAcceptor {
         lines(level, ex) { listOf(line()) }
 
     fun comps(level: LogLevel, ex: Throwable? = null, lines: () -> List<Component>) =
-        lines(level, ex) { lines().map { AnsiComponentRenderer.render(it) } }
+        record(LogRecord(level, ex) { lines().map { AnsiComponentRenderer.render(it) } })
 
     fun comp(level: LogLevel, ex: Throwable? = null, line: () -> Component) =
         comps(level, ex) { listOf(line()) }
 }
 
 class Logging(
-    val logger: Logger,
-    var level: LogLevel = LogLevel.VERBOSE,
-    var exceptionStrategy: ExceptionLogStrategy = ExceptionLogStrategy.FULL
+    val logger: (String) -> Unit,
+    var level: LogLevel = LogLevel.Verbose,
 ) : LogAcceptor {
     override fun record(record: LogRecord) {
         if (record.level.value >= this.level.value) {
-            (record.lines() + (record.ex?.let { exceptionStrategy.format(record.ex).map { "  $it" } } ?: emptyList()))
+            (
+                record.lines() +
+                (record.ex?.render()?.map { "  ${AnsiComponentRenderer.render(it)}" } ?: emptyList())
+            )
                 .map { "${record.level.prefix} $it$RESET" }
-                .forEach { logger.log(Level.INFO, it) }
+                .forEach { logger(it) }
         }
     }
 }
+
+fun loggingOf(logger: Logger) = Logging({ logger.log(Level.INFO, it) })
 
 class LogList : ArrayList<LogRecord>(), LogAcceptor {
     override fun record(record: LogRecord) {

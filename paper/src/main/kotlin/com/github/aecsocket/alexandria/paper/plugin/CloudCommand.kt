@@ -14,8 +14,9 @@ import cloud.commandframework.execution.CommandExecutionCoordinator
 import cloud.commandframework.minecraft.extras.MinecraftExceptionHandler
 import cloud.commandframework.minecraft.extras.MinecraftHelp
 import cloud.commandframework.paper.PaperCommandManager
-import com.github.aecsocket.alexandria.core.ExceptionLogStrategy
+import com.github.aecsocket.alexandria.core.LogLevel
 import com.github.aecsocket.alexandria.core.extension.render
+import com.github.aecsocket.alexandria.core.extension.simpleTrace
 import com.github.aecsocket.glossa.core.I18N
 import io.papermc.paper.util.StacktraceDeobfuscator
 import net.kyori.adventure.extra.kotlin.join
@@ -24,6 +25,8 @@ import net.kyori.adventure.text.Component.newline
 import net.kyori.adventure.text.Component.text
 import net.kyori.adventure.text.JoinConfiguration
 import net.kyori.adventure.text.event.ClickEvent
+import net.kyori.adventure.text.format.NamedTextColor.RED
+import net.kyori.adventure.text.logger.slf4j.ComponentLogger
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Entity
@@ -67,7 +70,20 @@ open class CloudCommand<P : BasePlugin<*>>(
             .withInvalidSenderHandler()
             .withInvalidSyntaxHandler()
             .withNoPermissionHandler()
-            .withCommandExecutionHandler()
+            .withHandler(MinecraftExceptionHandler.ExceptionType.COMMAND_EXECUTION) { sender, rawEx ->
+                val ex = rawEx.cause ?: rawEx
+
+                StacktraceDeobfuscator.INSTANCE.deobfuscateThrowable(ex)
+                plugin.log.line(LogLevel.Error, ex) { "Could not run command" }
+
+                text()
+                    .append(text("An internal error occurred.", RED))
+                    .append(newline())
+                    .append(stackTrace(ex, plugin.locale(sender))
+                        .map { text().append(text("  ")).append(it) }
+                        .join(JoinConfiguration.newlines()))
+                    .build()
+            }
             .withDecorator { msg -> plugin.asChat(plugin.i18n.safe(plugin.defaultLocale(), "error.command") {
                 list("lines") {
                     sub(msg)
@@ -126,6 +142,19 @@ open class CloudCommand<P : BasePlugin<*>>(
 
     class CommandException(val lines: List<Component>, cause: Throwable?) : RuntimeException(cause)
 
+    protected fun stackTrace(ex: Throwable, locale: Locale): List<Component> {
+        StacktraceDeobfuscator.INSTANCE.deobfuscateThrowable(ex)
+        val stackTrace = ex.render()
+        val hover = (stackTrace + newline() + plugin.i18n.safe(locale, "click_to_copy"))
+            .join(JoinConfiguration.newlines())
+        val click = ClickEvent.copyToClipboard(stackTrace.joinToString("\n") {
+            PlainTextComponentSerializer.plainText().serialize(it)
+        })
+        return ex.simpleTrace().map {
+            text("  $it").hoverEvent(hover).clickEvent(click)
+        }
+    }
+
     protected fun error(
         cause: Throwable? = null,
         content: I18N<Component>.() -> List<Component>
@@ -143,22 +172,11 @@ open class CloudCommand<P : BasePlugin<*>>(
             handler(ctx, sender, locale)
         } catch (ex: CommandException) {
             ex.cause?.let { cause ->
-                StacktraceDeobfuscator.INSTANCE.deobfuscateThrowable(cause)
-                val stackTrace = cause.render()
-                val hover = (
-                    stackTrace + newline() + plugin.i18n.safe("click_to_copy")
-                ).join(JoinConfiguration.newlines())
-                val click = ClickEvent.copyToClipboard(
-                    stackTrace.joinToString("\n") { PlainTextComponentSerializer.plainText().serialize(it) }
-                )
+                val stackTrace = stackTrace(cause, locale)
                 plugin.send(sender) { safe(locale, "error.command") {
                     list("lines") {
-                        (
-                            ex.lines +
-                            ExceptionLogStrategy.SIMPLE.format(cause)
-                                .map { text("  $it") }
-                        ).forEach { line ->
-                            sub(line.hoverEvent(hover).clickEvent(click))
+                        (ex.lines + stackTrace).forEach {
+                            sub(it)
                         }
                     }
                 } }

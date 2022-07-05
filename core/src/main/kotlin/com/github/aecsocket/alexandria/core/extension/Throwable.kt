@@ -8,20 +8,27 @@ import net.kyori.adventure.text.format.Style.style
 import net.kyori.adventure.text.format.TextDecoration
 import kotlin.math.min
 
+fun Throwable.simpleTrace(): List<String> {
+    val className = this::class.java.simpleName
+    val lines: List<String> = message?.let { message ->
+        val messageLines = message.split('\n')
+        if (messageLines.size == 1) listOf("$className: ${messageLines[0]}")
+        else listOf("$className:") + messageLines.map { "  $it" }
+    } ?: listOf(className)
+
+    return lines + (cause?.simpleTrace() ?: emptyList())
+}
+
 data class ThrowableRenderOptions(
-    val className: Style = style(AQUA),
     val separator: Style = style(GRAY),
-    val message: Style = style(WHITE),
+    val className: Style = style(YELLOW),
+    val message: Style = style(GOLD),
     val declaringPackage: Style = style(GRAY),
-    val declaringClass: Style = style(DARK_GREEN),
-    val methodName: Style = style(GREEN),
-    val nativeMethod: Style = style(GRAY, TextDecoration.ITALIC),
-    val fileName: Style = style(GOLD),
+    val declaringClass: Style = style(DARK_RED),
+    val methodName: Style = style(RED),
     val lineNumber: Style = style(YELLOW),
-    val unknownSource: Style = style(GRAY, TextDecoration.ITALIC),
     val packageLength: Int? = 3,
-    val suppressed: Style = style(WHITE, TextDecoration.ITALIC),
-    val causedBy: Style = style(WHITE, TextDecoration.ITALIC),
+    val exDetail: Style = style(GOLD, TextDecoration.ITALIC),
     val framesInCommon: Style = style(GRAY, TextDecoration.ITALIC),
 ) {
     companion object {
@@ -73,20 +80,10 @@ private fun Throwable.renderInternal(
             res.append(text(className, options.declaringClass))
             res.append(text(".", options.separator))
             res.append(text(element.methodName, options.methodName))
-            res.append(text(" @ ", options.separator))
-            if (element.isNativeMethod) {
-                res.append(text("(native)", options.nativeMethod))
-            } else {
-                element.fileName?.let { fileName ->
-                    res.append(text(fileName, options.fileName))
-                    val lineNo = element.lineNumber
-                    if (lineNo >= 0) {
-                        res.append(text(" : ", options.separator))
-                        res.append(text(lineNo, options.lineNumber))
-                    }
-                } ?: run {
-                    res.append(text("(unknown)", options.unknownSource))
-                }
+            val lineNo = element.lineNumber
+            if (lineNo >= 0) {
+                res.append(text(" : ", options.separator))
+                res.append(text(lineNo, options.lineNumber))
             }
         }
     }.toMutableList()
@@ -103,7 +100,7 @@ private fun Throwable.renderInternal(
         val childTrace = ex.stackTrace
         val (exSummary, exLines) = ex.renderInternal(options, framesInCommon(childTrace, stackTrace))
         lines.add(text()
-            .append(text("Suppressed: ", options.suppressed))
+            .append(text("Suppressed: ", options.exDetail))
             .append(exSummary)
             .build()
         )
@@ -120,7 +117,7 @@ private fun Throwable.renderInternal(
         val childTrace = ex.stackTrace
         val (exSummary, exLines) = ex.renderInternal(options, framesInCommon(childTrace, stackTrace))
         lines.add(text()
-            .append(text("Caused by: ", options.causedBy))
+            .append(text("Caused by: ", options.exDetail))
             .append(exSummary)
             .build()
         )

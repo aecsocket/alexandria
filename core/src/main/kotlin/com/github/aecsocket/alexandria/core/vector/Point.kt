@@ -1,6 +1,5 @@
 package com.github.aecsocket.alexandria.core.vector
 
-import com.github.aecsocket.alexandria.core.extension.clamp
 import kotlin.math.*
 
 abstract class Point<T : Point<T>> {
@@ -64,8 +63,8 @@ data class Point2(val x: Int, val y: Int) : Point<Point2>() {
     override fun toString() = "($x, $y)"
 
     companion object {
-        val ZERO = Point2(0)
-        val ONE = Point2(1)
+        val Zero = Point2(0)
+        val One = Point2(1)
 
         fun min(one: Point2, two: Point2) = Point.min(one, two)
 
@@ -115,8 +114,8 @@ data class Point3(val x: Int, val y: Int, val z: Int) : Point<Point3>() {
     override fun toString() = "($x, $y, $z)"
 
     companion object {
-        val ZERO = Point3(0)
-        val ONE = Point3(1)
+        val Zero = Point3(0)
+        val One = Point3(1)
 
         fun min(one: Point3, two: Point3) = Point.min(one, two)
 

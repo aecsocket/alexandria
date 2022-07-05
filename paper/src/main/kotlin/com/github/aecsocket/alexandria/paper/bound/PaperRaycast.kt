@@ -27,8 +27,6 @@ sealed interface PaperBoundable : Boundable {
         override val bound: Bound,
         override val fluid: Material?
     ) : PaperBoundable {
-        override val origin = block.location.vector()
-
         override fun toString() =
             "OfBlock(${block.type} fluid=$fluid)"
     }
@@ -36,8 +34,7 @@ sealed interface PaperBoundable : Boundable {
     data class OfEntity(
         val entity: Entity
     ) : PaperBoundable {
-        override val origin = entity.location.vector()
-        override val bound = entity.bound()
+        override val bound = entity.bound().translated(entity.location.vector())
         override val fluid: Material?
             get() = null
 
@@ -103,18 +100,20 @@ class PaperRaycast(
                 i++
                 val block = world.getBlockAt(xi, yi, zi)
 
-                val boundables = when (val type = block.type) {
-                    Material.AIR, Material.WATER, Material.LAVA -> listOf(PaperBoundable.OfBlock(block, Box.ZERO_ONE, type))
-                    else -> {
-                        if (type.isOccluding)
-                            listOf(PaperBoundable.OfBlock(block, Box.ZERO_ONE, null))
-                        else {
+                val type = block.type
+                // block bounds are translated into ray space
+                val box = listOf(PaperBoundable.OfBlock(block, Box.ZeroOne.translated(ray.origin), type))
+                val boundables = when (type) {
+                    Material.AIR, Material.WATER, Material.LAVA -> box
+                    else -> when {
+                        type.isOccluding -> box
+                        else -> {
                             val blockData = block.blockData
                             listOf(
-                                PaperBoundable.OfBlock(block, block.bound(), null)
-                            ) + if (blockData is Waterlogged && blockData.isWaterlogged)
-                                listOf(PaperBoundable.OfBlock(block, Box.ZERO_ONE, Material.WATER))
-                            else emptyList()
+                                PaperBoundable.OfBlock(block, block.bound().translated(ray.origin), null)
+                            ) + (if (blockData is Waterlogged && blockData.isWaterlogged)
+                                listOf(PaperBoundable.OfBlock(block, Box.ZeroOne.translated(ray.origin), Material.WATER))
+                            else emptyList())
                         }
                     }
                 }

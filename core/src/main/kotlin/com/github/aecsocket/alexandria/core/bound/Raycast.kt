@@ -3,8 +3,6 @@ package com.github.aecsocket.alexandria.core.bound
 import com.github.aecsocket.alexandria.core.vector.Vector3
 
 interface Boundable {
-    val origin: Vector3
-
     val bound: Bound
 }
 
@@ -43,7 +41,7 @@ abstract class Raycast<B : Boundable> {
     abstract fun cast(ray: Ray, maxDistance: Double, test: (B) -> Boolean = { true }): Result<B>
 
     protected fun <C : B> intersects(ray: Ray, obj: C): Result.Hit<C>? {
-        return obj.bound.intersects(ray.copy(origin = ray.origin - obj.origin))?.let {
+        return obj.bound.intersects(ray)?.let {
             Result.Hit(ray, obj, it)
         }
     }
