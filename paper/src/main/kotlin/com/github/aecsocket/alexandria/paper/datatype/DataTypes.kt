@@ -1,9 +1,6 @@
 package com.github.aecsocket.alexandria.paper.datatype
 
-import com.github.aecsocket.alexandria.core.vector.Polar2
-import com.github.aecsocket.alexandria.core.vector.Polar3
-import com.github.aecsocket.alexandria.core.vector.Vector2
-import com.github.aecsocket.alexandria.core.vector.Vector3
+import com.github.aecsocket.alexandria.core.spatial.*
 import com.github.aecsocket.alexandria.paper.extension.dataType
 import com.github.aecsocket.alexandria.paper.extension.force
 import com.github.aecsocket.alexandria.paper.extension.key
@@ -32,14 +29,19 @@ val Vector3DataType = dataType<ByteArray, Vector3>(
     { raw, _ -> bytesToDoubles(raw).run { Vector3(get(0), get(1), get(2)) } }
 )
 
-val Polar2DataType = dataType<ByteArray, Polar2>(
-    { obj, _ -> doublesToBytes(doubleArrayOf(obj.radius, obj.angle)) },
-    { raw, _ -> bytesToDoubles(raw).run { Polar2(get(0), get(1)) } }
+val Point2DataType = dataType<IntArray, Point2>(
+    { obj, _ -> intArrayOf(obj.x, obj.y) },
+    { raw, _ -> raw.run { Point2(get(0), get(1)) } }
 )
 
-val Polar3DataType = dataType<ByteArray, Polar3>(
-    { obj, _ -> doublesToBytes(doubleArrayOf(obj.radius, obj.yaw, obj.pitch)) },
-    { raw, _ -> bytesToDoubles(raw).run { Polar3(get(0), get(1), get(2)) } }
+val Point3DataType = dataType<IntArray, Point3>(
+    { obj, _ -> intArrayOf(obj.x, obj.y, obj.z) },
+    { raw, _ -> raw.run { Point3(get(0), get(1), get(2)) } }
+)
+
+val QuaternionDataType = dataType<ByteArray, Quaternion>(
+    { obj, _ -> doublesToBytes(doubleArrayOf(obj.x, obj.y, obj.z, obj.w)) },
+    { raw, _ -> bytesToDoubles(raw).run { Quaternion(get(0), get(1), get(2), get(3)) } }
 )
 
 fun texturePropertyDataType(plugin: Plugin): PersistentDataType<PersistentDataContainer, TextureProperty> {

@@ -22,11 +22,9 @@ interface MutableRegistry<T : Keyed> : Registry<T> {
 
 private class RegistryImpl<T : Keyed> : MutableRegistry<T> {
     private val _entries = HashMap<String, T>()
-    override val entries: Map<String, T>
-        get() = _entries
+    override val entries: Map<String, T> get() = _entries
 
-    override val size: Int
-        get() = _entries.size
+    override val size get() = _entries.size
 
     override fun get(id: String) = _entries[id]
 

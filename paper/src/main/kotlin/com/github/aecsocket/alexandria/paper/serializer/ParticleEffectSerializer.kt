@@ -2,7 +2,7 @@ package com.github.aecsocket.alexandria.paper.serializer
 
 import com.github.aecsocket.alexandria.core.effect.ParticleEffect
 import com.github.aecsocket.alexandria.core.extension.force
-import com.github.aecsocket.alexandria.core.vector.Vector3
+import com.github.aecsocket.alexandria.core.spatial.Vector3
 import com.github.aecsocket.alexandria.paper.effect.particleByKey
 import net.kyori.adventure.key.Key
 import org.spongepowered.configurate.ConfigurationNode

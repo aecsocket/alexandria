@@ -1,25 +1,32 @@
 package com.github.aecsocket.alexandria.core.bound
 
-import com.github.aecsocket.alexandria.core.vector.Vector3
+import com.github.aecsocket.alexandria.core.spatial.Quaternion
+import com.github.aecsocket.alexandria.core.spatial.Vector3
+import com.github.aecsocket.alexandria.core.spatial.step
+import org.spongepowered.configurate.objectmapping.ConfigSerializable
+import org.spongepowered.configurate.objectmapping.meta.Required
 import kotlin.math.sqrt
 
 object Empty : Bound {
-    override fun translated(vector: Vector3) = Empty
+    override fun translated(vector: Vector3) = this
 
-    override fun intersects(ray: Ray) = null
+    override fun rotated(rotation: Quaternion) = this
+
+    override fun collides(ray: Ray) = null
 }
 
+@ConfigSerializable
 data class Sphere(
-    val center: Vector3,
-    val radius: Double
+    @Required val center: Vector3,
+    @Required val radius: Double
 ) : Bound {
-    val sqrRadius by lazy { radius * radius }
+    val sqrRadius = radius * radius
 
     override fun translated(vector: Vector3) = Sphere(center + vector, radius)
 
-    override fun intersects(ray: Ray): Bound.Intersection? {
-        val m = ray.origin - center
-        val b = m.dot(ray.direction)
+    override fun collides(ray: Ray): Collision? {
+        val m = ray.pos - center
+        val b = m.dot(ray.dir)
         val c = m.dot(m) - sqrRadius
 
         if (c > 0 && b > 0)
@@ -31,49 +38,58 @@ data class Sphere(
 
         val tIn = -b - discrim
         val tOut = -b + discrim
-        return Bound.Intersection(tIn, tOut, (ray.point(tIn) - center).normalized)
+        return Collision(tIn, tOut, (ray.point(tIn) - center).normalized)
     }
+
+    override fun rotated(rotation: Quaternion) = this
 }
 
+@ConfigSerializable
 data class Box(
-    val min: Vector3,
-    val max: Vector3,
+    @Required val min: Vector3,
+    @Required val max: Vector3,
     val origin: Vector3 = Vector3.Zero,
-    override val angle: Double = 0.0
-) : Bound.Oriented {
-    val extent by lazy { max - min }
+    val rotation: Quaternion = Quaternion.Identity
+) : Bound {
+    val extent = max - min
+    val center = min.midpoint(max)
 
-    val center by lazy { min.midpoint(max) }
+    private val halfExtent = extent / 2.0
+    private val invRotation = rotation.inverse
 
-    override fun translated(vector: Vector3) = Box(min + vector, max + vector, origin + vector, angle)
+    override fun translated(vector: Vector3) = Box(min + vector, max + vector, origin + vector, rotation)
 
-    override fun oriented(angle: Double) = Box(min, max, origin, angle)
+    override fun rotated(rotation: Quaternion) = Box(min, max, origin, rotation)
 
-    override fun intersects(ray: Ray): Bound.Intersection? {
-        val offset = -center
-
-        val (orig, dir) = if (angle.compareTo(0) == 0) {
-            ray.origin + offset to ray.direction
+    // https://iquilezles.org/articles/boxfunctions/
+    // https://www.shadertoy.com/view/ld23DV
+    override fun collides(ray: Ray): Collision? {
+        val center = center
+        val (ro, rd, m) = if (rotation == Quaternion.Identity) {
+            Triple(ray.pos - center, ray.dir, ray.invDir)
         } else {
-            (ray.origin - origin).rotateY(-angle) + origin + offset to
-                ray.direction.rotateY(-angle)
+            val pos = (invRotation * (ray.pos - origin)) + (origin - center)
+            val dir = invRotation * ray.dir
+            Triple(pos, dir, dir.inv)
         }
-        val invDir = dir.reciprocal
 
-        val n = invDir * orig
-        val k = invDir.abs * (extent / 2.0)
-        val t1 = -n - k
-        val t2 = -n + k
-        val near = t1.maxComponent
-        val far = t2.minComponent
-        if (near > far || far < 0)
-            return null
-        val normal = (-dir.sign * t1.yzx.step(t1) * t1.zxy.step(t1)).rotateY(angle)
-        return Bound.Intersection(near, far, normal)
+        // ray-box intersection in box space
+        val s = rd.map { if (it < 0.0) 1.0 else -1.0 }
+        val t1 = m * (-ro + s * halfExtent)
+        val t2 = m * (-ro - s * halfExtent)
+
+        val tN = t1.max
+        val tF = t2.min
+
+        if (tN > tF || tF < 0.0) return null
+
+        val oN = rotation * (-rd.sign * step(Vector3(t1.y, t1.z, t1.x), t1) * step(Vector3(t1.z, t1.x, t1.y), t1))
+
+        return Collision(tN, tF, oN)
     }
 
     companion object {
-        val ZeroOne = Box(Vector3.Zero, Vector3.One, Vector3.Zero)
+        val Unit = Box(Vector3.Zero, Vector3.One, Vector3.Zero)
         val CenteredOne = Box(Vector3(-0.5), Vector3(0.5))
     }
 }
@@ -83,15 +99,10 @@ data class Compound(
 ) : Bound {
     override fun translated(vector: Vector3) = Compound(bounds.map { it.translated(vector) })
 
-    override fun intersects(ray: Ray): Bound.Intersection? {
-        var closest: Bound.Intersection? = null
-        bounds.forEach { bound ->
-            bound.intersects(ray)?.let { collision ->
-                closest = closest?.let {
-                    if (collision.tIn < it.tIn) collision else closest
-                } ?: collision
-            }
-        }
-        return closest
+    override fun rotated(rotation: Quaternion) = Compound(bounds.map { it.rotated(rotation) })
+
+    override fun collides(ray: Ray): Collision? {
+        return if (bounds.isEmpty()) null
+        else bounds.mapNotNull { it.collides(ray) }.closest()
     }
 }

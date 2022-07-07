@@ -1,10 +1,10 @@
 package com.github.aecsocket.alexandria.core.serializer
 
 import com.github.aecsocket.alexandria.core.extension.force
-import com.github.aecsocket.alexandria.core.vector.Point2
-import com.github.aecsocket.alexandria.core.vector.Point3
-import com.github.aecsocket.alexandria.core.vector.Vector2
-import com.github.aecsocket.alexandria.core.vector.Vector3
+import com.github.aecsocket.alexandria.core.spatial.Point2
+import com.github.aecsocket.alexandria.core.spatial.Point3
+import com.github.aecsocket.alexandria.core.spatial.Vector2
+import com.github.aecsocket.alexandria.core.spatial.Vector3
 import org.spongepowered.configurate.ConfigurationNode
 import org.spongepowered.configurate.serialize.SerializationException
 import org.spongepowered.configurate.serialize.TypeSerializer
@@ -43,8 +43,7 @@ abstract class CartesianSerializer<N, T> : TypeSerializer<T> {
 }
 
 object Vector2Serializer : CartesianSerializer<Double, Vector2>() {
-    override val numComponents: Int
-        get() = 2
+    override val numComponents get() = 2
 
     override fun forEachComponent(obj: Vector2, action: (Double) -> Unit) {
         action(obj.x)
@@ -59,8 +58,7 @@ object Vector2Serializer : CartesianSerializer<Double, Vector2>() {
 }
 
 object Vector3Serializer : CartesianSerializer<Double, Vector3>() {
-    override val numComponents: Int
-        get() = 3
+    override val numComponents get() = 3
 
     override fun forEachComponent(obj: Vector3, action: (Double) -> Unit) {
         action(obj.x)
@@ -76,8 +74,7 @@ object Vector3Serializer : CartesianSerializer<Double, Vector3>() {
 }
 
 object Point2Serializer : CartesianSerializer<Int, Point2>() {
-    override val numComponents: Int
-        get() = 2
+    override val numComponents get() = 2
 
     override fun forEachComponent(obj: Point2, action: (Int) -> Unit) {
         action(obj.x)
@@ -92,8 +89,7 @@ object Point2Serializer : CartesianSerializer<Int, Point2>() {
 }
 
 object Point3Serializer : CartesianSerializer<Int, Point3>() {
-    override val numComponents: Int
-        get() = 3
+    override val numComponents get() = 3
 
     override fun forEachComponent(obj: Point3, action: (Int) -> Unit) {
         action(obj.x)

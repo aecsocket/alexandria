@@ -50,8 +50,7 @@ class PacketInputListener(
             override val input: Input,
             val onCancel: () -> Unit
         ) : Event {
-            override val player: Player
-                get() = player
+            override val player: Player get() = player
 
             override fun cancel() {
                 event.isCancelled = true

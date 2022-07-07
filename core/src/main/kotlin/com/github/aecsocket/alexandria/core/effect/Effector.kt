@@ -1,6 +1,6 @@
 package com.github.aecsocket.alexandria.core.effect
 
-import com.github.aecsocket.alexandria.core.vector.Vector3
+import com.github.aecsocket.alexandria.core.spatial.Vector3
 
 interface Effector {
     fun playSound(effect: SoundEffect, position: Vector3)

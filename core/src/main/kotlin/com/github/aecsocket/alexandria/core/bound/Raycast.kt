@@ -1,6 +1,6 @@
 package com.github.aecsocket.alexandria.core.bound
 
-import com.github.aecsocket.alexandria.core.vector.Vector3
+import com.github.aecsocket.alexandria.core.spatial.Vector3
 
 interface Boundable {
     val bound: Bound
@@ -15,7 +15,7 @@ abstract class Raycast<B : Boundable> {
             override val ray: Ray,
             override val travelled: Double
         ) : Result<B> {
-            val position by lazy { ray.point(travelled) }
+            val position = ray.point(travelled)
         }
 
         data class Hit<B>(
@@ -25,23 +25,23 @@ abstract class Raycast<B : Boundable> {
             val tOut: Double,
             val normal: Vector3
         ) : Result<B> {
-            constructor(ray: Ray, hit: B, intersection: Bound.Intersection)
-                : this(ray, hit, intersection.tIn, intersection.tOut, intersection.normal)
+            constructor(ray: Ray, hit: B, collision: Collision)
+                : this(ray, hit, collision.tIn, collision.tOut, collision.normal)
 
             override val travelled = tIn
 
-            val posIn by lazy { ray.point(tIn) }
+            val posIn = ray.point(tIn)
 
-            val posOut by lazy { ray.point(tOut) }
+            val posOut = ray.point(tOut)
 
-            val penetration by lazy { tOut - tIn }
+            val penetration = tOut - tIn
         }
     }
 
     abstract fun cast(ray: Ray, maxDistance: Double, test: (B) -> Boolean = { true }): Result<B>
 
     protected fun <C : B> intersects(ray: Ray, obj: C): Result.Hit<C>? {
-        return obj.bound.intersects(ray)?.let {
+        return obj.bound.collides(ray)?.let {
             Result.Hit(ray, obj, it)
         }
     }

@@ -39,8 +39,7 @@ class EventDispatcher<E> private constructor(
         fun build() = EventDispatcher(listeners.sortedWith(Comparator.comparingInt { it.priority }))
     }
 
-    val size: Int
-        get() = listeners.size
+    val size get() = listeners.size
 
     fun <F : E> call(event: F): F {
         listeners.forEach {

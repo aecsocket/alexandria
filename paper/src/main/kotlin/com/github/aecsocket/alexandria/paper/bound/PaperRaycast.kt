@@ -1,7 +1,9 @@
 package com.github.aecsocket.alexandria.paper.bound
 
 import com.github.aecsocket.alexandria.core.bound.*
-import com.github.aecsocket.alexandria.core.vector.Vector3
+import com.github.aecsocket.alexandria.core.spatial.Vector3
+import com.github.aecsocket.alexandria.core.spatial.max
+import com.github.aecsocket.alexandria.core.spatial.min
 import com.github.aecsocket.alexandria.paper.extension.vector
 import net.minecraft.world.phys.AABB
 import org.bukkit.Material
@@ -35,8 +37,7 @@ sealed interface PaperBoundable : Boundable {
         val entity: Entity
     ) : PaperBoundable {
         override val bound = entity.bound().translated(entity.location.vector())
-        override val fluid: Material?
-            get() = null
+        override val fluid get() = null
 
         override fun toString() =
             "OfEntity(${entity.name})"
@@ -78,7 +79,7 @@ class PaperRaycast(
             return if (v < i) i - 1 else i
         }
 
-        val (x0, y0, z0) = ray.origin
+        val (x0, y0, z0) = ray.pos
         val (x1, y1, z1) = ray.point(maxDistance)
         var (xi, yi, zi) = Triple(floor(x0), floor(y0), floor(z0))
         val (dx, dy, dz) = Triple(x1 - x0, y1 - y0, z1 - z0)
@@ -102,7 +103,7 @@ class PaperRaycast(
 
                 val type = block.type
                 // block bounds are translated into ray space
-                val box = listOf(PaperBoundable.OfBlock(block, Box.ZeroOne.translated(ray.origin), type))
+                val box = listOf(PaperBoundable.OfBlock(block, Box.Unit.translated(ray.pos), type))
                 val boundables = when (type) {
                     Material.AIR, Material.WATER, Material.LAVA -> box
                     else -> when {
@@ -110,9 +111,9 @@ class PaperRaycast(
                         else -> {
                             val blockData = block.blockData
                             listOf(
-                                PaperBoundable.OfBlock(block, block.bound().translated(ray.origin), null)
+                                PaperBoundable.OfBlock(block, block.bound().translated(ray.pos), null)
                             ) + (if (blockData is Waterlogged && blockData.isWaterlogged)
-                                listOf(PaperBoundable.OfBlock(block, Box.ZeroOne.translated(ray.origin), Material.WATER))
+                                listOf(PaperBoundable.OfBlock(block, Box.Unit.translated(ray.pos), Material.WATER))
                             else emptyList())
                         }
                     }
@@ -173,7 +174,7 @@ class PaperRaycast(
     ): Result<PaperBoundable.OfEntity> {
         val world = (world as CraftWorld).handle
         val end = ray.point(maxDistance)
-        val (min, max) = Vector3.min(ray.origin, end) to Vector3.max(ray.origin, end)
+        val (min, max) = min(ray.pos, end) to max(ray.pos, end)
 
         var closest: Result.Hit<PaperBoundable.OfEntity>? = null
         world.entities.get(AABB(

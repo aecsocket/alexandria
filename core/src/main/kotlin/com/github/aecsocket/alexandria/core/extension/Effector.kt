@@ -1,9 +1,10 @@
 package com.github.aecsocket.alexandria.core.extension
 
-import com.github.aecsocket.alexandria.core.bound.Box
+import com.github.aecsocket.alexandria.core.bound.*
 import com.github.aecsocket.alexandria.core.effect.Effector
 import com.github.aecsocket.alexandria.core.effect.ParticleEffect
-import com.github.aecsocket.alexandria.core.vector.Vector3
+import com.github.aecsocket.alexandria.core.spatial.Quaternion
+import com.github.aecsocket.alexandria.core.spatial.Vector3
 
 
 fun Effector.particleLine(effect: ParticleEffect, from: Vector3, to: Vector3, step: Double) {
@@ -63,12 +64,21 @@ fun cuboidVertices(min: Vector3, max: Vector3): CuboidVertices {
     return CuboidVertices(vertical(min.y), vertical(max.y))
 }
 
-fun cuboidVertices(min: Vector3, max: Vector3, origin: Vector3, angle: Double): CuboidVertices {
+fun cuboidVertices(min: Vector3, max: Vector3, origin: Vector3, rotation: Quaternion): CuboidVertices {
     val (bottom, top) = cuboidVertices(min, max)
 
-    fun Array<Vector3>.rotate() = map { (it - origin).rotateY(angle) + origin }.toTypedArray()
+    fun Array<Vector3>.rotate() = map { (rotation * (it - origin)) + origin }.toTypedArray()
 
     return CuboidVertices(bottom.rotate(), top.rotate())
 }
 
-val Box.vertices: CuboidVertices get() = cuboidVertices(min, max, origin, angle)
+val Box.vertices get() = cuboidVertices(min, max, origin, rotation)
+
+fun Effector.particleBound(effect: ParticleEffect, bound: Bound, step: Double) {
+    when (bound) {
+        is Empty -> {}
+        is Compound -> bound.bounds.forEach { particleBound(effect, it, step) }
+        is Box -> particleCuboid(effect, bound.vertices, step)
+        is Sphere -> TODO("todo")
+    }
+}

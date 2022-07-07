@@ -15,6 +15,7 @@ import cloud.commandframework.minecraft.extras.MinecraftExceptionHandler
 import cloud.commandframework.minecraft.extras.MinecraftHelp
 import cloud.commandframework.paper.PaperCommandManager
 import com.github.aecsocket.alexandria.core.LogLevel
+import com.github.aecsocket.alexandria.core.extension.get
 import com.github.aecsocket.alexandria.core.extension.render
 import com.github.aecsocket.alexandria.core.extension.simpleTrace
 import com.github.aecsocket.glossa.core.I18N
@@ -219,11 +220,3 @@ open class CloudCommand<P : BasePlugin<*>>(
         } }
     }
 }
-
-@Suppress("UNCHECKED_CAST") // cloud is stupid in this regard anyway
-fun <V> CommandContext<*>.get(key: String, default: () -> V): V =
-    getOrDefault<V>(key, null) ?: default()
-
-fun CommandContext<*>.flagged(name: String) = flags().hasFlag(name)
-
-fun <V> CommandContext<*>.flag(name: String): V? = flags().get<V>(name)

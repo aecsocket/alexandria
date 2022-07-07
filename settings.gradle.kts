@@ -17,7 +17,7 @@ rootProject.name = "alexandria"
 
 listOf(
     "core",
-    "paper"
+    "paper",
 ).forEach {
     val name = "${rootProject.name}-$it"
     include(name)

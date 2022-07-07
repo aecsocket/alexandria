@@ -2,6 +2,8 @@ package com.github.aecsocket.alexandria.paper.bound
 
 import com.github.aecsocket.alexandria.core.bound.Box
 import com.github.aecsocket.alexandria.core.bound.Compound
+import com.github.aecsocket.alexandria.core.extension.Euler3
+import com.github.aecsocket.alexandria.core.extension.quaternion
 import com.github.aecsocket.alexandria.paper.extension.*
 import org.bukkit.Material
 import org.bukkit.block.Block
@@ -16,13 +18,13 @@ fun VoxelShape.bound() = Compound(
 )
 
 fun Block.bound() = when (type) {
-    Material.AIR, Material.WATER, Material.LAVA -> Box.ZeroOne
-    else -> if (type.isOccluding) Box.ZeroOne else collisionShape.bound()
+    Material.AIR, Material.WATER, Material.LAVA -> Box.Unit
+    else -> if (type.isOccluding) Box.Unit else collisionShape.bound()
 }
 
 fun Entity.bound() = Box(
     (boundingBox.min - location).alexandria(),
     (boundingBox.max - location).alexandria(),
     location.vector(),
-    location.yaw.toDouble()
+    Euler3(0.0, location.yaw.toDouble(), 0.0).quaternion(),
 )
