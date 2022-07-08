@@ -13,8 +13,8 @@ data class Quaternion(val x: Double, val y: Double, val z: Double, val w: Double
     val norm: Double get() = x*x + y*y + z*z + w*w
 
     val normalized: Quaternion get() {
-        val norm = norm
-        return Quaternion(x/norm, y/norm, z/norm, w/norm)
+        val n = 1 / sqrt(norm)
+        return Quaternion(x/n, y/n, z/n, w/n)
     }
 
     val inverse: Quaternion get() {
@@ -36,15 +36,17 @@ data class Quaternion(val x: Double, val y: Double, val z: Double, val w: Double
         x*s, y*s, z*s, w*s
     )
 
-    operator fun times(v: Vector3) = Vector3(
-        w*w*v.x + 2*y*w*v.z - 2*z*w*v.y + x*x*v.x + 2*y*x*v.y + 2*z*x*v.z - z*z*v.x - y*y*v.x,
-        2*x*y*v.x + y*y*v.y + 2*z*y*v.z + 2*w*z*v.x - z*z*v.y + w*w*v.y - 2*x*w*v.z - x*x*v.y,
-        2*x*z*v.x + 2*y*z*v.y + z*z*v.z - 2*w*y*v.x - y*y*v.z + 2*w*x*v.y - x*x*v.z + w*w*v.z
-    )
+    operator fun times(v: Vector3): Vector3 {
+        val u = Vector3(x, y, z)
+        val s = w
+        return (u * 2.0 * u.dot(v)) +
+                (v * (s*s - u.dot(u))) +
+                (u.cross(v) * 2.0 * s)
+    }
 
     fun dot(q: Quaternion) = x*q.x + y*q.y + z*q.z + w*q.w
 
-    fun asString(fmt: String = "%f") = "($fmt + ${fmt}i + ${fmt}j + ${fmt}k)".format(x, y, z, w)
+    fun asString(fmt: String = "%f") = "($fmt + ${fmt}i + ${fmt}j + ${fmt}k)".format(w, x, y, z)
     override fun toString() = asString(DECIMAL_FORMAT)
 
     companion object {

@@ -75,23 +75,20 @@ val Euler3.roll get() = z
 val Euler3.radians get() = map { it.radians }
 val Euler3.degrees get() = map { it.degrees }
 
+private fun trig(ang: Double) = sin(ang / 2) to cos(ang / 2)
+
+// https://github.com/mrdoob/three.js/blob/dev/src/math/Quaternion.js#L223
+// JME's impl seems to not work properly for our use-case
 fun Euler3.quaternion(): Quaternion {
-    fun trig(ang: Double) = sin(ang / 2) to cos(ang / 2)
-    val (sinX, cosX) = trig(x)
-    val (sinY, cosY) = trig(y)
-    val (sinZ, cosZ) = trig(z)
-
-    val cosYcosZ = cosY * cosZ
-    val sinYsinZ = sinY * sinZ
-    val cosYsinZ = cosY * sinZ
-    val sinYcosZ = sinY * cosZ
-
+    val (s1, c1) = trig(x)
+    val (s2, c2) = trig(y)
+    val (s3, c3) = trig(z)
     return Quaternion(
-        cosYcosZ*sinX + sinYsinZ*cosX,
-        sinYcosZ*cosX + cosYsinZ*sinX,
-        cosYsinZ*cosX - sinYcosZ*sinX,
-        cosYcosZ*cosX - sinYsinZ*sinX,
-    ).normalized
+        s1*c2*c3 + c1*s2*s3,
+        c1*s2*c3 - s1*c2*s3,
+        c1*c2*s3 + s1*s2*c3,
+        c1*c2*c3 - s1*s2*s3,
+    )
 }
 
 // https://github.com/jMonkeyEngine/jmonkeyengine/blob/master/jme3-core/src/main/java/com/jme3/math/Quaternion.java l328
