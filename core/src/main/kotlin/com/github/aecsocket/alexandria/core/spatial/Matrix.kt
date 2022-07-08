@@ -47,10 +47,10 @@ data class Matrix3(
     }
 
     fun asString(fmt: String = "%f") = """Matrix3 [
-      $fmt $fmt $fmt
-      $fmt $fmt $fmt
-      $fmt $fmt $fmt
-    ]""".trimIndent().format(
+  $fmt $fmt $fmt
+  $fmt $fmt $fmt
+  $fmt $fmt $fmt
+]""".format(
         n00, n01, n02,
         n10, n11, n12,
         n20, n21, n22,
@@ -133,11 +133,11 @@ data class Matrix4(
     }
 
     fun asString(fmt: String = "%f") = """Matrix4 [
-      $fmt $fmt $fmt $fmt
-      $fmt $fmt $fmt $fmt
-      $fmt $fmt $fmt $fmt
-      $fmt $fmt $fmt $fmt
-    ]""".trimIndent().format(
+  $fmt $fmt $fmt $fmt
+  $fmt $fmt $fmt $fmt
+  $fmt $fmt $fmt $fmt
+  $fmt $fmt $fmt $fmt
+]""".format(
         n00, n01, n02, n03,
         n10, n11, n12, n13,
         n20, n21, n22, n23,

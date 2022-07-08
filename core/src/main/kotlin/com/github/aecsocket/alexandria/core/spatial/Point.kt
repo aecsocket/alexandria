@@ -1,8 +1,10 @@
 package com.github.aecsocket.alexandria.core.spatial
 
-import kotlin.math.*
+import kotlin.math.abs
+import kotlin.math.max
+import kotlin.math.min
 
-data class Point2(val x: Int, val y: Int) {
+data class Point2(val x: Int = 0, val y: Int = 0) {
     constructor(s: Int) : this(s, s)
 
     inline fun x(map: (Int) -> Int) = Point2(map(x), y)
@@ -54,7 +56,7 @@ data class Point2(val x: Int, val y: Int) {
     }
 }
 
-data class Point3(val x: Int, val y: Int, val z: Int) {
+data class Point3(val x: Int = 0, val y: Int = 0, val z: Int = 0) {
     constructor(s: Int) : this(s, s, s)
 
     inline fun x(map: (Int) -> Int) = Point3(map(x), y, z)

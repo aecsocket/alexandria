@@ -27,12 +27,11 @@ import net.kyori.adventure.text.Component.text
 import net.kyori.adventure.text.JoinConfiguration
 import net.kyori.adventure.text.event.ClickEvent
 import net.kyori.adventure.text.format.NamedTextColor.RED
-import net.kyori.adventure.text.logger.slf4j.ComponentLogger
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
-import java.util.Locale
+import java.util.*
 
 fun desc(string: String) = ArgumentDescription.of(string)
 
@@ -80,7 +79,7 @@ open class CloudCommand<P : BasePlugin<*>>(
                 text()
                     .append(text("An internal error occurred.", RED))
                     .append(newline())
-                    .append(stackTrace(ex, plugin.locale(sender))
+                    .append(stackTrace(ex, plugin.locale(sender), false)
                         .map { text().append(text("  ")).append(it) }
                         .join(JoinConfiguration.newlines()))
                     .build()
@@ -143,9 +142,9 @@ open class CloudCommand<P : BasePlugin<*>>(
 
     class CommandException(val lines: List<Component>, cause: Throwable?) : RuntimeException(cause)
 
-    protected fun stackTrace(ex: Throwable, locale: Locale): List<Component> {
+    protected fun stackTrace(ex: Throwable, locale: Locale, long: Boolean): List<Component> {
         StacktraceDeobfuscator.INSTANCE.deobfuscateThrowable(ex)
-        val stackTrace = ex.render()
+        val stackTrace = ex.render(long)
         val hover = (stackTrace + newline() + plugin.i18n.safe(locale, "click_to_copy"))
             .join(JoinConfiguration.newlines())
         val click = ClickEvent.copyToClipboard(stackTrace.joinToString("\n") {
@@ -173,7 +172,7 @@ open class CloudCommand<P : BasePlugin<*>>(
             handler(ctx, sender, locale)
         } catch (ex: CommandException) {
             ex.cause?.let { cause ->
-                val stackTrace = stackTrace(cause, locale)
+                val stackTrace = stackTrace(cause, locale, false)
                 plugin.send(sender) { safe(locale, "error.command") {
                     list("lines") {
                         (ex.lines + stackTrace).forEach {

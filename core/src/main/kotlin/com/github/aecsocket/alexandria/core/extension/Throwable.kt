@@ -28,6 +28,8 @@ data class ThrowableRenderOptions(
     val methodName: Style = style(RED),
     val lineNumber: Style = style(YELLOW),
     val packageLength: Int? = 3,
+    val fileName: Style = style(GOLD),
+    val unknownSource: Style = style(GRAY),
     val exDetail: Style = style(GOLD, TextDecoration.ITALIC),
     val framesInCommon: Style = style(GRAY, TextDecoration.ITALIC),
 ) {
@@ -52,6 +54,7 @@ fun framesInCommon(child: Array<StackTraceElement>, parent: Array<StackTraceElem
 }
 
 private fun Throwable.renderInternal(
+    long: Boolean,
     options: ThrowableRenderOptions = ThrowableRenderOptions.DEFAULT,
     framesInCommon: Int = 0,
 ): ThrowableRender {
@@ -73,17 +76,36 @@ private fun Throwable.renderInternal(
             val pkg = classSegments.dropLast(1)
             val className = classSegments.last()
             res.append(text(pkg.joinToString(".") { segment ->
-                options.packageLength?.let {
-                    segment.subSequence(0, min(segment.length, it))
-                } ?: segment
+                if (long) segment else {
+                    options.packageLength?.let {
+                        segment.subSequence(0, min(segment.length, it))
+                    } ?: segment
+                }
             } + ".", options.declaringPackage))
             res.append(text(className, options.declaringClass))
             res.append(text(".", options.separator))
             res.append(text(element.methodName, options.methodName))
+
             val lineNo = element.lineNumber
-            if (lineNo >= 0) {
-                res.append(text(" : ", options.separator))
-                res.append(text(lineNo, options.lineNumber))
+            if (long) {
+                if (lineNo >= 0) {
+                    element.fileName?.let { fileName ->
+                        res.append(text("(", options.separator))
+                        res.append(text(fileName, options.fileName))
+                        res.append(text(":", options.separator))
+                        res.append(text(lineNo, options.lineNumber))
+                        res.append(text(")", options.separator))
+                    } ?: run {
+                        res.append(text("(Unknown Source)", options.unknownSource))
+                    }
+                } else {
+                    res.append(text("(Native Method)", options.unknownSource))
+                }
+            } else {
+                if (lineNo >= 0) {
+                    res.append(text(" : ", options.separator))
+                    res.append(text(lineNo, options.lineNumber))
+                }
             }
         }
     }.toMutableList()
@@ -98,7 +120,7 @@ private fun Throwable.renderInternal(
 
     suppressed.forEach { ex ->
         val childTrace = ex.stackTrace
-        val (exSummary, exLines) = ex.renderInternal(options, framesInCommon(childTrace, stackTrace))
+        val (exSummary, exLines) = ex.renderInternal(long, options, framesInCommon(childTrace, stackTrace))
         lines.add(text()
             .append(text("Suppressed: ", options.exDetail))
             .append(exSummary)
@@ -115,7 +137,7 @@ private fun Throwable.renderInternal(
 
     cause?.let { ex ->
         val childTrace = ex.stackTrace
-        val (exSummary, exLines) = ex.renderInternal(options, framesInCommon(childTrace, stackTrace))
+        val (exSummary, exLines) = ex.renderInternal(long, options, framesInCommon(childTrace, stackTrace))
         lines.add(text()
             .append(text("Caused by: ", options.exDetail))
             .append(exSummary)
@@ -128,8 +150,9 @@ private fun Throwable.renderInternal(
 }
 
 fun Throwable.render(
+    long: Boolean,
     options: ThrowableRenderOptions = ThrowableRenderOptions.DEFAULT
 ): List<Component> {
-    val (summary, lines) = renderInternal(options)
+    val (summary, lines) = renderInternal(long, options)
     return listOf(summary) + lines
 }

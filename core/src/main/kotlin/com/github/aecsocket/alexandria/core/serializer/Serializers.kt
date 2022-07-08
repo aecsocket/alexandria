@@ -2,28 +2,27 @@ package com.github.aecsocket.alexandria.core.serializer
 
 import com.github.aecsocket.alexandria.core.DoubleMod
 import com.github.aecsocket.alexandria.core.IntMod
-import com.github.aecsocket.alexandria.core.bound.Bound
 import com.github.aecsocket.alexandria.core.effect.SoundEffect
-import com.github.aecsocket.alexandria.core.extension.register
 import com.github.aecsocket.alexandria.core.extension.registerExact
-import com.github.aecsocket.alexandria.core.spatial.Point2
-import com.github.aecsocket.alexandria.core.spatial.Point3
-import com.github.aecsocket.alexandria.core.spatial.Vector2
-import com.github.aecsocket.alexandria.core.spatial.Vector3
+import com.github.aecsocket.alexandria.core.physics.Shape
+import com.github.aecsocket.alexandria.core.physics.SimpleBody
+import com.github.aecsocket.alexandria.core.spatial.*
 import org.spongepowered.configurate.serialize.TypeSerializerCollection
-import java.util.Locale
+import java.util.*
 
 object Serializers {
     val ALL: TypeSerializerCollection = TypeSerializerCollection.builder()
-        .register(Locale::class, LocaleSerializer)
-        .register(WDuration::class, DurationSerializer)
-        .register(Vector2::class, Vector2Serializer)
-        .register(Vector3::class, Vector3Serializer)
-        .register(Point2::class, Point2Serializer)
-        .register(Point3::class, Point3Serializer)
-        .register(SoundEffect::class, SoundEffectSerializer)
+        .registerExact(Locale::class, LocaleSerializer)
+        .registerExact(WDuration::class, DurationSerializer)
+        .registerExact(Vector2::class, Vector2Serializer)
+        .registerExact(Vector3::class, Vector3Serializer)
+        .registerExact(Point2::class, Point2Serializer)
+        .registerExact(Point3::class, Point3Serializer)
+        .registerExact(SoundEffect::class, SoundEffectSerializer)
         .registerExact(DoubleMod::class, DoubleModSerializer)
         .registerExact(IntMod::class, IntModSerializer)
-        .registerExact(Bound::class, BoundSerializer)
+        .registerExact(Shape::class, ShapeSerializer)
+        .registerExact(Transform::class, TransformSerializer)
+        .registerExact(SimpleBody::class, SimpleBodySerializer)
         .build()
 }

@@ -4,6 +4,7 @@ import com.github.aecsocket.alexandria.core.spatial.Point3
 import com.github.aecsocket.alexandria.core.spatial.Vector3
 import org.bukkit.Location
 import org.bukkit.World
+import org.bukkit.util.BoundingBox
 import org.bukkit.util.Vector
 
 operator fun Vector3.plus(v: Vector)    = Vector3(x + v.x, y + v.y, z + v.z)
@@ -67,3 +68,7 @@ fun Location.copy(
 ) = Location(world, x, y, z, yaw, pitch)
 fun Location.vector() = Vector3(x, y, z)
 fun Location.point() = Point3(blockX, blockY, blockZ)
+
+val BoundingBox.extent get() = Vector3(
+    maxX - minX, maxY - minY, maxZ - minZ
+)

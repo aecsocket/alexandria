@@ -1,6 +1,8 @@
 package com.github.aecsocket.alexandria.core.spatial
 
-import kotlin.math.*
+import kotlin.math.acos
+import kotlin.math.sin
+import kotlin.math.sqrt
 
 // https://github.com/jMonkeyEngine/jmonkeyengine/blob/master/jme3-core/src/main/java/com/jme3/math/Quaternion.java
 data class Quaternion(val x: Double, val y: Double, val z: Double, val w: Double) {
@@ -24,7 +26,7 @@ data class Quaternion(val x: Double, val y: Double, val z: Double, val w: Double
     }
 
     operator fun times(q: Quaternion) = Quaternion(
-        x*q.x + y*q.z - z*q.y + w*q.x,
+        x*q.w + y*q.z - z*q.y + w*q.x,
         -x*q.z + y*q.w + z*q.x + w*q.y,
         x*q.y - y*q.x + z*q.w + w*q.z,
         -x*q.x - y*q.y - z*q.z + w*q.w,

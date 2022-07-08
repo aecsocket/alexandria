@@ -2,7 +2,6 @@ package com.github.aecsocket.alexandria.core
 
 import com.github.aecsocket.alexandria.core.extension.render
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.Component.text
 import java.util.logging.Level
 import java.util.logging.Logger
 
@@ -57,12 +56,13 @@ interface LogAcceptor {
 class Logging(
     val logger: (String) -> Unit,
     var level: LogLevel = LogLevel.Verbose,
+    var longStackTraces: Boolean = true,
 ) : LogAcceptor {
     override fun record(record: LogRecord) {
         if (record.level.value >= this.level.value) {
             (
                 record.lines() +
-                (record.ex?.render()?.map { "  ${AnsiComponentRenderer.render(it)}" } ?: emptyList())
+                (record.ex?.render(longStackTraces)?.map { "  ${AnsiComponentRenderer.render(it)}" } ?: emptyList())
             )
                 .map { "${record.level.prefix} $it$RESET" }
                 .forEach { logger(it) }

@@ -5,7 +5,7 @@ import kotlin.math.*
 
 private fun sqr(v: Double) = v*v
 
-data class Vector2(val x: Double, val y: Double) {
+data class Vector2(val x: Double = 0.0, val y: Double = 0.0) {
     constructor(s: Double) : this(s, s)
 
     inline fun x(map: (Double) -> Double) = Vector2(map(x), y)
@@ -77,7 +77,7 @@ data class Vector2(val x: Double, val y: Double) {
     }
 }
 
-data class Vector3(val x: Double, val y: Double, val z: Double) {
+data class Vector3(val x: Double = 0.0, val y: Double = 0.0, val z: Double = 0.0) {
     constructor(s: Double) : this(s, s, s)
 
     inline fun x(map: (Double) -> Double) = Vector3(map(x), y, z)
@@ -183,7 +183,7 @@ data class Vector3(val x: Double, val y: Double, val z: Double) {
     }
 }
 
-data class Vector4(val x: Double, val y: Double, val z: Double, val w: Double) {
+data class Vector4(val x: Double = 0.0, val y: Double = 0.0, val z: Double = 0.0, val w: Double = 0.0) {
     constructor(s: Double) : this(s, s, s, s)
 
     inline fun x(map: (Double) -> Double) = Vector4(map(x), y, z, w)
