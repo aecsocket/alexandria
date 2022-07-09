@@ -1,6 +1,6 @@
 package com.github.aecsocket.alexandria.core.effect
 
-import com.github.aecsocket.alexandria.core.spatial.Vector3
+import com.github.aecsocket.alexandria.core.physics.Vector3
 import net.kyori.adventure.key.Key
 
 data class ParticleEffect(

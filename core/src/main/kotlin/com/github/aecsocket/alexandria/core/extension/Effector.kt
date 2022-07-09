@@ -2,12 +2,7 @@ package com.github.aecsocket.alexandria.core.extension
 
 import com.github.aecsocket.alexandria.core.effect.Effector
 import com.github.aecsocket.alexandria.core.effect.ParticleEffect
-import com.github.aecsocket.alexandria.core.physics.Box
-import com.github.aecsocket.alexandria.core.physics.Empty
-import com.github.aecsocket.alexandria.core.physics.Shape
-import com.github.aecsocket.alexandria.core.physics.Sphere
-import com.github.aecsocket.alexandria.core.spatial.Transform
-import com.github.aecsocket.alexandria.core.spatial.Vector3
+import com.github.aecsocket.alexandria.core.physics.*
 
 fun Effector.showLine(effect: ParticleEffect, from: Vector3, to: Vector3, step: Double) {
     val delta = to - from

@@ -1,4 +1,4 @@
-package com.github.aecsocket.alexandria.core.spatial
+package com.github.aecsocket.alexandria.core.physics
 
 import kotlin.math.acos
 import kotlin.math.sin
@@ -12,12 +12,17 @@ data class Quaternion(val x: Double, val y: Double, val z: Double, val w: Double
 
     val norm: Double get() = x*x + y*y + z*z + w*w
 
-    val normalized: Quaternion get() {
+    val normalized: Quaternion
+        get() {
         val n = 1 / sqrt(norm)
         return Quaternion(x/n, y/n, z/n, w/n)
     }
 
-    val inverse: Quaternion get() {
+    // TODO we can just assume that this quaternion is a unit quaternion
+    // so we don't need to normalize or anything, just get conjugate
+    // https://github.com/mrdoob/three.js/blob/dev/src/math/Quaternion.js #invert
+    val inverse: Quaternion
+        get() {
         val norm = norm
         return if (norm > 0.0) {
             val invNorm = 1 / norm

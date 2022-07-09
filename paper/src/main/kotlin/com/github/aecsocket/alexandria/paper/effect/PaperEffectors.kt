@@ -6,7 +6,7 @@ import com.github.aecsocket.alexandria.core.effect.ParticleEffect
 import com.github.aecsocket.alexandria.core.effect.SoundEffect
 import com.github.aecsocket.alexandria.core.extension.clamp01
 import com.github.aecsocket.alexandria.core.extension.copy
-import com.github.aecsocket.alexandria.core.spatial.Vector3
+import com.github.aecsocket.alexandria.core.physics.Vector3
 import com.github.aecsocket.alexandria.paper.extension.*
 import net.kyori.adventure.key.Key
 import net.minecraft.core.Registry

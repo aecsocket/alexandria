@@ -1,10 +1,10 @@
 package com.github.aecsocket.alexandria.core.serializer
 
 import com.github.aecsocket.alexandria.core.extension.force
-import com.github.aecsocket.alexandria.core.spatial.Point2
-import com.github.aecsocket.alexandria.core.spatial.Point3
-import com.github.aecsocket.alexandria.core.spatial.Vector2
-import com.github.aecsocket.alexandria.core.spatial.Vector3
+import com.github.aecsocket.alexandria.core.physics.Point2
+import com.github.aecsocket.alexandria.core.physics.Point3
+import com.github.aecsocket.alexandria.core.physics.Vector2
+import com.github.aecsocket.alexandria.core.physics.Vector3
 import org.spongepowered.configurate.ConfigurationNode
 import org.spongepowered.configurate.serialize.SerializationException
 import org.spongepowered.configurate.serialize.TypeSerializer

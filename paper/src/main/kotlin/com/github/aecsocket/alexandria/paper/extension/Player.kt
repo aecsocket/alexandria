@@ -1,6 +1,6 @@
 package com.github.aecsocket.alexandria.paper.extension
 
-import com.github.aecsocket.alexandria.core.spatial.Point3
+import com.github.aecsocket.alexandria.core.physics.Point3
 import net.minecraft.core.BlockPos
 import net.minecraft.network.protocol.game.ClientboundBlockDestructionPacket
 import org.bukkit.GameMode

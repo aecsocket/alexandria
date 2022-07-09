@@ -1,4 +1,4 @@
-package com.github.aecsocket.alexandria.core.spatial
+package com.github.aecsocket.alexandria.core.physics
 
 import kotlin.math.abs
 
@@ -26,7 +26,8 @@ data class Matrix3(
     )
 
     // https://github.com/glslify/glsl-inverse/blob/master/index.glsl
-    val inverse: Matrix3 get() {
+    val inverse: Matrix3
+        get() {
         val b00 = n11*n22 - n12*n21
         val b10 = n12*n20 - n10*n22
         val b20 = n10*n21 - n11*n20
@@ -100,7 +101,8 @@ data class Matrix4(
         n30*s, n31*s, n32*s, n33*s,
     )
 
-    val inverse: Matrix4 get() {
+    val inverse: Matrix4
+        get() {
         val fA0 = n00*n11 - n01*n10
         val fA1 = n00*n12 - n02*n10
         val fA2 = n00*n13 - n03*n10

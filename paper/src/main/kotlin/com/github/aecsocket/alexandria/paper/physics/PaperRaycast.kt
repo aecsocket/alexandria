@@ -1,12 +1,10 @@
 package com.github.aecsocket.alexandria.paper.physics
 
 import com.github.aecsocket.alexandria.core.extension.Euler3
+import com.github.aecsocket.alexandria.core.extension.EulerOrder
 import com.github.aecsocket.alexandria.core.extension.quaternion
 import com.github.aecsocket.alexandria.core.extension.radians
 import com.github.aecsocket.alexandria.core.physics.*
-import com.github.aecsocket.alexandria.core.spatial.Transform
-import com.github.aecsocket.alexandria.core.spatial.max
-import com.github.aecsocket.alexandria.core.spatial.min
 import com.github.aecsocket.alexandria.paper.extension.alexandria
 import com.github.aecsocket.alexandria.paper.extension.extent
 import com.github.aecsocket.alexandria.paper.extension.vector
@@ -78,7 +76,7 @@ fun Entity.bodies(): List<PaperEntityBody> {
     return listOf(PaperEntityBody(
         this,
         Transform(
-            Euler3(0.0, -location.yaw.toDouble().radians, 0.0).quaternion(),
+            Euler3(0.0, -location.yaw.toDouble().radians, 0.0).quaternion(EulerOrder.XYZ),
             aabb.center.alexandria()),
         Box(aabb.extent / 2.0)
     ))

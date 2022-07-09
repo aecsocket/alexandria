@@ -1,4 +1,4 @@
-package com.github.aecsocket.alexandria.core.spatial
+package com.github.aecsocket.alexandria.core.physics
 
 import kotlin.math.abs
 import kotlin.math.max

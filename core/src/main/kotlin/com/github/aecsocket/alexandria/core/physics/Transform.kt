@@ -1,8 +1,4 @@
-package com.github.aecsocket.alexandria.core.spatial
-
-import com.github.aecsocket.alexandria.core.extension.degrees
-import com.github.aecsocket.alexandria.core.extension.euler
-import com.github.aecsocket.alexandria.core.physics.Ray
+package com.github.aecsocket.alexandria.core.physics
 
 // (no: scale, then) rotate, then translate
 data class Transform(
@@ -33,7 +29,7 @@ data class Transform(
         else Ray(invert(r.pos), invRot * r.dir)
 
     fun asString(fmt: String = "%f") = """Transform [
-  rot = ${rot.asString(fmt)} = ${rot.euler().degrees.asString(fmt)}
+  rot = ${rot.asString(fmt)}
   tl = ${tl.asString(fmt)}
 ]"""
 

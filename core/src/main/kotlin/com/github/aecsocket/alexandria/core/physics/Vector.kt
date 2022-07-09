@@ -1,4 +1,4 @@
-package com.github.aecsocket.alexandria.core.spatial
+package com.github.aecsocket.alexandria.core.physics
 
 import com.github.aecsocket.alexandria.core.extension.clamp
 import kotlin.math.*

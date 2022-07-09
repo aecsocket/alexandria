@@ -1,7 +1,5 @@
 package com.github.aecsocket.alexandria.core.physics
 
-import com.github.aecsocket.alexandria.core.spatial.Vector3
-
 data class RayCollision<B : Body>(
     val ray: Ray,
     val hit: B,

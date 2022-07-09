@@ -2,7 +2,7 @@ package com.github.aecsocket.alexandria.paper.effect
 
 import com.github.aecsocket.alexandria.core.effect.Effector
 import com.github.aecsocket.alexandria.core.effect.SoundEffect
-import com.github.aecsocket.alexandria.core.spatial.Vector3
+import com.github.aecsocket.alexandria.core.physics.Vector3
 import com.github.aecsocket.alexandria.paper.extension.vector
 import com.github.aecsocket.alexandria.paper.extension.scheduleDelayed
 import org.bukkit.World

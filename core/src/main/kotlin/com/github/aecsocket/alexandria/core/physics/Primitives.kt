@@ -1,7 +1,5 @@
 package com.github.aecsocket.alexandria.core.physics
 
-import com.github.aecsocket.alexandria.core.spatial.Vector3
-import com.github.aecsocket.alexandria.core.spatial.step
 import org.spongepowered.configurate.objectmapping.ConfigSerializable
 import org.spongepowered.configurate.objectmapping.meta.Required
 import kotlin.math.sqrt

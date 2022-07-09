@@ -4,9 +4,7 @@ import com.github.aecsocket.alexandria.core.DoubleMod
 import com.github.aecsocket.alexandria.core.IntMod
 import com.github.aecsocket.alexandria.core.effect.SoundEffect
 import com.github.aecsocket.alexandria.core.extension.registerExact
-import com.github.aecsocket.alexandria.core.physics.Shape
-import com.github.aecsocket.alexandria.core.physics.SimpleBody
-import com.github.aecsocket.alexandria.core.spatial.*
+import com.github.aecsocket.alexandria.core.physics.*
 import org.spongepowered.configurate.serialize.TypeSerializerCollection
 import java.util.*
 

@@ -1,14 +1,15 @@
 package com.github.aecsocket.alexandria.core.serializer
 
 import com.github.aecsocket.alexandria.core.extension.*
-import com.github.aecsocket.alexandria.core.spatial.Quaternion
+import com.github.aecsocket.alexandria.core.physics.Quaternion
 import org.spongepowered.configurate.ConfigurationNode
 import org.spongepowered.configurate.serialize.SerializationException
 import org.spongepowered.configurate.serialize.TypeSerializer
 import java.lang.reflect.Type
 
 class QuaternionSerializer(
-    var format: Format = Format.EULER
+    var format: Format = Format.EULER,
+    var order: EulerOrder = EulerOrder.XYZ,
 ) : TypeSerializer<Quaternion> {
     enum class Format {
         EULER, QUATERNION
@@ -18,7 +19,7 @@ class QuaternionSerializer(
         if (obj == null) node.set(null)
         else when (format) {
             Format.EULER -> {
-                val euler = obj.euler()
+                val euler = obj.euler(order)
                 node.appendListNode().set(euler.pitch)
                 node.appendListNode().set(euler.yaw)
                 node.appendListNode().set(euler.roll)
@@ -37,7 +38,7 @@ class QuaternionSerializer(
         return when (list.size) {
             3 -> Euler3(
                 list[0].force(), list[1].force(), list[2].force()
-            ).quaternion()
+            ).quaternion(order)
             4 -> Quaternion(
                 list[0].force(), list[1].force(), list[2].force(), list[3].force()
             )

@@ -4,9 +4,9 @@ import com.github.aecsocket.alexandria.core.extension.force
 import com.github.aecsocket.alexandria.core.extension.forceMap
 import com.github.aecsocket.alexandria.core.extension.typeToken
 import com.github.aecsocket.alexandria.core.physics.*
-import com.github.aecsocket.alexandria.core.spatial.Quaternion
-import com.github.aecsocket.alexandria.core.spatial.Transform
-import com.github.aecsocket.alexandria.core.spatial.Vector3
+import com.github.aecsocket.alexandria.core.physics.Quaternion
+import com.github.aecsocket.alexandria.core.physics.Transform
+import com.github.aecsocket.alexandria.core.physics.Vector3
 import org.spongepowered.configurate.ConfigurationNode
 import org.spongepowered.configurate.kotlin.extensions.get
 import org.spongepowered.configurate.serialize.SerializationException

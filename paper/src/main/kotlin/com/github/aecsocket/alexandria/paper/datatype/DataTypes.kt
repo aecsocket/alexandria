@@ -1,6 +1,6 @@
 package com.github.aecsocket.alexandria.paper.datatype
 
-import com.github.aecsocket.alexandria.core.spatial.*
+import com.github.aecsocket.alexandria.core.physics.*
 import com.github.aecsocket.alexandria.paper.extension.dataType
 import com.github.aecsocket.alexandria.paper.extension.force
 import com.github.aecsocket.alexandria.paper.extension.key

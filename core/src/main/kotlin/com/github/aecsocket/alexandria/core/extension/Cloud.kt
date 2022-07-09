@@ -4,7 +4,7 @@ import cloud.commandframework.ArgumentDescription
 import cloud.commandframework.Command
 import cloud.commandframework.context.CommandContext
 import cloud.commandframework.types.tuples.Triplet
-import com.github.aecsocket.alexandria.core.spatial.Vector3
+import com.github.aecsocket.alexandria.core.physics.Vector3
 
 operator fun <U, V> cloud.commandframework.types.tuples.Pair<U, V>.component1(): U = first
 operator fun <U, V> cloud.commandframework.types.tuples.Pair<U, V>.component2(): V = second

@@ -1,7 +1,7 @@
 package com.github.aecsocket.alexandria.paper.extension
 
-import com.github.aecsocket.alexandria.core.spatial.Point3
-import com.github.aecsocket.alexandria.core.spatial.Vector3
+import com.github.aecsocket.alexandria.core.physics.Point3
+import com.github.aecsocket.alexandria.core.physics.Vector3
 import org.bukkit.Location
 import org.bukkit.World
 import org.bukkit.util.BoundingBox

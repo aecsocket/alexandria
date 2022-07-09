@@ -1,6 +1,6 @@
 package com.github.aecsocket.alexandria.core.extension
 
-import com.github.aecsocket.alexandria.core.spatial.*
+import com.github.aecsocket.alexandria.core.physics.*
 import kotlin.math.*
 
 // Conversion
@@ -45,6 +45,10 @@ fun KRandom.nextMatrix4() = Matrix4(
     nextDouble(), nextDouble(), nextDouble(), nextDouble()
 )
 
+fun KRandom.nextQuaternion() = Quaternion(
+    nextDouble(), nextDouble(), nextDouble(), nextDouble()
+).normalized
+
 // Java random
 typealias JRandom = java.util.Random
 
@@ -64,7 +68,9 @@ fun JRandom.nextMatrix4() = Matrix4(
     nextDouble(), nextDouble(), nextDouble(), nextDouble()
 )
 
-// Angles
+private fun trig(ang: Double) = sin(ang / 2) to cos(ang / 2)
+
+// Eulers
 
 typealias Euler3 = Vector3
 
@@ -75,57 +81,110 @@ val Euler3.roll get() = z
 val Euler3.radians get() = map { it.radians }
 val Euler3.degrees get() = map { it.degrees }
 
-private fun trig(ang: Double) = sin(ang / 2) to cos(ang / 2)
+enum class EulerOrder {
+    XYZ,
+    ZYX,
+}
 
 // https://github.com/mrdoob/three.js/blob/dev/src/math/Quaternion.js#L223
 // JME's impl seems to not work properly for our use-case
-fun Euler3.quaternion(): Quaternion {
+fun Euler3.quaternion(order: EulerOrder): Quaternion {
     val (s1, c1) = trig(x)
     val (s2, c2) = trig(y)
     val (s3, c3) = trig(z)
-    return Quaternion(
-        s1*c2*c3 + c1*s2*s3,
-        c1*s2*c3 - s1*c2*s3,
-        c1*c2*s3 + s1*s2*c3,
-        c1*c2*c3 - s1*s2*s3,
-    )
-}
 
-// https://github.com/jMonkeyEngine/jmonkeyengine/blob/master/jme3-core/src/main/java/com/jme3/math/Quaternion.java l328
-fun Quaternion.euler(): Euler3 {
-    val ww = w*w
-    val xx = x*x
-    val yy = y*y
-    val zz = z*z
-    val unit = xx + yy + zz + ww
-    val test = x*y + z*w
-    return when {
-        test > 0.499 * unit -> Euler3(
-            0.0, 2 * atan2(x, w), PI / 2
+    return when (order) {
+        EulerOrder.XYZ -> Quaternion(
+            s1*c2*c3 + c1*s2*s3,
+            c1*s2*c3 - s1*c2*s3,
+            c1*c2*s3 + s1*s2*c3,
+            c1*c2*c3 - s1*s2*s3,
         )
-        test < -0.499 * unit -> Euler3(
-            0.0, -2 * atan2(x, w), -PI / 2
-        )
-        else -> Euler3(
-            atan2(2*x*w - 2*y*z, -xx + yy - zz + ww), // pitch
-            atan2(2*y*w - 2*x*z, xx - yy - zz + ww), // yaw
-            asin(2 * test / unit), // roll
+        EulerOrder.ZYX -> Quaternion(
+            s1*c2*c3 - c1*s2*s3,
+            c1*s2*c3 + s1*c2*s3,
+            c1*c2*s3 - s1*s2*c3,
+            c1*c2*c3 + s1*s2*s3,
         )
     }
 }
 
-fun Quaternion.matrix(): Matrix3 {
-    val norm = norm
-    val s = if (norm == 1.0) 2.0 else if (norm > 0.0) 2.0 / norm else 0.0
+// Polar
 
-    val (xs, ys, zs) = Triple(x*s, y*s, z*s)
-    val (xx, xy, xz) = Triple(x*xs, x*ys, x*zs)
-    val (xw, yy, yz) = Triple(w*xs, y*ys, y*zs)
-    val (yw, zz, zw) = Triple(w*ys, z*zs, w*zs)
+typealias Polar2 = Vector2
+
+val Polar2.pitch get() = x
+val Polar2.yaw get() = y
+
+// copied from Bukkit's vector (I think?)
+fun Polar2.cartesian(): Vector3 {
+    val xz = cos(pitch)
+    return Vector3(
+        -xz * sin(yaw),
+        -sin(pitch),
+        xz * cos(yaw),
+    )
+}
+
+fun Vector3.polar(): Polar2 {
+    val pitch = atan(-y / sqrt(x*x + z*z))
+    val yaw = atan2(-x, z) + PI*2
+    return Polar2(pitch, yaw)
+}
+
+// Quaternion -> ...
+
+fun Quaternion.matrix(): Matrix3 {
+    // https://github.com/mrdoob/three.js/blob/dev/src/math/Matrix4.js # makeRotationFromQuaternion (#compose(zero, q, one))
+    // note that we strip out the position and scale code
+    // (position = (0,0,0), scale = (1,1,1))
+    val (x2, y2, z2) = Triple(x+x, y+y, z+z)
+    val (xx, xy, xz) = Triple(x*x2, x*y2, x*z2)
+    val (yy, yz, zz) = Triple(y*y2, y*z2, z*z2)
+    val (wx, wy, wz) = Triple(w*x2, w*y2, w*z2)
 
     return Matrix3(
-        1-(yy+zz), (xy-zw), (zw+yw),
-        (xy+zw), 1-(xx+zz), (yz-xw),
-        (xz-yw), (yz+xw), 1-(xx+yy),
+        1 - (yy+zz), xy+wz, xz-wy,
+        xy-wz, 1 - (xx+zz), yz+wx,
+        xz+wy, yz-wx, 1 - (xx+yy),
     )
+}
+
+fun Quaternion.euler(order: EulerOrder): Euler3 {
+    return matrix().euler(order)
+}
+
+// Matrix -> ...
+
+private const val EPSILON = 0.999999
+
+fun Matrix3.euler(order: EulerOrder): Euler3 {
+    // https://github.com/mrdoob/three.js/blob/dev/src/math/Euler.js#L105
+    // I'm aware that XYZ and ZYX are switched. I don't understand why, but that's how it works
+    return when (order) {
+        EulerOrder.XYZ -> {
+            val y = asin(-clamp(n20, -1.0, 1.0))
+            if (abs(n20) < EPSILON) Euler3(
+                atan2(n21, n22),
+                y,
+                atan2(n10, n00),
+            ) else Euler3(
+                0.0,
+                y,
+                atan2(-n01, n11),
+            )
+        }
+        EulerOrder.ZYX -> {
+            val y = asin(clamp(n02, -1.0, 1.0))
+            if (abs(n02) < EPSILON) Euler3(
+                atan2(-n12, n22),
+                y,
+                atan2(-n01, n00),
+            ) else Euler3(
+                atan2(n21, n11),
+                y,
+                0.0,
+            )
+        }
+    }
 }
