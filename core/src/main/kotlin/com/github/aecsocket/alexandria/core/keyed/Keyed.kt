@@ -20,3 +20,10 @@ interface Keyed {
         }
     }
 }
+
+fun <K : Keyed> Map<String, *>.by(keyed: Keyed): K? {
+    return get(keyed.id)?.let {
+        @Suppress("UNCHECKED_CAST")
+        it as K
+    }
+}

@@ -4,9 +4,6 @@ import com.github.aecsocket.alexandria.core.extension.force
 import com.github.aecsocket.alexandria.core.extension.forceMap
 import com.github.aecsocket.alexandria.core.extension.typeToken
 import com.github.aecsocket.alexandria.core.physics.*
-import com.github.aecsocket.alexandria.core.physics.Quaternion
-import com.github.aecsocket.alexandria.core.physics.Transform
-import com.github.aecsocket.alexandria.core.physics.Vector3
 import org.spongepowered.configurate.ConfigurationNode
 import org.spongepowered.configurate.kotlin.extensions.get
 import org.spongepowered.configurate.serialize.SerializationException
@@ -86,23 +83,22 @@ object SimpleBodySerializer : TypeSerializer<SimpleBody> {
         node.forceMap(type)
         return when {
             node.hasChild(SHAPE) -> SimpleBody(
-                node.node(TRANSFORM).get { Transform.Identity },
                 node.node(SHAPE).force(),
+                node.node(TRANSFORM).get { Transform.Identity },
             )
             node.hasChild(RADIUS) -> SimpleBody(
+                Sphere(node.node(RADIUS).force()),
                 Transform(tl = node.node(CENTER).get { Vector3.Zero }),
-                Sphere(node.node(RADIUS).force())
             )
             node.hasChild(MIN) && node.hasChild(MAX) -> {
                 val min = node.node(MIN).force<Vector3>()
                 val max = node.node(MAX).force<Vector3>()
-                val center = min.midpoint(max)
                 SimpleBody(
+                    Box((max - min) / 2.0),
                     Transform(
                         rot = node.node(ROT).get { Quaternion.Identity },
                         tl = min.midpoint(max)
                     ),
-                    Box((max - min) / 2.0)
                 )
             }
             else -> throw SerializationException(node, type, "Invalid body format")

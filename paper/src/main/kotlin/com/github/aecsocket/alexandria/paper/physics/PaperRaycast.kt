@@ -1,12 +1,9 @@
 package com.github.aecsocket.alexandria.paper.physics
 
-import com.github.aecsocket.alexandria.core.extension.Euler3
-import com.github.aecsocket.alexandria.core.extension.EulerOrder
-import com.github.aecsocket.alexandria.core.extension.quaternion
-import com.github.aecsocket.alexandria.core.extension.radians
 import com.github.aecsocket.alexandria.core.physics.*
 import com.github.aecsocket.alexandria.paper.extension.alexandria
 import com.github.aecsocket.alexandria.paper.extension.extent
+import com.github.aecsocket.alexandria.paper.extension.transform
 import com.github.aecsocket.alexandria.paper.extension.vector
 import net.minecraft.world.phys.AABB
 import org.bukkit.Material
@@ -17,26 +14,26 @@ import org.bukkit.craftbukkit.v1_18_R2.CraftWorld
 import org.bukkit.entity.Entity
 import kotlin.math.sign
 
-sealed interface PaperBody : Body {
-    val fluid: Material?
-}
+sealed interface PaperBody : Body
 
-data class PaperBlockBody(
-    val block: Block,
-    override val transform: Transform,
+class PaperBlockBody(
     override val shape: Shape,
-    override val fluid: Material? = null
+    override val transform: Transform,
+    val block: Block,
+    val fluid: Material? = null
 ) : PaperBody {
+    override val invTransform: Transform = transform.inverse
+
     override fun toString() =
         "PaperBlockBody(${block.type} fluid=$fluid)"
 }
 
-data class PaperEntityBody(
-    val entity: Entity,
-    override val transform: Transform,
+class PaperEntityBody(
     override val shape: Shape,
+    override val transform: Transform,
+    val entity: Entity,
 ) : PaperBody {
-    override val fluid get() = null
+    override val invTransform: Transform = transform.inverse
 
     override fun toString() =
         "PaperEntityBody(${entity.name})"
@@ -44,7 +41,7 @@ data class PaperEntityBody(
 
 fun Block.bodies(): List<PaperBlockBody> {
     val location = location.vector()
-    fun box(fluid: Material?) = PaperBlockBody(this, Transform(tl = location + 0.5), Box.Half, fluid)
+    fun box(fluid: Material?) = PaperBlockBody(Box.Half, Transform(tl = location + 0.5), this, fluid)
 
     return when (type) {
         Material.AIR, Material.WATER, Material.LAVA -> listOf(box(type))
@@ -56,14 +53,14 @@ fun Block.bodies(): List<PaperBlockBody> {
                     // -> transform = [location + aabb.center]
                     // -> shape = [0.5, 0.5, 0.5]
                     PaperBlockBody(
-                        this,
+                        Box(box.extent / 2.0),
                         Transform(tl = location + box.center.alexandria()),
-                        Box(box.extent / 2.0)
+                        this,
                     )
                 }.toMutableList()
                 val data = blockData
                 if (data is Waterlogged && data.isWaterlogged) {
-                    bodies.add(PaperBlockBody(this, Transform(tl = location + 0.5), Box.Half, Material.WATER))
+                    bodies.add(PaperBlockBody(Box.Half, Transform(tl = location + 0.5), this, Material.WATER))
                 }
                 bodies
             }
@@ -74,11 +71,9 @@ fun Block.bodies(): List<PaperBlockBody> {
 fun Entity.bodies(): List<PaperEntityBody> {
     val aabb = boundingBox
     return listOf(PaperEntityBody(
+        Box(aabb.extent / 2.0),
+        Transform(transform.rot, aabb.center.alexandria()),
         this,
-        Transform(
-            Euler3(0.0, -location.yaw.toDouble().radians, 0.0).quaternion(EulerOrder.XYZ),
-            aabb.center.alexandria()),
-        Box(aabb.extent / 2.0)
     ))
 }
 

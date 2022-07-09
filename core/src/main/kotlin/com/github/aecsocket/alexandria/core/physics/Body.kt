@@ -1,19 +1,30 @@
 package com.github.aecsocket.alexandria.core.physics
 
 interface Body {
+    val shape: Shape
+
     // object -> world space
     val transform: Transform
-    val shape: Shape
+
+    // world -> object space
+    val invTransform: Transform
 }
 
-data class SimpleBody(
+interface DynamicBody : Body {
+    override var transform: Transform
+}
+
+class SimpleBody(
+    override val shape: Shape,
     override val transform: Transform = Transform.Identity,
-    override val shape: Shape
-) : Body
-
-interface ForwardingBody : Body {
-    val backing: Body
-
-    override val transform get() = backing.transform
-    override val shape get() = backing.shape
+    override val invTransform: Transform = transform.inverse,
+) : Body {
+    override fun toString() = "SimpleBody($shape @ ${transform.tl})"
 }
+
+/*class DynamicSimpleBody(
+    shape: Shape,
+    override var transform: Transform = Transform.Identity,
+    invTransform: Transform = transform.inverse,
+) : SimpleBody(shape, transform)
+*/
