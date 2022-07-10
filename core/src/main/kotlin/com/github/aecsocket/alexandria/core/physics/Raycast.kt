@@ -15,14 +15,16 @@ data class RayCollision<B : Body>(
 abstract class Raycast<B : Body> {
     abstract fun cast(ray: Ray, maxDistance: Double, test: (B) -> Boolean = { true }): RayCollision<out B>?
 
-    protected fun <T : B> collides(ray: Ray, bodies: Iterable<T>): RayCollision<T>? {
+    protected fun <T : B> collides(ray: Ray, bodies: Iterable<T>, maxDistance: Double): RayCollision<T>? {
         var closest: Pair<T, Collision>? = null
         bodies.forEach { body ->
-            body.shape.collides(body.invTransform.apply(ray))?.let { collision ->
-                closest = closest?.let {
-                    if (collision.tIn < it.second.tIn) body to collision
-                    else it
-                } ?: (body to collision)
+            body.shape.collides(body.transform.invert(ray))?.let { collision ->
+                if (collision.tIn <= maxDistance) {
+                    closest = closest?.let {
+                        if (collision.tIn < it.second.tIn) body to collision
+                        else it
+                    } ?: (body to collision)
+                }
             }
         }
         return closest?.let { (body, collision) -> RayCollision(ray, body,
@@ -33,6 +35,6 @@ abstract class Raycast<B : Body> {
 
 fun <B : Body> raycastOf(bodies: Iterable<B>) = object : Raycast<B>() {
     override fun cast(ray: Ray, maxDistance: Double, test: (B) -> Boolean): RayCollision<out B>? {
-        return collides(ray, bodies)
+        return collides(ray, bodies.filter(test), maxDistance)
     }
 }

@@ -19,7 +19,7 @@ class QuaternionSerializer(
         if (obj == null) node.set(null)
         else when (format) {
             Format.EULER -> {
-                val euler = obj.euler(order)
+                val euler = obj.euler(order).degrees
                 node.appendListNode().set(euler.pitch)
                 node.appendListNode().set(euler.yaw)
                 node.appendListNode().set(euler.roll)
@@ -38,7 +38,7 @@ class QuaternionSerializer(
         return when (list.size) {
             3 -> Euler3(
                 list[0].force(), list[1].force(), list[2].force()
-            ).quaternion(order)
+            ).radians.quaternion(order)
             4 -> Quaternion(
                 list[0].force(), list[1].force(), list[2].force(), list[3].force()
             )

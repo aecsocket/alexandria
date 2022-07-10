@@ -22,8 +22,6 @@ class PaperBlockBody(
     val block: Block,
     val fluid: Material? = null
 ) : PaperBody {
-    override val invTransform: Transform = transform.inverse
-
     override fun toString() =
         "PaperBlockBody(${block.type} fluid=$fluid)"
 }
@@ -33,8 +31,6 @@ class PaperEntityBody(
     override val transform: Transform,
     val entity: Entity,
 ) : PaperBody {
-    override val invTransform: Transform = transform.inverse
-
     override fun toString() =
         "PaperEntityBody(${entity.name})"
 }
@@ -132,7 +128,7 @@ class PaperRaycast(
         while (true) {
             i++
             val block = world.getBlockAt(xi, yi, zi)
-            collides(ray, block.bodies().filter(test))?.let { return it }
+            collides(ray, block.bodies().filter(test), maxDistance)?.let { return it }
 
             if (xb < yb) {
                 if (xb < zb) {
@@ -172,7 +168,7 @@ class PaperRaycast(
             max.x + mgn, max.y + mgn, max.z + mgn
         )) { nms ->
             val entity = nms.bukkitEntity
-            collides(ray, entity.bodies().filter(test))?.let { collision ->
+            collides(ray, entity.bodies().filter(test), maxDistance)?.let { collision ->
                 closest = closest?.let {
                     if (collision.tIn < it.tIn) collision
                     else it

@@ -116,6 +116,9 @@ typealias Polar2 = Vector2
 val Polar2.pitch get() = x
 val Polar2.yaw get() = y
 
+val Polar2.radians get() = map { it.radians }
+val Polar2.degrees get() = map { it.degrees }
+
 // copied from Bukkit's vector (I think?)
 fun Polar2.cartesian(): Vector3 {
     val xz = cos(pitch)
@@ -126,11 +129,15 @@ fun Polar2.cartesian(): Vector3 {
     )
 }
 
+fun Polar2.euler() = Euler3(pitch, yaw, 0.0)
+
 fun Vector3.polar(): Polar2 {
     val pitch = atan(-y / sqrt(x*x + z*z))
     val yaw = atan2(-x, z) + PI*2
     return Polar2(pitch, yaw)
 }
+
+fun Vector3.euler() = polar().euler()
 
 // Quaternion -> ...
 

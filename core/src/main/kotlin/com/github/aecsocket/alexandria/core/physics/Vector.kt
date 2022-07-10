@@ -146,7 +146,11 @@ data class Vector3(val x: Double = 0.0, val y: Double = 0.0, val z: Double = 0.0
 
     val length: Double get() = sqrt(sqrLength)
 
-    val normalized: Vector3 get() = Vector3(x/length, y/length, z/length)
+    val normalized: Vector3 get() {
+        val length = length
+        return if (length == 0.0 || length == 1.0) this
+        else Vector3(x/length, y/length, z/length)
+    }
 
     val sign: Vector3 get() = Vector3(sign(x), sign(y), sign(z))
 

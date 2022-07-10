@@ -1,8 +1,11 @@
 package com.github.aecsocket.alexandria.core.physics
 
+import kotlin.math.abs
 import kotlin.math.acos
 import kotlin.math.sin
 import kotlin.math.sqrt
+
+private const val EPSILON = 0.000001
 
 // https://github.com/jMonkeyEngine/jmonkeyengine/blob/master/jme3-core/src/main/java/com/jme3/math/Quaternion.java
 data class Quaternion(val x: Double, val y: Double, val z: Double, val w: Double) {
@@ -12,23 +15,26 @@ data class Quaternion(val x: Double, val y: Double, val z: Double, val w: Double
 
     val norm: Double get() = x*x + y*y + z*z + w*w
 
+    val length: Double get() = sqrt(norm)
+
     val normalized: Quaternion
         get() {
-        val n = 1 / sqrt(norm)
-        return Quaternion(x/n, y/n, z/n, w/n)
-    }
+            val length = length
+            return if (length == 0.0) Zero
+            else Quaternion(x/length, y/length, z/length, w/length)
+        }
 
     // TODO we can just assume that this quaternion is a unit quaternion
     // so we don't need to normalize or anything, just get conjugate
     // https://github.com/mrdoob/three.js/blob/dev/src/math/Quaternion.js #invert
     val inverse: Quaternion
         get() {
-        val norm = norm
-        return if (norm > 0.0) {
-            val invNorm = 1 / norm
-            Quaternion(-x*invNorm, -y*invNorm, -z*invNorm, w*invNorm)
-        } else throw ArithmeticException("Cannot invert quaternion with norm $norm")
-    }
+            val norm = norm
+            return if (norm > 0.0) {
+                val invNorm = 1 / norm
+                Quaternion(-x*invNorm, -y*invNorm, -z*invNorm, w*invNorm)
+            } else throw ArithmeticException("Cannot invert quaternion with norm $norm: $this")
+        }
 
     operator fun times(q: Quaternion) = Quaternion(
         x*q.w + y*q.z - z*q.y + w*q.x,
@@ -139,8 +145,40 @@ fun quaternionOfAxes(x: Vector3, y: Vector3, z: Vector3): Quaternion {
     }
 }
 
+// https://github.com/mrdoob/three.js/blob/dev/src/math/Quaternion.js#L358
+fun quaternionFromTo(from: Vector3, to: Vector3): Quaternion {
+    var r = from.dot(to) + 1
+    return (if (r < EPSILON) {
+        // `from` and `to` point in opposite directions
+        r = 0.0
+        if (abs(from.x) > abs(from.z)) Quaternion(
+            -from.y,
+            from.x,
+            0.0,
+            r,
+        ) else Quaternion(
+            0.0,
+            -from.z,
+            from.y,
+            r
+        )
+    } else Quaternion(
+        from.y*to.z - from.z*to.y,
+        from.z*to.x - from.x*to.z,
+        from.x*to.y - from.y*to.x,
+        r
+    )).normalized
+}
+
+// same semantics as https://docs.unity3d.com/ScriptReference/Quaternion.LookRotation.html
 fun quaternionLooking(dir: Vector3, up: Vector3): Quaternion {
     val v1 = up.cross(dir).normalized
-    val v2 = dir.cross(v1).normalized
-    return quaternionOfAxes(v1, v2, dir)
+
+    return if (v1 == Vector3.Zero) {
+        // `dir` and `up` are collinear
+        quaternionFromTo(Vector3.Z, dir)
+    } else {
+        val v2 = dir.cross(v1).normalized
+        quaternionOfAxes(v1, v2, dir)
+    }
 }

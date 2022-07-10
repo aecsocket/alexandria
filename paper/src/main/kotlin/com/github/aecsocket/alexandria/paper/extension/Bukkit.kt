@@ -9,11 +9,12 @@ import org.bukkit.entity.Entity
 val bukkitCurrentTick get() = Bukkit.getCurrentTick()
 @Suppress("DEPRECATION")
 val bukkitNextEntityId get() = Bukkit.getUnsafe().nextEntityId()
+val bukkitPlayers get() = Bukkit.getOnlinePlayers()
 
 var Entity.transform: Transform
     get() = Transform(
         // we ignore pitch, because entities can't really *rotate* up/down
-        rot = Euler3(y = -location.yaw.radians.toDouble()).quaternion(EulerOrder.XYZ),
+        rot = Euler3(y = -location.yaw.radians.toDouble()).quaternion(EulerOrder.ZYX),
         tl = location.vector(),
     )
     set(value) {
@@ -25,7 +26,7 @@ var Entity.transform: Transform
 
 var Entity.looking: Quaternion
     // here we DON'T ignore pitch, since entities can *look* up/down
-    get() = Euler3(location.pitch.toDouble(), -location.yaw.toDouble()).radians.quaternion(EulerOrder.XYZ)
+    get() = Euler3(location.pitch.toDouble(), -location.yaw.toDouble()).radians.quaternion(EulerOrder.ZYX)
     set(value) {
         val (pitch, yaw) = value.euler(EulerOrder.XYZ).degrees
         setRotation(yaw.toFloat(), pitch.toFloat())
