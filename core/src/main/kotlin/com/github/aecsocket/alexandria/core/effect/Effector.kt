@@ -27,4 +27,8 @@ fun interface ForwardingEffector : Effector {
         effectors().forEach { it.showParticle(effect, position) }
 }
 
+fun Iterable<SoundEffect>.play(effector: Effector, position: Vector3) =
+    forEach { effector.playSound(it, position) }
 
+fun Iterable<ParticleEffect>.show(effector: Effector, position: Vector3) =
+    forEach { effector.showParticle(it, position) }
