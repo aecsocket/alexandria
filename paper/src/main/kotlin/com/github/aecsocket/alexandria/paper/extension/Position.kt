@@ -71,6 +71,7 @@ fun Location.copy(
 fun Location.vector() = Vector3(x, y, z)
 fun Location.point() = Point3(blockX, blockY, blockZ)
 fun Location.polar() = Polar2(pitch.radians.toDouble(), yaw.radians.toDouble())
+fun Location.direction() = direction.alexandria()
 fun Location.rotation() = Euler3(pitch.toDouble(), -yaw.toDouble(), 0.0).radians.quaternion(EulerOrder.ZYX)
 fun Location.ray() = Ray(vector(), direction.alexandria())
 

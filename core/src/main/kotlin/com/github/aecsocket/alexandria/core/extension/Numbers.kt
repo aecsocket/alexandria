@@ -4,6 +4,8 @@ import kotlin.math.PI
 import kotlin.math.max
 import kotlin.math.min
 
+const val EPSILON = 0.000001
+
 fun clamp(value: Double, min: Double, max: Double) = min(max, max(min, value))
 
 fun clamp(value: Float, min: Float, max: Float) = min(max, max(min, value))

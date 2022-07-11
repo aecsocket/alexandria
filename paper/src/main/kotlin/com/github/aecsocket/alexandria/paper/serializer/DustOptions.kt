@@ -19,8 +19,8 @@ object DustOptionsSerializer : TypeSerializer<DustOptions> {
     override fun deserialize(type: Type, node: ConfigurationNode): DustOptions {
         val list = node.forceList(type, "size", "color")
         return DustOptions(
-            list[0].force(),
-            list[1].force()
+            list[1].force(),
+            list[0].force()
         )
     }
 }

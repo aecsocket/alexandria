@@ -120,9 +120,9 @@ data class Vector3(val x: Double = 0.0, val y: Double = 0.0, val z: Double = 0.0
     fun angle(p: Vector3) = acos(clamp(dot(p) / (length * p.length), -1.0, 1.0))
 
     fun cross(v: Vector3) = Vector3(
-        y*v.z - v.y*z,
-        z*v.x - v.z*x,
-        x*v.y - v.x*y,
+        y*v.z - z*v.y,
+        z*v.x - x*v.z,
+        x*v.y - y*v.x,
     )
 
     fun rotate(v: Vector3, a: Double): Vector3 {
@@ -184,6 +184,13 @@ data class Vector3(val x: Double = 0.0, val y: Double = 0.0, val z: Double = 0.0
         val Y = Vector3(0.0, 1.0, 0.0)
         val Z = Vector3(0.0, 0.0, 1.0)
         val One = Vector3(1.0)
+
+        val Up = Vector3(0.0, 1.0, 0.0)
+        val Down = Vector3(0.0, -1.0, 0.0)
+        val Forward = Vector3(0.0, 0.0, 1.0)
+        val Backward = Vector3(0.0, 0.0, -1.0)
+        val Right = Vector3(1.0, 0.0, 0.0)
+        val Left = Vector3(-1.0, 0.0, 0.0)
     }
 }
 

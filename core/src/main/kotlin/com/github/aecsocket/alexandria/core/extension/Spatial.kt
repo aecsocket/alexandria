@@ -163,7 +163,7 @@ fun Quaternion.euler(order: EulerOrder): Euler3 {
 
 // Matrix -> ...
 
-private const val EPSILON = 0.999999
+private const val ONE_EPSILON = 0.999999
 
 fun Matrix3.euler(order: EulerOrder): Euler3 {
     // https://github.com/mrdoob/three.js/blob/dev/src/math/Euler.js#L105
@@ -171,7 +171,7 @@ fun Matrix3.euler(order: EulerOrder): Euler3 {
     return when (order) {
         EulerOrder.XYZ -> {
             val y = asin(-clamp(n20, -1.0, 1.0))
-            if (abs(n20) < EPSILON) Euler3(
+            if (abs(n20) < ONE_EPSILON) Euler3(
                 atan2(n21, n22),
                 y,
                 atan2(n10, n00),
@@ -183,7 +183,7 @@ fun Matrix3.euler(order: EulerOrder): Euler3 {
         }
         EulerOrder.ZYX -> {
             val y = asin(clamp(n02, -1.0, 1.0))
-            if (abs(n02) < EPSILON) Euler3(
+            if (abs(n02) < ONE_EPSILON) Euler3(
                 atan2(-n12, n22),
                 y,
                 atan2(-n01, n00),

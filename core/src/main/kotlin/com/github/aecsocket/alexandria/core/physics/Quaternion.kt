@@ -1,11 +1,7 @@
 package com.github.aecsocket.alexandria.core.physics
 
-import kotlin.math.abs
-import kotlin.math.acos
-import kotlin.math.sin
-import kotlin.math.sqrt
-
-private const val EPSILON = 0.000001
+import com.github.aecsocket.alexandria.core.extension.EPSILON
+import kotlin.math.*
 
 // https://github.com/jMonkeyEngine/jmonkeyengine/blob/master/jme3-core/src/main/java/com/jme3/math/Quaternion.java
 data class Quaternion(val x: Double, val y: Double, val z: Double, val w: Double) {
@@ -55,6 +51,8 @@ data class Quaternion(val x: Double, val y: Double, val z: Double, val w: Double
                 (u.cross(v) * 2.0 * s)
     }
 
+    operator fun unaryMinus() = this * -1.0
+
     fun dot(q: Quaternion) = x*q.x + y*q.y + z*q.z + w*q.w
 
     fun asString(fmt: String = "%f") = "($fmt + ${fmt}i + ${fmt}j + ${fmt}k)".format(w, x, y, z)
@@ -95,12 +93,23 @@ fun slerp(q1: Quaternion, q2: Quaternion, t: Double): Quaternion {
     )
 }
 
+fun quaternionOfAxisAngle(axis: Vector3, angle: Double): Quaternion {
+    val halfAngle = angle / 2.0
+    val s = sin(halfAngle)
+    return Quaternion(
+        axis.x * s,
+        axis.y * s,
+        axis.z * s,
+        cos(halfAngle),
+    )
+}
+
 // must all be normalized
 fun quaternionOfAxes(x: Vector3, y: Vector3, z: Vector3): Quaternion {
-    val t = x.x + y.y + z.z
     val (m00, m10, m20) = x
     val (m01, m11, m21) = y
     val (m02, m12, m22) = z
+    val t = m00 + m11 + m22
     return when {
         t >= 0 -> {
             val s = sqrt(t + 1)
@@ -128,8 +137,8 @@ fun quaternionOfAxes(x: Vector3, y: Vector3, z: Vector3): Quaternion {
             Quaternion(
                 (m10 + m01) * s2,
                 s * 0.5,
-                (m21 + m12) * s,
-                (m02 - m20) * s,
+                (m21 + m12) * s2,
+                (m02 - m20) * s2,
             )
         }
         else -> {
@@ -174,9 +183,9 @@ fun quaternionFromTo(from: Vector3, to: Vector3): Quaternion {
 fun quaternionLooking(dir: Vector3, up: Vector3): Quaternion {
     val v1 = up.cross(dir).normalized
 
-    return if (v1 == Vector3.Zero) {
+    return if (v1.sqrLength < EPSILON) {
         // `dir` and `up` are collinear
-        quaternionFromTo(Vector3.Z, dir)
+        quaternionFromTo(Vector3.Forward, dir)
     } else {
         val v2 = dir.cross(v1).normalized
         quaternionOfAxes(v1, v2, dir)
