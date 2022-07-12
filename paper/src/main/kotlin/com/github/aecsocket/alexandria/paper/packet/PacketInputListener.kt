@@ -2,29 +2,24 @@ package com.github.aecsocket.alexandria.paper.packet
 
 import com.github.aecsocket.alexandria.core.Input
 import com.github.aecsocket.alexandria.core.Input.*
-import com.github.aecsocket.alexandria.core.Input.MouseButton.*
-import com.github.aecsocket.alexandria.core.Input.MenuType.*
+import com.github.aecsocket.alexandria.core.Input.MenuType.ADVANCEMENTS
+import com.github.aecsocket.alexandria.core.Input.MenuType.HORSE
+import com.github.aecsocket.alexandria.core.Input.MouseButton.LEFT
+import com.github.aecsocket.alexandria.core.Input.MouseButton.RIGHT
+import com.github.aecsocket.alexandria.paper.extension.bukkitCurrentTick
 import com.github.retrooper.packetevents.event.PacketListener
 import com.github.retrooper.packetevents.event.PacketReceiveEvent
 import com.github.retrooper.packetevents.protocol.packettype.PacketType.Play.Client
 import com.github.retrooper.packetevents.protocol.player.DiggingAction
 import com.github.retrooper.packetevents.protocol.player.InteractionHand
-import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientAdvancementTab
-import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientAnimation
-import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientEntityAction
-import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientHeldItemChange
-import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientPlayerAbilities
-import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientPlayerBlockPlacement
-import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientPlayerDigging
-import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientUseItem
+import com.github.retrooper.packetevents.wrapper.play.client.*
 import net.minecraft.world.item.UseAnim
-import org.bukkit.Bukkit
 import org.bukkit.craftbukkit.v1_18_R2.inventory.CraftItemStack
 import org.bukkit.entity.Player
-import java.util.UUID
+import java.util.*
 
 class PacketInputListener(
-    val callback: (Event) -> Unit
+    val callback: (Event) -> Unit,
 ) : PacketListener {
     interface Event {
         val input: Input
@@ -33,12 +28,19 @@ class PacketInputListener(
         fun cancel()
     }
 
-    private val lastDropped = HashMap<UUID, Int>()
+    private val lastSwing = HashMap<UUID, Int>()
+    private val lastClick = HashMap<UUID, Int>()
 
-    private fun dropping(player: Player) = lastDropped[player.uniqueId] == Bukkit.getCurrentTick()
+    private fun isSwinging(player: Player) = lastSwing[player.uniqueId] == bukkitCurrentTick
 
-    private fun dropped(player: Player) {
-        lastDropped[player.uniqueId] = Bukkit.getCurrentTick()
+    private fun markSwinging(player: Player) {
+        lastSwing[player.uniqueId] = bukkitCurrentTick
+    }
+
+    private fun isClicking(player: Player) = lastClick[player.uniqueId] == bukkitCurrentTick
+
+    private fun markClicking(player: Player) {
+        lastClick[player.uniqueId] = bukkitCurrentTick
     }
 
     override fun onPacketReceive(event: PacketReceiveEvent) {
@@ -58,18 +60,22 @@ class PacketInputListener(
             }
         }
 
-        fun call(input: Input, onCancel: () -> Unit = {}) = callback(EventImpl(input, onCancel))
+        fun call(input: Input, onCancel: () -> Unit = {}) {
+            callback(EventImpl(input, onCancel))
+        }
+
+        val bytes = event.byteBuf
 
         when (event.packetType) {
             Client.ANIMATION -> {
                 val packet = WrapperPlayClientAnimation(event)
-                if (packet.hand == InteractionHand.MAIN_HAND && !dropping(player)) {
+                if (packet.hand == InteractionHand.MAIN_HAND && !isSwinging(player) && !isClicking(player)) {
                     call(Mouse(LEFT, MouseState.UNDEFINED))
                 }
             }
             Client.USE_ITEM -> {
                 val packet = WrapperPlayClientUseItem(event)
-                if (packet.hand == InteractionHand.MAIN_HAND) {
+                if (packet.hand == InteractionHand.MAIN_HAND && !isClicking(player)) {
                     // if the item has an animation (e.g. eating, using bow)
                     // client will later send a PLAYER_BLOCK_PLACEMENT to cancel this action
                     call(Mouse(RIGHT, when ((player.inventory.itemInMainHand as CraftItemStack).handle.useAnimation) {
@@ -78,12 +84,15 @@ class PacketInputListener(
                     }))
                 }
             }
+            // wiki.vg: Use Item On
             Client.PLAYER_BLOCK_PLACEMENT -> {
                 val packet = WrapperPlayClientPlayerBlockPlacement(event)
+                markClicking(player)
                 if (packet.hand == InteractionHand.MAIN_HAND) {
                     call(Mouse(RIGHT, MouseState.UNDEFINED))
                 }
             }
+            // wiki.vg: Player Action
             Client.PLAYER_DIGGING -> {
                 val packet = WrapperPlayClientPlayerDigging(event)
                 when (packet.action) {
@@ -91,13 +100,17 @@ class PacketInputListener(
 
                     DiggingAction.DROP_ITEM,
                     DiggingAction.DROP_ITEM_STACK -> {
+                        markSwinging(player)
                         call(Drop)
-                        dropped(player)
                     }
 
-                    DiggingAction.START_DIGGING -> call(Mouse(LEFT, MouseState.DOWN))
+                    DiggingAction.START_DIGGING -> {
+                        call(Mouse(LEFT, MouseState.DOWN))
+                    }
                     DiggingAction.CANCELLED_DIGGING,
-                    DiggingAction.FINISHED_DIGGING -> call(Mouse(LEFT, MouseState.UP))
+                    DiggingAction.FINISHED_DIGGING -> {
+                        call(Mouse(LEFT, MouseState.UP))
+                    }
 
                     DiggingAction.RELEASE_USE_ITEM -> call(Mouse(RIGHT, MouseState.UP))
                     else -> {}
