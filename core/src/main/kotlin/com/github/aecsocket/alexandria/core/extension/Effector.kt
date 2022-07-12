@@ -3,6 +3,9 @@ package com.github.aecsocket.alexandria.core.extension
 import com.github.aecsocket.alexandria.core.effect.Effector
 import com.github.aecsocket.alexandria.core.effect.ParticleEffect
 import com.github.aecsocket.alexandria.core.physics.*
+import kotlin.math.PI
+import kotlin.math.cos
+import kotlin.math.sin
 
 fun Effector.showLine(effect: ParticleEffect, from: Vector3, to: Vector3, step: Double) {
     val delta = to - from
@@ -49,24 +52,43 @@ fun Effector.showCuboid(
     line(b3, t3)
 }
 
-fun verticesOf(v0: Vector3, v1: Vector3) = CuboidVertices(
+fun boxVertices(v0: Vector3, v1: Vector3) = CuboidVertices(
     v0,                        Vector3(v1.x, v0.y, v0.z), Vector3(v1.x, v0.y, v1.z), Vector3(v0.x, v0.y, v1.z),
     Vector3(v0.x, v1.y, v0.z), Vector3(v1.x, v1.y, v0.z), v1,                        Vector3(v0.x, v1.y, v1.z)
 )
 
-fun verticesOf(box: Box) = verticesOf(-box.halfExtent, box.halfExtent)
+fun boxVertices(box: Box) = boxVertices(-box.halfExtent, box.halfExtent)
+
+// TODO this is more like "2 circles vertices"
+fun sphereVertices(sphere: Sphere, step: Double): Array<Vector3> {
+    val circ = 2 * PI * sphere.radius
+    val divisions = (circ / step).toInt()
+    val angStep = (2 * PI) / divisions
+
+    return Array(divisions * 2) {
+        val ang = angStep * it
+        val a = cos(ang) * sphere.radius
+        val b = sin(ang) * sphere.radius
+        if (it <= divisions) Vector3(a, 0.0, b)
+        else Vector3(a, b, 0.0)
+    }
+}
 
 fun Effector.showShape(
     effect: ParticleEffect,
     shape: Shape,
     transform: Transform,
-    step: Double
+    step: Double,
 ) {
     when (shape) {
         is Empty -> {}
         is Box -> {
-            showCuboid(effect, verticesOf(shape).map { transform.apply(it) }, step)
+            showCuboid(effect, boxVertices(shape).map { transform.apply(it) }, step)
         }
-        is Sphere -> {} // todo
+        is Sphere -> {
+            sphereVertices(shape, step).map { transform.apply(it) }.forEach {
+                showParticle(effect, it)
+            }
+        }
     }
 }

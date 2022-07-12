@@ -39,7 +39,7 @@ class PaperEffectors {
             val playerPos =  player.location.vector()
             val delta = position - playerPos
             val distance = delta.length
-            val (dx, dy, dz) = delta / distance
+            val (dx, dy, dz) = (delta / distance) * 8.0
             val volume = (1 - clamp01((distance - effect.dropoff) / (effect.range - effect.dropoff))).toFloat()
             player.playSound(effect.sound.copy(volume = effect.sound.volume() * volume),
                 position.x + dx, position.y + dy, position.z + dz)

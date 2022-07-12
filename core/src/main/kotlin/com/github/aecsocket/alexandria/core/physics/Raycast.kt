@@ -12,6 +12,8 @@ data class RayCollision<B : Body>(
     val posOut = ray.point(tOut)
 }
 
+fun <T : RayCollision<*>> Iterable<T?>.closest() = filterNotNull().minByOrNull { it.tIn }
+
 abstract class Raycast<B : Body> {
     abstract fun cast(ray: Ray, maxDistance: Double, test: (B) -> Boolean = { true }): RayCollision<out B>?
 
