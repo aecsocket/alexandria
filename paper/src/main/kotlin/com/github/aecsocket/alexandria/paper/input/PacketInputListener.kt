@@ -1,4 +1,4 @@
-package com.github.aecsocket.alexandria.paper.packet
+package com.github.aecsocket.alexandria.paper.input
 
 import com.github.aecsocket.alexandria.core.Input
 import com.github.aecsocket.alexandria.core.Input.*

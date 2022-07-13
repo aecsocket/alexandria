@@ -1,8 +1,11 @@
 package com.github.aecsocket.alexandria.paper.extension
 
+import org.bukkit.Material
 import org.bukkit.inventory.EntityEquipment
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
+
+fun ItemStack?.isEmpty() = this == null || type == Material.AIR || amount == 0
 
 inline fun <reified M : ItemMeta> ItemStack.withMeta(action: M.() -> Unit): ItemStack {
     itemMeta?.let { meta ->

@@ -1,6 +1,6 @@
 package com.github.aecsocket.alexandria.core
 
-interface Input {
+sealed interface Input {
     data class Mouse(val button: MouseButton, val state: MouseState) : Input
     object SwapHands : Input
     object Drop : Input
@@ -13,20 +13,24 @@ interface Input {
     data class Menu(val menu: MenuType, val open: Boolean) : Input
     object LeaveBed : Input
 
-    enum class MouseButton {
-        LEFT, RIGHT
+    enum class MouseButton(val key: String) {
+        LEFT    ("left"),
+        RIGHT   ("right"),
     }
 
-    enum class MouseState {
-        UNDEFINED, DOWN, UP
+    enum class MouseState(val key: String) {
+        UNDEFINED   ("undefined"),
+        DOWN        ("down"),
+        UP          ("up"),
     }
 
-    enum class ScrollDirection(val direction: Int) {
-        DOWN    (-1),
-        UP      (1)
+    enum class ScrollDirection(val key: String, val offset: Int) {
+        DOWN    ("down", -1),
+        UP      ("up", 1)
     }
 
-    enum class MenuType {
-        ADVANCEMENTS, HORSE
+    enum class MenuType(val key: String) {
+        ADVANCEMENTS    ("advancements"),
+        HORSE           ("horse"),
     }
 }
