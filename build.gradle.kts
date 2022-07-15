@@ -6,7 +6,12 @@ plugins {
 
 allprojects {
     group = "com.github.aecsocket.alexandria"
-    version = "0.3.6"
+    version = "0.4.0"
+    description = "Platform-agnostic utilities for Minecraft projects"
+}
+
+java {
+    toolchain.languageVersion.set(JavaLanguageVersion.of(17))
 }
 
 repositories {
@@ -16,8 +21,8 @@ repositories {
 
 subprojects {
     apply<JavaLibraryPlugin>()
-    apply(plugin = "org.jetbrains.dokka")
     apply(plugin = "maven-publish")
+    apply(plugin = "org.jetbrains.dokka")
 
     publishing {
         publications {
@@ -28,6 +33,11 @@ subprojects {
     }
 
     tasks {
+        compileJava {
+            options.encoding = Charsets.UTF_8.name()
+            options.release.set(17)
+        }
+
         test {
             useJUnitPlatform()
         }

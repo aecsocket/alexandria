@@ -3,7 +3,7 @@ plugins {
     id("io.papermc.paperweight.userdev")
 }
 
-val minecraftVersion = libs.versions.minecraft.get()
+val minecraft = libs.versions.minecraft.get()
 
 repositories {
     mavenLocal()
@@ -13,23 +13,24 @@ repositories {
 }
 
 dependencies {
-    paperDevBundle("$minecraftVersion-R0.1-SNAPSHOT")
     api(projects.alexandriaCore)
-    api(libs.configurateHocon)
-    api(libs.cloudPaper)
-    api(libs.cloudMinecraftExtras) { isTransitive = false }
+    paperDevBundle("$minecraft-R0.1-SNAPSHOT")
+
+    compileOnly(libs.glossaCore)
+    compileOnly(libs.glossaAdventure)
+    compileOnly(libs.glossaConfigurate)
+
+    compileOnly(libs.configurateCore)
+    compileOnly(libs.configurateHocon)
+    compileOnly(libs.configurateExtraKotlin)
+
+    compileOnly(libs.cloudPaper)
+    compileOnly(libs.cloudMinecraftExtras) { isTransitive = false }
+
+    compileOnly(libs.adventureApi)
+    compileOnly(libs.adventureExtraKotlin)
+
     compileOnly(libs.packetEventsApi)
 
     testImplementation(kotlin("test"))
 }
-
-fun addReobfTo(target: NamedDomainObjectProvider<Configuration>) {
-    target.get().let {
-        it.outgoing.artifact(tasks.reobfJar.get().outputJar) {
-            classifier = "reobf"
-        }
-    }
-}
-
-addReobfTo(configurations.apiElements)
-addReobfTo(configurations.runtimeElements)

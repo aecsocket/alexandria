@@ -9,14 +9,14 @@ repositories {
 }
 
 dependencies {
-    api(libs.adventureApi)
-    api(libs.adventureExtraKotlin)
-    api(libs.adventureTextLoggerSlf4j)
-    api(libs.glossaAdventure)
-    api(libs.glossaConfigurate)
-    api(libs.configurateCore)
-    api(libs.configurateExtraKotlin)
-    api(libs.cloudCore)
+    compileOnly(libs.configurateCore)
+    compileOnly(libs.configurateExtraKotlin)
+
+    compileOnly(libs.adventureApi)
+    compileOnly(libs.adventureExtraKotlin)
+
+    compileOnly(libs.cloudCore)
 
     testImplementation(kotlin("test"))
+    testImplementation(libs.adventureApi)
 }

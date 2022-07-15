@@ -2,7 +2,6 @@ package com.github.aecsocket.alexandria.paper.plugin
 
 import com.github.aecsocket.alexandria.core.LogLevel
 import com.github.aecsocket.alexandria.core.LogList
-import com.github.aecsocket.alexandria.core.Logging
 import com.github.aecsocket.alexandria.core.extension.force
 import com.github.aecsocket.alexandria.core.extension.register
 import com.github.aecsocket.alexandria.core.loggingOf
@@ -10,7 +9,8 @@ import com.github.aecsocket.alexandria.core.serializer.Serializers
 import com.github.aecsocket.alexandria.paper.extension.disable
 import com.github.aecsocket.alexandria.paper.extension.scheduleDelayed
 import com.github.aecsocket.alexandria.paper.serializer.PaperSerializers
-import com.github.aecsocket.glossa.adventure.*
+import com.github.aecsocket.glossa.adventure.AdventureI18NBuilder
+import com.github.aecsocket.glossa.adventure.I18NFormat
 import com.github.aecsocket.glossa.configurate.I18NLoader
 import com.github.aecsocket.glossa.core.I18N
 import com.github.aecsocket.glossa.core.Translation
@@ -40,7 +40,10 @@ import java.io.IOException
 import java.io.InputStream
 import java.lang.reflect.Type
 import java.nio.charset.StandardCharsets
-import java.nio.file.*
+import java.nio.file.FileVisitResult
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.SimpleFileVisitor
 import java.nio.file.attribute.BasicFileAttributes
 
 private const val PATH_MANIFEST = "manifest.conf"

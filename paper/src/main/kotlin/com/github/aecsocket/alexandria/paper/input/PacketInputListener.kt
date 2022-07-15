@@ -64,8 +64,6 @@ class PacketInputListener(
             callback(EventImpl(input, onCancel))
         }
 
-        val bytes = event.byteBuf
-
         when (event.packetType) {
             Client.ANIMATION -> {
                 val packet = WrapperPlayClientAnimation(event)
