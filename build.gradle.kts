@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformJvmPlugin
+
 plugins {
     kotlin("jvm")
     id("maven-publish")
@@ -10,10 +12,6 @@ allprojects {
     description = "Platform-agnostic utilities for Minecraft projects"
 }
 
-java {
-    toolchain.languageVersion.set(JavaLanguageVersion.of(17))
-}
-
 repositories {
     mavenLocal()
     mavenCentral()
@@ -21,6 +19,7 @@ repositories {
 
 subprojects {
     apply<JavaLibraryPlugin>()
+    apply<KotlinPlatformJvmPlugin>()
     apply(plugin = "maven-publish")
     apply(plugin = "org.jetbrains.dokka")
 
@@ -29,6 +28,12 @@ subprojects {
             create<MavenPublication>("maven") {
                 from(components["java"])
             }
+        }
+    }
+
+    kotlin {
+        jvmToolchain {
+            languageVersion.set(JavaLanguageVersion.of(17))
         }
     }
 
