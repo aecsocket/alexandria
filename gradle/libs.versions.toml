@@ -3,7 +3,7 @@
 minecraft = "1.18.2"
 
 adventure = "4.11.0"
-glossa = "0.3.6"
+glossa = "0.4.0"
 configurate = "4.1.2"
 cloud = "1.6.2"
 packetEvents = "2.0-SNAPSHOT"
@@ -13,9 +13,9 @@ packetEvents = "2.0-SNAPSHOT"
 adventureApi = { group = "net.kyori", name = "adventure-api", version.ref = "adventure" }
 adventureExtraKotlin = { group = "net.kyori", name = "adventure-extra-kotlin", version.ref = "adventure" }
 
-glossaCore = { group = "com.github.aecsocket.glossa", name = "glossa-core", version.ref = "glossa" }
-glossaAdventure = { group = "com.github.aecsocket.glossa", name = "glossa-adventure", version.ref = "glossa" }
-glossaConfigurate = { group = "com.github.aecsocket.glossa", name = "glossa-configurate", version.ref = "glossa" }
+glossaCore = { group = "com.gitlab.aecsocket.glossa", name = "glossa-core", version.ref = "glossa" }
+glossaAdventure = { group = "com.gitlab.aecsocket.glossa", name = "glossa-adventure", version.ref = "glossa" }
+glossaConfigurate = { group = "com.gitlab.aecsocket.glossa", name = "glossa-configurate", version.ref = "glossa" }
 
 configurateCore = { group = "org.spongepowered", name = "configurate-core", version.ref = "configurate" }
 configurateExtraKotlin = { group = "org.spongepowered", name = "configurate-extra-kotlin", version.ref = "configurate" }

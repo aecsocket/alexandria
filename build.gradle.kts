@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformJvmPlugin
-
 plugins {
     kotlin("jvm")
     id("maven-publish")
@@ -7,8 +5,8 @@ plugins {
 }
 
 allprojects {
-    group = "com.github.aecsocket.alexandria"
-    version = "0.4.0"
+    group = "com.gitlab.aecsocket.alexandria"
+    version = "0.5.0-SNAPSHOT"
     description = "Platform-agnostic utilities for Minecraft projects"
 }
 
@@ -17,34 +15,47 @@ repositories {
     mavenCentral()
 }
 
+kotlin {
+    jvmToolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
+}
+
 subprojects {
     apply<JavaLibraryPlugin>()
-    apply<KotlinPlatformJvmPlugin>()
     apply(plugin = "maven-publish")
     apply(plugin = "org.jetbrains.dokka")
 
-    publishing {
-        publications {
-            create<MavenPublication>("maven") {
-                from(components["java"])
-            }
-        }
-    }
-
-    kotlin {
-        jvmToolchain {
-            languageVersion.set(JavaLanguageVersion.of(17))
-        }
-    }
-
     tasks {
-        compileJava {
-            options.encoding = Charsets.UTF_8.name()
-            options.release.set(17)
+        withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+            kotlinOptions {
+                jvmTarget = JavaVersion.VERSION_17.toString()
+            }
         }
 
         test {
             useJUnitPlatform()
+        }
+    }
+
+    publishing {
+        repositories {
+            maven {
+                url = uri("${System.getenv("CI_API_V4_URL")}/projects/${System.getenv("CI_PROJECT_ID")}/packages/maven")
+                credentials(HttpHeaderCredentials::class) {
+                    name = "Job-Token"
+                    value = System.getenv("CI_JOB_TOKEN")
+                }
+                authentication {
+                    create<HttpHeaderAuthentication>("header")
+                }
+            }
+        }
+
+        publications {
+            create<MavenPublication>("maven") {
+                from(components["java"])
+            }
         }
     }
 }
