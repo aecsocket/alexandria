@@ -48,9 +48,9 @@ open class CloudCommand<P : BasePlugin<*>>(
     protected val root: Command.Builder<CommandSender>
 
     init {
-        if (manager.queryCapability(CloudBukkitCapabilities.ASYNCHRONOUS_COMPLETION))
+        if (manager.hasCapability(CloudBukkitCapabilities.ASYNCHRONOUS_COMPLETION))
             manager.registerAsynchronousCompletions()
-        if (manager.queryCapability(CloudBukkitCapabilities.BRIGADIER))
+        if (manager.hasCapability(CloudBukkitCapabilities.BRIGADIER))
             manager.registerBrigadier()
 
         val help = MinecraftHelp("/$rootName help", { it }, manager)
@@ -59,7 +59,7 @@ open class CloudCommand<P : BasePlugin<*>>(
                 plugin.i18n.safe(plugin.locale(sender), "error.caption.${caption.key}").join(JoinConfiguration.newlines()))
         }
 
-        val captions = manager.captionRegistry
+        val captions = manager.captionRegistry()
         if (captions is FactoryDelegatingCaptionRegistry<CommandSender>) {
             this.captions = captions
         } else

@@ -9,7 +9,7 @@ build:
       files:
         - "gradle/wrapper/gradle-wrapper.properties"
     paths:
-      - "cache/caches"
+      - "cache/caches/"
       - "cache/notifications/"
       - "cache/wrapper/"
   artifacts:

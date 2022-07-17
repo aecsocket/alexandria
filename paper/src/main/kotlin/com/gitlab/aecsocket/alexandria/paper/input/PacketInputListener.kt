@@ -14,7 +14,7 @@ import com.github.retrooper.packetevents.protocol.player.DiggingAction
 import com.github.retrooper.packetevents.protocol.player.InteractionHand
 import com.github.retrooper.packetevents.wrapper.play.client.*
 import net.minecraft.world.item.UseAnim
-import org.bukkit.craftbukkit.v1_18_R2.inventory.CraftItemStack
+import org.bukkit.craftbukkit.v1_19_R1.inventory.CraftItemStack
 import org.bukkit.entity.Player
 import java.util.*
 

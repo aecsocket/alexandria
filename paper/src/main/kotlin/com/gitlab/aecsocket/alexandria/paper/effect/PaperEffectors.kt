@@ -13,7 +13,7 @@ import com.gitlab.aecsocket.alexandria.paper.extension.vector
 import net.kyori.adventure.key.Key
 import net.minecraft.core.Registry
 import org.bukkit.World
-import org.bukkit.craftbukkit.v1_18_R2.CraftParticle
+import org.bukkit.craftbukkit.v1_19_R1.CraftParticle
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener

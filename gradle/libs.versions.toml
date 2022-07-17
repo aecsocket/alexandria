@@ -1,11 +1,11 @@
 [versions]
 
-minecraft = "1.18.2"
+minecraft = "1.19"
 
 adventure = "4.11.0"
 glossa = "0.4.0"
 configurate = "4.1.2"
-cloud = "1.6.2"
+cloud = "1.8.0-SNAPSHOT"
 packetEvents = "2.0-SNAPSHOT"
 
 [libraries]
