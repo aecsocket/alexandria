@@ -1,0 +1,11 @@
+name: "Alexandria"
+description: "@description@"
+main: "@group@.paper.Alexandria"
+version: "@version@"
+api-version: "1.19"
+authors: [ "aecsocket" ]
+website: "https://phosphorous.gitlab.io/alexandria"
+libraries:
+  - "org.jetbrains.kotlin:kotlin-stdlib:@kotlin-version@"
+  - "org.jetbrains.kotlin:kotlin-reflect:@kotlin-version@"
+  - "com.ibm.icu:icu4j:@icu4j-version@"

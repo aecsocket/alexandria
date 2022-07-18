@@ -1,6 +1,8 @@
 plugins {
     kotlin("jvm")
     id("io.papermc.paperweight.userdev")
+    id("com.github.johnrengelman.shadow")
+    id("xyz.jpenilla.run-paper")
 }
 
 val minecraft = libs.versions.minecraft.get()
@@ -18,21 +20,61 @@ dependencies {
     api(projects.alexandriaCore)
     paperDevBundle("$minecraft-R0.1-SNAPSHOT")
 
-    compileOnly(libs.glossaCore)
-    compileOnly(libs.glossaAdventure)
-    compileOnly(libs.glossaConfigurate)
+    implementation(libs.glossaCore)
+    implementation(libs.glossaAdventure)
+    implementation(libs.glossaConfigurate)
 
-    compileOnly(libs.configurateCore)
-    compileOnly(libs.configurateHocon)
-    compileOnly(libs.configurateExtraKotlin)
+    implementation(libs.configurateCore)
+    implementation(libs.configurateHocon)
+    implementation(libs.configurateExtraKotlin)
 
-    compileOnly(libs.cloudPaper)
-    compileOnly(libs.cloudMinecraftExtras) { isTransitive = false }
+    implementation(libs.cloudPaper)
+    implementation(libs.cloudMinecraftExtras) { isTransitive = false }
 
     compileOnly(libs.adventureApi)
-    compileOnly(libs.adventureExtraKotlin)
+    implementation(libs.adventureExtraKotlin)
 
     compileOnly(libs.packetEventsApi)
 
+    // library loader
+
+    // kotlinStdlib
+    // icu4j
+    compileOnly(libs.kotlinReflect)
+
     testImplementation(kotlin("test"))
+}
+
+tasks {
+    shadowJar {
+        mergeServiceFiles()
+        exclude("kotlin/")
+        exclude("kotlinx/")
+        listOf(
+            "com.gitlab.aecsocket.glossa",
+            "com.ibm.icu",
+
+            "org.spongepowered.configurate",
+            "io.leangen.geantyref",
+            "com.typesafe.config",
+
+            "commandframework.cloud",
+
+            "com.github.retrooper.packetevents",
+            "net.kyori",
+
+            "cloud.commandframework",
+
+            "org.jetbrains",
+            "org.intellij",
+        ).forEach { relocate(it, "${project.group}.lib.$it") }
+    }
+
+    assemble {
+        dependsOn(shadowJar)
+    }
+
+    runServer {
+        minecraftVersion(minecraft)
+    }
 }

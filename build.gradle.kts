@@ -2,6 +2,7 @@ plugins {
     kotlin("jvm")
     id("maven-publish")
     id("org.jetbrains.dokka")
+    id("com.github.johnrengelman.shadow")
 }
 
 allprojects {
@@ -25,6 +26,7 @@ subprojects {
     apply<JavaLibraryPlugin>()
     apply(plugin = "maven-publish")
     apply(plugin = "org.jetbrains.dokka")
+    apply(plugin = "com.github.johnrengelman.shadow")
 
     tasks {
         withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
@@ -35,6 +37,17 @@ subprojects {
 
         test {
             useJUnitPlatform()
+        }
+
+        processResources {
+            filteringCharset = Charsets.UTF_8.name()
+            filter { it
+                .replace("@version@", project.version.toString())
+                .replace("@description@", project.description.toString())
+                .replace("@group@", project.group.toString())
+                .replace("@kotlin-version@", libs.versions.kotlin.get())
+                .replace("@icu4j-version@", libs.versions.icu4j.get())
+            }
         }
     }
 
@@ -49,12 +62,6 @@ subprojects {
                 authentication {
                     create<HttpHeaderAuthentication>("header")
                 }
-            }
-        }
-
-        publications {
-            create<MavenPublication>("maven") {
-                from(components["java"])
             }
         }
     }
