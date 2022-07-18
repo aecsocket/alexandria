@@ -30,3 +30,4 @@ cloudPaper = { group = "cloud.commandframework", name = "cloud-paper", version.r
 cloudMinecraftExtras = { group = "cloud.commandframework", name = "cloud-minecraft-extras", version.ref = "cloud" }
 
 packetEventsApi = { group = "com.github.retrooper.packetevents", name = "api", version.ref = "packetEvents" }
+packetEventsSpigot = { group = "com.github.retrooper.packetevents", name = "spigot", version.ref = "packetEvents" }

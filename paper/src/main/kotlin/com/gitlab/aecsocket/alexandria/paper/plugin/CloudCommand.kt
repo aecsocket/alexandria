@@ -79,7 +79,7 @@ open class CloudCommand<P : BasePlugin<*>>(
                 text()
                     .append(text("An internal error occurred.", RED))
                     .append(newline())
-                    .append(stackTrace(ex, plugin.locale(sender), false)
+                    .append(stackTrace(ex, plugin.locale(sender))
                         .map { text().append(text("  ")).append(it) }
                         .join(JoinConfiguration.newlines()))
                     .build()
@@ -142,12 +142,13 @@ open class CloudCommand<P : BasePlugin<*>>(
 
     class CommandException(val lines: List<Component>, cause: Throwable?) : RuntimeException(cause)
 
-    protected fun stackTrace(ex: Throwable, locale: Locale, long: Boolean): List<Component> {
+    protected fun stackTrace(ex: Throwable, locale: Locale): List<Component> {
         StacktraceDeobfuscator.INSTANCE.deobfuscateThrowable(ex)
-        val stackTrace = ex.render(long)
-        val hover = (stackTrace + newline() + plugin.i18n.safe(locale, "click_to_copy"))
+        val userStackTrace = ex.render(false)
+        val longStackTrace = ex.render(true)
+        val hover = (userStackTrace + newline() + plugin.i18n.safe(locale, "click_to_copy"))
             .join(JoinConfiguration.newlines())
-        val click = ClickEvent.copyToClipboard(stackTrace.joinToString("\n") {
+        val click = ClickEvent.copyToClipboard(longStackTrace.joinToString("\n") {
             PlainTextComponentSerializer.plainText().serialize(it)
         })
         return ex.simpleTrace().map {
@@ -172,7 +173,7 @@ open class CloudCommand<P : BasePlugin<*>>(
             handler(ctx, sender, locale)
         } catch (ex: CommandException) {
             ex.cause?.let { cause ->
-                val stackTrace = stackTrace(cause, locale, false)
+                val stackTrace = stackTrace(cause, locale)
                 plugin.send(sender) { safe(locale, "error.command") {
                     list("lines") {
                         (ex.lines + stackTrace).forEach {

@@ -34,12 +34,11 @@ dependencies {
     compileOnly(libs.adventureApi)
     implementation(libs.adventureExtraKotlin)
 
-    compileOnly(libs.packetEventsApi)
+    implementation(libs.packetEventsSpigot)
 
     // library loader
 
     // kotlinStdlib
-    // icu4j
     compileOnly(libs.kotlinReflect)
 
     testImplementation(kotlin("test"))
@@ -50,21 +49,9 @@ tasks {
         mergeServiceFiles()
         exclude("kotlin/")
         exclude("kotlinx/")
+        // can't exclude `net/kyori/` here beacuse of glossa's configurate component serialize
+        // but otherwise packetevents will include adventure-api here
         listOf(
-            "com.gitlab.aecsocket.glossa",
-            "com.ibm.icu",
-
-            "org.spongepowered.configurate",
-            "io.leangen.geantyref",
-            "com.typesafe.config",
-
-            "commandframework.cloud",
-
-            "com.github.retrooper.packetevents",
-            "net.kyori",
-
-            "cloud.commandframework",
-
             "org.jetbrains",
             "org.intellij",
         ).forEach { relocate(it, "${project.group}.lib.$it") }
