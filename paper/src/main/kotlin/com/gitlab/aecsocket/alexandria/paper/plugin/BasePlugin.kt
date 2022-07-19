@@ -246,7 +246,10 @@ abstract class BasePlugin<S : BasePlugin.LoadScope> : JavaPlugin() {
             }
 
             // Load from fs
-            loadLang(dataFolder.resolve(PATH_LANG).toPath())
+            val dataLang = dataFolder.resolve(PATH_LANG)
+            if (dataLang.exists()) {
+                loadLang(dataLang.toPath())
+            }
 
             // Apply loaded
             translations.forEach(::register)

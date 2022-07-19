@@ -1,5 +1,11 @@
 package com.gitlab.aecsocket.alexandria.paper.input
 
+import com.github.retrooper.packetevents.event.PacketListener
+import com.github.retrooper.packetevents.event.PacketReceiveEvent
+import com.github.retrooper.packetevents.protocol.packettype.PacketType.Play.Client
+import com.github.retrooper.packetevents.protocol.player.DiggingAction
+import com.github.retrooper.packetevents.protocol.player.InteractionHand
+import com.github.retrooper.packetevents.wrapper.play.client.*
 import com.gitlab.aecsocket.alexandria.core.Input
 import com.gitlab.aecsocket.alexandria.core.Input.*
 import com.gitlab.aecsocket.alexandria.core.Input.MenuType.ADVANCEMENTS
@@ -7,12 +13,6 @@ import com.gitlab.aecsocket.alexandria.core.Input.MenuType.HORSE
 import com.gitlab.aecsocket.alexandria.core.Input.MouseButton.LEFT
 import com.gitlab.aecsocket.alexandria.core.Input.MouseButton.RIGHT
 import com.gitlab.aecsocket.alexandria.paper.extension.bukkitCurrentTick
-import com.github.retrooper.packetevents.event.PacketListener
-import com.github.retrooper.packetevents.event.PacketReceiveEvent
-import com.github.retrooper.packetevents.protocol.packettype.PacketType.Play.Client
-import com.github.retrooper.packetevents.protocol.player.DiggingAction
-import com.github.retrooper.packetevents.protocol.player.InteractionHand
-import com.github.retrooper.packetevents.wrapper.play.client.*
 import net.minecraft.world.item.UseAnim
 import org.bukkit.craftbukkit.v1_19_R1.inventory.CraftItemStack
 import org.bukkit.entity.Player
@@ -76,7 +76,7 @@ class PacketInputListener(
                 if (packet.hand == InteractionHand.MAIN_HAND && !isClicking(player)) {
                     // if the item has an animation (e.g. eating, using bow)
                     // client will later send a PLAYER_BLOCK_PLACEMENT to cancel this action
-                    call(Mouse(RIGHT, when ((player.inventory.itemInMainHand as CraftItemStack).handle.useAnimation) {
+                    call(Mouse(RIGHT, when ((player.inventory.itemInMainHand as CraftItemStack).handle?.useAnimation) {
                         UseAnim.NONE -> MouseState.UNDEFINED
                         else -> MouseState.DOWN
                     }))

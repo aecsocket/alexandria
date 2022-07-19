@@ -44,7 +44,6 @@ subprojects {
                 .replace("@description@", project.description.toString())
                 .replace("@group@", project.group.toString())
                 .replace("@kotlin-version@", libs.versions.kotlin.get())
-                .replace("@icu4j-version@", libs.versions.icu4j.get())
             }
         }
     }

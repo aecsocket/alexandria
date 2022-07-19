@@ -5,6 +5,8 @@ interface Registry<T : Keyed> : Iterable<Map.Entry<String, T>> {
 
     val size: Int
 
+    fun contains(id: String): Boolean
+
     operator fun get(id: String): T?
 
     companion object {
@@ -25,6 +27,8 @@ private class RegistryImpl<T : Keyed> : MutableRegistry<T> {
     override val entries: Map<String, T> get() = _entries
 
     override val size get() = _entries.size
+
+    override fun contains(id: String) = _entries.contains(id)
 
     override fun get(id: String) = _entries[id]
 
