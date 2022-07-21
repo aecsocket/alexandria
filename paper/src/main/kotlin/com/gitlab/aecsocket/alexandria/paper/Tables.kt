@@ -1,18 +1,17 @@
 package com.gitlab.aecsocket.alexandria.paper
 
-import com.gitlab.aecsocket.alexandria.core.ColumnAlign
+import com.gitlab.aecsocket.alexandria.core.*
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.Component.text
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 
 fun tableOfComponents(
-    rows: Iterable<Iterable<Component>>,
-    separator: Component,
-    alignCol: (Int) -> ColumnAlign,
-) = com.gitlab.aecsocket.alexandria.core.tableOfComponents(
-    rows,
-    separator,
-    alignCol,
-    { AlexandriaAPI.widthOf(PlainTextComponentSerializer.plainText().serialize(it)) },
-    { text(AlexandriaAPI.padding.repeat(it / (AlexandriaAPI.paddingWidth + 1))) }
+    rows: Iterable<TableRow<Component>>,
+    colAlign: (Int) -> TableAlign,
+    rowAlign: (Int) -> TableAlign,
+    colSeparator: (TableColumnSeparatorData) -> Component,
+    rowSeparator: (TableRowSeparatorData) -> Iterable<Component>,
+): TableData<Component> = tableOfComponents(
+    rows, colAlign, rowAlign, colSeparator, rowSeparator,
+    { AlexandriaAPI.widthOf(it) },
+    { text(AlexandriaAPI.paddingOf(it)) },
 )

@@ -2,6 +2,7 @@ package com.gitlab.aecsocket.alexandria.core.serializer
 
 import com.gitlab.aecsocket.alexandria.core.DoubleMod
 import com.gitlab.aecsocket.alexandria.core.IntMod
+import com.gitlab.aecsocket.alexandria.core.TableFormat
 import com.gitlab.aecsocket.alexandria.core.effect.SoundEffect
 import com.gitlab.aecsocket.alexandria.core.extension.registerExact
 import com.gitlab.aecsocket.alexandria.core.physics.*
@@ -22,5 +23,6 @@ object Serializers {
         .registerExact(Shape::class, ShapeSerializer)
         .registerExact(Transform::class, TransformSerializer)
         .registerExact(SimpleBody::class, SimpleBodySerializer)
+        .registerExact(TableFormat::class, TableFormatSerializer)
         .build()
 }

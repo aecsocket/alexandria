@@ -1,5 +1,7 @@
 package com.gitlab.aecsocket.alexandria.core
 
+import com.gitlab.aecsocket.alexandria.core.extension.CollectionDiff
+import com.gitlab.aecsocket.alexandria.core.extension.diff
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 

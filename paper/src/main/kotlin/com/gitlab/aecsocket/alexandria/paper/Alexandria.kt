@@ -4,6 +4,8 @@ import com.gitlab.aecsocket.alexandria.core.LogList
 import com.gitlab.aecsocket.alexandria.core.extension.force
 import com.gitlab.aecsocket.alexandria.paper.plugin.BasePlugin
 import com.gitlab.aecsocket.alexandria.paper.plugin.ConfigOptionsAction
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import org.bukkit.map.MapFont
 import org.bukkit.map.MinecraftFont
 import org.spongepowered.configurate.ConfigurationNode
@@ -29,7 +31,14 @@ class Alexandria : BasePlugin<Alexandria.LoadScope>() {
 
     var paddingWidth: Int = 0
 
-    fun widthOf(text: String) = charSizes.getWidth(text)
+    fun widthOf(text: String) =
+        charSizes.getWidth(text)
+
+    fun widthOf(component: Component) =
+        widthOf(PlainTextComponentSerializer.plainText().serialize(component))
+
+    fun paddingOf(width: Int) =
+        padding.repeat(width / (paddingWidth + 1))
 
     init {
         instance = this
