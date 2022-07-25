@@ -10,6 +10,8 @@ import cloud.commandframework.bukkit.arguments.selector.SinglePlayerSelector
 import cloud.commandframework.captions.Caption
 import cloud.commandframework.captions.FactoryDelegatingCaptionRegistry
 import cloud.commandframework.context.CommandContext
+import cloud.commandframework.exceptions.InvalidCommandSenderException
+import cloud.commandframework.exceptions.InvalidSyntaxException
 import cloud.commandframework.execution.CommandExecutionCoordinator
 import cloud.commandframework.minecraft.extras.MinecraftExceptionHandler
 import cloud.commandframework.minecraft.extras.MinecraftHelp
@@ -18,6 +20,7 @@ import com.gitlab.aecsocket.alexandria.core.LogLevel
 import com.gitlab.aecsocket.alexandria.core.extension.get
 import com.gitlab.aecsocket.alexandria.core.extension.render
 import com.gitlab.aecsocket.alexandria.core.extension.simpleTrace
+import com.gitlab.aecsocket.glossa.core.Argument
 import com.gitlab.aecsocket.glossa.core.I18N
 import io.papermc.paper.util.StacktraceDeobfuscator
 import net.kyori.adventure.extra.kotlin.join
@@ -26,7 +29,6 @@ import net.kyori.adventure.text.Component.newline
 import net.kyori.adventure.text.Component.text
 import net.kyori.adventure.text.JoinConfiguration
 import net.kyori.adventure.text.event.ClickEvent
-import net.kyori.adventure.text.format.NamedTextColor.RED
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Entity
@@ -65,30 +67,34 @@ open class CloudCommand<P : BasePlugin<*>>(
         } else
             this.captions = null
 
+        fun handlerOf(
+            tlKey: String,
+            i18nArgs: Argument.MapScope<Component>.(Throwable) -> Unit = {},
+            action: (Throwable) -> Unit = {},
+        ): (CommandSender, Exception) -> Component = { sender, rawEx ->
+            val ex = rawEx.cause ?: rawEx
+            StacktraceDeobfuscator.INSTANCE.deobfuscateThrowable(ex)
+
+            action(ex)
+
+            plugin.asChat(plugin.i18n.safe("error.caption.$tlKey") {
+                i18nArgs(this, ex)
+                list("stack_trace") { stackTrace(ex, plugin.locale(sender)).forEach { sub(it) } }
+            }).join(JoinConfiguration.newlines())
+        }
+
         MinecraftExceptionHandler<CommandSender>()
-            .withArgumentParsingHandler()
-            .withInvalidSenderHandler()
-            .withInvalidSyntaxHandler()
-            .withNoPermissionHandler()
-            .withHandler(MinecraftExceptionHandler.ExceptionType.COMMAND_EXECUTION) { sender, rawEx ->
-                val ex = rawEx.cause ?: rawEx
-
-                StacktraceDeobfuscator.INSTANCE.deobfuscateThrowable(ex)
-                plugin.log.line(LogLevel.Error, ex) { "Could not run command" }
-
-                text()
-                    .append(text("An internal error occurred.", RED))
-                    .append(newline())
-                    .append(stackTrace(ex, plugin.locale(sender))
-                        .map { text().append(text("  ")).append(it) }
-                        .join(JoinConfiguration.newlines()))
-                    .build()
-            }
-            .withDecorator { msg -> plugin.asChat(plugin.i18n.safe(plugin.defaultLocale(), "error.command") {
-                list("lines") {
-                    sub(msg)
-                }
-            }).join(JoinConfiguration.newlines()) }
+            .withHandler(MinecraftExceptionHandler.ExceptionType.INVALID_SENDER, handlerOf("invalid_sender",
+                i18nArgs = { ex -> raw("sender_type") { (ex as InvalidCommandSenderException).requiredSender.simpleName } }
+            ))
+            .withHandler(MinecraftExceptionHandler.ExceptionType.INVALID_SYNTAX, handlerOf("invalid_syntax",
+                i18nArgs = { ex -> raw("correct_syntax") { "/${(ex as InvalidSyntaxException).correctSyntax }" } }
+            ))
+            .withHandler(MinecraftExceptionHandler.ExceptionType.NO_PERMISSION, handlerOf("no_permission"))
+            .withHandler(MinecraftExceptionHandler.ExceptionType.ARGUMENT_PARSING, handlerOf("argument_parsing"))
+            .withHandler(MinecraftExceptionHandler.ExceptionType.COMMAND_EXECUTION, handlerOf("command_execution",
+                action = { ex -> plugin.log.line(LogLevel.Error, ex) { "Could not run command" } }
+            ))
             .apply(manager) { it }
 
         root = rootFactory(manager, rootName)
@@ -152,7 +158,7 @@ open class CloudCommand<P : BasePlugin<*>>(
             PlainTextComponentSerializer.plainText().serialize(it)
         })
         return ex.simpleTrace().map {
-            text("  $it").hoverEvent(hover).clickEvent(click)
+            text(it).hoverEvent(hover).clickEvent(click)
         }
     }
 

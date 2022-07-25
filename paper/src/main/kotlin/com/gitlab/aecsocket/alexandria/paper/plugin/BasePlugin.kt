@@ -121,7 +121,7 @@ abstract class BasePlugin<S : BasePlugin.LoadScope> : JavaPlugin() {
 
     fun locale(sender: CommandSender) = if (sender is Player) sender.locale() else defaultLocale()
 
-    fun asChat(lines: List<Component>) = lines.map { text().append(chatPrefix).append(it) }
+    fun asChat(lines: List<Component>) = lines.map { text().append(chatPrefix).append(it).build() }
 
     fun send(audience: Audience, lines: List<Component>) {
         asChat(lines).forEach {

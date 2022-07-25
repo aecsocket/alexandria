@@ -1,8 +1,9 @@
 package com.gitlab.aecsocket.alexandria.core
 
+import net.kyori.adventure.extra.kotlin.join
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.Component.empty
-import net.kyori.adventure.text.Component.text
+import kotlin.math.max
 
 enum class TableAlign {
     START,
@@ -12,160 +13,155 @@ enum class TableAlign {
 
 typealias TableCell<T> = Collection<T>
 
-data class TableRow<T>(
-    val cells: Iterable<TableCell<T>>,
-    val mapper: (T) -> T = { it },
-)
+typealias TableRow<T> = Iterable<TableCell<T>>
 
-data class TableColumnSeparatorData(val colIdx: Int, val lineIdx: Int)
+data class TableDimensions(val rowHeights: List<Int>, val colWidths: List<Int>)
 
-data class TableRowSeparatorData(val rowIdx: Int, val colWidths: List<Int>)
-
-data class TableData<T>(val lines: List<T>, val rowHeights: List<Int>, val colWidths: List<Int>)
-
-fun <T> tableOf(
+fun <T> tableDimensionsOf(
     rows: Iterable<TableRow<T>>,
-    colAlign: (Int) -> TableAlign,
-    rowAlign: (Int) -> TableAlign,
-    colSeparator: (TableColumnSeparatorData) -> T,
-    rowSeparator: (TableRowSeparatorData) -> Iterable<T>,
-
     widthOf: (T) -> Int,
-    paddingOf: (Int) -> T,
-    append2: (T, T) -> T,
-    append3: (T, T, T) -> T,
-    makeEmpty: () -> T,
-): TableData<T> {
-    val rowHeights = HashMap<Int, Int>()
+): TableDimensions {
     val colWidths = HashMap<Int, Int>()
-
-    rows.forEachIndexed { rowIdx, row ->
+    val rowHeights = rows.map { row ->
         var height = 0
-        row.cells.forEachIndexed { colIdx, cell ->
-            // get the widest T in this cell
-            // if it's wider than our current widest for this column, update this
-            cell.maxOfOrNull(widthOf)?.let { width ->
-                if (colWidths[colIdx]?.let { width > it } != false) {
-                    colWidths[colIdx] = width
-                }
-            }
-
-            // if this cell's height (no. of lines) is taller than our current highest,
-            // make this the highest cell
+        row.forEachIndexed { colIdx, cell ->
+            // calculate tallest cell
             if (cell.size > height) {
                 height = cell.size
             }
+
+            // if this cell is wider than its column's current widest,
+            // update this to be the widest
+            cell.maxOfOrNull(widthOf)?.let { width ->
+                colWidths.compute(colIdx) { _, value -> value?.let { max(it, width) } ?: width }
+            }
         }
-        rowHeights[rowIdx] = height
+        height
     }
-
-    val cRowHeights = rowHeights.map { (_, v) -> v }
-    val cColWidths = colWidths.map { (_, v) -> v }
-
-    val lines = ArrayList<T>()
-    val rowIter = rows.iterator()
-    var rowIdx = 0
-    while (rowIter.hasNext()) {
-        val row = rowIter.next()
-
-        val height = cRowHeights[rowIdx]
-        val justify = rowAlign(rowIdx)
-        val rowLines = MutableList(height) { makeEmpty() }
-
-        val colIter = row.cells.iterator()
-        var colIdx = 0
-        while (colIter.hasNext()) {
-            val cell = colIter.next()
-            val width = cColWidths[colIdx]
-
-            val align = colAlign(colIdx)
-            val aligned = cell.map { line ->
-                val alignWidth = width - widthOf(line)
-                when (align) {
-                    TableAlign.START -> append2(line, paddingOf(alignWidth))
-                    TableAlign.END -> append2(paddingOf(alignWidth), line)
-                    TableAlign.CENTER -> {
-                        val halfWidth = alignWidth / 2
-                        append3(paddingOf(halfWidth), line, paddingOf(alignWidth - halfWidth))
-                    }
-                }
-            }
-
-            val alignPad = paddingOf(width)
-            val justifyHeight = height - aligned.size
-            val justified = when (justify) {
-                TableAlign.START -> aligned + List(justifyHeight) { alignPad }
-                TableAlign.END -> List(justifyHeight) { alignPad } + aligned
-                TableAlign.CENTER -> {
-                    val halfHeight = justifyHeight / 2
-                    List(halfHeight) { alignPad } + aligned + List(justifyHeight - halfHeight) { alignPad }
-                }
-            }
-
-            justified.forEachIndexed { lineIdx, line ->
-                rowLines[lineIdx] = if (colIter.hasNext())
-                    append3(rowLines[lineIdx], line, colSeparator(TableColumnSeparatorData(colIdx, lineIdx)))
-                else append2(rowLines[lineIdx], line)
-            }
-
-            colIdx++
-        }
-
-        val toAdd = rowLines +
-            if (rowIter.hasNext()) rowSeparator(TableRowSeparatorData(rowIdx, cColWidths))
-            else emptyList()
-
-        toAdd.forEach { line ->
-            lines.add(row.mapper(line))
-        }
-
-        rowIdx++
-    }
-
-    return TableData(lines, cRowHeights, cColWidths)
+    return TableDimensions(rowHeights, colWidths.map { (_, width) -> width })
 }
 
-data class TableFormat(
-    val align: (Int) -> TableAlign,
-    val justify: (Int) -> TableAlign,
-)
+interface TableRenderer<T> {
+    fun render(
+        rows: Iterable<TableRow<T>>,
+        dimensions: TableDimensions,
+    ): List<T>
 
-fun tableOfStrings(
-    rows: Iterable<TableRow<String>>,
-    colAlign: (Int) -> TableAlign,
-    rowAlign: (Int) -> TableAlign,
-    colSeparator: (TableColumnSeparatorData) -> String,
-    rowSeparator: (TableRowSeparatorData) -> Iterable<String>,
+    fun render(rows: Iterable<TableRow<T>>): List<T>
+}
 
-    widthOf: (String) -> Int,
-    paddingOf: (Int) -> String,
-): TableData<String> = tableOf(
-    rows, colAlign, rowAlign, colSeparator, rowSeparator, widthOf, paddingOf,
-    { a, b -> a + b }, { a, b, c -> a + b + c }, { "" }
-)
+abstract class AbstractTableRenderer<T>(
+    var align: (Int) -> TableAlign = { TableAlign.START },
+    var justify: (Int) -> TableAlign = { TableAlign.START },
+    var colSeparator: T,
+    var rowSeparator: (List<Int>) -> Iterable<T>,
+) : TableRenderer<T> {
 
-fun tableOfMonoStrings(
-    rows: Iterable<TableRow<String>>,
-    colAlign: (Int) -> TableAlign,
-    rowAlign: (Int) -> TableAlign,
-    colSeparator: (TableColumnSeparatorData) -> String,
-    rowSeparator: (TableRowSeparatorData) -> Iterable<String>,
-): TableData<String> = tableOfStrings(
-    rows, colAlign, rowAlign, colSeparator, rowSeparator, { it.length }, { " ".repeat(it) },
-)
+    protected abstract fun widthOf(value: T): Int
 
-fun tableOfComponents(
-    rows: Iterable<TableRow<Component>>,
-    colAlign: (Int) -> TableAlign,
-    rowAlign: (Int) -> TableAlign,
-    colSeparator: (TableColumnSeparatorData) -> Component,
-    rowSeparator: (TableRowSeparatorData) -> Iterable<Component>,
+    protected abstract fun paddingOf(width: Int): T
 
-    widthOf: (Component) -> Int,
-    paddingOf: (Int) -> Component,
-): TableData<Component> = tableOf(
-    rows, colAlign, rowAlign, colSeparator, rowSeparator, widthOf, paddingOf,
-    { a, b -> text().append(a).append(b).build() },
-    { a, b, c -> text().append(a).append(b).append(c).build() },
-    { empty() },
-)
+    override fun render(rows: Iterable<TableRow<T>>) =
+        render(rows, tableDimensionsOf(rows, this::widthOf))
+
+    protected abstract fun join(values: Iterable<T>): T
+
+    private fun join(vararg values: T): T = join(values.asIterable())
+
+    override fun render(rows: Iterable<TableRow<T>>, dimensions: TableDimensions): List<T> {
+        val (rowHeights, colWidths) = dimensions
+        val lines = ArrayList<T>()
+
+        val rowIter = rows.iterator()
+        var rowIdx = 0
+        while (rowIter.hasNext()) {
+            val row = rowIter.next()
+            val maxHeight = rowHeights[rowIdx]
+            val justify = justify(rowIdx)
+
+            val rowLines = List(maxHeight) { ArrayList<T>() }
+
+            val colIter = row.iterator()
+            var colIdx = 0
+            while (colIter.hasNext()) {
+                val cell = colIter.next()
+                val maxWidth = colWidths[colIdx]
+                val align = align(colIdx)
+
+                val aligned = cell.map {
+                    val padWidth = maxWidth - widthOf(it)
+                    when (align) {
+                        TableAlign.START -> join(it, paddingOf(padWidth))
+                        TableAlign.END -> join(paddingOf(padWidth), it)
+                        TableAlign.CENTER -> {
+                            val halfPad = padWidth / 2
+                            join(paddingOf(halfPad), it, paddingOf(padWidth - halfPad))
+                        }
+                    }
+                }
+
+                val padValue = paddingOf(maxWidth)
+                val padHeight = maxHeight - aligned.size
+                val justified = when (justify) {
+                    TableAlign.START -> aligned + List(padHeight) { padValue }
+                    TableAlign.END -> List(padHeight) { padValue } + aligned
+                    TableAlign.CENTER -> {
+                        val halfPad = padHeight / 2
+                        List(halfPad) { padValue } + aligned + List(padHeight - halfPad) { padValue }
+                    }
+                }
+
+                justified.forEachIndexed { lineIdx, line ->
+                    rowLines[lineIdx].add(line)
+                    if (colIter.hasNext()) {
+                        rowLines[lineIdx].add(colSeparator)
+                    }
+                }
+
+                colIdx++
+            }
+
+            lines.addAll(rowLines.map { join(it) })
+            if (rowIter.hasNext()) {
+                lines.addAll(rowSeparator(colWidths))
+            }
+
+            rowIdx++
+        }
+
+        return lines
+    }
+}
+
+abstract class StringTableRenderer(
+    align: (Int) -> TableAlign = { TableAlign.START },
+    justify: (Int) -> TableAlign = { TableAlign.START },
+    colSeparator: String = "",
+    rowSeparator: (List<Int>) -> Iterable<String> = { emptySet() },
+) : AbstractTableRenderer<String>(align, justify, colSeparator, rowSeparator) {
+    override fun join(values: Iterable<String>) =
+        values.joinToString("")
+}
+
+class MonoStringTableRenderer(
+    align: (Int) -> TableAlign = { TableAlign.START },
+    justify: (Int) -> TableAlign = { TableAlign.START },
+    colSeparator: String = "",
+    rowSeparator: (List<Int>) -> Iterable<String> = { emptySet() },
+) : StringTableRenderer(align, justify, colSeparator, rowSeparator) {
+    override fun widthOf(value: String) =
+        value.length
+
+    override fun paddingOf(width: Int) =
+        " ".repeat(width)
+}
+
+abstract class ComponentTableRenderer(
+    align: (Int) -> TableAlign = { TableAlign.START },
+    justify: (Int) -> TableAlign = { TableAlign.START },
+    colSeparator: Component = empty(),
+    rowSeparator: (List<Int>) -> Iterable<Component> = { emptySet() },
+) : AbstractTableRenderer<Component>(align, justify, colSeparator, rowSeparator) {
+    override fun join(values: Iterable<Component>) =
+        values.join()
+}
