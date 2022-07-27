@@ -1,4 +1,4 @@
-package com.gitlab.aecsocket.alexandria.paper.input
+package com.gitlab.aecsocket.alexandria.paper
 
 import com.github.retrooper.packetevents.event.PacketListener
 import com.github.retrooper.packetevents.event.PacketReceiveEvent
@@ -6,12 +6,12 @@ import com.github.retrooper.packetevents.protocol.packettype.PacketType.Play.Cli
 import com.github.retrooper.packetevents.protocol.player.DiggingAction
 import com.github.retrooper.packetevents.protocol.player.InteractionHand
 import com.github.retrooper.packetevents.wrapper.play.client.*
-import com.gitlab.aecsocket.alexandria.core.Input
-import com.gitlab.aecsocket.alexandria.core.Input.*
-import com.gitlab.aecsocket.alexandria.core.Input.MenuType.ADVANCEMENTS
-import com.gitlab.aecsocket.alexandria.core.Input.MenuType.HORSE
-import com.gitlab.aecsocket.alexandria.core.Input.MouseButton.LEFT
-import com.gitlab.aecsocket.alexandria.core.Input.MouseButton.RIGHT
+import com.gitlab.aecsocket.alexandria.core.input.Input
+import com.gitlab.aecsocket.alexandria.core.input.Input.*
+import com.gitlab.aecsocket.alexandria.core.input.Input.MenuType.ADVANCEMENTS
+import com.gitlab.aecsocket.alexandria.core.input.Input.MenuType.HORSE
+import com.gitlab.aecsocket.alexandria.core.input.Input.MouseButton.LEFT
+import com.gitlab.aecsocket.alexandria.core.input.Input.MouseButton.RIGHT
 import com.gitlab.aecsocket.alexandria.paper.extension.bukkitCurrentTick
 import net.minecraft.world.item.UseAnim
 import org.bukkit.craftbukkit.v1_19_R1.inventory.CraftItemStack

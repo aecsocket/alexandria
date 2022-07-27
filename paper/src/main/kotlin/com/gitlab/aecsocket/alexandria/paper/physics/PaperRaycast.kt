@@ -37,7 +37,7 @@ class PaperEntityBody(
 
 fun Block.bodies(): List<PaperBlockBody> {
     val location = location.vector()
-    fun box(fluid: Material?) = PaperBlockBody(Box.Half, Transform(tl = location + 0.5), this, fluid)
+    fun box(fluid: Material?) = PaperBlockBody(BoxShape.Half, Transform(tl = location + 0.5), this, fluid)
 
     return when (type) {
         Material.AIR, Material.WATER, Material.LAVA -> listOf(box(type))
@@ -49,14 +49,14 @@ fun Block.bodies(): List<PaperBlockBody> {
                     // -> transform = [location + aabb.center]
                     // -> shape = [0.5, 0.5, 0.5]
                     PaperBlockBody(
-                        Box(box.extent / 2.0),
+                        BoxShape(box.extent / 2.0),
                         Transform(tl = location + box.center.alexandria()),
                         this,
                     )
                 }.toMutableList()
                 val data = blockData
                 if (data is Waterlogged && data.isWaterlogged) {
-                    bodies.add(PaperBlockBody(Box.Half, Transform(tl = location + 0.5), this, Material.WATER))
+                    bodies.add(PaperBlockBody(BoxShape.Half, Transform(tl = location + 0.5), this, Material.WATER))
                 }
                 bodies
             }
@@ -67,7 +67,7 @@ fun Block.bodies(): List<PaperBlockBody> {
 fun Entity.bodies(): List<PaperEntityBody> {
     val aabb = boundingBox
     return listOf(PaperEntityBody(
-        Box(aabb.extent / 2.0),
+        BoxShape(aabb.extent / 2.0),
         Transform(transform.rot, aabb.center.alexandria()),
         this,
     ))

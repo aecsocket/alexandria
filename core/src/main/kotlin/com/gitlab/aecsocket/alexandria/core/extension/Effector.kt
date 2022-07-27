@@ -57,10 +57,10 @@ fun boxVertices(v0: Vector3, v1: Vector3) = CuboidVertices(
     Vector3(v0.x, v1.y, v0.z), Vector3(v1.x, v1.y, v0.z), v1,                        Vector3(v0.x, v1.y, v1.z)
 )
 
-fun boxVertices(box: Box) = boxVertices(-box.halfExtent, box.halfExtent)
+fun boxVertices(box: BoxShape) = boxVertices(-box.halfExtent, box.halfExtent)
 
 // TODO this is more like "2 circles vertices"
-fun sphereVertices(sphere: Sphere, step: Double): Array<Vector3> {
+fun sphereVertices(sphere: SphereShape, step: Double): Array<Vector3> {
     val circ = 2 * PI * sphere.radius
     val divisions = (circ / step).toInt()
     val angStep = (2 * PI) / divisions
@@ -81,14 +81,17 @@ fun Effector.showShape(
     step: Double,
 ) {
     when (shape) {
-        is Empty -> {}
-        is Box -> {
+        is EmptyShape -> {}
+        is BoxShape -> {
             showCuboid(effect, boxVertices(shape).map { transform.apply(it) }, step)
         }
-        is Sphere -> {
+        is SphereShape -> {
             sphereVertices(shape, step).map { transform.apply(it) }.forEach {
                 showParticle(effect, it)
             }
+        }
+        is PlaneShape -> {
+            showLine(effect, transform.tl, transform.tl + shape.normal, step)
         }
     }
 }

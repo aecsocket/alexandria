@@ -1,4 +1,4 @@
-package com.gitlab.aecsocket.alexandria.core
+package com.gitlab.aecsocket.alexandria.core.input
 
 sealed interface Input {
     data class Mouse(val button: MouseButton, val state: MouseState) : Input

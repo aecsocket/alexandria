@@ -6,6 +6,7 @@ import com.gitlab.aecsocket.alexandria.core.Quantifier
 import com.gitlab.aecsocket.alexandria.core.effect.SoundEffect
 import com.gitlab.aecsocket.alexandria.core.extension.register
 import com.gitlab.aecsocket.alexandria.core.extension.registerExact
+import com.gitlab.aecsocket.alexandria.core.input.InputMapper
 import com.gitlab.aecsocket.alexandria.core.physics.*
 import org.spongepowered.configurate.serialize.TypeSerializerCollection
 import java.util.*
@@ -24,6 +25,7 @@ object Serializers {
         .registerExact(Shape::class, ShapeSerializer)
         .registerExact(Transform::class, TransformSerializer)
         .registerExact(SimpleBody::class, SimpleBodySerializer)
+        .registerExact(InputMapper::class, InputMapperSerializer)
         .register(Quantifier::class, QuantifierSerializer)
         .build()
 }

@@ -19,27 +19,28 @@ private const val MIN = "min"
 private const val MAX = "max"
 private const val CENTER = "center"
 private const val RADIUS = "radius"
+private const val NORMAL = "normal"
 
 object ShapeSerializer : TypeSerializer<Shape> {
     val TYPES = mapOf(
-        "box" to typeToken<Box>(),
-        "sphere" to typeToken<Sphere>(),
+        "box" to typeToken<BoxShape>(),
+        "sphere" to typeToken<SphereShape>(),
+        "plane" to typeToken<PlaneShape>(),
     )
 
     override fun serialize(type: Type, obj: Shape?, node: ConfigurationNode) {
         if (obj == null) node.set(null)
         else {
             when (obj) {
-                is Empty -> node.appendListNode()
+                is EmptyShape -> node.appendListNode()
                 else -> node.set(obj)
             }
         }
     }
 
     override fun deserialize(type: Type, node: ConfigurationNode): Shape {
-        return if (node.isList) {
-            Empty
-        } else {
+        return if (node.isList) EmptyShape
+        else {
             val typeName = node.node(TYPE).force<String>()
             val boundType = TYPES[typeName]
                 ?: throw SerializationException(node, type, "No shape type for key '$typeName' - available: [${TYPES.keys.joinToString()}]")
@@ -87,18 +88,26 @@ object SimpleBodySerializer : TypeSerializer<SimpleBody> {
                 node.node(TRANSFORM).get { Transform.Identity },
             )
             node.hasChild(RADIUS) -> SimpleBody(
-                Sphere(node.node(RADIUS).force()),
+                SphereShape(node.node(RADIUS).force()),
                 Transform(tl = node.node(CENTER).get { Vector3.Zero }),
             )
             node.hasChild(MIN) && node.hasChild(MAX) -> {
                 val min = node.node(MIN).force<Vector3>()
                 val max = node.node(MAX).force<Vector3>()
                 SimpleBody(
-                    Box((max - min) / 2.0),
+                    BoxShape((max - min) / 2.0),
                     Transform(
                         rot = node.node(ROT).get { Quaternion.Identity },
                         tl = min.midpoint(max)
                     ),
+                )
+            }
+            node.hasChild(NORMAL) -> {
+                val normal = node.node(NORMAL).force<Vector3>()
+                val center = node.node(CENTER).force<Vector3>()
+                SimpleBody(
+                    PlaneShape(normal),
+                    Transform(tl = center)
                 )
             }
             else -> throw SerializationException(node, type, "Invalid body format")

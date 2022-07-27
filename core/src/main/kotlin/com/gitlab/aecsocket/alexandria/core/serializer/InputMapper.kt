@@ -1,11 +1,11 @@
-package com.gitlab.aecsocket.alexandria.paper.serializer
+package com.gitlab.aecsocket.alexandria.core.serializer
 
 import com.gitlab.aecsocket.alexandria.core.extension.force
 import com.gitlab.aecsocket.alexandria.core.extension.forceList
 import com.gitlab.aecsocket.alexandria.core.extension.forceMap
-import com.gitlab.aecsocket.alexandria.paper.input.INPUT_TYPES
-import com.gitlab.aecsocket.alexandria.paper.input.InputMapper
-import com.gitlab.aecsocket.alexandria.paper.input.InputPredicate
+import com.gitlab.aecsocket.alexandria.core.input.INPUT_TYPES
+import com.gitlab.aecsocket.alexandria.core.input.InputMapper
+import com.gitlab.aecsocket.alexandria.core.input.InputPredicate
 import org.spongepowered.configurate.ConfigurationNode
 import org.spongepowered.configurate.serialize.SerializationException
 import org.spongepowered.configurate.serialize.TypeSerializer
