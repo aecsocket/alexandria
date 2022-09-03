@@ -5,7 +5,7 @@ minecraft = "1.19"
 kotlin = "1.7.10"
 icu4j = "68.1"
 adventure = "4.11.0"
-glossa = "0.4.0"
+glossa = "0.5.1"
 configurate = "4.1.2"
 cloud = "1.8.0-SNAPSHOT"
 packetEvents = "2.0-SNAPSHOT"
@@ -16,10 +16,10 @@ kotlinReflect = { group = "org.jetbrains.kotlin", name = "kotlin-reflect", versi
 
 adventureApi = { group = "net.kyori", name = "adventure-api", version.ref = "adventure" }
 adventureExtraKotlin = { group = "net.kyori", name = "adventure-extra-kotlin", version.ref = "adventure" }
+adventureSerializerConfigurate = { group = "net.kyori", name = "adventure-serializer-configurate4", version.ref = "adventure" }
 
 glossaCore = { group = "com.gitlab.aecsocket.glossa", name = "glossa-core", version.ref = "glossa" }
 glossaAdventure = { group = "com.gitlab.aecsocket.glossa", name = "glossa-adventure", version.ref = "glossa" }
-glossaConfigurate = { group = "com.gitlab.aecsocket.glossa", name = "glossa-configurate", version.ref = "glossa" }
 
 configurateCore = { group = "org.spongepowered", name = "configurate-core", version.ref = "configurate" }
 configurateExtraKotlin = { group = "org.spongepowered", name = "configurate-extra-kotlin", version.ref = "configurate" }

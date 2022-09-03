@@ -3,8 +3,8 @@ package com.gitlab.aecsocket.alexandria.core
 import com.gitlab.aecsocket.alexandria.core.extension.nextVector3
 import com.gitlab.aecsocket.alexandria.core.physics.Vector3
 import com.gitlab.aecsocket.alexandria.core.physics.quaternionOfAxes
+import org.junit.jupiter.api.Test
 import kotlin.random.Random
-import kotlin.test.Test
 
 // this class is for quickly testing different physics maths classes
 class PhysicsTest {

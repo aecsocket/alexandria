@@ -12,7 +12,6 @@ repositories {
 dependencies {
     implementation(libs.glossaCore)
     implementation(libs.glossaAdventure)
-    implementation(libs.glossaConfigurate)
 
     implementation(libs.configurateCore)
     implementation(libs.configurateExtraKotlin)
@@ -22,6 +21,7 @@ dependencies {
 
     implementation(libs.cloudCore)
 
-    testImplementation(kotlin("test"))
+    testImplementation(platform("org.junit:junit-bom:5.9.0"))
+    testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation(libs.adventureApi)
 }

@@ -22,7 +22,6 @@ dependencies {
 
     implementation(libs.glossaCore)
     implementation(libs.glossaAdventure)
-    implementation(libs.glossaConfigurate)
 
     implementation(libs.configurateCore)
     implementation(libs.configurateHocon)
@@ -33,6 +32,7 @@ dependencies {
 
     compileOnly(libs.adventureApi)
     implementation(libs.adventureExtraKotlin)
+    implementation(libs.adventureSerializerConfigurate)
 
     implementation(libs.packetEventsSpigot)
 
@@ -41,7 +41,8 @@ dependencies {
     // kotlinStdlib
     compileOnly(libs.kotlinReflect)
 
-    testImplementation(kotlin("test"))
+    testImplementation(platform("org.junit:junit-bom:5.9.0"))
+    testImplementation("org.junit.jupiter:junit-jupiter")
 }
 
 tasks {

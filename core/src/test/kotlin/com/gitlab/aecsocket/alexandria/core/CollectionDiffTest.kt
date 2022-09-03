@@ -2,20 +2,20 @@ package com.gitlab.aecsocket.alexandria.core
 
 import com.gitlab.aecsocket.alexandria.core.extension.CollectionDiff
 import com.gitlab.aecsocket.alexandria.core.extension.diff
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
 
 class CollectionDiffTest {
     @Test
     fun testIdentical() {
-        assertEquals(CollectionDiff(
+        assertEquals(CollectionDiff<Int>(
             emptySet(), emptySet()
         ), diff(
             emptySet<Int>(),
             emptySet()
         ))
 
-        assertEquals(CollectionDiff(
+        assertEquals(CollectionDiff<Int>(
             emptySet(), emptySet()
         ), diff(
             setOf(1, 2, 3),

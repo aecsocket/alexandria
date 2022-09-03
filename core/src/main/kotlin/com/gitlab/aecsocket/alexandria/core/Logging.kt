@@ -1,6 +1,7 @@
 package com.gitlab.aecsocket.alexandria.core
 
 import com.gitlab.aecsocket.alexandria.core.extension.render
+import com.gitlab.aecsocket.glossa.adventure.AnsiComponentRenderer
 import net.kyori.adventure.text.Component
 import java.util.logging.Level
 import java.util.logging.Logger
@@ -16,9 +17,9 @@ data class LogLevel(
         private fun esc(text: String) = "\u001b[${text}m"
 
         private fun prefix(symbol: String, background: Int, post: Int? = null, foreground: Int = 0) =
-            esc("38;5;${foreground};48;5;${background}") + " $symbol " + esc("0${if (post == null) "" else ";3$post"}")
+            esc("38;5;${foreground};48;5;${background}") + " $symbol " + esc("0${if (post == null) "" else ";38;5;$post"}")
 
-        val Verbose =  LogLevel("verbose", -1, prefix("V", 4, 7))
+        val Verbose =  LogLevel("verbose", -1, prefix("V", 4, 8))
         val Info =  LogLevel( "info", 0, prefix("I", 2))
         val Warning =  LogLevel( "warning", 1, prefix("W", 3, 3))
         val Error = LogLevel( "error", 2, prefix("E", 1, 1))

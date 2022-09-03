@@ -6,7 +6,7 @@ plugins {
 
 allprojects {
     group = "com.gitlab.aecsocket.alexandria"
-    version = "0.5.1-SNAPSHOT"
+    version = "0.5.2"
     description = "Platform-agnostic utilities for Minecraft projects"
 }
 
