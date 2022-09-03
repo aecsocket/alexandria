@@ -40,7 +40,7 @@ private val manifestConfigOptions = ConfigurationOptions.defaults()
 fun chatPrefixOf(name: String, color: TextColor) =
     Component.text("{$name} ", color)
 
-abstract class AlexandriaPlugin : JavaPlugin() {
+abstract class BasePlugin : JavaPlugin() {
     @ConfigSerializable
     data class Manifest(
         val name: String,

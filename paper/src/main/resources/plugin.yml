@@ -8,3 +8,6 @@ website: "https://phosphorous.gitlab.io/alexandria"
 libraries:
   - "org.jetbrains.kotlin:kotlin-stdlib:@kotlin-version@"
   - "org.jetbrains.kotlin:kotlin-reflect:@kotlin-version@"
+  - "com.zaxxer:HikariCP:@hikaricp-version@"
+  - "com.h2database:h2:@h2-version@"
+  - "com.github.stephengold:Libbulletjme:@libbulletjme-version@"

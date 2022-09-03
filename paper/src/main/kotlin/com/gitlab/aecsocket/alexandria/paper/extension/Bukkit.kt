@@ -15,7 +15,7 @@ var Entity.transform: Transform
     get() = Transform(
         // we ignore pitch, because entities can't really *rotate* up/down
         rot = Euler3(y = -location.yaw.radians.toDouble()).quaternion(EulerOrder.ZYX),
-        tl = location.vector(),
+        tl = location.position(),
     )
     set(value) {
         val (x, y, z) = value.tl

@@ -47,9 +47,9 @@ private const val CHAR_WIDTHS = "char_widths"
 private lateinit var instance: Alexandria
 val AlexandriaAPI get() = instance
 
-class Alexandria : AlexandriaPlugin() {
+class Alexandria : BasePlugin() {
     private data class Registration(
-        val plugin: AlexandriaPlugin,
+        val plugin: BasePlugin,
         val onInit: InitContext.() -> Unit,
         val onLoad: LoadContext.() -> Unit,
     )
@@ -66,6 +66,7 @@ class Alexandria : AlexandriaPlugin() {
         fun addDefaultI18N()
     }
 
+    lateinit var physics: BulletPhysics
     lateinit var padding: String private set
     lateinit var charSizes: MapFont private set
     lateinit var i18n: I18N<Component> private set
@@ -82,6 +83,7 @@ class Alexandria : AlexandriaPlugin() {
 
     override fun onEnable() {
         super.onEnable()
+        physics = BulletPhysics(this)
         AlexandriaCommand(this)
         registerConsumer(this,
             onLoad = {
@@ -91,6 +93,9 @@ class Alexandria : AlexandriaPlugin() {
     }
 
     override fun init() {
+        // TODO
+        //PlayerPersistence().a(this)
+
         val serializers = TypeSerializerCollection.defaults().childBuilder()
             .registerAll(Serializers.ALL)
             .registerAll(PaperSerializers.ALL)
@@ -224,7 +229,7 @@ class Alexandria : AlexandriaPlugin() {
     }
 
     fun registerConsumer(
-        plugin: AlexandriaPlugin,
+        plugin: BasePlugin,
         onInit: InitContext.() -> Unit = {},
         onLoad: LoadContext.() -> Unit = {},
     ) {

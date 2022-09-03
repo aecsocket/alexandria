@@ -9,6 +9,9 @@ glossa = "0.5.1"
 configurate = "4.1.2"
 cloud = "1.8.0-SNAPSHOT"
 packetEvents = "2.0-SNAPSHOT"
+hikariCp = "5.0.1"
+h2 = "2.1.214"
+libBulletJme = "16.1.0"
 
 [libraries]
 
@@ -31,3 +34,8 @@ cloudMinecraftExtras = { group = "cloud.commandframework", name = "cloud-minecra
 
 packetEventsApi = { group = "com.github.retrooper.packetevents", name = "api", version.ref = "packetEvents" }
 packetEventsSpigot = { group = "com.github.retrooper.packetevents", name = "spigot", version.ref = "packetEvents" }
+
+hikariCp = { group = "com.zaxxer", name = "HikariCP", version.ref = "hikariCp" }
+h2 = { group = "com.h2database", name = "h2", version.ref = "h2" }
+
+libBulletJme = { group = "com.github.stephengold", name = "Libbulletjme", version.ref = "libBulletJme" }

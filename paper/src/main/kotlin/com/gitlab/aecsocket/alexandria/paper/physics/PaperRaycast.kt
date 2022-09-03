@@ -4,7 +4,7 @@ import com.gitlab.aecsocket.alexandria.core.physics.*
 import com.gitlab.aecsocket.alexandria.paper.extension.alexandria
 import com.gitlab.aecsocket.alexandria.paper.extension.extent
 import com.gitlab.aecsocket.alexandria.paper.extension.transform
-import com.gitlab.aecsocket.alexandria.paper.extension.vector
+import com.gitlab.aecsocket.alexandria.paper.extension.position
 import net.minecraft.world.phys.AABB
 import org.bukkit.Material
 import org.bukkit.World
@@ -36,7 +36,7 @@ class PaperEntityBody(
 }
 
 fun Block.bodies(): List<PaperBlockBody> {
-    val location = location.vector()
+    val location = location.position()
     fun box(fluid: Material?) = PaperBlockBody(BoxShape.Half, Transform(tl = location + 0.5), this, fluid)
 
     return when (type) {

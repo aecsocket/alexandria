@@ -9,7 +9,7 @@ import com.gitlab.aecsocket.alexandria.core.extension.copy
 import com.gitlab.aecsocket.alexandria.core.physics.Vector3
 import com.gitlab.aecsocket.alexandria.paper.extension.location
 import com.gitlab.aecsocket.alexandria.paper.extension.registerEvents
-import com.gitlab.aecsocket.alexandria.paper.extension.vector
+import com.gitlab.aecsocket.alexandria.paper.extension.position
 import net.kyori.adventure.key.Key
 import net.minecraft.core.Registry
 import org.bukkit.World
@@ -36,7 +36,7 @@ class PaperEffectors {
         val player: Player
     ) : Effector {
         override fun playSound(effect: SoundEffect, position: Vector3) {
-            val playerPos =  player.location.vector()
+            val playerPos =  player.location.position()
             val delta = position - playerPos
             val distance = delta.length
             val (dx, dy, dz) = (delta / distance) * 8.0
