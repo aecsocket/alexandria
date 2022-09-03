@@ -5,6 +5,7 @@ import com.gitlab.aecsocket.alexandria.core.LogList
 import com.gitlab.aecsocket.alexandria.core.Logging
 import com.gitlab.aecsocket.alexandria.core.extension.force
 import com.gitlab.aecsocket.alexandria.core.keyed.Keyed
+import com.gitlab.aecsocket.alexandria.paper.extension.bukkitCurrentTick
 import com.gitlab.aecsocket.alexandria.paper.extension.disable
 import com.gitlab.aecsocket.alexandria.paper.extension.scheduleDelayed
 import com.gitlab.aecsocket.glossa.core.I18N
@@ -27,6 +28,9 @@ const val PATH_MANIFEST = "manifest.conf"
 const val PATH_SETTINGS = "settings.conf"
 const val PATH_LANG = "lang"
 private const val LOG_LEVEL = "log_level"
+
+private const val THREAD_NAME_WIDTH = 16
+private const val TICK_WIDTH = 3
 
 private val manifestConfigOptions = ConfigurationOptions.defaults()
     .serializers {
@@ -54,7 +58,16 @@ abstract class BasePlugin : JavaPlugin() {
         }
     }
 
-    val log = Logging({ logger.info(it) })
+    val log = Logging({
+        fun String.crop(target: Int) = if (length > target) substring(0, target)
+            else padEnd(target)
+
+        val threadName = Thread.currentThread().name.crop(THREAD_NAME_WIDTH)
+        val tick = bukkitCurrentTick.toString().crop(TICK_WIDTH)
+
+        logger.info("$tick  $threadName $it")
+    })
+
     val manifest = HoconConfigurationLoader.builder()
         .source { resource(PATH_MANIFEST).bufferedReader() }
         .build()

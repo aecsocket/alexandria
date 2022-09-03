@@ -54,6 +54,8 @@ interface LogAcceptor {
         comps(level, ex) { listOf(line()) }
 }
 
+private const val THREAD_NAME_SIZE = 10
+
 class Logging(
     val logger: (String) -> Unit,
     var level: LogLevel = LogLevel.Verbose,

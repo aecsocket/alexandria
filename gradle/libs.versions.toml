@@ -3,6 +3,7 @@
 minecraft = "1.19"
 
 kotlin = "1.7.10"
+kotlinCoroutines = "1.6.4"
 icu4j = "68.1"
 adventure = "4.11.0"
 glossa = "0.5.1"
@@ -16,6 +17,7 @@ libBulletJme = "16.1.0"
 [libraries]
 
 kotlinReflect = { group = "org.jetbrains.kotlin", name = "kotlin-reflect", version.ref = "kotlin" }
+kotlinCoroutines = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinCoroutines" }
 
 adventureApi = { group = "net.kyori", name = "adventure-api", version.ref = "adventure" }
 adventureExtraKotlin = { group = "net.kyori", name = "adventure-extra-kotlin", version.ref = "adventure" }

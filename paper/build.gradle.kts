@@ -40,6 +40,7 @@ dependencies {
 
     // kotlinStdlib
     compileOnly(libs.kotlinReflect)
+    compileOnly(libs.kotlinCoroutines)
     compileOnly(libs.hikariCp)
     compileOnly(libs.h2)
     compileOnly(libs.libBulletJme)

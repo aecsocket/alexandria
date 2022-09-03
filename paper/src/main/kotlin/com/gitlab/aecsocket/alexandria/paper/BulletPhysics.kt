@@ -1,23 +1,27 @@
 package com.gitlab.aecsocket.alexandria.paper
 
+import com.gitlab.aecsocket.alexandria.core.LogLevel
 import com.gitlab.aecsocket.alexandria.core.effect.ParticleEffect
 import com.gitlab.aecsocket.alexandria.core.extension.EulerOrder
 import com.gitlab.aecsocket.alexandria.core.extension.boxVertices
 import com.gitlab.aecsocket.alexandria.core.extension.euler
 import com.gitlab.aecsocket.alexandria.core.extension.showCuboid
+import com.gitlab.aecsocket.alexandria.core.physics.BoxShape
 import com.gitlab.aecsocket.alexandria.core.physics.Transform
 import com.gitlab.aecsocket.alexandria.core.physics.Vector3
 import com.gitlab.aecsocket.alexandria.paper.effect.PaperEffectors
 import com.gitlab.aecsocket.alexandria.paper.extension.*
 import com.jme3.bullet.PhysicsSpace
-import com.jme3.bullet.collision.shapes.*
-import com.jme3.bullet.collision.shapes.infos.IndexedMesh
+import com.jme3.bullet.collision.shapes.BoxCollisionShape
+import com.jme3.bullet.collision.shapes.CompoundCollisionShape
+import com.jme3.bullet.collision.shapes.PlaneCollisionShape
 import com.jme3.bullet.objects.PhysicsRigidBody
 import com.jme3.bullet.objects.infos.RigidBodyMotionState
 import com.jme3.math.Plane
 import com.jme3.math.Quaternion
 import com.jme3.math.Vector3f
 import com.jme3.system.NativeLibraryLoader
+import kotlinx.coroutines.*
 import net.kyori.adventure.key.Key
 import net.kyori.adventure.text.Component.text
 import org.bukkit.*
@@ -30,6 +34,7 @@ import org.bukkit.event.block.Action
 import org.bukkit.event.entity.CreatureSpawnEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerToggleSneakEvent
+import org.bukkit.event.world.ChunkLoadEvent
 import org.bukkit.event.world.ChunkUnloadEvent
 import org.bukkit.event.world.WorldUnloadEvent
 import org.bukkit.inventory.ItemStack
@@ -40,179 +45,29 @@ import kotlin.collections.set
 
 const val TIME_INTERVAL = 0.05f
 
-// todo man this code is slow (probably)
-fun collisionShapeOf(chunk: Chunk): CollisionShape {
-    val indices = ArrayList<Int>()
+// use java classes here because we can't access Bullet classes from non-main threads
+// it *will* cause a JVM internal error
+private data class BlockBody(val shape: BoxShape, val offset: Vector3)
 
-    fun addIndices(vararg values: Int) {
-        indices.addAll(values.asIterable())
-    }
-
-    (0 until 16).forEach { ix ->
-        (0 until 16).forEach { iz ->
-            (-64 until 256).forEach { iy ->
-                val block = chunk.getBlock(ix, iy, iz)
-                val x = ix
-                val y = iy + 64
-                val z = iz
-                if (block.isSolid) {
-                    val i = x + (16 * z) + (16 * 16 * y)
-
-                    val aa1 = i
-                    val ba1 = i+1
-                    val ab1 = i+16
-                    val bb1 = i+17
-
-                    val aa2 = aa1+256
-                    val ba2 = ba1+256
-                    val ab2 = ab1+256
-                    val bb2 = bb1+256
-
-                    addIndices(
-                        // bottom
-//                        aa1, ba1, bb1,
-//                        aa1, ab1, bb1,
-                        // top
-                        //aa2, ba2, bb2,
-                        //aa2, ab2, bb2,
-                        aa2, bb2, ba2,
-                        aa2, bb2, ab2,
-//                        // -X
-//                        aa1, ab1, ab2,
-//                        aa1, aa2, ab2,
-//                        // +X
-//                        ba1, bb1, bb2,
-//                        ba1, ba2, bb2,
-//                        // -Z
-//                        aa1, ba1, ba2,
-//                        aa1, aa2, ba2,
-//                        // +X
-//                        ab1, bb1, bb2,
-//                        ab1, ab2, bb2,
-                    )
-                }
-            }
+private suspend fun chunkCollisionBodies(world: World, chunk: ChunkSnapshot): List<BlockBody> = coroutineScope {
+    val bodies = (0 until 16).flatMap { x ->
+        (0 until 16).flatMap { z ->
+            (world.minHeight until world.maxHeight).map { y -> async {
+                val block = chunk.getBlockData(x, y, z)
+                // todo proper stuff
+                return@async if (block.material.isSolid) listOf(
+                    BlockBody(BoxShape.Half, Vector3(x + 0.5, y + 0.5, z + 0.5))
+                ) else emptyList()
+            } }
         }
-    }
+    }.awaitAll()
 
-    return GImpactCollisionShape(IndexedMesh(BulletPhysics.chunkVertices, indices.toIntArray()))
-}
-
-class PhysicsWorld(
-    val worldId: UUID,
-    val space: PhysicsSpace
-) {
-    val world: World? get() = Bukkit.getWorld(worldId)
-
-    private val _chunkBodies = HashMap<Long, PhysicsRigidBody>()
-    val chunkBodies: Map<Long, PhysicsRigidBody> get() = _chunkBodies
-
-    fun removeChunk(key: Long) {
-        _chunkBodies[key]?.also { space.removeCollisionObject(it) }
-    }
-
-    fun setChunk(chunk: Chunk, shape: CollisionShape) {
-        val key = chunk.chunkKey
-        removeChunk(key)
-        _chunkBodies[key] = PhysicsRigidBody(shape, staticMass).also {
-            it.position = Vector3f(chunk.x * 16f, 0f, chunk.z * 16f)
-            space.addCollisionObject(it)
-        }
-    }
+    bodies.flatten()
 }
 
 class BulletPhysics(
     private val plugin: Alexandria
 ) {
-    fun collisionShapeOf(chunk: Chunk): CollisionShape {
-        /*val indices = ArrayList<Int>()
-
-        fun addIndices(vararg values: Int) {
-            indices.addAll(values.asIterable())
-        }
-
-        (0 until 16).forEach { ix ->
-            (0 until 16).forEach { iz ->
-                (-64 until 256).forEach { iy ->
-                    val block = chunk.getBlock(ix, iy, iz)
-                    val x = ix
-                    val y = iy + 64
-                    val z = iz
-                    if (block.isSolid) {
-                        val i = x + (16 * z) + (16 * 16 * y)
-
-                        val aa1 = i
-                        val ba1 = i+1
-                        val ab1 = i+16
-                        val bb1 = i+17
-
-                        val aa2 = aa1+256
-                        val ba2 = ba1+256
-                        val ab2 = ab1+256
-                        val bb2 = bb1+256
-
-                        addIndices(
-                            // bottom
-                            aa1, ba1, bb1,
-                            aa1, ab1, bb1,
-                            // top
-                            aa2, ba2, bb2,
-                            aa2, ab2, bb2,
-                            // -X
-                            aa1, ab1, ab2,
-                            aa1, aa2, ab2,
-                            // +X
-                            ba1, bb1, bb2,
-                            ba1, ba2, bb2,
-                            // -Z
-                            aa1, ba1, ba2,
-                            aa1, aa2, ba2,
-                            // +X
-                            ab1, bb1, bb2,
-                            ab1, ab2, bb2,
-                        )
-                    }
-                }
-            }
-        }
-
-        val offset = Vector3f(chunk.x * 16f, 0f, chunk.z * 16f)
-        plugin.scheduleRepeating {
-            bukkitPlayers.forEach { player ->
-                val eff = PaperEffectors().apply { init(plugin) }.player(player)
-                val part = ParticleEffect(Key.key("minecraft", "bubble"))
-                repeat(indices.size / 3) {
-                    val start = it * 3
-                    val a = (chunkVertices[indices[start]] + offset).alexandria()
-                    val b = (chunkVertices[indices[start+1]] + offset).alexandria()
-                    val c = (chunkVertices[indices[start+2]] + offset).alexandria()
-                    eff.showLine(part, a, b, 0.1)
-                    eff.showLine(part, b, c, 0.1)
-                    eff.showLine(part, c, a, 0.1)
-                }
-            }
-        }
-
-
-
-        return GImpactCollisionShape(IndexedMesh(BulletPhysics.chunkVertices, indices.toIntArray()))*/
-
-        val shape = CompoundCollisionShape()
-
-        (0 until 16).forEach { x ->
-            (0 until 16).forEach { z ->
-                (-64 until 320).forEach { y ->
-                    val block = chunk.getBlock(x, y, z)
-                    if (block.isSolid) {
-                        shape.addChildShape(BoxCollisionShape(0.5f), Vector3f(x + 0.5f, y + 0.5f, z + 0.5f))
-                    }
-                }
-            }
-        }
-
-        return shape
-    }
-
     var enabled = true
     var timeInterval = TIME_INTERVAL
 
@@ -229,13 +84,7 @@ class BulletPhysics(
     private val drops = ArrayList<Drop>()
 
     fun world(world: World) = _worlds.computeIfAbsent(world.uid) {
-        PhysicsWorld(it, PhysicsSpace(PhysicsSpace.BroadphaseType.DBVT).also { space ->
-//            // TODO temporary
-//            space.addCollisionObject(PhysicsRigidBody(
-//                PlaneCollisionShape(Plane(Vector3f.UNIT_Y, 128f)),
-//                staticMass
-//            ))
-
+        PhysicsWorld(PhysicsSpace(PhysicsSpace.BroadphaseType.DBVT).also { space ->
             space.addCollisionObject(PhysicsRigidBody(
                 PlaneCollisionShape(Plane(Vector3f.UNIT_Y, -128f)),
                 staticMass
@@ -244,8 +93,8 @@ class BulletPhysics(
     }
 
     init {
-        // TODO auto-download native lib, Linux64DebugSp
-        NativeLibraryLoader.loadLibbulletjme(true, plugin.dataFolder, "Debug", "Sp")
+        // TODO auto-download native lib, Linux64DebugSpMt
+        NativeLibraryLoader.loadLibbulletjme(true, plugin.dataFolder, "Debug", "SpMt")
 
         plugin.registerEvents(object : Listener {
             @EventHandler
@@ -258,9 +107,7 @@ class BulletPhysics(
                 val chunk = player.chunk
                 val world = world(player.world)
                 if (!world.chunkBodies.contains(chunk.chunkKey)) {
-                    world.setChunk(chunk, collisionShapeOf(chunk))
-                    player.sendMessage("Computed collision shape for chunk (${chunk.x}, ${chunk.z})")
-                    println("Complete shape for (${chunk.x}, ${chunk.z})")
+                    world.startChunkUpdate(chunk)
                 }
             }
 
@@ -293,11 +140,23 @@ class BulletPhysics(
                 }
             }
 
-            /*@EventHandler
+            private var a = 0
+
+            @EventHandler
             fun ChunkLoadEvent.on() {
-                val shape = collisionShapeOf(chunk)
-                _worlds[world.uid]?.setChunk(chunk, shape)
-                println("Complete shape for (${chunk.x}, ${chunk.z})")
+                a++
+                plugin.log.line(LogLevel.Verbose) { "Loaded $a" }
+                //world(world).startChunkUpdate(chunk)
+            }
+
+            /*@EventHandler
+            fun EntitiesLoadEvent.on() {
+                entities.forEach { entity ->
+                    val body = PhysicsRigidBody(BoxCollisionShape(0.4f), 150f)
+
+
+                    world(world).space.addCollisionObject(body)
+                }
             }*/
 
             @EventHandler
@@ -313,7 +172,7 @@ class BulletPhysics(
         if (!enabled) return
 
         _worlds.forEach { (_, world) ->
-            world.space.update(timeInterval)
+            world.update(timeInterval)
         }
 
         val iter = drops.iterator()
@@ -349,14 +208,64 @@ class BulletPhysics(
         }
     }
 
-    companion object {
-        // todo different world sizes
-        val chunkVertices: Array<Vector3f> = Array(16 * 16 * 384) { i ->
-            val x = i % 16
-            val z = (i / 16) % 16
-            val y = i / 256
+    private data class ChunkUpdate(
+        val key: Long,
+        val x: Int,
+        val z: Int,
+        val bodies: List<BlockBody>,
+    )
 
-            Vector3f(x.toFloat(), y.toFloat() - 64f, z.toFloat())
+    inner class PhysicsWorld(
+        val space: PhysicsSpace
+    ) {
+        private val _chunkBodies = HashMap<Long, PhysicsRigidBody>()
+        val chunkBodies: Map<Long, PhysicsRigidBody> get() = _chunkBodies
+
+        // TODO better data structure?
+        private val chunkUpdates = ArrayList<ChunkUpdate>()
+
+        private var consumed = 0
+
+        internal fun update(dt: Float) {
+            space.update(dt)
+            runBlocking {
+                chunkUpdates.map { (key, x, z, bodies) -> async {
+                    val start = System.currentTimeMillis()
+                    val shape = CompoundCollisionShape()
+                    /*bodies.forEach {
+                        shape.addChildShape(
+                            BoxCollisionShape(it.shape.halfExtent.bullet()),
+                            it.offset.bullet()
+                        )
+                    }*/
+
+                    removeChunk(key)
+                    _chunkBodies[key] = PhysicsRigidBody(shape, staticMass).also {
+                        it.position = Vector3f(x * 16f, 0f, z * 16f)
+                        space.addCollisionObject(it)
+                    }
+                    consumed++
+                    plugin.log.line(LogLevel.Verbose) { "Consumed ($x, $z) in ${System.currentTimeMillis() - start} ms (total = $consumed)" }
+                } }.awaitAll()
+                chunkUpdates.clear()
+            }
+        }
+
+        fun removeChunk(key: Long) {
+            _chunkBodies[key]?.also { space.removeCollisionObject(it) }
+        }
+
+        fun startChunkUpdate(chunk: Chunk) {
+            runBlocking(Dispatchers.Default) {
+                plugin.log.line(LogLevel.Verbose) { "Computing shape for (${chunk.x}, ${chunk.z})..." }
+                val start = System.currentTimeMillis()
+                val shape = chunkCollisionBodies(
+                    chunk.world,
+                    chunk.getChunkSnapshot(false, false, false)
+                )
+                plugin.log.line(LogLevel.Verbose) { "Computed in ${System.currentTimeMillis() - start} ms" }
+                chunkUpdates.add(ChunkUpdate(chunk.chunkKey, chunk.x, chunk.z, shape))
+            }
         }
     }
 }
