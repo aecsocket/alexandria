@@ -86,7 +86,7 @@ interface PlayerLock {
             }
         }
 
-        val Dig = playerLockOf(Alexandria.namespaced("dig")) { player, acquire ->
+        val Dig = playerLockOf(Alexandria.namespaced("dig")) { player, _ ->
             OnRelease { release ->
                 if (release) {
                     player.sendPacket(WrapperPlayServerRemoveEntityEffect(player.entityId, PotionTypes.MINING_FATIGUE))
@@ -113,7 +113,9 @@ data class PlayerLockInstance(
     val stackTrace: List<StackTraceElement>,
 )
 
-class PlayerLocks internal constructor(private val alexandria: Alexandria) {
+class PlayerLocks internal constructor(
+    private val alexandria: Alexandria
+) {
     inner class ForPlayer {
         private val nextLockId = AtomicLong()
 

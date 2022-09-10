@@ -82,6 +82,7 @@ class Alexandria : BasePlugin() {
         private set
 
     val playerLocks = PlayerLocks(this)
+    val playerActions = PlayerActions(this)
 
     private val registrations = ArrayList<Registration>()
 
@@ -109,6 +110,7 @@ class Alexandria : BasePlugin() {
         )
 
         playerLocks.enable()
+        playerActions.enable()
         scheduleRepeating {
             bukkitPlayers.forEach { player ->
                 if (player.hasLockByType(PlayerLock.Jump)) {
@@ -255,6 +257,8 @@ class Alexandria : BasePlugin() {
             }
 
             paddingWidth = widthOf(padding)
+
+            playerActions.load(settings)
 
             return true
         }
