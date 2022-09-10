@@ -1,5 +1,6 @@
 package com.gitlab.aecsocket.alexandria.core.serializer
 
+import com.gitlab.aecsocket.alexandria.core.ColorMod
 import com.gitlab.aecsocket.alexandria.core.DoubleMod
 import com.gitlab.aecsocket.alexandria.core.IntMod
 import com.gitlab.aecsocket.alexandria.core.Quantifier
@@ -21,6 +22,7 @@ object Serializers {
         .registerExact(Point3::class, Point3Serializer)
         .registerExact(SoundEffect::class, SoundEffectSerializer)
         .registerExact(DoubleMod::class, DoubleModSerializer)
+        .registerExact(ColorMod::class, ColorModSerializer)
         .registerExact(IntMod::class, IntModSerializer)
         .registerExact(Shape::class, ShapeSerializer)
         .registerExact(Transform::class, TransformSerializer)

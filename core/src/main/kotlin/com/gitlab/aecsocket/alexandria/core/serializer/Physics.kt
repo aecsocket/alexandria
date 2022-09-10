@@ -53,8 +53,8 @@ object TransformSerializer : TypeSerializer<Transform> {
     override fun serialize(type: Type, obj: Transform?, node: ConfigurationNode) {
         if (obj == null) node.set(null)
         else {
-            node.node(ROT).set(obj.rot)
-            node.node(TL).set(obj.tl)
+            node.node(ROT).set(obj.rotation)
+            node.node(TL).set(obj.translation)
         }
     }
 
@@ -65,7 +65,7 @@ object TransformSerializer : TypeSerializer<Transform> {
                 node.node(TL).get { Vector3.Zero },
             )
             else -> Transform(
-                tl = node.force()
+                translation = node.force()
             )
         }
     }
@@ -89,7 +89,7 @@ object SimpleBodySerializer : TypeSerializer<SimpleBody> {
             )
             node.hasChild(RADIUS) -> SimpleBody(
                 SphereShape(node.node(RADIUS).force()),
-                Transform(tl = node.node(CENTER).get { Vector3.Zero }),
+                Transform(translation = node.node(CENTER).get { Vector3.Zero }),
             )
             node.hasChild(MIN) && node.hasChild(MAX) -> {
                 val min = node.node(MIN).force<Vector3>()
@@ -97,8 +97,8 @@ object SimpleBodySerializer : TypeSerializer<SimpleBody> {
                 SimpleBody(
                     BoxShape((max - min) / 2.0),
                     Transform(
-                        rot = node.node(ROT).get { Quaternion.Identity },
-                        tl = min.midpoint(max)
+                        rotation = node.node(ROT).get { Quaternion.Identity },
+                        translation = min.midpoint(max)
                     ),
                 )
             }
@@ -107,7 +107,7 @@ object SimpleBodySerializer : TypeSerializer<SimpleBody> {
                 val center = node.node(CENTER).force<Vector3>()
                 SimpleBody(
                     PlaneShape(normal),
-                    Transform(tl = center)
+                    Transform(translation = center)
                 )
             }
             else -> throw SerializationException(node, type, "Invalid body format")

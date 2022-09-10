@@ -11,5 +11,5 @@ class SimpleBody(
     override val shape: Shape,
     override val transform: Transform = Transform.Identity,
 ) : Body {
-    override fun toString() = "SimpleBody($shape @ ${transform.tl})"
+    override fun toString() = "SimpleBody($shape @ ${transform.translation})"
 }

@@ -1,6 +1,7 @@
 package com.gitlab.aecsocket.alexandria.core.extension
 
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.Component.empty
 import net.kyori.adventure.text.Component.text
 import net.kyori.adventure.text.format.NamedTextColor.*
 import net.kyori.adventure.text.format.Style
@@ -53,23 +54,13 @@ fun framesInCommon(child: Array<StackTraceElement>, parent: Array<StackTraceElem
     return child.size - 1 - m
 }
 
-private fun Throwable.renderInternal(
+fun List<StackTraceElement>.render(
     long: Boolean,
     options: ThrowableRenderOptions = ThrowableRenderOptions.DEFAULT,
     framesInCommon: Int = 0,
-): ThrowableRender {
-    val summary = text { res ->
-        res.append(text(this::class.qualifiedName.toString(), options.className))
-        message?.let { message ->
-            res.append(text(": ", options.separator))
-            res.append(text(message, options.message))
-        }
-    }
-
-    val margin = text("  ")
-
-    val stackTrace = this.stackTrace
-    val lines: MutableList<Component> = stackTrace.dropLast(framesInCommon).map { element ->
+    margin: Component = empty(),
+): List<Component> {
+    return dropLast(framesInCommon).map { element ->
         text { res ->
             res.append(margin)
             val classSegments = element.className.split('.')
@@ -108,7 +99,28 @@ private fun Throwable.renderInternal(
                 }
             }
         }
-    }.toMutableList()
+    }
+}
+
+private fun Throwable.renderInternal(
+    long: Boolean,
+    options: ThrowableRenderOptions = ThrowableRenderOptions.DEFAULT,
+    framesInCommon: Int = 0,
+): ThrowableRender {
+    val summary = text { res ->
+        res.append(text(this::class.qualifiedName.toString(), options.className))
+        message?.let { message ->
+            res.append(text(": ", options.separator))
+            res.append(text(message, options.message))
+        }
+    }
+
+    val margin = text("  ")
+
+    val stackTrace = this.stackTrace
+    val lines = stackTrace.toList()
+        .render(long, options, framesInCommon, margin)
+        .toMutableList()
 
     if (framesInCommon > 0) {
         lines.add(text()

@@ -91,7 +91,7 @@ fun Effector.showShape(
             }
         }
         is PlaneShape -> {
-            showLine(effect, transform.tl, transform.tl + shape.normal, step)
+            showLine(effect, transform.translation, transform.translation + shape.normal, step)
         }
     }
 }

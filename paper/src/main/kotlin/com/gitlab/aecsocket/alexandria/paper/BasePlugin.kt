@@ -29,7 +29,7 @@ const val PATH_SETTINGS = "settings.conf"
 const val PATH_LANG = "lang"
 private const val LOG_LEVEL = "log_level"
 
-private const val THREAD_NAME_WIDTH = 16
+private const val THREAD_NAME_WIDTH = 12
 private const val TICK_WIDTH = 3
 
 private val manifestConfigOptions = ConfigurationOptions.defaults()
@@ -59,11 +59,11 @@ abstract class BasePlugin : JavaPlugin() {
     }
 
     val log = Logging({
-        fun String.crop(target: Int) = if (length > target) substring(0, target)
-            else padEnd(target)
+        fun String.crop(target: Int, padder: String.(Int) -> String) = if (length > target) substring(0, target)
+            else padder(this, target)
 
-        val threadName = Thread.currentThread().name.crop(THREAD_NAME_WIDTH)
-        val tick = bukkitCurrentTick.toString().crop(TICK_WIDTH)
+        val tick = bukkitCurrentTick.toString().crop(TICK_WIDTH, String::padStart)
+        val threadName = Thread.currentThread().name.crop(THREAD_NAME_WIDTH, String::padEnd)
 
         logger.info("$tick  $threadName $it")
     })

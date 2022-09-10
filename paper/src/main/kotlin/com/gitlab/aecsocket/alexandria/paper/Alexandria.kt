@@ -1,10 +1,17 @@
 package com.gitlab.aecsocket.alexandria.paper
 
+import com.github.retrooper.packetevents.PacketEvents
+import com.github.retrooper.packetevents.protocol.potion.PotionTypes
+import com.github.retrooper.packetevents.wrapper.PacketWrapper
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityEffect
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerPlayerAbilities
 import com.gitlab.aecsocket.alexandria.core.LogLevel
 import com.gitlab.aecsocket.alexandria.core.LogList
 import com.gitlab.aecsocket.alexandria.core.TableAlign
 import com.gitlab.aecsocket.alexandria.core.extension.force
 import com.gitlab.aecsocket.alexandria.core.serializer.Serializers
+import com.gitlab.aecsocket.alexandria.paper.extension.bukkitPlayers
+import com.gitlab.aecsocket.alexandria.paper.extension.scheduleRepeating
 import com.gitlab.aecsocket.alexandria.paper.serializer.PaperSerializers
 import com.gitlab.aecsocket.glossa.adventure.MiniMessageI18N
 import com.gitlab.aecsocket.glossa.adventure.load
@@ -12,12 +19,14 @@ import com.gitlab.aecsocket.glossa.core.I18N
 import com.gitlab.aecsocket.glossa.core.PATH_SEPARATOR
 import com.gitlab.aecsocket.glossa.core.TranslationNode
 import com.gitlab.aecsocket.glossa.core.visit
+import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder
 import net.kyori.adventure.audience.Audience
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.Component.empty
 import net.kyori.adventure.text.Component.text
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
+import org.bukkit.GameMode
 import org.bukkit.entity.Player
 import org.bukkit.map.MapFont
 import org.bukkit.map.MinecraftFont
@@ -66,7 +75,6 @@ class Alexandria : BasePlugin() {
         fun addDefaultI18N()
     }
 
-    lateinit var physics: BulletPhysics
     lateinit var padding: String private set
     lateinit var charSizes: MapFont private set
     lateinit var i18n: I18N<Component> private set
@@ -75,21 +83,47 @@ class Alexandria : BasePlugin() {
     var paddingWidth: Int = -1
         private set
 
+    val playerLocks = PlayerLocks(this)
+
     private val registrations = ArrayList<Registration>()
 
     init {
         instance = this
     }
 
+    override fun onLoad() {
+        super.onLoad()
+        PacketEvents.setAPI(SpigotPacketEventsBuilder.build(this))
+        PacketEvents.getAPI().settings
+            .checkForUpdates(false)
+            .bStats(true)
+        PacketEvents.getAPI().load()
+    }
+
     override fun onEnable() {
         super.onEnable()
-        physics = BulletPhysics(this)
         AlexandriaCommand(this)
+        AlexandriaPacketListener(this)
         registerConsumer(this,
             onLoad = {
                 addDefaultI18N()
             }
         )
+
+        playerLocks.enable()
+        scheduleRepeating {
+            bukkitPlayers.forEach { player ->
+                if (playerLocks.hasByType(player, PlayerLock.Jump)) {
+                    player.sendPacket(WrapperPlayServerEntityEffect(player.entityId,
+                        PotionTypes.JUMP_BOOST, -127, 1, 0))
+                }
+                if (playerLocks.hasByType(player, PlayerLock.Move)) {
+                    player.sendPacket(WrapperPlayServerPlayerAbilities(
+                        player.isInvulnerable, player.isFlying, player.allowFlight,
+                        player.gameMode == GameMode.CREATIVE, 0.05f, 0.0125f))
+                }
+            }
+        }
     }
 
     override fun init() {
@@ -228,6 +262,10 @@ class Alexandria : BasePlugin() {
         return false
     }
 
+    override fun onDisable() {
+        playerLocks.releaseAll()
+    }
+
     fun registerConsumer(
         plugin: BasePlugin,
         onInit: InitContext.() -> Unit = {},
@@ -283,4 +321,14 @@ class Alexandria : BasePlugin() {
         override fun paddingOf(width: Int) =
             text(this@Alexandria.paddingOf(width))
     }
+
+    companion object {
+        const val Namespace = "alexandria"
+
+        fun namespaced(value: String) = "$Namespace:$value"
+    }
+}
+
+fun Player.sendPacket(packet: PacketWrapper<*>) {
+    PacketEvents.getAPI().playerManager.sendPacket(this, packet)
 }

@@ -43,6 +43,7 @@ abstract class BaseCommand(
 ) {
     abstract val plugin: BasePlugin
 
+    val pluginName = plugin.manifest.name
     val rootName = plugin.manifest.chatName
     protected val manager = PaperCommandManager(
         plugin,
@@ -54,6 +55,20 @@ abstract class BaseCommand(
     protected val root: Command.Builder<CommandSender>
 
     protected fun perm(key: String) = "$rootName.command.$key"
+
+    protected fun i18nKey(key: String) = "command.$pluginName.$key"
+
+    protected fun I18N<Component>.cmake(key: String, args: I18NArgs<Component>) =
+        make(i18nKey(key), args)
+
+    protected fun I18N<Component>.cmake(key: String, args: I18NArgs.Scope<Component>.() -> Unit = {}) =
+        make(i18nKey(key), args)
+
+    protected fun I18N<Component>.csafe(key: String, args: I18NArgs<Component>) =
+        safe(i18nKey(key), args)
+
+    protected fun I18N<Component>.csafe(key: String, args: I18NArgs.Scope<Component>.() -> Unit = {}) =
+        safe(i18nKey(key), args)
 
     private interface HandlerContext {
         val ex: Throwable
@@ -174,23 +189,31 @@ abstract class BaseCommand(
     }
 
     protected fun error(
-        cause: Throwable? = null,
         message: List<Component>,
+        cause: Throwable? = null,
     ): Nothing {
         throw CommandException(cause, message)
+    }
+
+    protected fun formatAsStackTrace(
+        userTrace: List<Component>,
+        longTrace: List<Component>,
+        i18n: I18N<Component>
+    ): List<Component> {
+        val lines = (userTrace + newline() + i18n.safe("click_to_copy"))
+        val click = ClickEvent.copyToClipboard(longTrace.joinToString("\n") {
+            PlainTextComponentSerializer.plainText().serialize(it)
+        })
+        return lines.map { it.clickEvent(click) }
     }
 
     protected fun stackTrace(ex: Throwable, i18n: I18N<Component>): List<Component> {
         StacktraceDeobfuscator.INSTANCE.deobfuscateThrowable(ex)
         val userStackTrace = ex.render(false)
         val longStackTrace = ex.render(true)
-        val hover = (userStackTrace + newline() + i18n.safe("click_to_copy"))
-            .join(JoinConfiguration.newlines())
-        val click = ClickEvent.copyToClipboard(longStackTrace.joinToString("\n") {
-            PlainTextComponentSerializer.plainText().serialize(it)
-        })
+        val hover = formatAsStackTrace(userStackTrace, longStackTrace, i18n).join(JoinConfiguration.newlines())
         return ex.simpleTrace().map {
-            text(it).hoverEvent(hover).clickEvent(click)
+            text(it).hoverEvent(hover)
         }
     }
 

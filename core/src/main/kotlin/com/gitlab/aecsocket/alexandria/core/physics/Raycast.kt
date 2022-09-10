@@ -20,7 +20,10 @@ abstract class Raycast<B : Body> {
     protected fun <T : B> collides(ray: Ray, bodies: Iterable<T>, maxDistance: Double): RayCollision<T>? {
         var closest: Pair<T, Collision>? = null
         bodies.forEach { body ->
-            body.shape.collides(body.transform.invert(ray))?.let { collision ->
+            testRayShape(
+                body.transform.invert(ray),
+                body.shape
+            )?.let { collision ->
                 if (collision.tIn <= maxDistance) {
                     closest = closest?.let {
                         if (collision.tIn < it.second.tIn) body to collision
@@ -30,7 +33,7 @@ abstract class Raycast<B : Body> {
             }
         }
         return closest?.let { (body, collision) -> RayCollision(ray, body,
-            collision.tIn, collision.tOut, body.transform.rot * collision.normal
+            collision.tIn, collision.tOut, body.transform.rotation * collision.normal
         ) }
     }
 }
