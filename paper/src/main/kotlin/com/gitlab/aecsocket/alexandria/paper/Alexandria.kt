@@ -4,7 +4,6 @@ import com.github.retrooper.packetevents.PacketEvents
 import com.github.retrooper.packetevents.protocol.potion.PotionTypes
 import com.github.retrooper.packetevents.wrapper.PacketWrapper
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityEffect
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerPlayerAbilities
 import com.gitlab.aecsocket.alexandria.core.LogLevel
 import com.gitlab.aecsocket.alexandria.core.LogList
 import com.gitlab.aecsocket.alexandria.core.TableAlign
@@ -26,7 +25,6 @@ import net.kyori.adventure.text.Component.empty
 import net.kyori.adventure.text.Component.text
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
-import org.bukkit.GameMode
 import org.bukkit.entity.Player
 import org.bukkit.map.MapFont
 import org.bukkit.map.MinecraftFont
@@ -113,14 +111,15 @@ class Alexandria : BasePlugin() {
         playerLocks.enable()
         scheduleRepeating {
             bukkitPlayers.forEach { player ->
-                if (playerLocks.hasByType(player, PlayerLock.Jump)) {
+                if (player.hasLockByType(PlayerLock.Jump)) {
                     player.sendPacket(WrapperPlayServerEntityEffect(player.entityId,
                         PotionTypes.JUMP_BOOST, -127, 1, 0))
                 }
-                if (playerLocks.hasByType(player, PlayerLock.Move)) {
-                    player.sendPacket(WrapperPlayServerPlayerAbilities(
-                        player.isInvulnerable, player.isFlying, player.allowFlight,
-                        player.gameMode == GameMode.CREATIVE, 0.05f, 0.0125f))
+                if (player.hasLockByType(PlayerLock.Dig)) {
+                    player.sendPacket(WrapperPlayServerEntityEffect(player.entityId,
+                        PotionTypes.MINING_FATIGUE, 127, 1, 0))
+                    player.sendPacket(WrapperPlayServerEntityEffect(player.entityId,
+                        PotionTypes.HASTE, -127, 1, 0))
                 }
             }
         }

@@ -14,7 +14,7 @@ operator fun <U, V, W> Triplet<U, V, W>.component2(): V = second
 operator fun <U, V, W> Triplet<U, V, W>.component3(): W = third
 
 @Suppress("UNCHECKED_CAST") // cloud is stupid in this regard anyway
-fun <V> CommandContext<*>.get(key: String, default: () -> V): V =
+fun <V> CommandContext<*>.value(key: String, default: () -> V): V =
     getOrDefault<V>(key, null) ?: default()
 
 fun CommandContext<*>.flagged(name: String) = flags().hasFlag(name)

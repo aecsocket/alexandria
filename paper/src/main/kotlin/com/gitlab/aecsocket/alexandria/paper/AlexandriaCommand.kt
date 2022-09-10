@@ -2,14 +2,15 @@ package com.gitlab.aecsocket.alexandria.paper
 
 import cloud.commandframework.arguments.standard.EnumArgument
 import cloud.commandframework.arguments.standard.LongArgument
+import cloud.commandframework.bukkit.parsers.selector.SinglePlayerSelectorArgument
 import com.gitlab.aecsocket.alexandria.core.extension.render
 import com.gitlab.aecsocket.glossa.core.I18N
+import io.papermc.paper.util.StacktraceDeobfuscator
 import net.kyori.adventure.extra.kotlin.join
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.Component.text
 import net.kyori.adventure.text.JoinConfiguration
 import org.bukkit.command.CommandSender
-import org.bukkit.entity.Player
 
 internal class AlexandriaCommand(
     override val plugin: Alexandria
@@ -19,30 +20,34 @@ internal class AlexandriaCommand(
         SPRINT  (PlayerLock.Sprint),
         MOVE    (PlayerLock.Move),
         ATTACK  (PlayerLock.Attack),
+        DIG     (PlayerLock.Dig),
     }
 
     init {
         val playerLocks = root.literal("player-locks", desc("Manage temporary locks on player actions."))
         manager.command(playerLocks
             .literal("list", desc("List all locked player actions."))
+            .argument(SinglePlayerSelectorArgument.optional("target"), desc("Player to target."))
             .permission(perm("player-locks.list"))
             .handler { handle(it, ::playerLocksList) })
         manager.command(playerLocks
             .literal("acquire", desc("Lock a player action."))
             .argument(EnumArgument.of(PlayerLockType::class.java, "lock"), desc("Lock type."))
+            .argument(SinglePlayerSelectorArgument.optional("target"), desc("Player to target."))
             .permission(perm("player-locks.acquire"))
             .handler { handle(it, ::playerLocksAcquire) })
         manager.command(playerLocks
             .literal("release", desc("Unlock a player action by a previously acquired lock."))
             .argument(LongArgument.of("lock-id"), desc("Previously acquired lock ID."))
+            .argument(SinglePlayerSelectorArgument.optional("target"), desc("Player to target."))
             .permission(perm("player-locks.release"))
             .handler { handle(it, ::playerLocksRelease) })
     }
 
     fun playerLocksList(ctx: Context, sender: CommandSender, i18n: I18N<Component>) {
-        val player = sender as Player // TODO temp
+        val target = ctx.player("target", sender, i18n)
 
-        val byType = player.locks?.byType ?: emptyMap()
+        val byType = target.locks?.byType ?: emptyMap()
         if (byType.isEmpty()) {
             plugin.sendMessage(sender, i18n.csafe("player_locks.list.none"))
             return
@@ -54,7 +59,10 @@ internal class AlexandriaCommand(
                 icu("instances", instances.size)
             })
             instances.forEach { instance ->
-                val hover = formatAsStackTrace(instance.stackTrace.render(false), instance.stackTrace.render(true), i18n)
+                val traceArray = instance.stackTrace.toTypedArray()
+                StacktraceDeobfuscator.INSTANCE.deobfuscateStacktrace(traceArray)
+                val stackTrace = traceArray.toList()
+                val hover = formatAsStackTrace(stackTrace.toList().render(false), stackTrace.render(true), i18n)
                     .join(JoinConfiguration.newlines())
                 plugin.sendMessage(sender, i18n.csafe("player_locks.list.instance") {
                     subst("id", text(instance.id))
@@ -65,10 +73,10 @@ internal class AlexandriaCommand(
     }
 
     fun playerLocksAcquire(ctx: Context, sender: CommandSender, i18n: I18N<Component>) {
-        val player = sender as Player // TODO temp
+        val target = ctx.player("target", sender, i18n)
         val lock = ctx.get<PlayerLockType>("lock")
 
-        val (lockId) = player.acquireLock(lock.backing)
+        val (lockId) = target.acquireLock(lock.backing)
 
         plugin.sendMessage(sender, i18n.csafe("player_locks.acquire") {
             icu("lock_type", lock.name)
@@ -77,15 +85,15 @@ internal class AlexandriaCommand(
     }
 
     fun playerLocksRelease(ctx: Context, sender: CommandSender, i18n: I18N<Component>) {
-        val player = sender as Player // TODO temp
+        val target = ctx.player("target", sender, i18n)
         val lockId = ctx.get<Long>("lock-id")
 
-        if (!player.hasLockById(lockId))
+        if (!target.hasLockById(lockId))
             error(i18n.safe("error.invalid_lock_id") {
                 subst("lock_id", text(lockId))
             })
 
-        plugin.playerLocks.release(player, lockId)
+        plugin.playerLocks.release(target, lockId)
         plugin.sendMessage(sender, i18n.csafe("player_locks.release") {
             subst("lock_id", text(lockId))
         })

@@ -12,16 +12,19 @@ import org.bukkit.attribute.AttributeModifier
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
+import org.bukkit.event.block.BlockBreakEvent
+import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import java.util.*
 import java.util.concurrent.atomic.AtomicLong
 
 internal const val NO_SPRINT_FOOD = 6
 
+// note: you are NOT ALLOWED to add another lock when acquiring a lock
 interface PlayerLock {
     val name: String
 
-    fun acquire(player: Player, acquire: Boolean, locks: PlayerLocks): OnRelease
+    fun acquire(player: Player, acquire: Boolean): OnRelease
 
     fun interface OnRelease {
         fun release(release: Boolean)
@@ -32,7 +35,7 @@ interface PlayerLock {
             return player.health.toFloat()
         }
 
-        val Sprint = playerLockOf(Alexandria.namespaced("sprint")) { player, acquire, _ ->
+        val Sprint = playerLockOf(Alexandria.namespaced("sprint")) { player, acquire ->
             if (acquire) {
                 player.sendPacket(WrapperPlayServerUpdateHealth(healthOf(player), NO_SPRINT_FOOD, 5f))
             }
@@ -43,7 +46,7 @@ interface PlayerLock {
             }
         }
 
-        val Jump = playerLockOf(Alexandria.namespaced("jump")) { player, _, _ ->
+        val Jump = playerLockOf(Alexandria.namespaced("jump")) { player, _ ->
             OnRelease { release ->
                 if (release) {
                     player.sendPacket(WrapperPlayServerRemoveEntityEffect(player.entityId, PotionTypes.JUMP_BOOST))
@@ -55,16 +58,12 @@ interface PlayerLock {
             UUID(399141689, 766420721),
             "alexandria.move", -1.0, AttributeModifier.Operation.MULTIPLY_SCALAR_1)
 
-        val Move = playerLockOf(Alexandria.namespaced("move")) { player, acquire, locks ->
+        val Move = playerLockOf(Alexandria.namespaced("move")) { player, acquire ->
             val attr = player.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED)
-            val (sprintLock) = locks.acquire(player, Sprint)
-            val (jumpLock) = locks.acquire(player, Jump)
             if (acquire) {
                 attr?.forceModifier(MoveModifier)
             }
             OnRelease { release ->
-                locks.release(player, sprintLock)
-                locks.release(player, jumpLock)
                 if (release) {
                     attr?.removeModifier(MoveModifier)
                 }
@@ -75,8 +74,8 @@ interface PlayerLock {
             UUID(156548602, 506633689),
             "alexandria.attack", -1.0, AttributeModifier.Operation.MULTIPLY_SCALAR_1)
 
-        val Attack = playerLockOf(Alexandria.namespaced("attack")) { player, acquire, _ ->
-            val attr = player.getAttribute(Attribute.GENERIC_ATTACK_SPEED)
+        val Attack = playerLockOf(Alexandria.namespaced("attack")) { player, acquire ->
+            val attr = player.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE)
             if (acquire) {
                 attr?.forceModifier(AttackModifier)
             }
@@ -86,14 +85,23 @@ interface PlayerLock {
                 }
             }
         }
+
+        val Dig = playerLockOf(Alexandria.namespaced("dig")) { player, acquire ->
+            OnRelease { release ->
+                if (release) {
+                    player.sendPacket(WrapperPlayServerRemoveEntityEffect(player.entityId, PotionTypes.MINING_FATIGUE))
+                    player.sendPacket(WrapperPlayServerRemoveEntityEffect(player.entityId, PotionTypes.HASTE))
+                }
+            }
+        }
     }
 }
 
-fun playerLockOf(name: String, acquire: (Player, Boolean, PlayerLocks) -> OnRelease) = object : PlayerLock {
+fun playerLockOf(name: String, acquire: (Player, Boolean) -> OnRelease) = object : PlayerLock {
     override val name get() = name
 
-    override fun acquire(player: Player, acquire: Boolean, locks: PlayerLocks): OnRelease {
-        return acquire(player, acquire, locks)
+    override fun acquire(player: Player, acquire: Boolean): OnRelease {
+        return acquire(player, acquire)
     }
 }
 
@@ -127,6 +135,21 @@ class PlayerLocks internal constructor(private val alexandria: Alexandria) {
             fun PlayerQuitEvent.on() {
                 releaseAll(player)
             }
+
+            @EventHandler
+            fun EntityDamageByEntityEvent.on() {
+                val damager = damager
+                if (damager is Player && damager.hasLockByType(PlayerLock.Attack)) {
+                    isCancelled = true
+                }
+            }
+
+            @EventHandler
+            fun BlockBreakEvent.on() {
+                if (player.hasLockByType(PlayerLock.Dig)) {
+                    isCancelled = true
+                }
+            }
         })
     }
 
@@ -145,7 +168,7 @@ class PlayerLocks internal constructor(private val alexandria: Alexandria) {
         val byType = forPlayer._byType.computeIfAbsent(lock) { HashSet() }
 
         val id = forPlayer.nextLockId()
-        val onRelease = lock.acquire(player, byType.isEmpty(), this)
+        val onRelease = lock.acquire(player, byType.isEmpty())
         val thread = Thread.currentThread()
 
         return PlayerLockInstance(id, lock, onRelease, thread.name, thread.stackTrace.toList()).also {
@@ -167,7 +190,7 @@ class PlayerLocks internal constructor(private val alexandria: Alexandria) {
 
     fun releaseAll(player: Player) {
         _players[player]?.let { forPlayer ->
-            forPlayer._locks.forEach { (id) ->
+            forPlayer._locks.toMutableMap().forEach { (id) ->
                 release(player, id)
             }
         }
@@ -175,7 +198,7 @@ class PlayerLocks internal constructor(private val alexandria: Alexandria) {
     }
 
     fun releaseAll() {
-        _players.forEach { (player) -> releaseAll(player) }
+        _players.toMutableMap().forEach { (player) -> releaseAll(player) }
     }
 }
 

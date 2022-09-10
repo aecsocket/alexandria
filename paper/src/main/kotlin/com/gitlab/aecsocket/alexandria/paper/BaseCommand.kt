@@ -4,6 +4,9 @@ import cloud.commandframework.ArgumentDescription
 import cloud.commandframework.Command
 import cloud.commandframework.arguments.standard.StringArgument
 import cloud.commandframework.bukkit.CloudBukkitCapabilities
+import cloud.commandframework.bukkit.arguments.selector.EntitySelector
+import cloud.commandframework.bukkit.arguments.selector.MultiplePlayerSelector
+import cloud.commandframework.bukkit.arguments.selector.SinglePlayerSelector
 import cloud.commandframework.captions.Caption
 import cloud.commandframework.captions.FactoryDelegatingCaptionRegistry
 import cloud.commandframework.context.CommandContext
@@ -14,9 +17,9 @@ import cloud.commandframework.minecraft.extras.MinecraftExceptionHandler
 import cloud.commandframework.minecraft.extras.MinecraftHelp
 import cloud.commandframework.paper.PaperCommandManager
 import com.gitlab.aecsocket.alexandria.core.LogLevel
-import com.gitlab.aecsocket.alexandria.core.extension.get
 import com.gitlab.aecsocket.alexandria.core.extension.render
 import com.gitlab.aecsocket.alexandria.core.extension.simpleTrace
+import com.gitlab.aecsocket.alexandria.core.extension.value
 import com.gitlab.aecsocket.glossa.core.I18N
 import com.gitlab.aecsocket.glossa.core.I18NArgs
 import io.papermc.paper.util.StacktraceDeobfuscator
@@ -28,6 +31,8 @@ import net.kyori.adventure.text.JoinConfiguration
 import net.kyori.adventure.text.event.ClickEvent
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import org.bukkit.command.CommandSender
+import org.bukkit.entity.Entity
+import org.bukkit.entity.Player
 
 fun desc(content: String) = ArgumentDescription.of(content)
 
@@ -173,7 +178,7 @@ abstract class BaseCommand(
             .literal("help", desc("Lists help information."))
             .argument(StringArgument.optional("query", StringArgument.StringMode.GREEDY))
             .handler { ctx ->
-                val query = ctx.get("query") { "" }
+                val query = ctx.value("query") { "" }
                 help.queryCommands(
                     if (query.startsWith("$rootName ")) query else "$rootName $query",
                     ctx.sender
@@ -216,6 +221,42 @@ abstract class BaseCommand(
             text(it).hoverEvent(hover)
         }
     }
+
+    private fun errorNoTargets(arg: String, i18n: I18N<Component>): Nothing =
+        error(i18n.safe("error.no_targets") {
+            icu("argument", arg)
+        })
+
+    protected fun <S : EntitySelector> S.assertTargets(arg: String, i18n: I18N<Component>): S {
+        if (entities.isEmpty())
+            errorNoTargets(arg, i18n)
+        return this
+    }
+
+    private fun asPlayer(arg: String, sender: CommandSender, i18n: I18N<Component>) =
+        if (sender is Player) sender else errorNoTargets(arg, i18n)
+
+    protected fun EntitySelector?.orSender(arg: String, sender: CommandSender, i18n: I18N<Component>): List<Entity> {
+        return this?.assertTargets(arg, i18n)?.entities
+            ?: if (sender is Entity) listOf(sender) else errorNoTargets(arg, i18n)
+    }
+
+    protected fun CommandContext<*>.entities(arg: String, sender: CommandSender, i18n: I18N<Component>) =
+        value<EntitySelector?>(arg) { null }.orSender(arg, sender, i18n)
+
+    protected fun MultiplePlayerSelector?.orSender(arg: String, sender: CommandSender, i18n: I18N<Component>): List<Player> {
+        return this?.assertTargets(arg, i18n)?.players ?: listOf(asPlayer(arg, sender, i18n))
+    }
+
+    protected fun CommandContext<*>.players(arg: String, sender: CommandSender, i18n: I18N<Component>) =
+        value<MultiplePlayerSelector?>(arg) { null }.orSender(arg, sender, i18n)
+
+    protected fun SinglePlayerSelector?.orSender(arg: String, sender: CommandSender, i18n: I18N<Component>): Player {
+        return this?.assertTargets(arg, i18n)?.player ?: asPlayer(arg, sender, i18n)
+    }
+
+    protected fun CommandContext<*>.player(arg: String, sender: CommandSender, i18n: I18N<Component>) =
+        value<SinglePlayerSelector?>(arg) { null }.orSender(arg, sender, i18n)
 
     protected fun handle(
         ctx: Context,
