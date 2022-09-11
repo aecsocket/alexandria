@@ -18,11 +18,14 @@ internal class AlexandriaCommand(
     override val plugin: Alexandria
 ) : BaseCommand(plugin) {
     enum class PlayerLockType(val backing: PlayerLock) {
-        JUMP    (PlayerLock.Jump),
-        SPRINT  (PlayerLock.Sprint),
-        MOVE    (PlayerLock.Move),
-        ATTACK  (PlayerLock.Attack),
-        DIG     (PlayerLock.Dig),
+        SPRINT      (PlayerLock.Sprint),
+        JUMP        (PlayerLock.Jump),
+        MOVE        (PlayerLock.Move),
+
+        ATTACK      (PlayerLock.Attack),
+        INTERACT    (PlayerLock.Interact),
+        DIG         (PlayerLock.Dig),
+        PLACE       (PlayerLock.Place),
     }
 
     init {
@@ -57,18 +60,20 @@ internal class AlexandriaCommand(
 
         manager.command(root
             .literal("action")
+            .flag(manager.flagBuilder("indeterminate")
+                .withAliases("i"))
             .handler { ctx ->
                 val player = ctx.sender as Player
-                player.startAction { PlayerAction.Data(
-                    textSlot = null,
-                    duration = 5000,
-                    onUpdate = { ctx ->
-                        player.sendMessage("updated, elapsed = ${ctx.elapsed}")
-                    },
+                val locks = player.acquireLocks(PlayerLock.All)
+                player.startAction(PlayerAction(
+                    getName = { text("Doing something") },
+                    onUpdate = { updateCtx -> },
                     onStop = { success ->
-                        player.sendMessage("finish success: $success")
-                    }
-                ) }
+                        player.releaseLocks(locks)
+                        player.sendMessage("finish (success: $success)")
+                    },
+                    duration = if (ctx.flagged("indeterminate")) null else 5000,
+                ))
             })
     }
 

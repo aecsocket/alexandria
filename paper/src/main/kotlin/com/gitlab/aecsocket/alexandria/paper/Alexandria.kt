@@ -1,6 +1,7 @@
 package com.gitlab.aecsocket.alexandria.paper
 
 import com.github.retrooper.packetevents.PacketEvents
+import com.github.retrooper.packetevents.protocol.potion.PotionType
 import com.github.retrooper.packetevents.protocol.potion.PotionTypes
 import com.github.retrooper.packetevents.wrapper.PacketWrapper
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityEffect
@@ -113,15 +114,19 @@ class Alexandria : BasePlugin() {
         playerActions.enable()
         scheduleRepeating {
             bukkitPlayers.forEach { player ->
+                fun effect(type: PotionType, amplifier: Int) {
+                    player.sendPacket(WrapperPlayServerEntityEffect(player.entityId, type, amplifier, 1, 0))
+                }
+
                 if (player.hasLockByType(PlayerLock.Jump)) {
-                    player.sendPacket(WrapperPlayServerEntityEffect(player.entityId,
-                        PotionTypes.JUMP_BOOST, -127, 1, 0))
+                    effect(PotionTypes.JUMP_BOOST, -127)
+                }
+                if (player.hasLockByType(PlayerLock.Interact)) {
+                    effect(PotionTypes.HASTE, -127)
                 }
                 if (player.hasLockByType(PlayerLock.Dig)) {
-                    player.sendPacket(WrapperPlayServerEntityEffect(player.entityId,
-                        PotionTypes.MINING_FATIGUE, 127, 1, 0))
-                    player.sendPacket(WrapperPlayServerEntityEffect(player.entityId,
-                        PotionTypes.HASTE, -127, 1, 0))
+                    effect(PotionTypes.MINING_FATIGUE, 127)
+                    effect(PotionTypes.HASTE, -127)
                 }
             }
         }

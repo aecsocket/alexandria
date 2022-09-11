@@ -1,11 +1,15 @@
 package com.gitlab.aecsocket.alexandria.paper
 
+import com.gitlab.aecsocket.alexandria.core.BarRenderer
 import com.gitlab.aecsocket.alexandria.core.Spinner
 import com.gitlab.aecsocket.alexandria.paper.extension.registerEvents
 import com.gitlab.aecsocket.alexandria.paper.extension.scheduleRepeating
+import com.gitlab.aecsocket.glossa.core.I18N
 import com.gitlab.aecsocket.glossa.core.I18NArgs
 import net.kyori.adventure.bossbar.BossBar
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.Component.empty
+import net.kyori.adventure.text.Component.text
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -17,16 +21,13 @@ import kotlin.math.min
 
 private const val CONFIG_PATH = "actions"
 
-fun interface PlayerAction {
-    fun start(player: Player): Data
-
-    data class Data(
-        val textSlot: TextSlot? = null,
-        val duration: Long? = null,
-        val onUpdate: (UpdateContext) -> Unit = {},
-        val onStop: (Boolean) -> Unit = {},
-    )
-
+data class PlayerAction(
+    val getName: (I18N<Component>) -> Component,
+    val onUpdate: (UpdateContext) -> Unit = {},
+    val onStop: (Boolean) -> Unit = {},
+    val duration: Long? = null,
+    val textSlot: TextSlot? = null,
+) {
     interface UpdateContext {
         val elapsed: Long
 
@@ -36,7 +37,6 @@ fun interface PlayerAction {
 
 data class PlayerActionInstance(
     val action: PlayerAction,
-    val data: PlayerAction.Data,
     val textSlot: TextSlot,
     val startAt: Long,
 ) {
@@ -62,6 +62,7 @@ class PlayerActions internal constructor(
     data class Settings(
         val defaultTextSlot: TextSlot = TextSlot.InActionBar,
         val spinner: Spinner<String> = Spinner(),
+        val bar: BarRenderer = BarRenderer(0, "")
     )
 
     private val _players = HashMap<Player, PlayerActionInstance>()
@@ -83,27 +84,29 @@ class PlayerActions internal constructor(
     }
 
     private fun makeActionText(
-        player: Player,
+        i18n: I18N<Component>,
+        getActionName: (I18N<Component>) -> Component,
         textSlot: TextSlot,
         elapsed: Long,
         duration: Long?,
         state: String,
     ): Component? {
-        val i18n = alexandria.i18nFor(player)
-
         val spinner = settings.spinner.state(elapsed)
-        val args = I18NArgs<Component>(spinner?.let {
-            mapOf("spinner" to Component.text(spinner))
-        } ?: emptyMap())
+        val args = I18NArgs.Scope(i18n).apply {
+            subst("action_name", getActionName(this))
+            spinner?.let {
+                subst("spinner", text(spinner))
+            }
+        }.build()
 
         val slotKey = textSlot.key
-
-        // todo make bar
 
         return duration?.let {
             val sElapsed = min(elapsed, duration)
             val remaining = duration - sElapsed
             val progress = sElapsed.toDouble() / duration
+
+            val (barComplete, barBackground) = settings.bar.renderOne(progress.toFloat())
 
             i18n.makeOne("action.$state.$slotKey.determinate") {
                 add(args)
@@ -118,6 +121,9 @@ class PlayerActions internal constructor(
 
                 icu("percent_complete", progress)
                 icu("percent_remaining", 1 - progress)
+
+                subst("bar_complete", barComplete)
+                subst("bar_background", barBackground)
             }
         } ?: i18n.makeOne("action.$state.$slotKey.indeterminate") {
             add(args)
@@ -131,8 +137,9 @@ class PlayerActions internal constructor(
         val iter = _players.iterator()
         while (iter.hasNext()) {
             val (player, instance) = iter.next()
-            val (_, data, textSlot, startAt) = instance
-            val (_, duration, onUpdate) = data
+            val (action, textSlot, startAt) = instance
+            val (getName, onUpdate, _, duration) = action
+            val i18n = alexandria.i18nFor(player)
 
             val elapsed = time - startAt
             var stopSuccess: Boolean? = null
@@ -142,21 +149,22 @@ class PlayerActions internal constructor(
                     stopSuccess = true
                 }
 
-                min(elapsed, duration) / duration
+                min(elapsed.toDouble(), duration.toDouble()) / duration
             } ?: indeterminateProgress(elapsed / 1000.0)
 
-            makeActionText(player, textSlot, elapsed, duration, "in_progress")?.let { text ->
-                when (textSlot) {
-                    is TextSlot.InActionBar -> textSlot.show(player, text)
-                    is TextSlot.InTitle -> textSlot.show(player, text)
-                    is TextSlot.InBossBar -> {
-                        instance.bossBar?.let { bar ->
-                            textSlot.apply(bar, text)
-                            bar.progress(progress.toFloat())
-                        } ?: textSlot.createBar(text, progress.toFloat()).also {
-                            player.showBossBar(it)
-                            instance.bossBar = it
-                        }
+            val text = makeActionText(
+                i18n, getName, textSlot, elapsed, duration, "in_progress")
+
+            when (textSlot) {
+                is TextSlot.InActionBar -> text?.let { textSlot.show(player, it) }
+                is TextSlot.InTitle -> text?.let { textSlot.show(player, it) }
+                is TextSlot.InBossBar -> {
+                    instance.bossBar?.let { bar ->
+                        text?.let { textSlot.apply(bar, it) }
+                        bar.progress(progress.toFloat())
+                    } ?: textSlot.createBar(text ?: empty(), progress.toFloat()).also {
+                        player.showBossBar(it)
+                        instance.bossBar = it
                     }
                 }
             }
@@ -177,13 +185,15 @@ class PlayerActions internal constructor(
     }
 
     private fun stopAction(player: Player, instance: PlayerActionInstance, success: Boolean) {
-        val (_, data, textSlot, startAt) = instance
-        val (_, duration) = data
+        val (action, textSlot, startAt) = instance
+        val (getName, _, _, duration) = action
 
-        data.onStop(success)
+        action.onStop(success)
 
         val elapsed = System.currentTimeMillis() - startAt
-        val text = makeActionText(player, textSlot, elapsed, duration, if (success) "complete" else "cancelled")
+        val text = makeActionText(
+            alexandria.i18nFor(player), getName, textSlot, elapsed, duration,
+            if (success) "complete" else "cancelled")
 
         when (textSlot) {
             is TextSlot.InActionBar -> text?.let { textSlot.show(player, it) }
@@ -201,10 +211,8 @@ class PlayerActions internal constructor(
 
     fun start(player: Player, action: PlayerAction): PlayerActionInstance? {
         if (_players.contains(player)) return null
-        val data = action.start(player)
         return PlayerActionInstance(
-            action, data,
-            data.textSlot ?: settings.defaultTextSlot,
+            action, action.textSlot ?: settings.defaultTextSlot,
             System.currentTimeMillis()
         ).also { _players[player] = it }
     }

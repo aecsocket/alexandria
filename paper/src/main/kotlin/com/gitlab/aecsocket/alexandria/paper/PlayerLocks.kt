@@ -10,10 +10,16 @@ import com.gitlab.aecsocket.alexandria.paper.extension.registerEvents
 import org.bukkit.attribute.Attribute
 import org.bukkit.attribute.AttributeModifier
 import org.bukkit.entity.Player
+import org.bukkit.event.Cancellable
 import org.bukkit.event.EventHandler
+import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockBreakEvent
+import org.bukkit.event.block.BlockPlaceEvent
 import org.bukkit.event.entity.EntityDamageByEntityEvent
+import org.bukkit.event.inventory.InventoryClickEvent
+import org.bukkit.event.inventory.InventoryDragEvent
+import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import java.util.*
 import java.util.concurrent.atomic.AtomicLong
@@ -86,6 +92,22 @@ interface PlayerLock {
             }
         }
 
+        private val InteractModifier = AttributeModifier(
+            UUID(832329339, 657562654),
+            "alexandria.interact", -1.0, AttributeModifier.Operation.MULTIPLY_SCALAR_1)
+
+        val Interact = playerLockOf(Alexandria.namespaced("interact")) { player, acquire ->
+            val attr = player.getAttribute(Attribute.GENERIC_ATTACK_SPEED)
+            if (acquire) {
+                attr?.forceModifier(InteractModifier)
+            }
+            OnRelease { release ->
+                if (release) {
+                    attr?.removeModifier(InteractModifier)
+                }
+            }
+        }
+
         val Dig = playerLockOf(Alexandria.namespaced("dig")) { player, _ ->
             OnRelease { release ->
                 if (release) {
@@ -94,6 +116,25 @@ interface PlayerLock {
                 }
             }
         }
+
+        val Place = playerLockOf(Alexandria.namespaced("place")) { player, _ ->
+            OnRelease { release ->
+                if (release) {
+                    player.sendPacket(WrapperPlayServerRemoveEntityEffect(player.entityId, PotionTypes.HASTE))
+                }
+            }
+        }
+
+        val Inventory = playerLockOf(Alexandria.namespaced("inventory")) { _, _ ->
+            OnRelease {}
+        }
+
+
+        val AllMovement = listOf(Sprint, Jump, Move)
+
+        val AllInteraction = listOf(Attack, Interact, Dig, Place)
+
+        val All = AllMovement + AllInteraction + Inventory
     }
 }
 
@@ -138,17 +179,45 @@ class PlayerLocks internal constructor(
                 releaseAll(player)
             }
 
-            @EventHandler
-            fun EntityDamageByEntityEvent.on() {
-                val damager = damager
-                if (damager is Player && damager.hasLockByType(PlayerLock.Attack)) {
+            fun Cancellable.cancelIfLock(player: Player, type: PlayerLock) {
+                if (player.hasLockByType(type)) {
                     isCancelled = true
                 }
             }
 
-            @EventHandler
+            @EventHandler(priority = EventPriority.LOW)
+            fun EntityDamageByEntityEvent.on() {
+                val damager = damager
+                if (damager is Player) cancelIfLock(damager, PlayerLock.Attack)
+            }
+
+            @EventHandler(priority = EventPriority.LOW)
             fun BlockBreakEvent.on() {
-                if (player.hasLockByType(PlayerLock.Dig)) {
+                cancelIfLock(player, PlayerLock.Dig)
+            }
+
+            @EventHandler(priority = EventPriority.LOW)
+            fun BlockPlaceEvent.on() {
+                cancelIfLock(player, PlayerLock.Place)
+            }
+
+            @EventHandler(priority = EventPriority.LOW)
+            fun PlayerInteractEvent.on() {
+                cancelIfLock(player, PlayerLock.Interact)
+            }
+
+            @EventHandler(priority = EventPriority.LOW)
+            fun InventoryClickEvent.on() {
+                val player = whoClicked
+                if (player is Player) {
+                    cancelIfLock(player, PlayerLock.Inventory)
+                }
+            }
+
+            @EventHandler(priority = EventPriority.LOW)
+            fun InventoryDragEvent.on() {
+                val player = whoClicked
+                if (player is Player && player.hasLockByType(PlayerLock.Inventory)) {
                     isCancelled = true
                 }
             }
@@ -212,4 +281,10 @@ fun Player.hasLockByType(lock: PlayerLock) = AlexandriaAPI.playerLocks.hasByType
 
 fun Player.acquireLock(lock: PlayerLock) = AlexandriaAPI.playerLocks.acquire(this, lock)
 
+fun Player.acquireLocks(locks: Iterable<PlayerLock>) = locks.map { acquireLock(it) }
+
 fun Player.releaseLock(lock: Long) = AlexandriaAPI.playerLocks.release(this, lock)
+
+fun Player.releaseLock(lock: PlayerLockInstance) = releaseLock(lock.id)
+
+fun Player.releaseLocks(locks: Iterable<PlayerLockInstance>) = locks.map { releaseLock(it) }
