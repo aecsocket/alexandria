@@ -36,14 +36,11 @@ dependencies {
 
     implementation(libs.packetEventsSpigot)
 
+    compileOnly(libs.ktRuntime)
+
     // library loader
 
-    // kotlinStdlib
-    compileOnly(libs.kotlinReflect)
-    compileOnly(libs.kotlinCoroutines)
-    compileOnly(libs.hikariCp)
-    compileOnly(libs.h2)
-    compileOnly(libs.libBulletJme)
+    implementation(libs.ktRuntime)
 
     testImplementation(platform("org.junit:junit-bom:5.9.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
@@ -52,14 +49,15 @@ dependencies {
 tasks {
     shadowJar {
         mergeServiceFiles()
-        exclude("kotlin/")
-        exclude("kotlinx/")
-        // can't exclude `net/kyori/` here beacuse of glossa's configurate component serialize
+        // can't exclude `net/kyori/` here beacuse of glossa's configurate component serializer
         // but otherwise packetevents will include adventure-api here
         listOf(
             "org.jetbrains",
             "org.intellij",
         ).forEach { relocate(it, "${project.group}.lib.$it") }
+
+        exclude("kotlin/")
+        exclude("kotlinx/")
     }
 
     assemble {
