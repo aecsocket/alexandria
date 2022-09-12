@@ -205,11 +205,11 @@ fun Matrix3.euler(order: EulerOrder): Euler3 {
             if (abs(n10) < ONE_EPSILON) Euler3(
                 atan2(-n12, n11),
                 atan2(-n20, n00),
-                0.0
+                z,
             ) else Euler3(
                 0.0,
                 atan2(n02, n22),
-                0.0
+                z,
             )
         }
     }

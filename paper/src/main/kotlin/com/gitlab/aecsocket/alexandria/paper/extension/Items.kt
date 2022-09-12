@@ -7,7 +7,7 @@ import org.bukkit.inventory.meta.ItemMeta
 
 fun ItemStack?.isEmpty() = this == null || type == Material.AIR || amount == 0
 
-inline fun <reified M : ItemMeta> ItemStack.withMeta(action: M.() -> Unit): ItemStack {
+inline fun <reified M : ItemMeta> ItemStack.withMeta(action: (M) -> Unit): ItemStack {
     itemMeta?.let { meta ->
         action(meta as M)
         itemMeta = meta
@@ -16,7 +16,7 @@ inline fun <reified M : ItemMeta> ItemStack.withMeta(action: M.() -> Unit): Item
 }
 
 @JvmName("withRawMeta")
-inline fun ItemStack.withMeta(action: ItemMeta.() -> Unit) = withMeta<ItemMeta>(action)
+inline fun ItemStack.withMeta(action: (ItemMeta) -> Unit) = withMeta<ItemMeta>(action)
 
 fun EntityEquipment.forEach(action: (ItemStack) -> Unit) {
     action(itemInMainHand)

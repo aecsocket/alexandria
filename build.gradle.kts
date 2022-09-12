@@ -43,6 +43,7 @@ subprojects {
                 .replace("@version@", project.version.toString())
                 .replace("@description@", project.description.toString())
                 .replace("@group@", project.group.toString())
+                .replace("@hikaricp-version@", libs.versions.hikariCp.get())
             }
         }
     }

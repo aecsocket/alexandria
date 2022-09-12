@@ -7,3 +7,5 @@ authors: [ "aecsocket" ]
 website: "https://phosphorous.gitlab.io/alexandria"
 
 depend: [ "KtRuntime" ]
+libraries:
+  - "com.zaxxer:HikariCP:@hikaricp-version@"

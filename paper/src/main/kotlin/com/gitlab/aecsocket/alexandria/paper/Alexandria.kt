@@ -19,6 +19,8 @@ import com.gitlab.aecsocket.glossa.core.I18N
 import com.gitlab.aecsocket.glossa.core.PATH_SEPARATOR
 import com.gitlab.aecsocket.glossa.core.TranslationNode
 import com.gitlab.aecsocket.glossa.core.visit
+import com.zaxxer.hikari.HikariConfig
+import com.zaxxer.hikari.HikariDataSource
 import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder
 import net.kyori.adventure.audience.Audience
 import net.kyori.adventure.text.Component
@@ -35,7 +37,9 @@ import org.spongepowered.configurate.ConfigurationOptions
 import org.spongepowered.configurate.hocon.HoconConfigurationLoader
 import org.spongepowered.configurate.kotlin.dataClassFieldDiscoverer
 import org.spongepowered.configurate.kotlin.extensions.get
+import org.spongepowered.configurate.objectmapping.ConfigSerializable
 import org.spongepowered.configurate.objectmapping.ObjectMapper
+import org.spongepowered.configurate.objectmapping.meta.Required
 import org.spongepowered.configurate.serialize.TypeSerializerCollection
 import org.spongepowered.configurate.util.NamingSchemes
 import java.io.BufferedReader
@@ -45,6 +49,8 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.SimpleFileVisitor
 import java.nio.file.attribute.BasicFileAttributes
+import java.sql.Connection
+import java.sql.SQLException
 import java.util.*
 import kotlin.io.path.isDirectory
 
@@ -52,10 +58,17 @@ private const val LOCALE = "locale"
 private const val PADDING = "padding"
 private const val CHAR_WIDTHS = "char_widths"
 
+private const val DATABASE_NAME = "alexandria.db"
+
 private lateinit var instance: Alexandria
 val AlexandriaAPI get() = instance
 
 class Alexandria : BasePlugin() {
+    @ConfigSerializable
+    data class DatabaseSettings(
+        @Required val jdbcUrl: String,
+    )
+
     private data class Registration(
         val plugin: BasePlugin,
         val onInit: InitContext.() -> Unit,
@@ -78,12 +91,15 @@ class Alexandria : BasePlugin() {
     lateinit var charSizes: MapFont private set
     lateinit var i18n: I18N<Component> private set
     lateinit var configOptions: ConfigurationOptions private set
+    internal var db: HikariDataSource? = null
+        private set
 
     var paddingWidth: Int = -1
         private set
 
     val playerLocks = PlayerLocks(this)
     val playerActions = PlayerActions(this)
+    val playerPersistence = PlayerPersistence(this)
 
     private val registrations = ArrayList<Registration>()
 
@@ -111,8 +127,6 @@ class Alexandria : BasePlugin() {
             }
         )
 
-        playerLocks.enable()
-        playerActions.enable()
         scheduleRepeating {
             bukkitPlayers.forEach { player ->
                 fun effect(type: PotionType, amplifier: Int) {
@@ -156,6 +170,10 @@ class Alexandria : BasePlugin() {
                 .build())
 
         super.init()
+
+        playerLocks.enable()
+        playerActions.enable()
+        playerPersistence.enable()
     }
 
     override fun loadInternal(log: LogList, settings: ConfigurationNode): Boolean {
@@ -253,6 +271,18 @@ class Alexandria : BasePlugin() {
             }.build(locale, MiniMessage.miniMessage())
             log.line(LogLevel.Info) { "Initialized translations, default locale: ${locale.toLanguageTag()}" }
 
+            db?.close()
+            val db = HikariDataSource(HikariConfig().apply {
+                jdbcUrl = "jdbc:sqlite:${dataFolder.resolve(DATABASE_NAME).absolutePath}"
+            }).also { this.db = it }
+            try {
+                db.connection.close()
+                log.line(LogLevel.Verbose) { "Connected to database" }
+            } catch (ex: SQLException) {
+                log.line(LogLevel.Error, ex) { "Could not establish connection to local database" }
+                return false
+            }
+
             padding = settings.node(PADDING).get { " " }
             charSizes = MinecraftFont()
             settings.node(CHAR_WIDTHS).childrenMap().forEach { (char, width) ->
@@ -264,7 +294,19 @@ class Alexandria : BasePlugin() {
 
             paddingWidth = widthOf(padding)
 
-            playerActions.load(settings)
+            try {
+                playerActions.load(settings)
+            } catch (ex: Exception) {
+                log.line(LogLevel.Error, ex) { "Could not load player actions settings" }
+                return false
+            }
+
+            try {
+                playerPersistence.load(settings)
+            } catch (ex: Exception) {
+                log.line(LogLevel.Error, ex) { "Could not load player persistence settings" }
+                return false
+            }
 
             return true
         }
@@ -287,6 +329,14 @@ class Alexandria : BasePlugin() {
     fun configLoader() = HoconConfigurationLoader.builder().defaultOptions(configOptions)
 
     fun i18nFor(aud: Audience) = if (aud is Player) i18n.withLocale(aud.locale()) else i18n
+
+    internal fun useDb(action: (Connection) -> Unit) {
+        try {
+            db?.connection?.use(action)
+        } catch (ex: Exception) {
+            log.line(LogLevel.Warning, ex) { "An error occurred performing a database action" }
+        }
+    }
 
     fun widthOf(text: String): Int {
         // our own error message will be more useful for admins

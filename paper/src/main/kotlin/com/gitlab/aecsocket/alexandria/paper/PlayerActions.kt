@@ -53,10 +53,8 @@ private val TextSlot.key get() = when (this) {
 
 class PlayerActions internal constructor(
     private val alexandria: Alexandria,
-    settings: Settings = Settings()
 ) {
-    var settings: Settings = settings
-        private set
+    lateinit var settings: Settings private set
 
     @ConfigSerializable
     data class Settings(

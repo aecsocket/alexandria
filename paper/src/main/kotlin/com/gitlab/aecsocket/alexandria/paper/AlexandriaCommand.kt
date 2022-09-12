@@ -29,27 +29,27 @@ internal class AlexandriaCommand(
     }
 
     init {
-        val playerLocks = root.literal("player-locks", desc("Manage temporary locks on player actions."))
-        manager.command(playerLocks
+        val locks = root.literal("locks", desc("Manage temporary locks on player actions."))
+        manager.command(locks
             .literal("list", desc("List all locked player actions."))
             .argument(SinglePlayerSelectorArgument.optional("target"), desc("Player to target."))
             .permission(perm("player-locks.list"))
             .handler { handle(it, ::playerLocksList) })
-        manager.command(playerLocks
+        manager.command(locks
             .literal("acquire", desc("Lock a player action."))
             .argument(EnumArgument.of(PlayerLockType::class.java, "lock"), desc("Lock type."))
             .argument(SinglePlayerSelectorArgument.optional("target"), desc("Player to target."))
             .permission(perm("player-locks.acquire"))
             .handler { handle(it, ::playerLocksAcquire) })
-        manager.command(playerLocks
+        manager.command(locks
             .literal("release", desc("Unlock a player action by a previously acquired lock."))
             .argument(LongArgument.of("lock-id"), desc("Previously acquired lock ID."))
             .argument(SinglePlayerSelectorArgument.optional("target"), desc("Player to target."))
             .permission(perm("player-locks.release"))
             .handler { handle(it, ::playerLocksRelease) })
 
-        val playerActions = root.literal("player-actions", desc("Manage player action states."))
-        manager.command(playerActions
+        val actions = root.literal("actions", desc("Manage player action states."))
+        manager.command(actions
             .literal("stop", desc("Instantly stop an action."))
             .argument(SinglePlayerSelectorArgument.optional("target"), desc("Player to target."))
             .flag(manager.flagBuilder("success")

@@ -36,7 +36,8 @@ dependencies {
 
     implementation(libs.packetEventsSpigot)
 
-    compileOnly(libs.ktRuntime)
+    // library loader
+    compileOnly(libs.hikariCp)
 
 
     testImplementation(platform("org.junit:junit-bom:5.9.0"))

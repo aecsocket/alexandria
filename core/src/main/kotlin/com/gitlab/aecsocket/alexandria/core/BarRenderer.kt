@@ -14,7 +14,7 @@ data class BarRenderer(
     fun render(segments: Collection<Float>): List<Component> {
         val res = ArrayList<Component>(segments.size + 1)
         var remaining = width
-        segments.forEachIndexed { idx, segment ->
+        segments.forEach { segment ->
             val segWidth = min((segment * width).toInt(), remaining)
             res.add(text(fill.repeat(segWidth)))
             remaining -= segWidth

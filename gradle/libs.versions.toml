@@ -2,17 +2,16 @@
 
 minecraft = "1.19.2"
 
-ktRuntime = "1.7.10"
+kotlin = "1.7.10"
 icu4j = "68.1"
 adventure = "4.11.0"
 glossa = "0.5.2"
 configurate = "4.1.2"
 cloud = "1.8.0-SNAPSHOT"
 packetEvents = "2.0-SNAPSHOT"
+hikariCp = "5.0.1"
 
 [libraries]
-
-ktRuntime = { group = "com.gitlab.aecsocket.ktruntime", name = "kt-runtime-spigot", version.ref = "ktRuntime" }
 
 adventureApi = { group = "net.kyori", name = "adventure-api", version.ref = "adventure" }
 adventureExtraKotlin = { group = "net.kyori", name = "adventure-extra-kotlin", version.ref = "adventure" }
@@ -31,3 +30,5 @@ cloudMinecraftExtras = { group = "cloud.commandframework", name = "cloud-minecra
 
 packetEventsApi = { group = "com.github.retrooper.packetevents", name = "api", version.ref = "packetEvents" }
 packetEventsSpigot = { group = "com.github.retrooper.packetevents", name = "spigot", version.ref = "packetEvents" }
+
+hikariCp = { group = "com.zaxxer", name = "HikariCP", version.ref = "hikariCp" }
