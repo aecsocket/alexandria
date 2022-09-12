@@ -84,6 +84,7 @@ val Euler3.degrees get() = map { it.degrees }
 enum class EulerOrder {
     XYZ,
     ZYX,
+    YZX,
 }
 
 // https://github.com/mrdoob/three.js/blob/dev/src/math/Quaternion.js#L223
@@ -105,6 +106,12 @@ fun Euler3.quaternion(order: EulerOrder): Quaternion {
             c1*s2*c3 + s1*c2*s3,
             c1*c2*s3 - s1*s2*c3,
             c1*c2*c3 + s1*s2*s3,
+        )
+        EulerOrder.YZX -> Quaternion(
+            s1*c2*c3 + c1*s2*s3,
+            c1*s2*c3 + s1*c2*s3,
+            c1*c2*s3 - s1*s2*c3,
+            c1*c2*c3 - s1*s2*s3,
         )
     }
 }
@@ -191,6 +198,18 @@ fun Matrix3.euler(order: EulerOrder): Euler3 {
                 atan2(n21, n11),
                 y,
                 0.0,
+            )
+        }
+        EulerOrder.YZX -> {
+            val z = asin(clamp(n10, -1.0, 1.0))
+            if (abs(n10) < ONE_EPSILON) Euler3(
+                atan2(-n12, n11),
+                atan2(-n20, n00),
+                0.0
+            ) else Euler3(
+                0.0,
+                atan2(n02, n22),
+                0.0
             )
         }
     }

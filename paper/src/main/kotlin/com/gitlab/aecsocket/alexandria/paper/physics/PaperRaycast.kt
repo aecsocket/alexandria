@@ -3,8 +3,8 @@ package com.gitlab.aecsocket.alexandria.paper.physics
 import com.gitlab.aecsocket.alexandria.core.physics.*
 import com.gitlab.aecsocket.alexandria.paper.extension.alexandria
 import com.gitlab.aecsocket.alexandria.paper.extension.extent
-import com.gitlab.aecsocket.alexandria.paper.extension.transform
 import com.gitlab.aecsocket.alexandria.paper.extension.position
+import com.gitlab.aecsocket.alexandria.paper.extension.transform
 import net.minecraft.world.phys.AABB
 import org.bukkit.Material
 import org.bukkit.World
@@ -68,7 +68,7 @@ fun Entity.bodies(): List<PaperEntityBody> {
     val aabb = boundingBox
     return listOf(PaperEntityBody(
         BoxShape(aabb.extent / 2.0),
-        Transform(transform.rotation, aabb.center.alexandria()),
+        Transform(aabb.center.alexandria(), transform.rotation),
         this,
     ))
 }

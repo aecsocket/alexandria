@@ -83,3 +83,4 @@ val BoundingBox.extent get() = Vector3(
 )
 
 fun Euler3.bukkitEuler() = EulerAngle(x, y, z)
+fun Euler3.pose() = EulerAngle(-x, y, z)

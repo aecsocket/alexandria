@@ -103,7 +103,8 @@ class Alexandria : BasePlugin() {
     override fun onEnable() {
         super.onEnable()
         AlexandriaCommand(this)
-        AlexandriaPacketListener(this)
+        PacketEvents.getAPI().init()
+        PacketEvents.getAPI().eventManager.registerListener(AlexandriaPacketListener(this))
         registerConsumer(this,
             onLoad = {
                 addDefaultI18N()
@@ -272,6 +273,7 @@ class Alexandria : BasePlugin() {
 
     override fun onDisable() {
         playerLocks.releaseAll()
+        PacketEvents.getAPI().terminate()
     }
 
     fun registerConsumer(

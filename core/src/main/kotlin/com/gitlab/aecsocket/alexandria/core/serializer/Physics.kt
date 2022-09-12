@@ -1,8 +1,6 @@
 package com.gitlab.aecsocket.alexandria.core.serializer
 
-import com.gitlab.aecsocket.alexandria.core.extension.force
-import com.gitlab.aecsocket.alexandria.core.extension.forceMap
-import com.gitlab.aecsocket.alexandria.core.extension.typeToken
+import com.gitlab.aecsocket.alexandria.core.extension.*
 import com.gitlab.aecsocket.alexandria.core.physics.*
 import org.spongepowered.configurate.ConfigurationNode
 import org.spongepowered.configurate.kotlin.extensions.get
@@ -11,8 +9,8 @@ import org.spongepowered.configurate.serialize.TypeSerializer
 import java.lang.reflect.Type
 
 private const val TYPE = "type"
-private const val ROT = "rot"
-private const val TL = "tl"
+private const val ROTATION = "rotation"
+private const val TRANSLATION = "translation"
 private const val TRANSFORM = "transform"
 private const val SHAPE = "shape"
 private const val MIN = "min"
@@ -49,20 +47,48 @@ object ShapeSerializer : TypeSerializer<Shape> {
     }
 }
 
+object QuaternionSerializer : TypeSerializer<Quaternion> {
+    override fun serialize(type: Type, obj: Quaternion?, node: ConfigurationNode) {
+        if (obj == null) node.set(null)
+        else {
+            node.appendListNode().set(obj.x)
+            node.appendListNode().set(obj.y)
+            node.appendListNode().set(obj.z)
+            node.appendListNode().set(obj.w)
+        }
+    }
+
+    override fun deserialize(type: Type, node: ConfigurationNode): Quaternion {
+        val list = node.forceList(type, "order", "x", "y", "z")
+        return if (list[0].raw() is String) {
+            Euler3(
+                list[1].force(),
+                list[2].force(),
+                list[3].force(),
+            ).quaternion(list[0].force())
+        } else Quaternion(
+            list[0].force(),
+            list[1].force(),
+            list[2].force(),
+            list[3].force(),
+        )
+    }
+}
+
 object TransformSerializer : TypeSerializer<Transform> {
     override fun serialize(type: Type, obj: Transform?, node: ConfigurationNode) {
         if (obj == null) node.set(null)
         else {
-            node.node(ROT).set(obj.rotation)
-            node.node(TL).set(obj.translation)
+            node.node(ROTATION).set(obj.rotation)
+            node.node(TRANSLATION).set(obj.translation)
         }
     }
 
     override fun deserialize(type: Type, node: ConfigurationNode): Transform {
         return when {
             node.isMap -> Transform(
-                node.node(ROT).get { Quaternion.Identity },
-                node.node(TL).get { Vector3.Zero },
+                node.node(TRANSLATION).get { Vector3.Zero },
+                node.node(ROTATION).get { Quaternion.Identity },
             )
             else -> Transform(
                 translation = node.force()
@@ -97,7 +123,7 @@ object SimpleBodySerializer : TypeSerializer<SimpleBody> {
                 SimpleBody(
                     BoxShape((max - min) / 2.0),
                     Transform(
-                        rotation = node.node(ROT).get { Quaternion.Identity },
+                        rotation = node.node(ROTATION).get { Quaternion.Identity },
                         translation = min.midpoint(max)
                     ),
                 )

@@ -20,6 +20,7 @@ object Serializers {
         .registerExact(Vector3::class, Vector3Serializer)
         .registerExact(Point2::class, Point2Serializer)
         .registerExact(Point3::class, Point3Serializer)
+        .registerExact(Quaternion::class, QuaternionSerializer)
         .registerExact(SoundEffect::class, SoundEffectSerializer)
         .registerExact(DoubleMod::class, DoubleModSerializer)
         .registerExact(ColorMod::class, ColorModSerializer)

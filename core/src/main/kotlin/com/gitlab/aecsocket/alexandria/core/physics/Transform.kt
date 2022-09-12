@@ -1,15 +1,15 @@
 package com.gitlab.aecsocket.alexandria.core.physics
 
 data class Transform(
-    val rotation: Quaternion = Quaternion.Identity,
     val translation: Vector3 = Vector3.Zero,
+    val rotation: Quaternion = Quaternion.Identity,
     val invRotation: Quaternion = rotation.inverse,
 ) {
-    val inverse get() = Transform(invRotation, -translation, rotation)
+    val inverse get() = Transform(-translation, invRotation, rotation)
 
     operator fun plus(t: Transform) = Transform(
-        rotation * t.rotation,
         rotation * t.translation + translation,
+        rotation * t.rotation,
     )
 
     // assuming this is an object -> world space transform...
