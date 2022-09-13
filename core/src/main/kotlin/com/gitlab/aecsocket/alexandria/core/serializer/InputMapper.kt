@@ -21,9 +21,9 @@ object InputMapperSerializer : TypeSerializer<InputMapper> {
             if (!INPUT_TYPES.contains(inputType))
                 throw SerializationException(child, type, "Invalid input type '$inputType'")
             inputType.toString() to child.forceList(type).map { predicateNode ->
-                predicateNode.forceList(type, "tags", "action").run { InputPredicate(
-                    get(0).force<HashSet<String>>(),
-                    get(1).force(),
+                predicateNode.forceList(type, "actions", "tags").run { InputPredicate(
+                    get(0).force<ArrayList<String>>(),
+                    get(1).force<HashSet<String>>(),
                 ) }
             }
         }.associate { it })

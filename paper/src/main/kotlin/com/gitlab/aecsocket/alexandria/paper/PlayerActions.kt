@@ -66,6 +66,10 @@ class PlayerActions internal constructor(
     private val _players = HashMap<Player, PlayerActionInstance>()
     val players: Map<Player, PlayerActionInstance> get() = _players
 
+    internal fun load(settings: ConfigurationNode) {
+        this.settings = settings.node(CONFIG_PATH).get { Settings() }
+    }
+
     internal fun enable() {
         alexandria.registerEvents(object : Listener {
             @EventHandler
@@ -75,10 +79,6 @@ class PlayerActions internal constructor(
         })
 
         alexandria.scheduleRepeating { update() }
-    }
-
-    internal fun load(settings: ConfigurationNode) {
-        this.settings = settings.node(CONFIG_PATH).get { Settings() }
     }
 
     private fun makeActionText(

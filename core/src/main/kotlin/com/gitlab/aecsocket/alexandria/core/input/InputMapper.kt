@@ -26,14 +26,14 @@ val INPUT_TYPES = setOf(
 )
 
 data class InputPredicate(
-    val tags: Set<String>,
-    val action: String,
+    val actions: List<String>,
+    val tags: Set<String> = emptySet(),
 )
 
 class InputMapper(
     val actions: Map<String, List<InputPredicate>>
 ) {
-    fun actionOf(input: Input, tags: Collection<String>): String? {
+    fun actionOf(input: Input, tags: Collection<String>): List<String> {
         val (inputType, inputTags) = when (input) {
             is Input.Mouse -> INPUT_MOUSE to listOf(input.button.key, input.state.key)
             is Input.SwapHands -> INPUT_SWAP_HANDS to emptyList()
@@ -52,9 +52,10 @@ class InputMapper(
 
         return actions.getOrDefault(inputType, emptyList())
             // make sure that the predicate matches all the event tags
-            .filter { (tags) -> allTags.containsAll(tags) }
+            .filter { (_, tags) -> allTags.containsAll(tags) }
             // get the most specific predicate
-            .maxByOrNull { (tags) -> tags.size }?.let { (_, action) -> action }
+            .maxByOrNull { (_, tags) -> tags.size }?.let { (action) -> action }
+            ?: emptyList()
     }
 
     companion object {

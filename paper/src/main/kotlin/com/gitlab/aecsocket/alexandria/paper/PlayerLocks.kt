@@ -92,20 +92,8 @@ interface PlayerLock {
             }
         }
 
-        private val InteractModifier = AttributeModifier(
-            UUID(832329339, 657562654),
-            "alexandria.interact", -1.0, AttributeModifier.Operation.MULTIPLY_SCALAR_1)
-
-        val Interact = playerLockOf(Alexandria.namespaced("interact")) { player, acquire ->
-            val attr = player.getAttribute(Attribute.GENERIC_ATTACK_SPEED)
-            if (acquire) {
-                attr?.forceModifier(InteractModifier)
-            }
-            OnRelease { release ->
-                if (release) {
-                    attr?.removeModifier(InteractModifier)
-                }
-            }
+        val Interact = playerLockOf(Alexandria.namespaced("interact")) { _, _ ->
+            OnRelease {}
         }
 
         val Dig = playerLockOf(Alexandria.namespaced("dig")) { player, _ ->
@@ -129,12 +117,32 @@ interface PlayerLock {
             OnRelease {}
         }
 
+        private val RaiseHandModifier = AttributeModifier(
+            UUID(832329339, 657562654),
+            "alexandria.raise_hand", -1.0, AttributeModifier.Operation.MULTIPLY_SCALAR_1)
+
+        val RaiseHand = playerLockOf(Alexandria.namespaced("raise_hand")) { player, acquire ->
+            val attr = player.getAttribute(Attribute.GENERIC_ATTACK_SPEED)
+            if (acquire) {
+                attr?.forceModifier(RaiseHandModifier)
+            }
+            OnRelease { release ->
+                if (release) {
+                    attr?.removeModifier(RaiseHandModifier)
+                }
+            }
+        }
+
+        val UseAction = playerLockOf(Alexandria.namespaced("use_action")) { _, _ ->
+            OnRelease {}
+        }
+
 
         val AllMovement = listOf(Sprint, Jump, Move)
 
         val AllInteraction = listOf(Attack, Interact, Dig, Place)
 
-        val All = AllMovement + AllInteraction + Inventory
+        val All = AllMovement + AllInteraction + Inventory + RaiseHand + UseAction
     }
 }
 
@@ -157,6 +165,16 @@ data class PlayerLockInstance(
 class PlayerLocks internal constructor(
     private val alexandria: Alexandria
 ) {
+    data class OnLockAcquire(
+        val player: Player,
+        val lock: PlayerLockInstance,
+    )
+
+    data class OnLockRelease(
+        val player: Player,
+        val lock: PlayerLockInstance,
+    )
+
     inner class ForPlayer {
         private val nextLockId = AtomicLong()
 
@@ -171,6 +189,9 @@ class PlayerLocks internal constructor(
 
     private val _players = HashMap<Player, ForPlayer>()
     val players: Map<Player, ForPlayer> get() = _players
+
+    val onLockAcquire: MutableList<(OnLockAcquire) -> Unit> = ArrayList()
+    val onLockRelease: MutableList<(OnLockRelease) -> Unit> = ArrayList()
 
     internal fun enable() {
         alexandria.registerEvents(object : Listener {
@@ -237,14 +258,20 @@ class PlayerLocks internal constructor(
     fun acquire(player: Player, lock: PlayerLock): PlayerLockInstance {
         val forPlayer = _players.computeIfAbsent(player) { ForPlayer() }
         val byType = forPlayer._byType.computeIfAbsent(lock) { HashSet() }
+        val acquire = byType.isEmpty()
 
         val id = forPlayer.nextLockId()
-        val onRelease = lock.acquire(player, byType.isEmpty())
+        val onRelease = lock.acquire(player, acquire)
         val thread = Thread.currentThread()
 
         return PlayerLockInstance(id, lock, onRelease, thread.name, thread.stackTrace.toList()).also {
             forPlayer._locks[id] = it
             byType.add(it)
+
+            if (acquire) {
+                val event = OnLockAcquire(player, it)
+                onLockAcquire.forEach { lst -> lst(event) }
+            }
         }
     }
 
@@ -254,7 +281,14 @@ class PlayerLocks internal constructor(
                 val byType = forPlayer._byType[instance.type]
                     ?: throw IllegalStateException("No byType entry for $instance")
                 byType.remove(instance)
-                instance.onRelease.release(byType.isEmpty())
+
+                val release = byType.isEmpty()
+                instance.onRelease.release(release)
+
+                if (release) {
+                    val event = OnLockRelease(player, instance)
+                    onLockRelease.forEach { lst -> lst(event) }
+                }
             } ?: alexandria.log.line(LogLevel.Warning) { "Attempted to release lock with ID $lockId for ${player.name}, which was not held" }
         }
     }
@@ -270,6 +304,14 @@ class PlayerLocks internal constructor(
 
     fun releaseAll() {
         _players.toMutableMap().forEach { (player) -> releaseAll(player) }
+    }
+
+    fun onLockAcquire(listener: (OnLockAcquire) -> Unit) {
+        onLockAcquire.add(listener)
+    }
+
+    fun onLockRelease(listener: (OnLockRelease) -> Unit) {
+        onLockRelease.add(listener)
     }
 }
 

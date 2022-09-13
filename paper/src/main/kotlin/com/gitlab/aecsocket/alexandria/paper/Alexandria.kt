@@ -53,6 +53,7 @@ import java.sql.Connection
 import java.sql.SQLException
 import java.util.*
 import kotlin.io.path.isDirectory
+import kotlin.reflect.KClass
 
 private const val LOCALE = "locale"
 private const val PADDING = "padding"
@@ -100,6 +101,7 @@ class Alexandria : BasePlugin() {
     val playerLocks = PlayerLocks(this)
     val playerActions = PlayerActions(this)
     val playerPersistence = PlayerPersistence(this)
+    val contextActions = ContextActions(this)
 
     private val registrations = ArrayList<Registration>()
 
@@ -174,6 +176,7 @@ class Alexandria : BasePlugin() {
         playerLocks.enable()
         playerActions.enable()
         playerPersistence.enable()
+        contextActions.enable()
     }
 
     override fun loadInternal(log: LogList, settings: ConfigurationNode): Boolean {
@@ -294,19 +297,19 @@ class Alexandria : BasePlugin() {
 
             paddingWidth = widthOf(padding)
 
-            try {
-                playerActions.load(settings)
-            } catch (ex: Exception) {
-                log.line(LogLevel.Error, ex) { "Could not load player actions settings" }
-                return false
+            fun tryLoad(featureType: KClass<*>, action: () -> Unit): Boolean? {
+                try {
+                    action()
+                } catch (ex: Exception) {
+                    log.line(LogLevel.Error, ex) { "Could not load ${featureType.simpleName} settings" }
+                    return false
+                }
+                return null
             }
 
-            try {
-                playerPersistence.load(settings)
-            } catch (ex: Exception) {
-                log.line(LogLevel.Error, ex) { "Could not load player persistence settings" }
-                return false
-            }
+            tryLoad(PlayerActions::class) { playerActions.load(settings) }?.let { return it }
+            tryLoad(PlayerPersistence::class) { playerPersistence.load(settings) }?.let { return it }
+            tryLoad(ContextActions::class) { contextActions.load(settings) }?.let { return it }
 
             return true
         }

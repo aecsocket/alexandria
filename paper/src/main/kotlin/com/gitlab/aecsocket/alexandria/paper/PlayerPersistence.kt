@@ -34,6 +34,33 @@ class PlayerPersistence internal constructor(
         val load: Boolean = true,
     )
 
+    internal fun load(settings: ConfigurationNode) {
+        this.settings = settings.node(CONFIG_PATH).get { Settings() }
+        if (!this.settings.enabled) return
+
+        alexandria.useDb { conn -> conn.createStatement().use { stmt ->
+            stmt.executeUpdate(
+                """CREATE TABLE IF NOT EXISTS player_persistence (
+                player_id   VARCHAR(36) PRIMARY KEY  NOT NULL,
+                world_id    VARCHAR(36)              NOT NULL,
+                chunk_key   INTEGER                  NOT NULL,
+                position_x  REAL                     NOT NULL,
+                position_y  REAL                     NOT NULL,
+                position_z  REAL                     NOT NULL)
+            """.trimIndent())
+
+            stmt.executeUpdate(
+                """CREATE INDEX IF NOT EXISTS idx_persistence_world
+                ON player_persistence (world_id)
+            """.trimIndent())
+
+            stmt.executeUpdate(
+                """CREATE INDEX IF NOT EXISTS idx_persistence_chunk
+                ON player_persistence (chunk_key)
+            """.trimIndent())
+        } }
+    }
+
     internal fun enable() {
         alexandria.registerEvents(object : Listener {
             @EventHandler
@@ -93,7 +120,7 @@ class PlayerPersistence internal constructor(
 
             @EventHandler
             fun EntitiesLoadEvent.on() {
-                if (!settings.enabled || !settings.load) return
+                if (!settings.enabled || !settings.load || true) return
 
                 val worldId = world.uid.toString()
                 val chunkKey = chunk.chunkKey
@@ -125,39 +152,10 @@ class PlayerPersistence internal constructor(
                                 entity.isCustomNameVisible = true
                                 offlinePlayer.name?.let { entity.customName(Component.text(it)) }
                             }
-
-                            println(" > spawned zomboid for $playerId @ $position")
                         }
                     }
                 }
             }
         })
-    }
-
-    internal fun load(settings: ConfigurationNode) {
-        this.settings = settings.node(CONFIG_PATH).get { Settings() }
-        if (!this.settings.enabled) return
-
-        alexandria.useDb { conn -> conn.createStatement().use { stmt ->
-            stmt.executeUpdate(
-                """CREATE TABLE IF NOT EXISTS player_persistence (
-                player_id   VARCHAR(36) PRIMARY KEY  NOT NULL,
-                world_id    VARCHAR(36)              NOT NULL,
-                chunk_key   INTEGER                  NOT NULL,
-                position_x  REAL                     NOT NULL,
-                position_y  REAL                     NOT NULL,
-                position_z  REAL                     NOT NULL)
-            """.trimIndent())
-
-            stmt.executeUpdate(
-                """CREATE INDEX IF NOT EXISTS idx_persistence_world
-                ON player_persistence (world_id)
-            """.trimIndent())
-
-            stmt.executeUpdate(
-                """CREATE INDEX IF NOT EXISTS idx_persistence_chunk
-                ON player_persistence (chunk_key)
-            """.trimIndent())
-        } }
     }
 }

@@ -44,9 +44,8 @@ class PacketInputListener(
     }
 
     override fun onPacketReceive(event: PacketReceiveEvent) {
-        val player = event.player
-        if (player !is Player || !player.isValid)
-            return
+        val player = event.player as? Player ?: return
+        if (!player.isValid) return
 
         data class EventImpl(
             override val input: Input,
