@@ -1,12 +1,10 @@
 package com.gitlab.aecsocket.alexandria.paper
 
-import cloud.commandframework.arguments.standard.DoubleArgument
 import cloud.commandframework.arguments.standard.EnumArgument
 import cloud.commandframework.arguments.standard.LongArgument
 import cloud.commandframework.bukkit.parsers.selector.SinglePlayerSelectorArgument
 import com.gitlab.aecsocket.alexandria.core.extension.flagged
 import com.gitlab.aecsocket.alexandria.core.extension.render
-import com.gitlab.aecsocket.alexandria.paper.extension.position
 import com.gitlab.aecsocket.glossa.core.I18N
 import io.papermc.paper.util.StacktraceDeobfuscator
 import net.kyori.adventure.extra.kotlin.join
@@ -14,7 +12,8 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.Component.text
 import net.kyori.adventure.text.JoinConfiguration
 import org.bukkit.command.CommandSender
-import org.bukkit.entity.Player
+import kotlin.collections.component1
+import kotlin.collections.component2
 
 internal class AlexandriaCommand(
     override val plugin: Alexandria
@@ -28,6 +27,10 @@ internal class AlexandriaCommand(
         INTERACT    (PlayerLock.Interact),
         DIG         (PlayerLock.Dig),
         PLACE       (PlayerLock.Place),
+
+        INVENTORY   (PlayerLock.Inventory),
+        RAISE_HAND  (PlayerLock.RaiseHand),
+        USE_ACTION  (PlayerLock.UseAction),
     }
 
     init {
@@ -59,46 +62,6 @@ internal class AlexandriaCommand(
                 .withDescription(desc("The action should be ended successfully rather than cancelled.")))
             .permission(perm("player-actions.stop"))
             .handler { handle(it, ::playerActionsStop) })
-
-        fun doAction(player: Player, indeterminate: Boolean) {
-            val locks = player.acquireLocks(PlayerLock.All)
-            player.startAction(PlayerAction(
-                getName = { text("Doing something") },
-                onUpdate = { updateCtx -> },
-                onStop = { success ->
-                    player.releaseLocks(locks)
-                    player.sendMessage("finish (success: $success)")
-                },
-                duration = if (indeterminate) null else 5000,
-            ))
-        }
-
-        manager.command(root
-            .literal("action")
-            .flag(manager.flagBuilder("indeterminate")
-                .withAliases("i"))
-            .handler { ctx ->
-                val player = ctx.sender as Player
-                doAction(player, ctx.flagged("indeterminate"))
-            })
-
-        manager.command(root
-            .literal("ctx-act")
-            .argument(DoubleArgument.of("use-radius"))
-            .handler { ctx ->
-                val player = ctx.sender as Player
-                plugin.contextActions[player].create(
-                    ContextAction(
-                        getName = { text("Do something") },
-                        useRadius = ctx.get("use-radius"),
-                        onUse = { actionCtx ->
-                            actionCtx.remove()
-                            doAction(player, false)
-                        }
-                    ),
-                    player.location.position()
-                )
-            })
     }
 
     fun playerLocksList(ctx: Context, sender: CommandSender, i18n: I18N<Component>) {

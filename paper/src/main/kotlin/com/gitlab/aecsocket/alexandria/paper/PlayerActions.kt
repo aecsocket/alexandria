@@ -24,7 +24,7 @@ private const val CONFIG_PATH = "actions"
 data class PlayerAction(
     val getName: (I18N<Component>) -> Component,
     val onUpdate: (UpdateContext) -> Unit = {},
-    val onStop: (Boolean) -> Unit = {},
+    val onStop: (StopContext) -> Unit = {},
     val duration: Long? = null,
     val textSlot: TextSlot? = null,
 ) {
@@ -32,6 +32,11 @@ data class PlayerAction(
         val elapsed: Long
 
         fun stop(success: Boolean = false)
+    }
+
+    interface StopContext {
+        val success: Boolean
+        val elapsed: Long
     }
 }
 
@@ -185,10 +190,14 @@ class PlayerActions internal constructor(
     private fun stopAction(player: Player, instance: PlayerActionInstance, success: Boolean) {
         val (action, textSlot, startAt) = instance
         val (getName, _, _, duration) = action
+        var elapsed = System.currentTimeMillis() - startAt
+        duration?.let { elapsed = min(elapsed, it) }
 
-        action.onStop(success)
+        action.onStop(object : PlayerAction.StopContext {
+            override val success get() = success
+            override val elapsed get() = elapsed
+        })
 
-        val elapsed = System.currentTimeMillis() - startAt
         val text = makeActionText(
             alexandria.i18nFor(player), getName, textSlot, elapsed, duration,
             if (success) "complete" else "cancelled")
