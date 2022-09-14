@@ -138,13 +138,13 @@ fun Polar2.cartesian(): Vector3 {
 
 fun Polar2.euler() = Euler3(pitch, yaw, 0.0)
 
-fun Vector3.polar(): Polar2 {
+fun Vector3.heading(): Polar2 {
     val pitch = atan(-y / sqrt(x*x + z*z))
     val yaw = atan2(-x, z) + PI*2
     return Polar2(pitch, yaw)
 }
 
-fun Vector3.euler() = polar().euler()
+fun Vector3.euler() = heading().euler()
 
 // Quaternion -> ...
 

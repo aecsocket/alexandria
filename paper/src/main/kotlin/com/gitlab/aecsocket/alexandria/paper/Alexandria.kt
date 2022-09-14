@@ -22,6 +22,9 @@ import com.gitlab.aecsocket.glossa.core.visit
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 import net.kyori.adventure.audience.Audience
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.Component.empty
@@ -338,6 +341,16 @@ class Alexandria : BasePlugin() {
             db?.connection?.use(action)
         } catch (ex: Exception) {
             log.line(LogLevel.Warning, ex) { "An error occurred performing a database action" }
+        }
+    }
+
+    internal fun useIO(block: CoroutineScope.() -> Unit) {
+        runBlocking(Dispatchers.IO) {
+            try {
+                block(this)
+            } catch (ex: Exception) {
+                log.line(LogLevel.Warning, ex) { "An error occurred performing an IO action" }
+            }
         }
     }
 

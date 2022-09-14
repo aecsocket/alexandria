@@ -4,6 +4,7 @@ import com.github.retrooper.packetevents.protocol.potion.PotionTypes
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerRemoveEntityEffect
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerUpdateHealth
 import com.gitlab.aecsocket.alexandria.core.LogLevel
+import com.gitlab.aecsocket.alexandria.paper.Alexandria.Companion.namespaced
 import com.gitlab.aecsocket.alexandria.paper.PlayerLock.OnRelease
 import com.gitlab.aecsocket.alexandria.paper.extension.forceModifier
 import com.gitlab.aecsocket.alexandria.paper.extension.registerEvents
@@ -41,7 +42,7 @@ interface PlayerLock {
             return player.health.toFloat()
         }
 
-        val Sprint = playerLockOf(Alexandria.namespaced("sprint")) { player, acquire ->
+        val Sprint = playerLockOf(namespaced("sprint")) { player, acquire ->
             if (acquire) {
                 player.sendPacket(WrapperPlayServerUpdateHealth(healthOf(player), NO_SPRINT_FOOD, 5f))
             }
@@ -52,7 +53,7 @@ interface PlayerLock {
             }
         }
 
-        val Jump = playerLockOf(Alexandria.namespaced("jump")) { player, _ ->
+        val Jump = playerLockOf(namespaced("jump")) { player, _ ->
             OnRelease { release ->
                 if (release) {
                     player.sendPacket(WrapperPlayServerRemoveEntityEffect(player.entityId, PotionTypes.JUMP_BOOST))
@@ -64,7 +65,7 @@ interface PlayerLock {
             UUID(399141689, 766420721),
             "alexandria.move", -1.0, AttributeModifier.Operation.MULTIPLY_SCALAR_1)
 
-        val Move = playerLockOf(Alexandria.namespaced("move")) { player, acquire ->
+        val Move = playerLockOf(namespaced("move")) { player, acquire ->
             val attr = player.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED)
             if (acquire) {
                 attr?.forceModifier(MoveModifier)
@@ -80,7 +81,7 @@ interface PlayerLock {
             UUID(156548602, 506633689),
             "alexandria.attack", -1.0, AttributeModifier.Operation.MULTIPLY_SCALAR_1)
 
-        val Attack = playerLockOf(Alexandria.namespaced("attack")) { player, acquire ->
+        val Attack = playerLockOf(namespaced("attack")) { player, acquire ->
             val attr = player.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE)
             if (acquire) {
                 attr?.forceModifier(AttackModifier)
@@ -92,11 +93,11 @@ interface PlayerLock {
             }
         }
 
-        val Interact = playerLockOf(Alexandria.namespaced("interact")) { _, _ ->
+        val Interact = playerLockOf(namespaced("interact")) { _, _ ->
             OnRelease {}
         }
 
-        val Dig = playerLockOf(Alexandria.namespaced("dig")) { player, _ ->
+        val Dig = playerLockOf(namespaced("dig")) { player, _ ->
             OnRelease { release ->
                 if (release) {
                     player.sendPacket(WrapperPlayServerRemoveEntityEffect(player.entityId, PotionTypes.MINING_FATIGUE))
@@ -105,7 +106,7 @@ interface PlayerLock {
             }
         }
 
-        val Place = playerLockOf(Alexandria.namespaced("place")) { player, _ ->
+        val Place = playerLockOf(namespaced("place")) { player, _ ->
             OnRelease { release ->
                 if (release) {
                     player.sendPacket(WrapperPlayServerRemoveEntityEffect(player.entityId, PotionTypes.HASTE))
@@ -113,7 +114,7 @@ interface PlayerLock {
             }
         }
 
-        val Inventory = playerLockOf(Alexandria.namespaced("inventory")) { _, _ ->
+        val Inventory = playerLockOf(namespaced("inventory")) { _, _ ->
             OnRelease {}
         }
 
@@ -121,7 +122,7 @@ interface PlayerLock {
             UUID(832329339, 657562654),
             "alexandria.raise_hand", -1.0, AttributeModifier.Operation.MULTIPLY_SCALAR_1)
 
-        val RaiseHand = playerLockOf(Alexandria.namespaced("raise_hand")) { player, acquire ->
+        val RaiseHand = playerLockOf(namespaced("raise_hand")) { player, acquire ->
             val attr = player.getAttribute(Attribute.GENERIC_ATTACK_SPEED)
             if (acquire) {
                 attr?.forceModifier(RaiseHandModifier)
@@ -133,7 +134,7 @@ interface PlayerLock {
             }
         }
 
-        val UseAction = playerLockOf(Alexandria.namespaced("use_action")) { _, _ ->
+        val UseAction = playerLockOf(namespaced("use_action")) { _, _ ->
             OnRelease {}
         }
 

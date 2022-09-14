@@ -37,6 +37,8 @@ dependencies {
     implementation(libs.packetEventsSpigot)
 
     // library loader
+    compileOnly(libs.kotlinxCoroutines)
+
     compileOnly(libs.hikariCp)
 
 
