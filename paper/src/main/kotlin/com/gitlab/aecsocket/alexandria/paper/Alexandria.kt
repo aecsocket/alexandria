@@ -105,6 +105,7 @@ class Alexandria : BasePlugin() {
     val playerActions = PlayerActions(this)
     val playerPersistence = PlayerPersistence(this)
     val contextActions = ContextActions(this)
+    val debugBoard = DebugBoard(this)
 
     private val registrations = ArrayList<Registration>()
 
@@ -180,6 +181,7 @@ class Alexandria : BasePlugin() {
         playerActions.enable()
         playerPersistence.enable()
         contextActions.enable()
+        debugBoard.enable()
     }
 
     override fun loadInternal(log: LogList, settings: ConfigurationNode): Boolean {
