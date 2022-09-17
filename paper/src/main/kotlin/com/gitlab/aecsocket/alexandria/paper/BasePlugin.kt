@@ -12,6 +12,7 @@ import com.gitlab.aecsocket.glossa.core.I18N
 import net.kyori.adventure.audience.Audience
 import net.kyori.adventure.serializer.configurate4.ConfigurateComponentSerializer
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.TextReplacementConfig
 import net.kyori.adventure.text.format.TextColor
 import org.bukkit.plugin.java.JavaPlugin
 import org.spongepowered.configurate.ConfigurationNode
@@ -31,6 +32,11 @@ private const val LOG_LEVEL = "log_level"
 
 private const val THREAD_NAME_WIDTH = 12
 private const val TICK_WIDTH = 3
+
+private val TEXT_REPLACEMENT = TextReplacementConfig.builder()
+    .matchLiteral("\u00a0") // non-breaking space, from ICU messages
+    .replacement(" ")
+    .build()
 
 private val manifestConfigOptions = ConfigurationOptions.defaults()
     .serializers {
@@ -135,7 +141,7 @@ abstract class BasePlugin : JavaPlugin() {
     fun sendMessage(audience: Audience, content: Iterable<Component>) {
         // send individually so lines appear right in console
         chatMessages(content).forEach {
-            audience.sendMessage(it)
+            audience.sendMessage(it.replaceText(TEXT_REPLACEMENT))
         }
     }
 

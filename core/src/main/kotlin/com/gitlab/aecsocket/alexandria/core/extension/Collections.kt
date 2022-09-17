@@ -32,3 +32,15 @@ fun <T, R> Iterable<T>.join(mapper: (T) -> Iterable<R>, separator: (T) -> Iterab
 fun <T> Iterable<Iterable<T>>.join(separator: Iterable<T>): List<T> {
     return join({ it }, { separator })
 }
+
+private class MappingIterator<T, R>(val backing: Iterator<T>, val mapper: (T) -> R) : Iterator<R> {
+    override fun hasNext() = backing.hasNext()
+
+    override fun next(): R {
+        return mapper(backing.next())
+    }
+}
+
+fun <T, R> Iterator<T>.mapping(mapper: (T) -> R): Iterator<R> {
+    return MappingIterator(this, mapper)
+}
