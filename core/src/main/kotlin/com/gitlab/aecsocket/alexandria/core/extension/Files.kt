@@ -1,4 +1,4 @@
-package com.gitlab.aecsocket.alexandria.core
+package com.gitlab.aecsocket.alexandria.core.extension
 
 import java.io.File
 
