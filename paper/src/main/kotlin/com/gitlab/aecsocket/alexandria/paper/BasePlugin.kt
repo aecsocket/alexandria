@@ -102,14 +102,21 @@ abstract class BasePlugin : JavaPlugin() {
     fun load(): LoadResult {
         val log = LogList()
 
-        try {
-            val settings = AlexandriaAPI.configLoader().file(dataFolder.resolve(PATH_SETTINGS)).build().load()
-            if (!loadInternal(log, settings))
-                return LoadResult(log, false)
+        val settings = try {
+            AlexandriaAPI.configLoader().file(dataFolder.resolve(PATH_SETTINGS)).build().load()
         } catch (ex: Exception) {
             log.line(LogLevel.Error, ex) { "Could not load settings from $PATH_SETTINGS" }
             return LoadResult(log, false)
         }
+
+        try {
+            if (!loadInternal(log, settings))
+                return LoadResult(log, false)
+        } catch (ex: Exception) {
+            log.line(LogLevel.Error, ex) { "Could not load data" }
+            return LoadResult(log, false)
+        }
+
         return LoadResult(log, true)
     }
 

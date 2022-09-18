@@ -1,19 +1,22 @@
 package com.gitlab.aecsocket.alexandria.core.extension
 
-import java.io.File
+import java.io.IOException
+import java.nio.file.FileVisitResult
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.SimpleFileVisitor
+import java.nio.file.attribute.BasicFileAttributes
 
-fun File.walkPathed(
-    onEnter: (File, String, List<String>) -> Boolean = { _, _, _ -> true }
+fun walkFile(
+    root: Path,
+    onVisit: (Path, BasicFileAttributes) -> FileVisitResult = { _, _ -> FileVisitResult.CONTINUE },
+    onFail: (Path, IOException) -> FileVisitResult = { _, _ -> FileVisitResult.CONTINUE }
 ) {
-    fun walk(file: File, name: String, path: List<String>) {
-        if (!onEnter(file, name, path))
-            return
-        if (file.isDirectory) {
-            list()?.forEach { child ->
-                walk(resolve(child), child, path + child)
-            }
-        }
-    }
+    Files.walkFileTree(root, object : SimpleFileVisitor<Path>() {
+        override fun visitFile(path: Path, attrs: BasicFileAttributes) =
+            onVisit(path, attrs)
 
-    walk(this, name, emptyList())
+        override fun visitFileFailed(path: Path, ex: IOException) =
+            onFail(path, ex)
+    })
 }

@@ -9,6 +9,7 @@ import com.gitlab.aecsocket.alexandria.core.LogLevel
 import com.gitlab.aecsocket.alexandria.core.LogList
 import com.gitlab.aecsocket.alexandria.core.TableAlign
 import com.gitlab.aecsocket.alexandria.core.extension.force
+import com.gitlab.aecsocket.alexandria.core.extension.walkFile
 import com.gitlab.aecsocket.alexandria.core.serializer.Serializers
 import com.gitlab.aecsocket.alexandria.paper.extension.bukkitPlayers
 import com.gitlab.aecsocket.alexandria.paper.extension.scheduleRepeating
@@ -46,12 +47,9 @@ import org.spongepowered.configurate.objectmapping.meta.Required
 import org.spongepowered.configurate.serialize.TypeSerializerCollection
 import org.spongepowered.configurate.util.NamingSchemes
 import java.io.BufferedReader
-import java.io.IOException
 import java.nio.file.FileVisitResult
 import java.nio.file.Files
 import java.nio.file.Path
-import java.nio.file.SimpleFileVisitor
-import java.nio.file.attribute.BasicFileAttributes
 import java.sql.Connection
 import java.sql.SQLException
 import java.util.*
@@ -208,19 +206,18 @@ class Alexandria : BasePlugin() {
                 )
 
                 fun loadFromRoot(root: I18NRoot) {
-                    Files.walkFileTree(root.path, object : SimpleFileVisitor<Path>() {
-                        override fun visitFile(path: Path, attrs: BasicFileAttributes): FileVisitResult {
+                    walkFile(root.path,
+                        onVisit = { path, _ ->
                             loadFromSource(LogLevel.Warning, I18NSource("${root.name} : $path") {
                                 Files.newBufferedReader(path)
                             })
-                            return FileVisitResult.CONTINUE
-                        }
-
-                        override fun visitFileFailed(path: Path, ex: IOException): FileVisitResult {
+                            FileVisitResult.CONTINUE
+                        },
+                        onFail = { path, ex ->
                             log.line(LogLevel.Warning, ex) { "Could not access language resource ${root.name} : $path" }
-                            return FileVisitResult.CONTINUE
+                            FileVisitResult.CONTINUE
                         }
-                    })
+                    )
                 }
 
                 // get data from registrations
