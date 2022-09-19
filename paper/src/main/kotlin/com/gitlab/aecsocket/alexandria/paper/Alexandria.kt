@@ -104,6 +104,7 @@ class Alexandria : BasePlugin() {
     val playerPersistence = PlayerPersistence(this)
     val contextActions = ContextActions(this)
     val debugBoard = DebugBoard(this)
+    val meshes = MeshManager(this)
 
     private val registrations = ArrayList<Registration>()
 
@@ -180,6 +181,7 @@ class Alexandria : BasePlugin() {
         playerPersistence.enable()
         contextActions.enable()
         debugBoard.enable()
+        meshes.enable()
     }
 
     override fun loadInternal(log: LogList, settings: ConfigurationNode): Boolean {
