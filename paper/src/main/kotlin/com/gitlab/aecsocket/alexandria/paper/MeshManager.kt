@@ -57,11 +57,11 @@ class MeshManager internal constructor(
         }
     }
 
+    // NB: when doing massive bulk removes, this method needs to be staggered
+    // a debug `println` was enough to make the packets be sent properly, so
+    // any consumers who will do a lot of entity changes should consider a delay
     fun remove(entity: Entity) {
-        // send the remove packets first, since otherwise `_meshes` no longer has our entity
-        // and remove packets can't be sent from the packet listener
-        _meshes[entity]?.let { it.send(it.destroy()) }
-        _meshes.remove(entity)
+        _meshes.remove(entity)?.let { it.send(it.destroy()) }
     }
 
     override fun onPacketSend(event: PacketSendEvent) {

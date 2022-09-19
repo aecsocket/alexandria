@@ -9,50 +9,50 @@ import cloud.commandframework.captions.CaptionVariable
 import cloud.commandframework.context.CommandContext
 import cloud.commandframework.exceptions.parsing.NoInputProvidedException
 import cloud.commandframework.exceptions.parsing.ParserException
-import com.gitlab.aecsocket.alexandria.core.serializer.WDuration
-import com.gitlab.aecsocket.alexandria.core.serializer.wrap
+import com.gitlab.aecsocket.alexandria.core.keyed.Keyed
+import com.gitlab.aecsocket.alexandria.core.keyed.Registry
 import java.util.*
-import kotlin.time.Duration
 
-class DurationFormatException(
+class RegistryElementException(
     context: CommandContext<*>,
+    caption: Caption,
     input: String,
-    error: Throwable,
 ) : ParserException(
-    DurationParser::class.java, context, DurationParser.ARGUMENT_PARSE_FAILURE_DURATION,
-    CaptionVariable.of("input", input),
-    CaptionVariable.of("error", error.message ?: "(no message)")
+    RegistryElementParser::class.java, context, caption,
+    CaptionVariable.of("input", input)
 )
 
-class DurationParser<C : Any> : ArgumentParser<C, WDuration> {
+class RegistryElementParser<C : Any, T : Keyed>(
+    private val registry: Registry<T>,
+    private val failCaption: Caption,
+) : ArgumentParser<C, T> {
     override fun parse(
         commandContext: CommandContext<C>,
         inputQueue: Queue<String>
-    ): ArgumentParseResult<WDuration> {
+    ): ArgumentParseResult<T> {
         return inputQueue.peek()?.let { input ->
             inputQueue.remove()
-            try {
-                ArgumentParseResult.success(Duration.parse(input).wrap())
-            } catch (ex: IllegalArgumentException) {
-                ArgumentParseResult.failure(DurationFormatException(
-                    commandContext, input, ex
-                ))
-            }
+            registry[input]?.let {
+                ArgumentParseResult.success(it)
+            } ?: ArgumentParseResult.failure(RegistryElementException(
+                commandContext, failCaption, input
+            ))
         } ?: ArgumentParseResult.failure(NoInputProvidedException(
-            DurationParser::class.java,
+            RegistryElementParser::class.java,
             commandContext
         ))
     }
 
-    companion object {
-        val ARGUMENT_PARSE_FAILURE_DURATION = Caption.of("argument.parse.failure.duration")
-    }
+    override fun suggestions(commandContext: CommandContext<C>, input: String) = registry.entries.keys.toList()
 }
 
-class DurationArgument<C : Any>(
+open class RegistryElementArgument<C : Any, T : Keyed>(
     name: String,
+    registry: Registry<T>,
+    failCaption: Caption,
+    elementType: Class<T>,
     description: ArgumentDescription,
     required: Boolean = true,
     defaultValue: String = "",
     suggestionsProvider: ((CommandContext<C>, String) -> List<String>)? = null,
-) : CommandArgument<C, WDuration>(required, name, DurationParser(), defaultValue, WDuration::class.java, suggestionsProvider, description)
+) : CommandArgument<C, T>(required, name, RegistryElementParser(registry, failCaption), defaultValue, elementType, suggestionsProvider, description)
