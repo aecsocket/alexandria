@@ -52,7 +52,9 @@ class MeshManager internal constructor(
     fun create(entity: Entity, transform: Transform): Instance {
         if (_meshes.contains(entity))
             throw IllegalArgumentException("Mesh already exists for $entity (${entity.uniqueId})")
-        return Instance(entity, transform)
+        return Instance(entity, transform).also {
+            _meshes[entity] = it
+        }
     }
 
     fun remove(entity: Entity) {
@@ -104,14 +106,16 @@ class MeshManager internal constructor(
         private val _parts = parts.toMutableList()
         val parts: List<Part> get() = _parts
 
-        fun addPart(part: Part) {
+        fun addPart(part: Part, send: Boolean = true) {
             _parts.add(part)
-            send(part.spawn())
+            if (send)
+                send(part.spawn())
         }
 
-        fun removePart(part: Part) {
+        fun removePart(part: Part, send: Boolean = true) {
             _parts.remove(part)
-            send(setOf(WrapperPlayServerDestroyEntities(part.entityId)))
+            if (send)
+                send(setOf(WrapperPlayServerDestroyEntities(part.entityId)))
         }
 
         internal fun send(packets: Iterable<PacketWrapper<*>>) {
