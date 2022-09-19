@@ -58,7 +58,10 @@ class MeshManager internal constructor(
     }
 
     fun remove(entity: Entity) {
-        _meshes.remove(entity)?.let { it.send(it.destroy()) }
+        // send the remove packets first, since otherwise `_meshes` no longer has our entity
+        // and remove packets can't be sent from the packet listener
+        _meshes[entity]?.let { it.send(it.destroy()) }
+        _meshes.remove(entity)
     }
 
     override fun onPacketSend(event: PacketSendEvent) {
