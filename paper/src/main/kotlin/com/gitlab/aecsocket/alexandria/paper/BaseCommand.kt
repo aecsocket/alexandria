@@ -85,8 +85,9 @@ abstract class BaseCommand(
     }
 
     init {
-        if (manager.hasCapability(CloudBukkitCapabilities.ASYNCHRONOUS_COMPLETION))
-            manager.registerAsynchronousCompletions()
+        // will error if attempting to async getEntities with an *EntitySelector
+        //if (manager.hasCapability(CloudBukkitCapabilities.ASYNCHRONOUS_COMPLETION))
+        //    manager.registerAsynchronousCompletions()
         if (manager.hasCapability(CloudBukkitCapabilities.BRIGADIER))
             manager.registerBrigadier()
 

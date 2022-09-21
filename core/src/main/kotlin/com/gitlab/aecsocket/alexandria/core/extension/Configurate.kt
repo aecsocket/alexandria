@@ -18,6 +18,10 @@ import kotlin.reflect.KClass
 
 inline fun <reified T> typeToken() = object : TypeToken<T>() {}
 
+fun <V> ConfigurationNode.getIfExists(type: TypeToken<V>): V? = if (virtual()) null else get(type)
+
+inline fun <reified V> ConfigurationNode.getIfExists() = getIfExists(typeToken<V>())
+
 fun <V> ConfigurationNode.force(type: TypeToken<V>) = get(type)
     ?: throw SerializationException(this, type.type, "A value is required for this field")
 

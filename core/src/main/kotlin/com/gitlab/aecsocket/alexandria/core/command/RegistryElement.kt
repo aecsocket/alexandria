@@ -51,7 +51,7 @@ open class RegistryElementArgument<C : Any, T : Keyed>(
     registry: Registry<T>,
     failCaption: Caption,
     elementType: Class<T>,
-    description: ArgumentDescription,
+    description: ArgumentDescription = ArgumentDescription.of(""),
     required: Boolean = true,
     defaultValue: String = "",
     suggestionsProvider: ((CommandContext<C>, String) -> List<String>)? = null,

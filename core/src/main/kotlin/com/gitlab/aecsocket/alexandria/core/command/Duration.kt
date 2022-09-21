@@ -51,7 +51,7 @@ class DurationParser<C : Any> : ArgumentParser<C, WDuration> {
 
 class DurationArgument<C : Any>(
     name: String,
-    description: ArgumentDescription,
+    description: ArgumentDescription = ArgumentDescription.of(""),
     required: Boolean = true,
     defaultValue: String = "",
     suggestionsProvider: ((CommandContext<C>, String) -> List<String>)? = null,

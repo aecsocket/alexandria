@@ -152,36 +152,36 @@ class Alexandria : BasePlugin() {
         }
     }
 
-    override fun init() {
-        // TODO
-        //PlayerPersistence().a(this)
+    override fun initInternal(): Boolean {
+        if (super.initInternal()) {
+            val serializers = TypeSerializerCollection.defaults().childBuilder()
+                .registerAll(Serializers.ALL)
+                .registerAll(PaperSerializers.ALL)
 
-        val serializers = TypeSerializerCollection.defaults().childBuilder()
-            .registerAll(Serializers.ALL)
-            .registerAll(PaperSerializers.ALL)
+            val initCtx = object : InitContext {
+                override val serializers get() = serializers
+            }
 
-        val initCtx = object : InitContext {
-            override val serializers get() = serializers
-        }
+            registrations.forEach { it.onInit(initCtx) }
 
-        registrations.forEach { it.onInit(initCtx) }
-
-        configOptions = ConfigurationOptions.defaults()
-            .serializers(serializers.registerAnnotatedObjects(
-                ObjectMapper.factoryBuilder()
-                    .addDiscoverer(dataClassFieldDiscoverer())
-                    .defaultNamingScheme(NamingSchemes.SNAKE_CASE)
+            configOptions = ConfigurationOptions.defaults()
+                .serializers(serializers.registerAnnotatedObjects(
+                    ObjectMapper.factoryBuilder()
+                        .addDiscoverer(dataClassFieldDiscoverer())
+                        .defaultNamingScheme(NamingSchemes.SNAKE_CASE)
+                        .build())
                     .build())
-                .build())
 
-        super.init()
+            playerLocks.enable()
+            playerActions.enable()
+            playerPersistence.enable()
+            contextActions.enable()
+            debugBoard.enable()
+            meshes.enable()
 
-        playerLocks.enable()
-        playerActions.enable()
-        playerPersistence.enable()
-        contextActions.enable()
-        debugBoard.enable()
-        meshes.enable()
+            return true
+        }
+        return false
     }
 
     override fun loadInternal(log: LogList, settings: ConfigurationNode): Boolean {

@@ -90,11 +90,17 @@ abstract class BasePlugin : JavaPlugin() {
         scheduleDelayed { init() }
     }
 
-    protected open fun init() {
-        val (log, success) = load()
-        log.forEach { this.log.record(it) }
-        if (!success)
-            disable()
+    private fun init() {
+        if (initInternal()) {
+            val (log, success) = load()
+            log.forEach { this.log.record(it) }
+            if (!success)
+                disable()
+        } else disable()
+    }
+
+    protected open fun initInternal(): Boolean {
+        return true
     }
 
     data class LoadResult(val log: LogList, val success: Boolean)
