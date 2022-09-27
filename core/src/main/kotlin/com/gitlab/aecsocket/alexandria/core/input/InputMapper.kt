@@ -33,7 +33,7 @@ data class InputPredicate(
 class InputMapper(
     val actions: Map<String, List<InputPredicate>>
 ) {
-    fun actionOf(input: Input, tags: Collection<String>): List<String> {
+    fun actionsFor(input: Input, tags: Collection<String>): List<String> {
         val (inputType, inputTags) = when (input) {
             is Input.Mouse -> INPUT_MOUSE to listOf(input.button.key, input.state.key)
             is Input.SwapHands -> INPUT_SWAP_HANDS to emptyList()
@@ -60,5 +60,17 @@ class InputMapper(
 
     companion object {
         val Empty = InputMapper(emptyMap())
+
+        fun actOn(keys: List<String>, functions: Map<String, () -> Boolean>) {
+            for (key in keys) {
+                val func = functions[key]
+                    ?: throw IllegalStateException("Invalid action '$key'")
+                if (func())
+                    break
+            }
+        }
+
+        fun actOn(keys: List<String>, vararg functions: Pair<String, () -> Boolean>) =
+            actOn(keys, mapOf(*functions))
     }
 }

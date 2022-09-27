@@ -306,7 +306,7 @@ class ContextActions internal constructor(
 
     private fun handleInput(event: PacketInputListener.Event) {
         val player = event.player
-        settings.inputs.actionOf(event.input, player).forEach { inputAction ->
+        settings.inputs.actionsForPlayer(event.input, player).forEach { inputAction ->
             val processed = when (inputAction) {
                 ACTION_CANCEL -> run {
                     if (player.action != null) {

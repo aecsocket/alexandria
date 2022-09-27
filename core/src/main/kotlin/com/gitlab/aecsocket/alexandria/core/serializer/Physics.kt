@@ -115,7 +115,7 @@ object SimpleBodySerializer : TypeSerializer<SimpleBody> {
             )
             node.hasChild(RADIUS) -> SimpleBody(
                 SphereShape(node.node(RADIUS).force()),
-                Transform(translation = node.node(CENTER).get { Vector3.Zero }),
+                Transform(node.node(CENTER).get { Vector3.Zero }),
             )
             node.hasChild(MIN) && node.hasChild(MAX) -> {
                 val min = node.node(MIN).force<Vector3>()
@@ -123,8 +123,8 @@ object SimpleBodySerializer : TypeSerializer<SimpleBody> {
                 SimpleBody(
                     BoxShape((max - min) / 2.0),
                     Transform(
-                        rotation = node.node(ROTATION).get { Quaternion.Identity },
-                        translation = min.midpoint(max)
+                        min.midpoint(max),
+                        node.node(ROTATION).get { Quaternion.Identity },
                     ),
                 )
             }
