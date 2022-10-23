@@ -280,7 +280,7 @@ abstract class BaseCommand(
     fun about(ctx: Context, sender: CommandSender, i18n: I18N<Component>) {
         val desc = plugin.description
         plugin.sendMessage(sender, i18n.safe("command.core.about") {
-            icu("name", desc.name)
+            subst("name", text(desc.name, plugin.manifest.accentColor))
             icu("version", desc.version)
             list("authors", desc.authors.map { text(it) })
         })

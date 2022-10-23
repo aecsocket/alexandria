@@ -65,12 +65,12 @@ internal class AlexandriaCommand(
     }
 
     fun playerLocksList(ctx: Context, sender: CommandSender, i18n: I18N<Component>) {
-        val target = ctx.player("target", sender, i18n)
+        val target = ctx.player("target", sender, i18n).alexandria
 
-        val byType = target.locks?.byType ?: emptyMap()
+        val byType = target.locks.byType
         if (byType.isEmpty()) {
             plugin.sendMessage(sender, i18n.csafe("player_locks.list.none") {
-                subst("target", target.displayName())
+                subst("target", target.handle.displayName())
             })
             return
         }
@@ -98,7 +98,7 @@ internal class AlexandriaCommand(
         val target = ctx.player("target", sender, i18n)
         val lock = ctx.get<PlayerLockType>("lock")
 
-        val (lockId) = target.acquireLock(lock.backing)
+        val (lockId) = target.alexandria.acquireLock(lock.backing)
 
         plugin.sendMessage(sender, i18n.csafe("player_locks.acquire") {
             subst("target", target.displayName())
@@ -108,7 +108,7 @@ internal class AlexandriaCommand(
     }
 
     fun playerLocksRelease(ctx: Context, sender: CommandSender, i18n: I18N<Component>) {
-        val target = ctx.player("target", sender, i18n)
+        val target = ctx.player("target", sender, i18n).alexandria
         val lockId = ctx.get<Long>("lock-id")
 
         if (!target.hasLockById(lockId))
@@ -116,15 +116,15 @@ internal class AlexandriaCommand(
                 subst("lock_id", text(lockId))
             })
 
-        plugin.playerLocks.release(target, lockId)
+        target.releaseLock(lockId)
         plugin.sendMessage(sender, i18n.csafe("player_locks.release") {
-            subst("target", target.displayName())
+            subst("target", target.handle.displayName())
             subst("lock_id", text(lockId))
         })
     }
 
     fun playerActionsStop(ctx: Context, sender: CommandSender, i18n: I18N<Component>) {
-        val target = ctx.player("target", sender, i18n)
+        val target = ctx.player("target", sender, i18n).alexandria
         val success = ctx.flagged("success")
 
         target.action?.let {

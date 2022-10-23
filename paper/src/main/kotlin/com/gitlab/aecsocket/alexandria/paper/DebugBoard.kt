@@ -3,79 +3,59 @@ package com.gitlab.aecsocket.alexandria.paper
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerDisplayScoreboard
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerScoreboardObjective
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerUpdateScore
-import com.gitlab.aecsocket.alexandria.paper.extension.registerEvents
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
-import org.bukkit.entity.Player
-import org.bukkit.event.EventHandler
-import org.bukkit.event.Listener
-import org.bukkit.event.player.PlayerQuitEvent
 import java.util.*
 
 private const val INTERNAL_NAME = "debug_board"
 
 class DebugBoard internal constructor(
     private val alexandria: Alexandria,
-) {
-    private val boards = HashMap<Player, List<String>>()
-
-    internal fun enable() {
-        alexandria.registerEvents(object : Listener {
-            @EventHandler
-            fun PlayerQuitEvent.on() {
-                boards.remove(player)
-            }
-        })
+) : PlayerFeature<DebugBoard.PlayerData> {
+    inner class PlayerData internal constructor() : PlayerFeature.PlayerData {
+        var lastLines: List<String>? = null
+            internal set
     }
 
-    fun clear(player: Player) {
-        boards[player]?.let { lines ->
-            lines.forEach { line ->
-                player.sendPacket(WrapperPlayServerUpdateScore(
-                    line,
-                    WrapperPlayServerUpdateScore.Action.REMOVE_ITEM,
-                    INTERNAL_NAME,
-                    Optional.empty(),
-                ))
-            }
+    override fun createFor(player: AlexandriaPlayer) = PlayerData()
+
+    fun clear(player: AlexandriaPlayer) {
+        val data = player.featureData(this)
+        data.lastLines?.forEach { line ->
+            player.handle.sendPacket(WrapperPlayServerUpdateScore(
+                line,
+                WrapperPlayServerUpdateScore.Action.REMOVE_ITEM,
+                INTERNAL_NAME,
+                Optional.empty(),
+            ))
         }
-        boards[player] = emptyList()
+        data.lastLines = emptyList()
     }
 
-    fun show(player: Player, title: Component, lines: Iterable<Component>) {
-        player.sendPacket(WrapperPlayServerScoreboardObjective(
+    fun show(player: AlexandriaPlayer, title: Component, lines: Iterable<Component>) {
+        val data = player.featureData(this)
+        player.handle.sendPacket(WrapperPlayServerScoreboardObjective(
             INTERNAL_NAME,
-            if (boards.contains(player))
-                WrapperPlayServerScoreboardObjective.ObjectiveMode.UPDATE
+            if (data.lastLines == null)
+                WrapperPlayServerScoreboardObjective.ObjectiveMode.CREATE
             else
-                WrapperPlayServerScoreboardObjective.ObjectiveMode.CREATE,
+                WrapperPlayServerScoreboardObjective.ObjectiveMode.UPDATE,
             title,
             WrapperPlayServerScoreboardObjective.RenderType.INTEGER,
         ))
 
-        player.sendPacket(WrapperPlayServerDisplayScoreboard(
+        player.handle.sendPacket(WrapperPlayServerDisplayScoreboard(
             1,
             INTERNAL_NAME
         ))
 
+        clear(player)
+
         val convertedLines = lines.map { LegacyComponentSerializer.legacySection().serialize(it) }
-
-        boards[player]?.let { old ->
-            old.forEach { line ->
-                if (!convertedLines.contains(line))
-                    player.sendPacket(WrapperPlayServerUpdateScore(
-                        line,
-                        WrapperPlayServerUpdateScore.Action.REMOVE_ITEM,
-                        INTERNAL_NAME,
-                        Optional.empty()
-                    ))
-            }
-        }
-
-        boards[player] = convertedLines
+        data.lastLines = convertedLines
 
         convertedLines.reversed().forEachIndexed { idx, line ->
-            player.sendPacket(WrapperPlayServerUpdateScore(
+            player.handle.sendPacket(WrapperPlayServerUpdateScore(
                 line,
                 WrapperPlayServerUpdateScore.Action.CREATE_OR_UPDATE_ITEM,
                 INTERNAL_NAME,
@@ -85,8 +65,8 @@ class DebugBoard internal constructor(
     }
 }
 
-fun Player.clearDebugBoard() =
+fun AlexandriaPlayer.clearDebugBoard() =
     AlexandriaAPI.debugBoard.clear(this)
 
-fun Player.showDebugBoard(title: Component, lines: Iterable<Component>) =
+fun AlexandriaPlayer.showDebugBoard(title: Component, lines: Iterable<Component>) =
     AlexandriaAPI.debugBoard.show(this, title, lines)

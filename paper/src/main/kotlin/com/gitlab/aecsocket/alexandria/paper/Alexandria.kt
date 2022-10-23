@@ -1,17 +1,18 @@
 package com.gitlab.aecsocket.alexandria.paper
 
 import com.github.retrooper.packetevents.PacketEvents
-import com.github.retrooper.packetevents.protocol.potion.PotionType
-import com.github.retrooper.packetevents.protocol.potion.PotionTypes
+import com.github.retrooper.packetevents.event.PacketListenerAbstract
+import com.github.retrooper.packetevents.event.PacketListenerPriority
+import com.github.retrooper.packetevents.event.PacketReceiveEvent
+import com.github.retrooper.packetevents.event.PacketSendEvent
 import com.github.retrooper.packetevents.wrapper.PacketWrapper
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityEffect
 import com.gitlab.aecsocket.alexandria.core.LogLevel
 import com.gitlab.aecsocket.alexandria.core.LogList
 import com.gitlab.aecsocket.alexandria.core.TableAlign
 import com.gitlab.aecsocket.alexandria.core.extension.force
 import com.gitlab.aecsocket.alexandria.core.extension.walkFile
 import com.gitlab.aecsocket.alexandria.core.serializer.Serializers
-import com.gitlab.aecsocket.alexandria.paper.extension.bukkitPlayers
+import com.gitlab.aecsocket.alexandria.paper.extension.registerEvents
 import com.gitlab.aecsocket.alexandria.paper.extension.scheduleRepeating
 import com.gitlab.aecsocket.alexandria.paper.serializer.PaperSerializers
 import com.gitlab.aecsocket.glossa.adventure.MiniMessageI18N
@@ -33,6 +34,9 @@ import net.kyori.adventure.text.Component.text
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import org.bukkit.entity.Player
+import org.bukkit.event.EventHandler
+import org.bukkit.event.Listener
+import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.map.MapFont
 import org.bukkit.map.MinecraftFont
 import org.spongepowered.configurate.ConfigurateException
@@ -99,10 +103,12 @@ class Alexandria : BasePlugin() {
     var paddingWidth: Int = -1
         private set
 
+    private val _players = HashMap<Player, AlexandriaPlayer>()
+    val players: Map<Player, AlexandriaPlayer> get() = _players
+
     val playerLocks = PlayerLocks(this)
     val playerActions = PlayerActions(this)
-    val playerPersistence = PlayerPersistence(this)
-    val playerTracking = PlayerTracking(this)
+    val humanPersistence = HumanPersistence(this)
     val contextActions = ContextActions(this)
     val debugBoard = DebugBoard(this)
     val meshes = MeshManager(this)
@@ -126,7 +132,23 @@ class Alexandria : BasePlugin() {
         super.onEnable()
         AlexandriaCommand(this)
         PacketEvents.getAPI().init()
-        PacketEvents.getAPI().eventManager.registerListener(AlexandriaPacketListener(this))
+        PacketEvents.getAPI().eventManager.registerListener(object : PacketListenerAbstract(PacketListenerPriority.LOW) {
+            override fun onPacketSend(event: PacketSendEvent) {
+                val player = event.player as? Player ?: return
+                playerOf(player).onPacketSend(event)
+            }
+
+            override fun onPacketReceive(event: PacketReceiveEvent) {
+                val player = event.player as? Player ?: return
+                playerOf(player).onPacketReceive(event)
+            }
+        })
+        registerEvents(object : Listener {
+            @EventHandler
+            fun on(event: PlayerQuitEvent) {
+                _players.remove(event.player)?.dispose()
+            }
+        })
         registerConsumer(this,
             onLoad = {
                 addDefaultI18N()
@@ -134,22 +156,7 @@ class Alexandria : BasePlugin() {
         )
 
         scheduleRepeating {
-            bukkitPlayers.forEach { player ->
-                fun effect(type: PotionType, amplifier: Int) {
-                    player.sendPacket(WrapperPlayServerEntityEffect(player.entityId, type, amplifier, 1, 0))
-                }
-
-                if (player.hasLockByType(PlayerLock.Jump)) {
-                    effect(PotionTypes.JUMP_BOOST, -127)
-                }
-                if (player.hasLockByType(PlayerLock.Interact)) {
-                    effect(PotionTypes.HASTE, -127)
-                }
-                if (player.hasLockByType(PlayerLock.Dig)) {
-                    effect(PotionTypes.MINING_FATIGUE, 127)
-                    effect(PotionTypes.HASTE, -127)
-                }
-            }
+            _players.forEach { (_, player) -> player.update() }
         }
     }
 
@@ -175,11 +182,9 @@ class Alexandria : BasePlugin() {
 
             playerLocks.enable()
             playerActions.enable()
-            playerPersistence.enable()
-            playerTracking.enable()
             contextActions.enable()
-            debugBoard.enable()
             meshes.enable()
+            humanPersistence.enable()
 
             return true
         }
@@ -314,7 +319,7 @@ class Alexandria : BasePlugin() {
             }
 
             tryLoad(PlayerActions::class) { playerActions.load(settings) }?.let { return it }
-            tryLoad(PlayerPersistence::class) { playerPersistence.load(settings) }?.let { return it }
+            tryLoad(HumanPersistence::class) { humanPersistence.load(settings) }?.let { return it }
             tryLoad(ContextActions::class) { contextActions.load(settings) }?.let { return it }
 
             return true
@@ -323,7 +328,7 @@ class Alexandria : BasePlugin() {
     }
 
     override fun onDisable() {
-        playerLocks.releaseAll()
+        _players.forEach { (_, player) -> player.dispose() }
         PacketEvents.getAPI().terminate()
     }
 
@@ -336,6 +341,8 @@ class Alexandria : BasePlugin() {
     }
 
     fun configLoader() = HoconConfigurationLoader.builder().defaultOptions(configOptions)
+
+    fun playerOf(player: Player) = _players.computeIfAbsent(player) { AlexandriaPlayer(this, it) }
 
     fun i18nFor(aud: Audience) = if (aud is Player) i18n.withLocale(aud.locale()) else i18n
 

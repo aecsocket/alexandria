@@ -38,7 +38,7 @@ private val FOOD = namespaced("food")
 private val SATURATION = namespaced("saturation")
 private val INVENTORY = namespaced("inventory")
 
-class PlayerPersistence internal constructor(
+class HumanPersistence internal constructor(
     private val alexandria: Alexandria,
 ) {
     data class OnSave(
@@ -54,8 +54,8 @@ class PlayerPersistence internal constructor(
     lateinit var settings: Settings private set
     private lateinit var dataFolder: File
 
-    val onSave: MutableList<(OnSave) -> Unit> = ArrayList()
-    val onLoad: MutableList<(OnLoad) -> Unit> = ArrayList()
+    private val onSave = ArrayList<(OnSave) -> Unit>()
+    private val onLoad = ArrayList<(OnLoad) -> Unit>()
 
     @ConfigSerializable
     data class Settings(
@@ -101,9 +101,10 @@ class PlayerPersistence internal constructor(
     internal fun enable() {
         alexandria.registerEvents(object : Listener {
             @EventHandler
-            fun PlayerQuitEvent.on() {
+            fun on(event: PlayerQuitEvent) {
                 if (!settings.enabled || !settings.save) return
 
+                val player = event.player
                 val human = HumanPlayer(player)
                 val playerId = human.id
                 alexandria.useIO {
@@ -126,26 +127,27 @@ class PlayerPersistence internal constructor(
                     val loader = alexandria.configLoader().file(dataFileFor(playerId)).build()
                     val configNode = loader.createNode()
 
-                    val event = OnSave(player, configNode)
-                    onSave.forEach { it(event) }
+                    val persistEvent = OnSave(player, configNode)
+                    onSave.forEach { it(persistEvent) }
 
                     loader.save(configNode)
                 }
             }
 
             @EventHandler
-            fun PlayerJoinEvent.on() {
+            fun on(event: PlayerJoinEvent) {
                 if (!settings.enabled || !settings.save) return
 
+                val player = event.player
                 val playerId = player.uniqueId
                 val world = player.world
                 val expectedWorldId = world.uid.toString()
 
                 alexandria.useDb { conn ->
-                    conn.prepareStatement(
-                        """SELECT world_id, position_x, position_y, position_z, heading_pitch, heading_yaw FROM $TABLE_NAME
-                        WHERE player_id = ?""".trimIndent()
-                    ).use { stmt ->
+                    conn.prepareStatement("""
+                        SELECT world_id, position_x, position_y, position_z, heading_pitch, heading_yaw FROM $TABLE_NAME
+                        WHERE player_id = ?
+                    """.trimIndent()).use { stmt ->
                         stmt.setString(1, playerId.toString())
                         val results = stmt.executeQuery()
 
@@ -174,25 +176,27 @@ class PlayerPersistence internal constructor(
                             val loader = alexandria.configLoader().file(dataFileFor(playerId)).build()
                             val configNode = loader.load()
 
-                            val event = OnLoad(player, configNode)
-                            onLoad.forEach { it(event) }
+                            val persistEvent = OnLoad(player, configNode)
+                            onLoad.forEach { it(persistEvent) }
                         }
                     }
                 }
             }
 
             @EventHandler
-            fun EntitiesLoadEvent.on() {
-                if (!settings.enabled || !settings.load || true) return
+            fun on(event: EntitiesLoadEvent) {
+                if (!settings.enabled || !settings.load) return
 
+                val world = event.world
+                val chunk = event.chunk
                 val worldId = world.uid.toString()
                 val chunkKey = chunk.chunkKey
 
                 alexandria.useDb { conn ->
-                    conn.prepareStatement(
-                        """SELECT player_id, position_x, position_y, position_z FROM $TABLE_NAME
-                        WHERE world_id = ? AND chunk_key = ?""".trimIndent()
-                    ).use { stmt ->
+                    conn.prepareStatement("""
+                        SELECT player_id, position_x, position_y, position_z FROM $TABLE_NAME
+                        WHERE world_id = ? AND chunk_key = ?
+                    """.trimIndent()).use { stmt ->
                         stmt.setString(1, worldId)
                         stmt.  setLong(2, chunkKey)
                         val results = stmt.executeQuery()
