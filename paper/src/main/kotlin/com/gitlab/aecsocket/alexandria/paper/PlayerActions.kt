@@ -2,24 +2,18 @@ package com.gitlab.aecsocket.alexandria.paper
 
 import com.gitlab.aecsocket.alexandria.core.BarRenderer
 import com.gitlab.aecsocket.alexandria.core.Spinner
-import com.gitlab.aecsocket.alexandria.paper.extension.registerEvents
-import com.gitlab.aecsocket.alexandria.paper.extension.scheduleRepeating
 import com.gitlab.aecsocket.glossa.core.I18N
 import com.gitlab.aecsocket.glossa.core.I18NArgs
 import net.kyori.adventure.bossbar.BossBar
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.Component.empty
 import net.kyori.adventure.text.Component.text
-import org.bukkit.entity.Player
-import org.bukkit.event.EventHandler
-import org.bukkit.event.Listener
-import org.bukkit.event.player.PlayerQuitEvent
 import org.spongepowered.configurate.ConfigurationNode
 import org.spongepowered.configurate.kotlin.extensions.get
 import org.spongepowered.configurate.objectmapping.ConfigSerializable
 import kotlin.math.min
 
-private const val CONFIG_PATH = "actions"
+private const val CONFIG_PATH = "player_actions"
 
 data class PlayerAction(
     val getName: (I18N<Component>) -> Component,
@@ -58,8 +52,63 @@ private val TextSlot.key get() = when (this) {
 
 class PlayerActions internal constructor(
     private val alexandria: Alexandria,
-) {
-    lateinit var settings: Settings private set
+) : PlayerFeature<PlayerActions.PlayerData> {
+    inner class PlayerData internal constructor(
+        private val player: AlexandriaPlayer
+    ) : PlayerFeature.PlayerData {
+        var action: PlayerActionInstance? = null
+
+        override fun dispose() {
+            stop(player)
+        }
+
+        override fun update() {
+            val action = action ?: return
+
+            val (actionType, textSlot, startAt) = action
+            val (getName, onUpdate, _, duration) = actionType
+            val i18n = alexandria.i18nFor(player.handle)
+
+            val elapsed = System.currentTimeMillis() - startAt
+            var stopSuccess: Boolean? = null
+
+            val progress = duration?.let {
+                if (elapsed >= duration) {
+                    stopSuccess = true
+                }
+
+                min(elapsed.toDouble(), duration.toDouble()) / duration
+            } ?: indeterminateProgress(elapsed / 1000.0)
+
+            val text = makeActionText(i18n, getName, textSlot, elapsed, duration, "in_progress")
+
+            when (textSlot) {
+                is TextSlot.InActionBar -> text?.let { textSlot.show(player.handle, it) }
+                is TextSlot.InTitle -> text?.let { textSlot.show(player.handle, it) }
+                is TextSlot.InBossBar -> {
+                    action.bossBar?.let { bar ->
+                        text?.let { textSlot.apply(bar, it) }
+                        bar.progress(progress.toFloat())
+                    } ?: textSlot.createBar(text ?: empty(), progress.toFloat()).also {
+                        player.handle.showBossBar(it)
+                        action.bossBar = it
+                    }
+                }
+            }
+
+            onUpdate(object : PlayerAction.UpdateContext {
+                override val elapsed get() = elapsed
+
+                override fun stop(success: Boolean) {
+                    stopSuccess = success
+                }
+            })
+
+            stopSuccess?.let { success ->
+                stopAction(player, action, success)
+            }
+        }
+    }
 
     @ConfigSerializable
     data class Settings(
@@ -68,22 +117,12 @@ class PlayerActions internal constructor(
         val bar: BarRenderer = BarRenderer(0, "")
     )
 
-    private val _players = HashMap<Player, PlayerActionInstance>()
-    val players: Map<Player, PlayerActionInstance> get() = _players
+    lateinit var settings: Settings private set
+
+    override fun createFor(player: AlexandriaPlayer) = PlayerData(player)
 
     internal fun load(settings: ConfigurationNode) {
         this.settings = settings.node(CONFIG_PATH).get { Settings() }
-    }
-
-    internal fun enable() {
-        alexandria.registerEvents(object : Listener {
-            @EventHandler
-            fun PlayerQuitEvent.on() {
-                stop(player)
-            }
-        })
-
-        alexandria.scheduleRepeating { update() }
     }
 
     private fun makeActionText(
@@ -135,59 +174,7 @@ class PlayerActions internal constructor(
         }
     }
 
-    private fun update() {
-        val time = System.currentTimeMillis()
-        val iter = _players.iterator()
-        while (iter.hasNext()) {
-            val (player, instance) = iter.next()
-            val (action, textSlot, startAt) = instance
-            val (getName, onUpdate, _, duration) = action
-            val i18n = alexandria.i18nFor(player)
-
-            val elapsed = time - startAt
-            var stopSuccess: Boolean? = null
-
-            val progress = duration?.let {
-                if (elapsed >= duration) {
-                    stopSuccess = true
-                }
-
-                min(elapsed.toDouble(), duration.toDouble()) / duration
-            } ?: indeterminateProgress(elapsed / 1000.0)
-
-            val text = makeActionText(
-                i18n, getName, textSlot, elapsed, duration, "in_progress")
-
-            when (textSlot) {
-                is TextSlot.InActionBar -> text?.let { textSlot.show(player, it) }
-                is TextSlot.InTitle -> text?.let { textSlot.show(player, it) }
-                is TextSlot.InBossBar -> {
-                    instance.bossBar?.let { bar ->
-                        text?.let { textSlot.apply(bar, it) }
-                        bar.progress(progress.toFloat())
-                    } ?: textSlot.createBar(text ?: empty(), progress.toFloat()).also {
-                        player.showBossBar(it)
-                        instance.bossBar = it
-                    }
-                }
-            }
-
-            onUpdate(object : PlayerAction.UpdateContext {
-                override val elapsed get() = elapsed
-
-                override fun stop(success: Boolean) {
-                    stopSuccess = success
-                }
-            })
-
-            stopSuccess?.let { success ->
-                stopAction(player, instance, success)
-                iter.remove()
-            }
-        }
-    }
-
-    private fun stopAction(player: Player, instance: PlayerActionInstance, success: Boolean) {
+    private fun stopAction(player: AlexandriaPlayer, instance: PlayerActionInstance, success: Boolean) {
         val (action, textSlot, startAt) = instance
         val (getName, _, _, duration) = action
         var elapsed = System.currentTimeMillis() - startAt
@@ -198,49 +185,46 @@ class PlayerActions internal constructor(
             override val elapsed get() = elapsed
         })
 
+        val handle = player.handle
         val text = makeActionText(
-            alexandria.i18nFor(player), getName, textSlot, elapsed, duration,
+            alexandria.i18nFor(handle), getName, textSlot, elapsed, duration,
             if (success) "complete" else "cancelled")
 
         when (textSlot) {
-            is TextSlot.InActionBar -> text?.let { textSlot.show(player, it) }
-            is TextSlot.InTitle -> text?.let { textSlot.show(player, it) }
+            is TextSlot.InActionBar -> text?.let { textSlot.show(handle, it) }
+            is TextSlot.InTitle -> text?.let { textSlot.show(handle, it) }
             is TextSlot.InBossBar -> {
                 // we don't write the text to boss bar here because we're hiding anyway
                 instance.bossBar?.let {
-                    player.hideBossBar(it)
+                    handle.hideBossBar(it)
                 }
             }
         }
     }
 
-    operator fun get(player: Player) = _players[player]
+    fun actionOf(player: AlexandriaPlayer) = player.featureData(this).action
 
-    fun start(player: Player, action: PlayerAction): PlayerActionInstance? {
-        if (_players.contains(player)) return null
+    fun start(player: AlexandriaPlayer, action: PlayerAction): PlayerActionInstance? {
+        val data = player.featureData(this)
+        if (data.action == null) return null
+
         return PlayerActionInstance(
             action, action.textSlot ?: settings.defaultTextSlot,
             System.currentTimeMillis()
-        ).also { _players[player] = it }
+        ).also { data.action = it }
     }
 
-    fun stop(player: Player, success: Boolean = false) {
-        _players[player]?.let { action ->
+    fun stop(player: AlexandriaPlayer, success: Boolean = false) {
+        val data = player.featureData(this)
+        data.action?.let { action ->
             stopAction(player, action, success)
-            _players.remove(player)
+            data.action = null
         }
-    }
-
-    fun stopAll(success: Boolean = false) {
-        _players.forEach { (player, action) ->
-            stopAction(player, action, success)
-        }
-        _players.clear()
     }
 }
 
-val Player.action get() = AlexandriaAPI.playerActions[this]
+val AlexandriaPlayer.action get() = AlexandriaAPI.playerActions.actionOf(this)
 
-fun Player.startAction(action: PlayerAction) = AlexandriaAPI.playerActions.start(this, action)
+fun AlexandriaPlayer.startAction(action: PlayerAction) = AlexandriaAPI.playerActions.start(this, action)
 
-fun Player.stopAction(success: Boolean = false) = AlexandriaAPI.playerActions.stop(this, success)
+fun AlexandriaPlayer.stopAction(success: Boolean = false) = AlexandriaAPI.playerActions.stop(this, success)

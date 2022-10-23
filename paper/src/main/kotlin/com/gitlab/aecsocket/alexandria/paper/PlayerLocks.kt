@@ -1,6 +1,10 @@
 package com.gitlab.aecsocket.alexandria.paper
 
+import com.github.retrooper.packetevents.event.PacketSendEvent
+import com.github.retrooper.packetevents.protocol.packettype.PacketType
+import com.github.retrooper.packetevents.protocol.potion.PotionType
 import com.github.retrooper.packetevents.protocol.potion.PotionTypes
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityEffect
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerRemoveEntityEffect
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerUpdateHealth
 import com.gitlab.aecsocket.alexandria.core.LogLevel
@@ -171,6 +175,34 @@ class PlayerLocks internal constructor(
 
         override fun dispose() {
             releaseAll(player)
+        }
+
+        override fun update() {
+            fun effect(type: PotionType, amplifier: Int) {
+                player.handle.sendPacket(WrapperPlayServerEntityEffect(player.handle.entityId, type, amplifier, 1, 0))
+            }
+
+            if (hasByType(player, PlayerLock.Jump)) {
+                effect(PotionTypes.JUMP_BOOST, -127)
+            }
+            if (hasByType(player, PlayerLock.Interact)) {
+                effect(PotionTypes.HASTE, -127)
+            }
+            if (hasByType(player, PlayerLock.Dig)) {
+                effect(PotionTypes.MINING_FATIGUE, 127)
+                effect(PotionTypes.HASTE, -127)
+            }
+        }
+
+        override fun onPacketSend(event: PacketSendEvent) {
+            when (event.packetType) {
+                PacketType.Play.Server.UPDATE_HEALTH -> {
+                    val packet = WrapperPlayServerUpdateHealth(event)
+                    if (hasByType(player, PlayerLock.Sprint)) {
+                        packet.food = NO_SPRINT_FOOD
+                    }
+                }
+            }
         }
     }
 

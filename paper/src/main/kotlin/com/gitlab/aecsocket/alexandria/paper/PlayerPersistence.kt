@@ -29,7 +29,7 @@ import org.spongepowered.configurate.objectmapping.ConfigSerializable
 import java.io.File
 import java.util.*
 
-private const val CONFIG_PATH = "persistence"
+private const val CONFIG_PATH = "player_persistence"
 private const val TABLE_NAME = "player_persistence"
 private const val DATA_PATH = "player_persistence"
 
@@ -38,7 +38,7 @@ private val FOOD = namespaced("food")
 private val SATURATION = namespaced("saturation")
 private val INVENTORY = namespaced("inventory")
 
-class HumanPersistence internal constructor(
+class PlayerPersistence internal constructor(
     private val alexandria: Alexandria,
 ) {
     data class OnSave(

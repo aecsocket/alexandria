@@ -3,11 +3,7 @@ package com.gitlab.aecsocket.alexandria.paper
 import com.github.retrooper.packetevents.event.PacketReceiveEvent
 import com.github.retrooper.packetevents.event.PacketSendEvent
 import com.github.retrooper.packetevents.protocol.packettype.PacketType
-import com.github.retrooper.packetevents.protocol.potion.PotionType
-import com.github.retrooper.packetevents.protocol.potion.PotionTypes
 import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientSteerVehicle
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityEffect
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerUpdateHealth
 import com.gitlab.aecsocket.alexandria.core.extension.clamp
 import org.bukkit.entity.Player
 import org.spongepowered.configurate.objectmapping.ConfigSerializable
@@ -38,34 +34,15 @@ class AlexandriaPlayer internal constructor(
     }
 
     internal fun update() {
-        fun effect(type: PotionType, amplifier: Int) {
-            handle.sendPacket(WrapperPlayServerEntityEffect(handle.entityId, type, amplifier, 1, 0))
-        }
-
-        if (hasLockByType(PlayerLock.Jump)) {
-            effect(PotionTypes.JUMP_BOOST, -127)
-        }
-        if (hasLockByType(PlayerLock.Interact)) {
-            effect(PotionTypes.HASTE, -127)
-        }
-        if (hasLockByType(PlayerLock.Dig)) {
-            effect(PotionTypes.MINING_FATIGUE, 127)
-            effect(PotionTypes.HASTE, -127)
-        }
+        features.forEach { (_, data) -> data.update() }
     }
 
     internal fun onPacketSend(event: PacketSendEvent) {
-        when (event.packetType) {
-            PacketType.Play.Server.UPDATE_HEALTH -> {
-                val packet = WrapperPlayServerUpdateHealth(event)
-                if (hasLockByType(PlayerLock.Sprint)) {
-                    packet.food = NO_SPRINT_FOOD
-                }
-            }
-        }
+        features.forEach { (_, data) -> data.onPacketSend(event) }
     }
 
     internal fun onPacketReceive(event: PacketReceiveEvent) {
+        features.forEach { (_, data) -> data.onPacketReceive(event) }
         when (event.packetType) {
             PacketType.Play.Client.STEER_VEHICLE -> {
                 val packet = WrapperPlayClientSteerVehicle(event)

@@ -45,9 +45,7 @@ import org.spongepowered.configurate.ConfigurationOptions
 import org.spongepowered.configurate.hocon.HoconConfigurationLoader
 import org.spongepowered.configurate.kotlin.dataClassFieldDiscoverer
 import org.spongepowered.configurate.kotlin.extensions.get
-import org.spongepowered.configurate.objectmapping.ConfigSerializable
 import org.spongepowered.configurate.objectmapping.ObjectMapper
-import org.spongepowered.configurate.objectmapping.meta.Required
 import org.spongepowered.configurate.serialize.TypeSerializerCollection
 import org.spongepowered.configurate.util.NamingSchemes
 import java.io.BufferedReader
@@ -70,11 +68,6 @@ private lateinit var instance: Alexandria
 val AlexandriaAPI get() = instance
 
 class Alexandria : BasePlugin() {
-    @ConfigSerializable
-    data class DatabaseSettings(
-        @Required val jdbcUrl: String,
-    )
-
     private data class Registration(
         val plugin: BasePlugin,
         val onInit: InitContext.() -> Unit,
@@ -108,10 +101,9 @@ class Alexandria : BasePlugin() {
 
     val playerLocks = PlayerLocks(this)
     val playerActions = PlayerActions(this)
-    val humanPersistence = HumanPersistence(this)
-    val contextActions = ContextActions(this)
-    val debugBoard = DebugBoard(this)
+    val debugBoard = DebugBoard()
     val meshes = MeshManager(this)
+    val playerPersistence = PlayerPersistence(this)
 
     private val registrations = ArrayList<Registration>()
 
@@ -181,10 +173,8 @@ class Alexandria : BasePlugin() {
                     .build())
 
             playerLocks.enable()
-            playerActions.enable()
-            contextActions.enable()
             meshes.enable()
-            humanPersistence.enable()
+            playerPersistence.enable()
 
             return true
         }
@@ -319,8 +309,7 @@ class Alexandria : BasePlugin() {
             }
 
             tryLoad(PlayerActions::class) { playerActions.load(settings) }?.let { return it }
-            tryLoad(HumanPersistence::class) { humanPersistence.load(settings) }?.let { return it }
-            tryLoad(ContextActions::class) { contextActions.load(settings) }?.let { return it }
+            tryLoad(PlayerPersistence::class) { playerPersistence.load(settings) }?.let { return it }
 
             return true
         }

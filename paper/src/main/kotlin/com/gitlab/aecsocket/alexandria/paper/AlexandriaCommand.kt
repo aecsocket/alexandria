@@ -130,7 +130,7 @@ internal class AlexandriaCommand(
         target.action?.let {
             target.stopAction(success)
             plugin.sendMessage(sender, i18n.csafe("player_actions.stop") {
-                subst("target", target.displayName())
+                subst("target", target.handle.displayName())
             })
         } ?: error(i18n.safe("error.no_active_action"))
     }

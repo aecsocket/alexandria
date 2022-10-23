@@ -9,9 +9,7 @@ import java.util.*
 
 private const val INTERNAL_NAME = "debug_board"
 
-class DebugBoard internal constructor(
-    private val alexandria: Alexandria,
-) : PlayerFeature<DebugBoard.PlayerData> {
+class DebugBoard internal constructor() : PlayerFeature<DebugBoard.PlayerData> {
     inner class PlayerData internal constructor() : PlayerFeature.PlayerData {
         var lastLines: List<String>? = null
             internal set

@@ -31,7 +31,7 @@ import java.util.*
 
 class MeshManager internal constructor(
     private val alexandria: Alexandria,
-): PacketListener {
+) : PacketListener {
     private val _meshes = HashMap<Entity, Instance>()
     val meshes: Map<Entity, Instance> get() = _meshes
 
@@ -42,8 +42,8 @@ class MeshManager internal constructor(
     internal fun enable() {
         alexandria.registerEvents(object : Listener {
             @EventHandler
-            fun EntityRemoveFromWorldEvent.on() {
-                remove(entity)
+            fun on(event: EntityRemoveFromWorldEvent) {
+                remove(event.entity)
             }
         })
         PacketEvents.getAPI().eventManager.registerListener(this, PacketListenerPriority.NORMAL)
