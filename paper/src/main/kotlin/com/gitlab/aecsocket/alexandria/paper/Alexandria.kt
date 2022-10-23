@@ -173,7 +173,6 @@ class Alexandria : BasePlugin() {
                     .build())
 
             playerLocks.enable()
-            meshes.enable()
             playerPersistence.enable()
 
             return true

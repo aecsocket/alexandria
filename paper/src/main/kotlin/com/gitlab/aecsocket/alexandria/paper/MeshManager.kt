@@ -1,14 +1,9 @@
 package com.gitlab.aecsocket.alexandria.paper
 
-import com.destroystokyo.paper.event.entity.EntityRemoveFromWorldEvent
-import com.github.retrooper.packetevents.PacketEvents
 import com.github.retrooper.packetevents.event.PacketListener
-import com.github.retrooper.packetevents.event.PacketListenerPriority
-import com.github.retrooper.packetevents.event.PacketSendEvent
 import com.github.retrooper.packetevents.protocol.entity.data.EntityData
 import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes
 import com.github.retrooper.packetevents.protocol.entity.type.EntityTypes
-import com.github.retrooper.packetevents.protocol.packettype.PacketType
 import com.github.retrooper.packetevents.protocol.player.Equipment
 import com.github.retrooper.packetevents.protocol.player.EquipmentSlot
 import com.github.retrooper.packetevents.util.Vector3d
@@ -19,190 +14,203 @@ import com.gitlab.aecsocket.alexandria.core.extension.EulerOrder
 import com.gitlab.aecsocket.alexandria.core.extension.degrees
 import com.gitlab.aecsocket.alexandria.core.extension.euler
 import com.gitlab.aecsocket.alexandria.core.physics.Transform
-import com.gitlab.aecsocket.alexandria.paper.extension.registerEvents
+import com.gitlab.aecsocket.alexandria.paper.extension.bukkitNextEntityId
 import io.github.retrooper.packetevents.util.SpigotConversionUtil
-import io.github.retrooper.packetevents.util.SpigotReflectionUtil
-import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
-import org.bukkit.event.EventHandler
-import org.bukkit.event.Listener
 import org.bukkit.inventory.ItemStack
 import java.util.*
+import java.util.concurrent.atomic.AtomicLong
+
+sealed interface Mesh {
+    val id: Long
+    var item: ItemStack
+    var transform: Transform
+
+    fun trackedPlayers(): Iterable<Player>
+
+    fun spawn(players: Iterable<Player>)
+
+    fun spawn(player: Player) = spawn(setOf(player))
+
+    fun remove(players: Iterable<Player>)
+
+    fun remove(player: Player) = remove(setOf(player))
+}
 
 class MeshManager internal constructor(
     private val alexandria: Alexandria,
 ) : PacketListener {
-    private val _meshes = HashMap<Entity, Instance>()
-    val meshes: Map<Entity, Instance> get() = _meshes
+    private val nextMeshId = AtomicLong()
 
-    operator fun contains(entity: Entity) = _meshes.contains(entity)
+    private val _meshes = HashMap<Long, Mesh>()
+    val meshes: Map<Long, Mesh> get() = _meshes
 
-    operator fun get(entity: Entity) = _meshes[entity]
+    fun nextMeshId() = nextMeshId.getAndIncrement()
 
-    internal fun enable() {
-        alexandria.registerEvents(object : Listener {
-            @EventHandler
-            fun on(event: EntityRemoveFromWorldEvent) {
-                remove(event.entity)
-            }
-        })
-        PacketEvents.getAPI().eventManager.registerListener(this, PacketListenerPriority.NORMAL)
-    }
+    operator fun contains(id: Long) = _meshes.contains(id)
 
-    fun create(entity: Entity, transform: Transform): Instance {
-        if (_meshes.contains(entity))
-            throw IllegalArgumentException("Mesh already exists for $entity (${entity.uniqueId})")
-        return Instance(entity, transform).also {
-            _meshes[entity] = it
+    operator fun get(id: Long) = _meshes[id]
+
+    fun create(
+        item: ItemStack,
+        transform: Transform,
+        getTrackedPlayers: () -> Iterable<Player>,
+        interpolated: Boolean = true
+    ): Mesh {
+        val id = nextMeshId()
+        return (
+            if (interpolated) InterpMesh(id, item, transform, getTrackedPlayers)
+            else NonInterpMesh(id, item, transform, getTrackedPlayers)
+        ).also {
+            _meshes[id] = it
         }
     }
 
-    // NB: when doing massive bulk removes, this method needs to be staggered
-    // a debug `println` was enough to make the packets be sent properly, so
-    // any consumers who will do a lot of entity changes should consider a delay
-    fun remove(entity: Entity) {
-        _meshes.remove(entity)?.let { it.send(it.destroy()) }
-    }
-
-    override fun onPacketSend(event: PacketSendEvent) {
-        val player = event.player as? Player ?: return
-        when (event.packetType) {
-            PacketType.Play.Server.SPAWN_ENTITY -> {
-                val packet = WrapperPlayServerSpawnEntity(event)
-                SpigotReflectionUtil.getEntityById(packet.entityId)?.let { entity ->
-                    _meshes[entity]?.let { mesh ->
-                        event.isCancelled = true
-                        mesh.spawn().forEach { player.sendPacket(it) }
-                    }
-                }
-            }
-            PacketType.Play.Server.DESTROY_ENTITIES -> {
-                val packet = WrapperPlayServerDestroyEntities(event)
-
-                val entityIds = packet.entityIds.toMutableList()
-                entityIds.removeIf { entityId ->
-                    var remove = false
-                    SpigotReflectionUtil.getEntityById(entityId)?.let { entity ->
-                        _meshes[entity]?.let { mesh ->
-                            mesh.destroy().forEach { player.sendPacket(it) }
-                            remove = true
-                        }
-                    }
-                    remove
-                }
-                packet.entityIds = entityIds.toIntArray()
+    fun remove(id: Long, update: Boolean = true): Mesh? {
+        return _meshes.remove(id)?.also {
+            if (update) {
+                it.remove(it.trackedPlayers())
             }
         }
     }
 
-    inner class Instance internal constructor(
-        val entity: Entity,
-        meshTransform: Transform,
-        parts: List<Part> = emptyList(),
-    ) {
-        var meshTransform = meshTransform
+    sealed class BaseMesh(
+        override val id: Long,
+        item: ItemStack,
+        private val getTrackedPlayers: () -> Iterable<Player>,
+        private val yOffset: Double,
+    ) : Mesh {
+        val entityId = bukkitNextEntityId
+
+        override var item = item
             set(value) {
                 field = value
-                send(transform())
+                update(item())
             }
 
-        private val _parts = parts.toMutableList()
-        val parts: List<Part> get() = _parts
+        override fun trackedPlayers() = getTrackedPlayers()
 
-        fun addPart(part: Part, send: Boolean = true) {
-            _parts.add(part)
-            if (send)
-                send(part.spawn())
-        }
-
-        fun removePart(part: Part, send: Boolean = true) {
-            _parts.remove(part)
-            if (send)
-                send(setOf(WrapperPlayServerDestroyEntities(part.entityId)))
-        }
-
-        internal fun send(packets: Iterable<PacketWrapper<*>>) {
-            entity.trackedPlayers.forEach { player ->
+        protected fun update(packets: Iterable<PacketWrapper<*>>) {
+            val players = getTrackedPlayers()
+            players.forEach { player ->
                 packets.forEach { player.sendPacket(it) }
             }
         }
 
-        internal fun transform(): List<PacketWrapper<*>> {
-            return _parts.flatMap { it.partTransform() }
+        private fun item() = listOf(
+            WrapperPlayServerEntityEquipment(entityId, listOf(
+                Equipment(EquipmentSlot.HELMET, SpigotConversionUtil.fromBukkitItemStack(item))
+            ))
+        )
+
+        protected fun position(transform: Transform) = transform.translation.y { it - yOffset }.run {
+            Vector3d(x, y, z)
         }
 
-        internal fun spawn(): List<PacketWrapper<*>> {
-            return _parts.flatMap { it.spawn() }
+        protected fun headRotation(transform: Transform) = transform.rotation.euler(EulerOrder.ZYX).x { -it }.degrees.run {
+            Vector3f(x.toFloat(), y.toFloat(), z.toFloat())
         }
 
-        internal fun destroy(): List<PacketWrapper<*>> {
-            val entityIds = _parts.map { it.entityId }.toIntArray()
-            return listOf(WrapperPlayServerDestroyEntities(*entityIds))
+        protected fun transform(positionId: Int, rotationId: Int) = listOf(
+            WrapperPlayServerEntityTeleport(positionId,
+                position(transform), 0f, 0f, false),
+            WrapperPlayServerEntityMetadata(rotationId, listOf(
+                EntityData(16, EntityDataTypes.ROTATION, headRotation(transform))
+            ))
+        )
+
+        protected fun spawnStand(position: Vector3d) = listOf(
+            WrapperPlayServerSpawnEntity(entityId,
+                Optional.of(UUID.randomUUID()), EntityTypes.ARMOR_STAND,
+                position, 0f, 0f, 0f, 0, Optional.empty()
+            ),
+            WrapperPlayServerEntityMetadata(entityId, listOf(
+                EntityData(0, EntityDataTypes.BYTE, (0x20).toByte()),
+                EntityData(15, EntityDataTypes.BYTE, (0x10).toByte()),
+                EntityData(16, EntityDataTypes.ROTATION, headRotation(transform)),
+            ))
+        ) + item()
+
+        override fun spawn(players: Iterable<Player>) {
+            val position = position(transform)
+            val headRotation = headRotation(transform)
+
+            val packets = listOf(
+                WrapperPlayServerSpawnEntity(entityId,
+                    Optional.of(UUID.randomUUID()), EntityTypes.ARMOR_STAND,
+                    position, 0f, 0f, 0f, 0, Optional.empty()
+                ),
+                WrapperPlayServerEntityMetadata(entityId, listOf(
+                    EntityData(0, EntityDataTypes.BYTE, (0x20).toByte()),
+                    EntityData(15, EntityDataTypes.BYTE, (0x10).toByte()),
+                    EntityData(16, EntityDataTypes.ROTATION, headRotation),
+                ))
+            ) + item()
+
+            players.forEach { player ->
+                packets.forEach { player.sendPacket(it) }
+            }
+        }
+    }
+
+    class InterpMesh internal constructor(
+        id: Long,
+        item: ItemStack,
+        transform: Transform,
+        getTrackedPlayers: () -> Iterable<Player>,
+    ) : BaseMesh(id, item, getTrackedPlayers, 1.45) {
+        override var transform = transform
+            set(value) {
+                field = value
+                update(transform(entityId, entityId))
+            }
+
+        override fun spawn(players: Iterable<Player>) {
+            val packets = spawnStand(position(transform))
+            players.forEach { player ->
+                packets.forEach { player.sendPacket(it) }
+            }
         }
 
-        inner class Part(
-            val entityId: Int,
-            partTransform: Transform,
-            item: ItemStack
-        ) {
-            var partTransform = partTransform
-                set(value) {
-                    field = value
-                    send(transform())
-                }
+        override fun remove(players: Iterable<Player>) {
+            val packet = WrapperPlayServerDestroyEntities(entityId)
+            players.forEach { player ->
+                player.sendPacket(packet)
+            }
+        }
+    }
 
-            var item = item
-                set(value) {
-                    field = value
-                    send(item())
-                }
+    class NonInterpMesh internal constructor(
+        id: Long,
+        item: ItemStack,
+        transform: Transform,
+        getTrackedPlayers: () -> Iterable<Player>,
+    ) : BaseMesh(id, item, getTrackedPlayers, 1.85) {
+        val vehicleId = bukkitNextEntityId
 
-            private fun position(transform: Transform) = transform.translation.y { it - 1.45 }.run {
-                Vector3d(x, y, z)
+        override var transform = transform
+            set(value) {
+                field = value
+                update(transform(vehicleId, entityId))
             }
 
-            private fun headRotation(transform: Transform) = transform.rotation.euler(EulerOrder.ZYX).x { -it }.degrees.run {
-                Vector3f(x.toFloat(), y.toFloat(), z.toFloat())
+        override fun spawn(players: Iterable<Player>) {
+            val position = position(transform)
+            val packets = spawnStand(position) + listOf(
+                WrapperPlayServerSpawnEntity(vehicleId,
+                    Optional.of(UUID.randomUUID()), EntityTypes.AREA_EFFECT_CLOUD,
+                    position, 0f, 0f, 0f, 0, Optional.empty()
+                ),
+            )
+            players.forEach { player ->
+                packets.forEach { player.sendPacket(it) }
             }
+        }
 
-            internal fun spawn(parent: Transform = meshTransform): List<PacketWrapper<*>> {
-                val partTransform = parent + partTransform
-                val position = position(partTransform)
-                val headRotation = headRotation(partTransform)
-
-                return listOf(
-                    WrapperPlayServerSpawnEntity(entityId,
-                        Optional.of(UUID.randomUUID()), EntityTypes.ARMOR_STAND,
-                        position, 0f, 0f, 0f, 0, Optional.empty()
-                    ),
-                    WrapperPlayServerEntityMetadata(entityId, listOf(
-                        EntityData(0, EntityDataTypes.BYTE, (0x20).toByte()),
-                        EntityData(15, EntityDataTypes.BYTE, (0x10).toByte()),
-                        EntityData(16, EntityDataTypes.ROTATION, headRotation),
-                    ))
-                ) + item()
-            }
-
-            internal fun partTransform(parent: Transform = meshTransform): List<PacketWrapper<*>> {
-                val transform = parent + partTransform
-                val position = position(transform)
-                val headRotation = headRotation(transform)
-
-                return listOf(
-                    WrapperPlayServerEntityTeleport(entityId,
-                        position, 0f, 0f, false),
-                    WrapperPlayServerEntityMetadata(entityId, listOf(
-                        EntityData(16, EntityDataTypes.ROTATION, headRotation)
-                    ))
-                )
-            }
-
-            internal fun item(): List<PacketWrapper<*>> {
-                return listOf(
-                    WrapperPlayServerEntityEquipment(entityId, listOf(
-                        Equipment(EquipmentSlot.HELMET, SpigotConversionUtil.fromBukkitItemStack(item))
-                    ))
-                )
+        override fun remove(players: Iterable<Player>) {
+            val packet = WrapperPlayServerDestroyEntities(entityId, vehicleId)
+            players.forEach { player ->
+                player.sendPacket(packet)
             }
         }
     }
