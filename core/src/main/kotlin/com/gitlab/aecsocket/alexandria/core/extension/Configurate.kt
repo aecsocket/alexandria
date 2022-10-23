@@ -46,8 +46,14 @@ fun ConfigurationNode.forceMap(type: Type) = if (isMap) childrenMap()
 fun <T : Any> TypeSerializerCollection.Builder.register(type: KClass<T>, serializer: TypeSerializer<T>) =
     register(type.java, serializer)
 
+inline fun <reified T : Any> TypeSerializerCollection.Builder.register(serializer: TypeSerializer<T>) =
+    register(T::class.java, serializer)
+
 fun <T : Any> TypeSerializerCollection.Builder.registerExact(type: KClass<T>, serializer: TypeSerializer<T>) =
     registerExact(type.java, serializer)
+
+inline fun <reified T : Any> TypeSerializerCollection.Builder.registerExact(serializer: TypeSerializer<T>) =
+    registerExact(T::class.java, serializer)
 
 data class NodeRenderOptions(
     val boolean: Style = style(GOLD),
