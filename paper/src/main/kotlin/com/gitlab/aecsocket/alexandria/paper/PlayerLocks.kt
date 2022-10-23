@@ -224,7 +224,7 @@ class PlayerLocks internal constructor(
     internal fun enable() {
         alexandria.registerEvents(object : Listener {
             fun cancelIfLock(event: Cancellable, player: Player, type: PlayerLock) {
-                if (hasByType(alexandria.playerOf(player), type)) {
+                if (hasByType(alexandria.playerFor(player), type)) {
                     event.isCancelled = true
                 }
             }

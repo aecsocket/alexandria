@@ -58,4 +58,4 @@ class AlexandriaPlayer internal constructor(
 }
 
 val Player.alexandria: AlexandriaPlayer
-    get() = AlexandriaAPI.playerOf(this)
+    get() = AlexandriaAPI.playerFor(this)

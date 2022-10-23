@@ -127,12 +127,12 @@ class Alexandria : BasePlugin() {
         PacketEvents.getAPI().eventManager.registerListener(object : PacketListenerAbstract(PacketListenerPriority.LOW) {
             override fun onPacketSend(event: PacketSendEvent) {
                 val player = event.player as? Player ?: return
-                playerOf(player).onPacketSend(event)
+                playerFor(player).onPacketSend(event)
             }
 
             override fun onPacketReceive(event: PacketReceiveEvent) {
                 val player = event.player as? Player ?: return
-                playerOf(player).onPacketReceive(event)
+                playerFor(player).onPacketReceive(event)
             }
         })
         registerEvents(object : Listener {
@@ -331,7 +331,7 @@ class Alexandria : BasePlugin() {
 
     fun configLoader() = HoconConfigurationLoader.builder().defaultOptions(configOptions)
 
-    fun playerOf(player: Player) = _players.computeIfAbsent(player) { AlexandriaPlayer(this, it) }
+    fun playerFor(player: Player) = _players.computeIfAbsent(player) { AlexandriaPlayer(this, it) }
 
     fun i18nFor(aud: Audience) = if (aud is Player) i18n.withLocale(aud.locale()) else i18n
 
@@ -365,11 +365,11 @@ class Alexandria : BasePlugin() {
     fun widthOf(component: Component) =
         widthOf(PlainTextComponentSerializer.plainText().serialize(component))
 
-    fun paddingOf(width: Int) =
+    fun paddingFor(width: Int) =
         padding.repeat(width / (paddingWidth + 1))
 
-    fun paddingOfWidth(component: Component) =
-        paddingOf(widthOf(component))
+    fun paddingForWidth(component: Component) =
+        paddingFor(widthOf(component))
 
     inner class StringTableRenderer(
         align: (Int) -> TableAlign = { TableAlign.START },
@@ -381,7 +381,7 @@ class Alexandria : BasePlugin() {
             this@Alexandria.widthOf(value)
 
         override fun paddingOf(width: Int) =
-            this@Alexandria.paddingOf(width)
+            this@Alexandria.paddingFor(width)
     }
 
     inner class ComponentTableRenderer(
@@ -394,7 +394,7 @@ class Alexandria : BasePlugin() {
             this@Alexandria.widthOf(value)
 
         override fun paddingOf(width: Int) =
-            text(this@Alexandria.paddingOf(width))
+            text(this@Alexandria.paddingFor(width))
     }
 
     companion object {
