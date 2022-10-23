@@ -30,8 +30,7 @@ const val PATH_SETTINGS = "settings.conf"
 const val PATH_LANG = "lang"
 private const val LOG_LEVEL = "log_level"
 
-private const val THREAD_NAME_WIDTH = 12
-private const val TICK_WIDTH = 3
+private const val THREAD_NAME_WIDTH = 10
 
 private val TEXT_REPLACEMENT = TextReplacementConfig.builder()
     .matchLiteral("\u00a0") // non-breaking space, from ICU messages
@@ -68,10 +67,9 @@ abstract class BasePlugin : JavaPlugin() {
         fun String.crop(target: Int, padder: String.(Int) -> String) = if (length > target) substring(0, target)
             else padder(this, target)
 
-        val tick = bukkitCurrentTick.toString().crop(TICK_WIDTH, String::padStart)
         val threadName = Thread.currentThread().name.crop(THREAD_NAME_WIDTH, String::padEnd)
 
-        logger.info("$tick  $threadName $it")
+        logger.info("$threadName $it")
     })
 
     val manifest = HoconConfigurationLoader.builder()
