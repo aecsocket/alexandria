@@ -4,10 +4,10 @@ minecraft = "1.19.2"
 
 kotlin = "1.7.10"
 kotlinxCoroutines = "1.6.4"
-icu4j = "68.1"
 adventure = "4.11.0"
 glossa = "0.5.2"
 configurate = "4.1.2"
+bstats = "3.0.0"
 cloud = "1.8.0-SNAPSHOT"
 packetEvents = "2.0-SNAPSHOT"
 hikariCp = "5.0.1"
@@ -26,6 +26,8 @@ glossaAdventure = { group = "com.gitlab.aecsocket.glossa", name = "glossa-advent
 configurateCore = { group = "org.spongepowered", name = "configurate-core", version.ref = "configurate" }
 configurateExtraKotlin = { group = "org.spongepowered", name = "configurate-extra-kotlin", version.ref = "configurate" }
 configurateHocon = { group = "org.spongepowered", name = "configurate-hocon", version.ref = "configurate" }
+
+bstatsBukkit = { group = "org.bstats", name = "bstats-bukkit", version.ref = "bstats" }
 
 cloudCore = { group = "cloud.commandframework", name = "cloud-core", version.ref = "cloud" }
 cloudPaper = { group = "cloud.commandframework", name = "cloud-paper", version.ref = "cloud" }

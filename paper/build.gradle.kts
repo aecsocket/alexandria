@@ -27,6 +27,8 @@ dependencies {
     implementation(libs.configurateHocon)
     implementation(libs.configurateExtraKotlin)
 
+    implementation(libs.bstatsBukkit)
+
     implementation(libs.cloudPaper)
     implementation(libs.cloudMinecraftExtras) { isTransitive = false }
 
@@ -54,6 +56,8 @@ tasks {
         listOf(
             "org.jetbrains",
             "org.intellij",
+
+            "org.bstats",
         ).forEach { relocate(it, "${project.group}.lib.$it") }
 
         exclude("kotlin/")

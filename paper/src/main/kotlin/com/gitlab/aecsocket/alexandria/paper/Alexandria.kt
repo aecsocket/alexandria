@@ -33,6 +33,7 @@ import net.kyori.adventure.text.Component.empty
 import net.kyori.adventure.text.Component.text
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
+import org.bstats.bukkit.Metrics
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -45,6 +46,7 @@ import org.spongepowered.configurate.ConfigurationOptions
 import org.spongepowered.configurate.hocon.HoconConfigurationLoader
 import org.spongepowered.configurate.kotlin.dataClassFieldDiscoverer
 import org.spongepowered.configurate.kotlin.extensions.get
+import org.spongepowered.configurate.loader.AbstractConfigurationLoader
 import org.spongepowered.configurate.objectmapping.ObjectMapper
 import org.spongepowered.configurate.serialize.TypeSerializerCollection
 import org.spongepowered.configurate.util.NamingSchemes
@@ -58,10 +60,12 @@ import java.util.*
 import kotlin.io.path.isDirectory
 import kotlin.reflect.KClass
 
+private const val ENABLE_BSTATS = "enable_bstats"
 private const val LOCALE = "locale"
 private const val PADDING = "padding"
 private const val CHAR_WIDTHS = "char_widths"
 
+private const val BSTATS_ID = 16725
 private const val DATABASE_NAME = "alexandria.db"
 
 private lateinit var instance: Alexandria
@@ -183,7 +187,11 @@ class Alexandria : BasePlugin() {
 
     override fun loadInternal(log: LogList, settings: ConfigurationNode): Boolean {
         if (super.loadInternal(log, settings)) {
-            val locale = settings.node(LOCALE).get<Locale> { Locale.ROOT }
+            if (settings.node(ENABLE_BSTATS).get { true }) {
+                Metrics(this, BSTATS_ID)
+            }
+
+            val locale = settings.node(LOCALE).get { Locale.ROOT }
             i18n = MiniMessageI18N.Builder().apply {
                 data class I18NSource(
                     val name: String,
@@ -329,7 +337,8 @@ class Alexandria : BasePlugin() {
         registrations.add(Registration(plugin, onInit, onLoad))
     }
 
-    fun configLoader() = HoconConfigurationLoader.builder().defaultOptions(configOptions)
+    fun configLoader(): AbstractConfigurationLoader.Builder<*, *> =
+        HoconConfigurationLoader.builder().defaultOptions(configOptions)
 
     fun playerFor(player: Player) = _players.computeIfAbsent(player) { AlexandriaPlayer(this, it) }
 
