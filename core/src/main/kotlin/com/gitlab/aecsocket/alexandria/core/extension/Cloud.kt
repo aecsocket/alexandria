@@ -2,9 +2,15 @@ package com.gitlab.aecsocket.alexandria.core.extension
 
 import cloud.commandframework.ArgumentDescription
 import cloud.commandframework.Command
+import cloud.commandframework.arguments.parser.ArgumentParseResult
+import cloud.commandframework.arguments.standard.EnumArgument.EnumParseException
+import cloud.commandframework.arguments.standard.EnumArgument.EnumParser
 import cloud.commandframework.context.CommandContext
+import cloud.commandframework.exceptions.parsing.NoInputProvidedException
 import cloud.commandframework.types.tuples.Triplet
 import com.gitlab.aecsocket.alexandria.core.physics.Vector3
+import java.util.*
+import kotlin.reflect.KClass
 
 operator fun <U, V> cloud.commandframework.types.tuples.Pair<U, V>.component1(): U = first
 operator fun <U, V> cloud.commandframework.types.tuples.Pair<U, V>.component2(): V = second
@@ -40,3 +46,16 @@ fun <C> Command.Builder<C>.argumentEuler3(
     Triplet.of(Double::class.java, Double::class.java, Double::class.java),
     { _, (x, y, z) -> Euler3(x, y, z) },
     desc)
+
+class EnumParseUtil<E : Enum<E>>(private val enumClass: KClass<E>) {
+    private val values = EnumSet.allOf(enumClass.java)
+
+    fun parse(commandContext: CommandContext<*>, input: String): E {
+        values.forEach { value ->
+            if (value.name.equals(input, true)) {
+                return value
+            }
+        }
+        throw EnumParseException(input, enumClass.java, commandContext)
+    }
+}
