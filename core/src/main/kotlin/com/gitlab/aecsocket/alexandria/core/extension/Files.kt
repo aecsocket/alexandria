@@ -9,8 +9,8 @@ import java.nio.file.attribute.BasicFileAttributes
 
 fun walkFile(
     root: Path,
-    onVisit: (Path, BasicFileAttributes) -> FileVisitResult = { _, _ -> FileVisitResult.CONTINUE },
-    onFail: (Path, IOException) -> FileVisitResult = { _, _ -> FileVisitResult.CONTINUE }
+    onVisit: (path: Path, attrs: BasicFileAttributes) -> FileVisitResult = { _, _ -> FileVisitResult.CONTINUE },
+    onFail: (path: Path, ex: IOException) -> FileVisitResult = { _, _ -> FileVisitResult.CONTINUE }
 ) {
     Files.walkFileTree(root, object : SimpleFileVisitor<Path>() {
         override fun visitFile(path: Path, attrs: BasicFileAttributes) =

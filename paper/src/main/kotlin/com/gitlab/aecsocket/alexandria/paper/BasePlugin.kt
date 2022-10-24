@@ -4,6 +4,7 @@ import com.gitlab.aecsocket.alexandria.core.LogLevel
 import com.gitlab.aecsocket.alexandria.core.LogList
 import com.gitlab.aecsocket.alexandria.core.Logging
 import com.gitlab.aecsocket.alexandria.core.extension.force
+import com.gitlab.aecsocket.alexandria.core.extension.walkFile
 import com.gitlab.aecsocket.alexandria.core.keyed.Keyed
 import com.gitlab.aecsocket.alexandria.paper.extension.disable
 import com.gitlab.aecsocket.alexandria.paper.extension.scheduleDelayed
@@ -22,13 +23,19 @@ import org.spongepowered.configurate.kotlin.extensions.get
 import org.spongepowered.configurate.objectmapping.ConfigSerializable
 import org.spongepowered.configurate.objectmapping.ObjectMapper
 import org.spongepowered.configurate.util.NamingSchemes
+import java.io.File
 import java.io.InputStream
+import java.nio.file.FileVisitResult
+import java.nio.file.Path
+import kotlin.io.path.isRegularFile
+import kotlin.io.path.name
 
 const val PATH_MANIFEST = "manifest.conf"
 const val PATH_SETTINGS = "settings.conf"
 const val PATH_LANG = "lang"
-private const val LOG_LEVEL = "log_level"
 
+private const val LOG_LEVEL = "log_level"
+private const val CONFIG_FILE_EXT = ".conf"
 private const val THREAD_NAME_WIDTH = 10
 
 private val TEXT_REPLACEMENT = TextReplacementConfig.builder()
@@ -128,6 +135,40 @@ abstract class BasePlugin : JavaPlugin() {
         this.log.level = logLevel
 
         return true
+    }
+
+    protected data class ConfigData(
+        val node: ConfigurationNode,
+        val path: Path,
+    )
+
+    protected fun walkConfigs(
+        root: File,
+        onVisit: (node: ConfigurationNode, path: Path) -> Unit = { _, _ -> },
+        onError: (ex: Exception, path: Path) -> Unit = { _, _ -> }
+    ): List<ConfigData> {
+        if (!root.exists()) return emptyList()
+
+        val configs = ArrayList<ConfigData>()
+        walkFile(root.toPath(),
+            onVisit = { path, _ ->
+                if (path.isRegularFile() && path.name.endsWith(CONFIG_FILE_EXT)) {
+                    try {
+                        val node = AlexandriaAPI.configLoader().path(path).build().load()
+                        onVisit(node, path)
+                        configs.add(ConfigData(node, path))
+                    } catch (ex: Exception) {
+                        onError(ex, path)
+                    }
+                }
+                FileVisitResult.CONTINUE
+            },
+            onFail = { path, ex ->
+                onError(ex, path)
+                FileVisitResult.CONTINUE
+            }
+        )
+        return configs
     }
 
     fun resource(path: String): InputStream {
