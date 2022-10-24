@@ -19,10 +19,9 @@ import io.github.retrooper.packetevents.util.SpigotConversionUtil
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import java.util.*
-import java.util.concurrent.atomic.AtomicLong
 
 sealed interface Mesh {
-    val id: Long
+    val id: UUID
     var item: ItemStack
     var transform: Transform
 
@@ -37,19 +36,21 @@ sealed interface Mesh {
     fun remove(player: Player) = remove(setOf(player))
 }
 
-class MeshManager internal constructor(
-    private val alexandria: Alexandria,
-) : PacketListener {
-    private val nextMeshId = AtomicLong()
+class MeshManager internal constructor() : PacketListener {
+    private val _meshes = HashMap<UUID, BaseMesh>()
+    val meshes: Map<UUID, Mesh> get() = _meshes
 
-    private val _meshes = HashMap<Long, Mesh>()
-    val meshes: Map<Long, Mesh> get() = _meshes
+    fun nextMeshId(): UUID {
+        var id = UUID.randomUUID()
+        while (_meshes.contains(id)) {
+            id = UUID.randomUUID()
+        }
+        return id
+    }
 
-    fun nextMeshId() = nextMeshId.getAndIncrement()
+    operator fun contains(id: UUID) = _meshes.contains(id)
 
-    operator fun contains(id: Long) = _meshes.contains(id)
-
-    operator fun get(id: Long) = _meshes[id]
+    operator fun get(id: UUID): Mesh? = _meshes[id]
 
     fun create(
         item: ItemStack,
@@ -66,21 +67,28 @@ class MeshManager internal constructor(
         }
     }
 
-    fun remove(id: Long, update: Boolean = true): Mesh? {
+    fun remove(id: UUID, update: Boolean = true): Mesh? {
         return _meshes.remove(id)?.also {
             if (update) {
-                it.remove(it.trackedPlayers())
+                it.remove(it.lastTrackedPlayers)
             }
         }
     }
 
+    internal fun update() {
+        _meshes.forEach { (_, mesh) ->
+            mesh.lastTrackedPlayers = mesh.trackedPlayers()
+        }
+    }
+
     sealed class BaseMesh(
-        override val id: Long,
+        override val id: UUID,
         item: ItemStack,
         private val getTrackedPlayers: () -> Iterable<Player>,
         private val yOffset: Double,
     ) : Mesh {
         val entityId = bukkitNextEntityId
+        var lastTrackedPlayers: Iterable<Player> = emptySet()
 
         override var item = item
             set(value) {
@@ -154,7 +162,7 @@ class MeshManager internal constructor(
     }
 
     class InterpMesh internal constructor(
-        id: Long,
+        id: UUID,
         item: ItemStack,
         transform: Transform,
         getTrackedPlayers: () -> Iterable<Player>,
@@ -181,7 +189,7 @@ class MeshManager internal constructor(
     }
 
     class NonInterpMesh internal constructor(
-        id: Long,
+        id: UUID,
         item: ItemStack,
         transform: Transform,
         getTrackedPlayers: () -> Iterable<Player>,

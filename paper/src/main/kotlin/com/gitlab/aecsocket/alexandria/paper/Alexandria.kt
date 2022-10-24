@@ -102,7 +102,7 @@ class Alexandria : BasePlugin() {
     val playerLocks = PlayerLocks(this)
     val playerActions = PlayerActions(this)
     val debugBoard = DebugBoard()
-    val meshes = MeshManager(this)
+    val meshes = MeshManager()
     val playerPersistence = PlayerPersistence(this)
 
     private val registrations = ArrayList<Registration>()
@@ -149,6 +149,7 @@ class Alexandria : BasePlugin() {
 
         scheduleRepeating {
             _players.forEach { (_, player) -> player.update() }
+            meshes.update()
         }
     }
 
