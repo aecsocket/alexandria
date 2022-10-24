@@ -193,7 +193,7 @@ class MeshManager internal constructor() : PacketListener {
         item: ItemStack,
         transform: Transform,
         getTrackedPlayers: () -> Iterable<Player>,
-    ) : BaseMesh(id, item, getTrackedPlayers, 1.85) {
+    ) : BaseMesh(id, item, getTrackedPlayers, 1.82) {
         val vehicleId = bukkitNextEntityId
 
         override var transform = transform
@@ -209,6 +209,10 @@ class MeshManager internal constructor() : PacketListener {
                     Optional.of(UUID.randomUUID()), EntityTypes.AREA_EFFECT_CLOUD,
                     position, 0f, 0f, 0f, 0, Optional.empty()
                 ),
+                WrapperPlayServerEntityMetadata(vehicleId, listOf(
+                    EntityData(8, EntityDataTypes.FLOAT, 0f)
+                )),
+                WrapperPlayServerSetPassengers(vehicleId, intArrayOf(entityId))
             )
             players.forEach { player ->
                 packets.forEach { player.sendPacket(it) }
