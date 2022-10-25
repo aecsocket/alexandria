@@ -16,6 +16,7 @@ import com.gitlab.aecsocket.alexandria.core.extension.euler
 import com.gitlab.aecsocket.alexandria.core.physics.Transform
 import com.gitlab.aecsocket.alexandria.paper.extension.bukkitNextEntityId
 import io.github.retrooper.packetevents.util.SpigotConversionUtil
+import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import java.util.*
@@ -24,12 +25,17 @@ sealed interface Mesh {
     val id: UUID
     var item: ItemStack
     var transform: Transform
+    var glowingColor: NamedTextColor
 
     fun trackedPlayers(): Iterable<Player>
 
     fun spawn(players: Iterable<Player>)
 
     fun spawn(player: Player) = spawn(setOf(player))
+
+    fun glowing(state: Boolean, players: Iterable<Player>)
+
+    fun glowing(state: Boolean, player: Player) = glowing(state, setOf(player))
 
     fun remove(players: Iterable<Player>)
 
@@ -87,8 +93,24 @@ class MeshManager internal constructor() : PacketListener {
         private val getTrackedPlayers: () -> Iterable<Player>,
         private val yOffset: Double,
     ) : Mesh {
-        val entityId = bukkitNextEntityId
+        val entityId: UUID = UUID.randomUUID()
+        val protocolId = bukkitNextEntityId
         var lastTrackedPlayers: Iterable<Player> = emptySet()
+
+        override var glowingColor: NamedTextColor = NamedTextColor.WHITE
+            set(value) {
+                // due to how we handle storing the last team applied,
+                // we can't send separate glowing colors to separate players
+                field = value
+                val packet = WrapperPlayServerTeams(AlexandriaTeams.colorToTeam(value),
+                    WrapperPlayServerTeams.TeamMode.ADD_ENTITIES, Optional.empty(),
+                    entityId.toString()
+                )
+
+                lastTrackedPlayers.forEach { player ->
+                    player.sendPacket(packet)
+                }
+            }
 
         override var item = item
             set(value) {
@@ -106,7 +128,7 @@ class MeshManager internal constructor() : PacketListener {
         }
 
         private fun item() = listOf(
-            WrapperPlayServerEntityEquipment(entityId, listOf(
+            WrapperPlayServerEntityEquipment(protocolId, listOf(
                 Equipment(EquipmentSlot.HELMET, SpigotConversionUtil.fromBukkitItemStack(item))
             ))
         )
@@ -128,11 +150,11 @@ class MeshManager internal constructor() : PacketListener {
         )
 
         protected fun spawnStand(position: Vector3d) = listOf(
-            WrapperPlayServerSpawnEntity(entityId,
-                Optional.of(UUID.randomUUID()), EntityTypes.ARMOR_STAND,
+            WrapperPlayServerSpawnEntity(protocolId,
+                Optional.of(entityId), EntityTypes.ARMOR_STAND,
                 position, 0f, 0f, 0f, 0, Optional.empty()
             ),
-            WrapperPlayServerEntityMetadata(entityId, listOf(
+            WrapperPlayServerEntityMetadata(protocolId, listOf(
                 EntityData(0, EntityDataTypes.BYTE, (0x20).toByte()),
                 EntityData(15, EntityDataTypes.BYTE, (0x10).toByte()),
                 EntityData(16, EntityDataTypes.ROTATION, headRotation(transform)),
@@ -144,19 +166,29 @@ class MeshManager internal constructor() : PacketListener {
             val headRotation = headRotation(transform)
 
             val packets = listOf(
-                WrapperPlayServerSpawnEntity(entityId,
+                WrapperPlayServerSpawnEntity(protocolId,
                     Optional.of(UUID.randomUUID()), EntityTypes.ARMOR_STAND,
                     position, 0f, 0f, 0f, 0, Optional.empty()
                 ),
-                WrapperPlayServerEntityMetadata(entityId, listOf(
-                    EntityData(0, EntityDataTypes.BYTE, (0x20).toByte()),
-                    EntityData(15, EntityDataTypes.BYTE, (0x10).toByte()),
-                    EntityData(16, EntityDataTypes.ROTATION, headRotation),
+                WrapperPlayServerEntityMetadata(protocolId, listOf(
+                    EntityData(0, EntityDataTypes.BYTE, (0x20).toByte()), // invisible
+                    EntityData(15, EntityDataTypes.BYTE, (0x10).toByte()), // marker
+                    EntityData(16, EntityDataTypes.ROTATION, headRotation), // head pose
                 ))
             ) + item()
 
             players.forEach { player ->
                 packets.forEach { player.sendPacket(it) }
+            }
+        }
+
+        override fun glowing(state: Boolean, players: Iterable<Player>) {
+            val packet = WrapperPlayServerEntityMetadata(protocolId, listOf(
+                EntityData(0, EntityDataTypes.BYTE, (0x20 or (if (state) 0x40 else 0)).toByte()) // invisible + glowing?
+            ))
+
+            players.forEach { player ->
+                player.sendPacket(packet)
             }
         }
     }
@@ -170,7 +202,7 @@ class MeshManager internal constructor() : PacketListener {
         override var transform = transform
             set(value) {
                 field = value
-                update(transform(entityId, entityId))
+                update(transform(protocolId, protocolId))
             }
 
         override fun spawn(players: Iterable<Player>) {
@@ -181,7 +213,7 @@ class MeshManager internal constructor() : PacketListener {
         }
 
         override fun remove(players: Iterable<Player>) {
-            val packet = WrapperPlayServerDestroyEntities(entityId)
+            val packet = WrapperPlayServerDestroyEntities(protocolId)
             players.forEach { player ->
                 player.sendPacket(packet)
             }
@@ -199,7 +231,7 @@ class MeshManager internal constructor() : PacketListener {
         override var transform = transform
             set(value) {
                 field = value
-                update(transform(vehicleId, entityId))
+                update(transform(vehicleId, protocolId))
             }
 
         override fun spawn(players: Iterable<Player>) {
@@ -212,7 +244,7 @@ class MeshManager internal constructor() : PacketListener {
                 WrapperPlayServerEntityMetadata(vehicleId, listOf(
                     EntityData(8, EntityDataTypes.FLOAT, 0f)
                 )),
-                WrapperPlayServerSetPassengers(vehicleId, intArrayOf(entityId))
+                WrapperPlayServerSetPassengers(vehicleId, intArrayOf(protocolId))
             )
             players.forEach { player ->
                 packets.forEach { player.sendPacket(it) }
@@ -220,7 +252,7 @@ class MeshManager internal constructor() : PacketListener {
         }
 
         override fun remove(players: Iterable<Player>) {
-            val packet = WrapperPlayServerDestroyEntities(entityId, vehicleId)
+            val packet = WrapperPlayServerDestroyEntities(protocolId, vehicleId)
             players.forEach { player ->
                 player.sendPacket(packet)
             }

@@ -17,6 +17,7 @@ object PaperSerializers {
         .registerExact(TitleTimesSerializer)
         .registerExact(TextSlotSerializer)
         .registerExact(PlayerInventorySlotSerializer)
+        .registerExact(ItemBytesSerializer)
         .register(BlockDataSerializer)
         .registerAll(ConfigurateComponentSerializer.configurate().serializers())
         .build()

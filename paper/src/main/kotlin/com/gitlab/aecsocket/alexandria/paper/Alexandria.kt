@@ -37,6 +37,7 @@ import org.bstats.bukkit.Metrics
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
+import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.map.MapFont
 import org.bukkit.map.MinecraftFont
@@ -140,6 +141,11 @@ class Alexandria : BasePlugin() {
             }
         })
         registerEvents(object : Listener {
+            @EventHandler
+            fun on(event: PlayerJoinEvent) {
+                playerFor(event.player).join()
+            }
+
             @EventHandler
             fun on(event: PlayerQuitEvent) {
                 _players.remove(event.player)?.dispose()

@@ -65,7 +65,7 @@ object QuaternionSerializer : TypeSerializer<Quaternion> {
                 list[1].force(),
                 list[2].force(),
                 list[3].force(),
-            ).quaternion(list[0].force())
+            ).radians.quaternion(list[0].force())
         } else Quaternion(
             list[0].force(),
             list[1].force(),

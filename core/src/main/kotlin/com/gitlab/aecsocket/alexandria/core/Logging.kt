@@ -54,8 +54,6 @@ interface LogAcceptor {
         comps(level, ex) { listOf(line()) }
 }
 
-private const val THREAD_NAME_SIZE = 10
-
 class Logging(
     val logger: (String) -> Unit,
     var level: LogLevel = LogLevel.Verbose,
@@ -70,6 +68,17 @@ class Logging(
                 .map { "${record.level.prefix} $it$RESET" }
                 .forEach { logger(it) }
         }
+    }
+}
+
+class ForwardingLogging(
+    val backing: LogAcceptor,
+    private val messageFunction: (String) -> String = { it },
+) : LogAcceptor {
+    override fun record(record: LogRecord) {
+        backing.record(LogRecord(record.level, record.ex) {
+            record.lines().map(messageFunction)
+        })
     }
 }
 
