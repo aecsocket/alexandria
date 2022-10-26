@@ -1,4 +1,4 @@
-package com.gitlab.aecsocket.alexandria.core.effect
+package com.gitlab.aecsocket.alexandria.paper.effect
 
 import com.gitlab.aecsocket.alexandria.core.physics.Vector3
 
@@ -8,7 +8,7 @@ interface Effector {
     fun showParticle(effect: ParticleEffect, position: Vector3)
 
     companion object {
-        val EMPTY: Effector = EmptyEffector
+        val Empty: Effector = EmptyEffector
     }
 }
 
@@ -26,9 +26,3 @@ fun interface ForwardingEffector : Effector {
     override fun showParticle(effect: ParticleEffect, position: Vector3) =
         effectors().forEach { it.showParticle(effect, position) }
 }
-
-fun Iterable<SoundEffect>.play(effector: Effector, position: Vector3) =
-    forEach { effector.playSound(it, position) }
-
-fun Iterable<ParticleEffect>.show(effector: Effector, position: Vector3) =
-    forEach { effector.showParticle(it, position) }

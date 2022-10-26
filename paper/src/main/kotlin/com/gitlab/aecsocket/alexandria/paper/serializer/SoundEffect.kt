@@ -1,7 +1,7 @@
-package com.gitlab.aecsocket.alexandria.core.serializer
+package com.gitlab.aecsocket.alexandria.paper.serializer
 
-import com.gitlab.aecsocket.alexandria.core.effect.SoundEffect
 import com.gitlab.aecsocket.alexandria.core.extension.force
+import com.gitlab.aecsocket.alexandria.paper.effect.SoundEffect
 import org.spongepowered.configurate.ConfigurationNode
 import org.spongepowered.configurate.serialize.TypeSerializer
 import java.lang.reflect.Type

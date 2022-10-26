@@ -1,6 +1,5 @@
 package com.gitlab.aecsocket.alexandria.paper.datatype
 
-import com.gitlab.aecsocket.alexandria.paper.extension.dataType
 import java.nio.ByteBuffer
 
 fun floatsToBytes(obj: FloatArray): ByteArray = ByteBuffer.allocate(4 * obj.size).apply {

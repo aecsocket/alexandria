@@ -41,6 +41,13 @@ private val INVENTORY = namespaced("inventory")
 class PlayerPersistence internal constructor(
     private val alexandria: Alexandria,
 ) {
+    @ConfigSerializable
+    data class Settings(
+        val enabled: Boolean = false,
+        val save: Boolean = true,
+        val load: Boolean = true,
+    )
+
     data class OnSave(
         val player: Player,
         val configNode: ConfigurationNode,
@@ -56,13 +63,6 @@ class PlayerPersistence internal constructor(
 
     private val onSave = ArrayList<(OnSave) -> Unit>()
     private val onLoad = ArrayList<(OnLoad) -> Unit>()
-
-    @ConfigSerializable
-    data class Settings(
-        val enabled: Boolean = false,
-        val save: Boolean = true,
-        val load: Boolean = true,
-    )
 
     internal fun load(settings: ConfigurationNode) {
         this.settings = settings.node(CONFIG_PATH).get { Settings() }

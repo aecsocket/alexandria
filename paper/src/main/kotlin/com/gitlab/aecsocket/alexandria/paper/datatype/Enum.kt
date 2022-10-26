@@ -10,15 +10,13 @@ abstract class EnumDataType<T : Enum<T>> : PersistentDataType<String, T> {
         obj: T,
         ctx: PersistentDataAdapterContext
     ) = obj.name
+}
 
-    companion object {
-        inline fun <reified T : Enum<T>> of() = object : EnumDataType<T>() {
-            override fun getComplexType() = T::class.java
+inline fun <reified T : Enum<T>> enumDataTypeOf() = object : EnumDataType<T>() {
+    override fun getComplexType() = T::class.java
 
-            override fun fromPrimitive(
-                name: String,
-                ctx: PersistentDataAdapterContext
-            ) = enumValueOf<T>(name)
-        }
-    }
+    override fun fromPrimitive(
+        name: String,
+        ctx: PersistentDataAdapterContext
+    ) = enumValueOf<T>(name)
 }

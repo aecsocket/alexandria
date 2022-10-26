@@ -85,7 +85,6 @@ internal class AlexandriaCommand(
                 StacktraceDeobfuscator.INSTANCE.deobfuscateStacktrace(traceArray)
                 val stackTrace = traceArray.toList()
                 val hover = formatAsStackTrace(stackTrace.toList().render(false), stackTrace.render(true), i18n)
-                    .join(JoinConfiguration.newlines())
                 plugin.sendMessage(sender, i18n.csafe("player_locks.list.instance") {
                     subst("id", text(instance.id))
                     icu("thread_name", instance.threadName)

@@ -107,6 +107,7 @@ class Alexandria : BasePlugin() {
     val playerLocks = PlayerLocks(this)
     val playerActions = PlayerActions(this)
     val debugBoard = DebugBoard()
+    val soundEngine = SoundEngine(this)
     val meshes = MeshManager()
     val playerPersistence = PlayerPersistence(this)
 
@@ -324,6 +325,7 @@ class Alexandria : BasePlugin() {
 
             tryLoad(PlayerActions::class) { playerActions.load(settings) }?.let { return it }
             tryLoad(PlayerPersistence::class) { playerPersistence.load(settings) }?.let { return it }
+            tryLoad(SoundEngine::class) { soundEngine.load(settings) }?.let { return it }
 
             return true
         }
@@ -346,7 +348,7 @@ class Alexandria : BasePlugin() {
     fun configLoader(): AbstractConfigurationLoader.Builder<*, *> =
         HoconConfigurationLoader.builder().defaultOptions(configOptions)
 
-    fun playerFor(player: Player) = _players.computeIfAbsent(player) { AlexandriaPlayer(this, it) }
+    fun playerFor(player: Player) = _players.computeIfAbsent(player) { AlexandriaPlayer(it) }
 
     fun i18nFor(aud: Audience) = if (aud is Player) i18n.withLocale(aud.locale()) else i18n
 

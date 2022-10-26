@@ -4,6 +4,7 @@ import com.gitlab.aecsocket.alexandria.core.extension.hsb
 import com.gitlab.aecsocket.alexandria.core.physics.Vector3
 import net.kyori.adventure.text.format.TextColor
 import org.spongepowered.configurate.objectmapping.ConfigSerializable
+import org.spongepowered.configurate.objectmapping.meta.Required
 
 sealed interface ColorMod {
     fun apply(color: TextColor): TextColor
@@ -11,8 +12,8 @@ sealed interface ColorMod {
 
 @ConfigSerializable
 data class LerpColorMod(
-    val to: TextColor,
-    val fac: Float,
+    @Required val to: TextColor,
+    @Required val fac: Float,
 ) : ColorMod {
     override fun apply(color: TextColor): TextColor {
         return TextColor.lerp(fac, color, to)
@@ -21,7 +22,7 @@ data class LerpColorMod(
 
 @ConfigSerializable
 data class HSBColorMod(
-    val hsb: Vector3
+    @Required val hsb: Vector3
 ) : ColorMod {
     override fun apply(color: TextColor): TextColor {
         val baseHsb = color.hsb()

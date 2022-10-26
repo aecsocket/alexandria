@@ -81,7 +81,7 @@ abstract class BaseCommand(
 
         fun args(args: I18NArgs.Scope<Component>.() -> Unit)
 
-        fun messageFormat(formatter: (List<Component>) -> List<Component>)
+        fun showException()
     }
 
     init {
@@ -111,7 +111,7 @@ abstract class BaseCommand(
             StacktraceDeobfuscator.INSTANCE.deobfuscateThrowable(ex)
 
             var mArgs: I18NArgs.Scope<Component>.() -> Unit = {}
-            var mFormatter: (List<Component>) -> List<Component> = { it }
+            var mShowException = false
 
             val ctx = object : HandlerContext {
                 override val ex get() = ex
@@ -121,26 +121,22 @@ abstract class BaseCommand(
                     mArgs = args
                 }
 
-                override fun messageFormat(formatter: (List<Component>) -> List<Component>) {
-                    mFormatter = formatter
+                override fun showException() {
+                    mShowException = true
                 }
             }
 
             handler(ctx)
 
-            var lines = i18n.safe("error.caption.$key", mArgs)
-            lines = plugin.chatMessages(mFormatter(lines))
-
-            lines.join(JoinConfiguration.newlines())
-        }
-
-        fun errorStackTrace(ex: Throwable, i18n: I18N<Component>): List<Component> {
-            return stackTrace(ex, i18n).map { message ->
-                text("  ")
-                    .append(i18n.safeOne("error.stack_trace") {
-                        subst("message", message)
+            val lines = plugin.chatMessages(i18n.safe("error.caption.$key", mArgs)).toMutableList()
+            if (mShowException) {
+                lines.add(stackTrace(ex, i18n) {
+                    text("  ").append(i18n.safeOne("error.stack_trace") {
+                        subst("message", text(it))
                     })
+                })
             }
+            lines.join(JoinConfiguration.newlines())
         }
 
         MinecraftExceptionHandler<CommandSender>()
@@ -161,16 +157,11 @@ abstract class BaseCommand(
             })
             .withHandler(MinecraftExceptionHandler.ExceptionType.NO_PERMISSION, handlerOf("no_permission"))
             .withHandler(MinecraftExceptionHandler.ExceptionType.ARGUMENT_PARSING, handlerOf("argument_parsing") {
-                messageFormat { lines ->
-                    lines + errorStackTrace(ex, i18n)
-                }
+                showException()
             })
             .withHandler(MinecraftExceptionHandler.ExceptionType.COMMAND_EXECUTION, handlerOf("command_execution") {
                 plugin.log.line(LogLevel.Error, ex) { "Could not run command" }
-
-                messageFormat { lines ->
-                    lines + errorStackTrace(ex, i18n)
-                }
+                showException()
             })
             .apply(manager) { it }
 
@@ -205,22 +196,24 @@ abstract class BaseCommand(
         userTrace: List<Component>,
         longTrace: List<Component>,
         i18n: I18N<Component>
-    ): List<Component> {
-        val lines = (userTrace + newline() + i18n.safe("click_to_copy"))
+    ): Component {
+        val line = (userTrace + newline() + i18n.safe("click_to_copy")).join(JoinConfiguration.newlines())
         val click = ClickEvent.copyToClipboard(longTrace.joinToString("\n") {
             PlainTextComponentSerializer.plainText().serialize(it)
         })
-        return lines.map { it.clickEvent(click) }
+        return line.clickEvent(click)
     }
 
-    protected fun stackTrace(ex: Throwable, i18n: I18N<Component>): List<Component> {
-        StacktraceDeobfuscator.INSTANCE.deobfuscateThrowable(ex)
+    protected fun stackTrace(
+        ex: Throwable,
+        i18n: I18N<Component>,
+        mapper: (String) -> Component = { text(it) }
+    ): Component {
         val userStackTrace = ex.render(false)
         val longStackTrace = ex.render(true)
-        val hover = formatAsStackTrace(userStackTrace, longStackTrace, i18n).join(JoinConfiguration.newlines())
-        return ex.simpleTrace().map {
-            text(it).hoverEvent(hover)
-        }
+        val hover = formatAsStackTrace(userStackTrace, longStackTrace, i18n)
+
+        return ex.simpleTrace().map(mapper).join(JoinConfiguration.newlines()).hoverEvent(hover)
     }
 
     private fun errorNoTargets(arg: String, i18n: I18N<Component>): Nothing =
@@ -268,11 +261,10 @@ abstract class BaseCommand(
         try {
             handler(ctx, sender, i18n)
         } catch (ex: CommandException) {
+            plugin.sendMessage(sender, ex.lines)
             ex.cause?.let { cause ->
-                val stackTrace = stackTrace(cause, i18n)
-                plugin.sendMessage(sender, ex.lines + stackTrace)
-            } ?: run {
-                plugin.sendMessage(sender, ex.lines)
+                StacktraceDeobfuscator.INSTANCE.deobfuscateThrowable(ex)
+                plugin.sendMessage(sender, setOf(stackTrace(cause, i18n)))
             }
         }
     }

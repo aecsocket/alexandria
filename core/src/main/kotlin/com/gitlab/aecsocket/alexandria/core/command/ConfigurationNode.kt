@@ -4,8 +4,12 @@ import cloud.commandframework.ArgumentDescription
 import cloud.commandframework.arguments.CommandArgument
 import cloud.commandframework.arguments.parser.ArgumentParseResult
 import cloud.commandframework.arguments.parser.ArgumentParser
+import cloud.commandframework.captions.Caption
+import cloud.commandframework.captions.CaptionVariable
 import cloud.commandframework.context.CommandContext
 import cloud.commandframework.exceptions.parsing.NoInputProvidedException
+import cloud.commandframework.exceptions.parsing.ParserException
+import org.spongepowered.configurate.ConfigurateException
 import org.spongepowered.configurate.ConfigurationNode
 import java.util.*
 
@@ -19,7 +23,11 @@ class ConfigurationNodeParser<C : Any>(
         return inputQueue.peek()?.let {
             val input = inputQueue.joinToString(" ")
             inputQueue.clear()
-            return ArgumentParseResult.success(loader(input))
+            try {
+                ArgumentParseResult.success(loader(input))
+            } catch (ex: ConfigurateException) {
+                ArgumentParseResult.failure(ex)
+            }
         } ?: ArgumentParseResult.failure(NoInputProvidedException(
             ConfigurationNodeParser::class.java,
             commandContext

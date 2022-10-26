@@ -14,16 +14,6 @@ import com.gitlab.aecsocket.alexandria.core.serializer.wrap
 import java.util.*
 import kotlin.time.Duration
 
-class DurationFormatException(
-    context: CommandContext<*>,
-    input: String,
-    error: Throwable,
-) : ParserException(
-    DurationParser::class.java, context, DurationParser.ARGUMENT_PARSE_FAILURE_DURATION,
-    CaptionVariable.of("input", input),
-    CaptionVariable.of("error", error.message ?: "(no message)")
-)
-
 class DurationParser<C : Any> : ArgumentParser<C, WDuration> {
     override fun parse(
         commandContext: CommandContext<C>,
@@ -34,9 +24,7 @@ class DurationParser<C : Any> : ArgumentParser<C, WDuration> {
             try {
                 ArgumentParseResult.success(Duration.parse(input).wrap())
             } catch (ex: IllegalArgumentException) {
-                ArgumentParseResult.failure(DurationFormatException(
-                    commandContext, input, ex
-                ))
+                ArgumentParseResult.failure(ex)
             }
         } ?: ArgumentParseResult.failure(NoInputProvidedException(
             DurationParser::class.java,

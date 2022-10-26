@@ -2,11 +2,8 @@ package com.gitlab.aecsocket.alexandria.core.extension
 
 import cloud.commandframework.ArgumentDescription
 import cloud.commandframework.Command
-import cloud.commandframework.arguments.parser.ArgumentParseResult
 import cloud.commandframework.arguments.standard.EnumArgument.EnumParseException
-import cloud.commandframework.arguments.standard.EnumArgument.EnumParser
 import cloud.commandframework.context.CommandContext
-import cloud.commandframework.exceptions.parsing.NoInputProvidedException
 import cloud.commandframework.types.tuples.Triplet
 import com.gitlab.aecsocket.alexandria.core.physics.Vector3
 import java.util.*
@@ -19,7 +16,6 @@ operator fun <U, V, W> Triplet<U, V, W>.component1(): U = first
 operator fun <U, V, W> Triplet<U, V, W>.component2(): V = second
 operator fun <U, V, W> Triplet<U, V, W>.component3(): W = third
 
-@Suppress("UNCHECKED_CAST") // cloud is stupid in this regard anyway
 fun <V> CommandContext<*>.value(key: String, default: () -> V): V =
     getOrDefault<V>(key, null) ?: default()
 

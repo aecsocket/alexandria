@@ -1,9 +1,9 @@
-package com.gitlab.aecsocket.alexandria.core.effect
+package com.gitlab.aecsocket.alexandria.paper.effect
 
+import com.gitlab.aecsocket.alexandria.core.physics.Vector3
 import net.kyori.adventure.key.Key
 import net.kyori.adventure.sound.Sound
-import net.kyori.adventure.sound.Sound.Source
-import net.kyori.adventure.sound.Sound.sound
+import org.bukkit.Particle
 
 data class SoundEffect(
     val sound: Sound,
@@ -16,10 +16,18 @@ data class SoundEffect(
 
     fun copy(
         name: Key = sound.name(),
-        source: Source = sound.source(),
+        source: Sound.Source = sound.source(),
         volume: Float = sound.volume(),
         pitch: Float = sound.pitch(),
         dropoff: Double = this.dropoff,
         range: Double = this.range
-    ) = SoundEffect(sound(name, source, volume, pitch), dropoff, range)
+    ) = SoundEffect(Sound.sound(name, source, volume, pitch), dropoff, range)
 }
+
+data class ParticleEffect(
+    val particle: Particle,
+    val count: Double = 0.0,
+    val size: Vector3 = Vector3.Zero,
+    val speed: Double = 0.0,
+    val data: Any? = null
+)

@@ -2,7 +2,6 @@ package com.gitlab.aecsocket.alexandria.paper.extension
 
 import com.gitlab.aecsocket.alexandria.core.extension.*
 import com.gitlab.aecsocket.alexandria.core.physics.Point3
-import com.gitlab.aecsocket.alexandria.core.physics.Ray
 import com.gitlab.aecsocket.alexandria.core.physics.Transform
 import com.gitlab.aecsocket.alexandria.core.physics.Vector3
 import org.bukkit.Location
@@ -81,7 +80,6 @@ fun Location.heading() = Polar2(pitch.radians.toDouble(), yaw.radians.toDouble()
 fun Location.direction() = direction.alexandria()
 fun Location.rotation() = Euler3(pitch.toDouble(), -yaw.toDouble(), 0.0).radians.quaternion(EulerOrder.ZYX)
 fun Location.transform() = Transform(position(), rotation())
-fun Location.ray() = Ray(position(), direction.alexandria())
 
 val BoundingBox.extent get() = Vector3(
     maxX - minX, maxY - minY, maxZ - minZ
