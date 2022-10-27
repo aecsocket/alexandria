@@ -14,6 +14,7 @@ object Serializers {
         .registerExact(Point3Serializer)
         .registerExact(QuaternionSerializer)
         .registerExact(ColorModSerializer)
+        .registerExact(EmptyShapeSerializer)
         .registerExact(ShapeSerializer)
         .register(QuantifierSerializer)
         .build()

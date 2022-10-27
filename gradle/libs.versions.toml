@@ -8,7 +8,7 @@ adventure = "4.11.0"
 glossa = "0.5.2"
 configurate = "4.1.2"
 bstats = "3.0.0"
-cloud = "1.8.0-SNAPSHOT"
+cloud = "1.7.1"
 packetEvents = "2.0-SNAPSHOT"
 hikariCp = "5.0.1"
 
