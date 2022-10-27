@@ -13,8 +13,8 @@ private const val PLAYER_NOT_SPRINTING = "player_not_sprinting"
 private const val PLAYER_FLYING = "player_flying"
 private const val PLAYER_NOT_FLYING = "player_not_flying"
 
-fun InputMapper.actionsForPlayer(input: Input, player: Player): List<String> {
-    return actionsFor(input, listOf(
+fun <V> InputMapper<V>.map(input: Input, player: Player): V? {
+    return map(input, listOf(
         if (player.isSneaking) PLAYER_SNEAKING else PLAYER_NOT_SNEAKING,
         if (player.isSprinting) PLAYER_SPRINTING else PLAYER_NOT_SPRINTING,
         if (player.isFlying) PLAYER_FLYING else PLAYER_NOT_FLYING,

@@ -2,30 +2,32 @@ package com.gitlab.aecsocket.alexandria.core.serializer
 
 import com.gitlab.aecsocket.alexandria.core.extension.force
 import com.gitlab.aecsocket.alexandria.core.extension.forceList
-import com.gitlab.aecsocket.alexandria.core.extension.forceMap
-import com.gitlab.aecsocket.alexandria.core.input.INPUT_TYPES
 import com.gitlab.aecsocket.alexandria.core.input.InputMapper
-import com.gitlab.aecsocket.alexandria.core.input.InputPredicate
+import com.gitlab.aecsocket.alexandria.core.input.InputType
+import io.leangen.geantyref.TypeToken
 import org.spongepowered.configurate.ConfigurationNode
 import org.spongepowered.configurate.serialize.SerializationException
 import org.spongepowered.configurate.serialize.TypeSerializer
 import java.lang.reflect.Type
 
-object InputMapperSerializer : TypeSerializer<InputMapper> {
-    override fun serialize(type: Type, obj: InputMapper?, node: ConfigurationNode) {}
+private const val ON = "on"
+private const val VALUE = "value"
 
-    override fun deserialize(type: Type, node: ConfigurationNode): InputMapper {
-        node.forceMap(type)
+class InputMapperSerializer<V>(private val valueType: TypeToken<V>) : TypeSerializer<InputMapper<V>> {
+    override fun serialize(type: Type, obj: InputMapper<V>?, node: ConfigurationNode) {}
 
-        return InputMapper(node.childrenMap().map { (inputType, child) ->
-            if (!INPUT_TYPES.contains(inputType))
-                throw SerializationException(child, type, "Invalid input type '$inputType'")
-            inputType.toString() to child.forceList(type).map { predicateNode ->
-                predicateNode.forceList(type, "actions", "tags").run { InputPredicate(
-                    get(0).force<ArrayList<String>>(),
-                    get(1).force<HashSet<String>>(),
-                ) }
-            }
-        }.associate { it })
+    override fun deserialize(type: Type, node: ConfigurationNode): InputMapper<V> {
+        val builder = InputMapper.builder<V>()
+        node.forceList(type).forEach { child ->
+            val on = node.node(ON).forceList(type)
+            if (on.size < 1)
+                throw SerializationException(child, type, "Trigger 'on' must contain first element as input type, and rest as tags")
+            val inputType = on[0].force<InputType>()
+            val tags = on.drop(1).map { it.force<String>() }
+            val value = node.node(VALUE).force(valueType)
+
+            builder.trigger(inputType, tags, value)
+        }
+        return builder.build()
     }
 }

@@ -22,12 +22,6 @@ object EmptyShapeSerializer : TypeSerializer<EmptyShape> {
 }
 
 object ShapeSerializer : TypeSerializer<Shape> {
-    val TYPES = mapOf(
-        "box" to typeToken<BoxShape>(),
-        "sphere" to typeToken<SphereShape>(),
-        "plane" to typeToken<PlaneShape>(),
-    )
-
     override fun serialize(type: Type, obj: Shape?, node: ConfigurationNode) {
         node.set(obj)
     }

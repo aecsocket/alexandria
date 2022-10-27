@@ -15,7 +15,6 @@ object Serializers {
         .registerExact(QuaternionSerializer)
         .registerExact(ColorModSerializer)
         .registerExact(ShapeSerializer)
-        .registerExact(InputMapperSerializer)
         .register(QuantifierSerializer)
         .build()
 }
