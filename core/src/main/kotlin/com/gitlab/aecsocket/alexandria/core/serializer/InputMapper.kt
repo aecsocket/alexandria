@@ -2,6 +2,7 @@ package com.gitlab.aecsocket.alexandria.core.serializer
 
 import com.gitlab.aecsocket.alexandria.core.extension.force
 import com.gitlab.aecsocket.alexandria.core.extension.forceList
+import com.gitlab.aecsocket.alexandria.core.extension.typeToken
 import com.gitlab.aecsocket.alexandria.core.input.InputMapper
 import com.gitlab.aecsocket.alexandria.core.input.InputType
 import io.leangen.geantyref.TypeToken
@@ -19,15 +20,17 @@ class InputMapperSerializer<V>(private val valueType: TypeToken<V>) : TypeSerial
     override fun deserialize(type: Type, node: ConfigurationNode): InputMapper<V> {
         val builder = InputMapper.builder<V>()
         node.forceList(type).forEach { child ->
-            val on = node.node(ON).forceList(type)
+            val on = child.node(ON).forceList(type)
             if (on.size < 1)
                 throw SerializationException(child, type, "Trigger 'on' must contain first element as input type, and rest as tags")
             val inputType = on[0].force<InputType>()
             val tags = on.drop(1).map { it.force<String>() }
-            val value = node.node(VALUE).force(valueType)
+            val value = child.node(VALUE).force(valueType)
 
             builder.trigger(inputType, tags, value)
         }
         return builder.build()
     }
 }
+
+inline fun <reified V> InputMapperSerializer() = InputMapperSerializer<V>(typeToken())

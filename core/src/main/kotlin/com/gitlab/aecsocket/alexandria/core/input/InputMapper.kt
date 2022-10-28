@@ -1,27 +1,46 @@
 package com.gitlab.aecsocket.alexandria.core.input
 
-data class InputPredicate(
-    val actions: List<String>,
-    val tags: Set<String> = emptySet(),
-)
-
 class InputMapper<V> private constructor(
     private val values: Map<InputType, List<Trigger<V>>>
 ) {
     private data class Trigger<V>(
         val tags: Set<String>,
         val value: V
-    )
+    ) {
+        fun <R> map(mapper: (V) -> R): Trigger<R> {
+            return Trigger(tags, mapper(value))
+        }
+    }
 
-    fun map(input: Input, tags: Collection<String>): V? {
+    fun get(input: Input, tags: Collection<String>): V? {
+        val allTags = when (input) {
+            is Input.Mouse -> listOf(input.button.key, input.state.key)
+            is Input.SwapHands -> emptyList()
+            is Input.Drop -> emptyList()
+            is Input.HeldItem -> listOf(input.direction.key)
+            is Input.Sneak -> listOf(input.now.toString())
+            is Input.Sprint -> listOf(input.now.toString())
+            is Input.Flight -> listOf(input.now.toString())
+            is Input.HorseJump -> listOf(input.now.toString())
+            is Input.ElytraFlight -> emptyList()
+            is Input.Menu -> listOf(input.menu.key, input.open.toString())
+            is Input.LeaveBed -> emptyList()
+        } + tags
+
         values[input.type]?.let { triggers ->
             triggers.forEach { trigger ->
-                if (tags.containsAll(trigger.tags)) {
+                if (allTags.containsAll(trigger.tags)) {
                     return trigger.value
                 }
             }
         }
         return null
+    }
+
+    fun <R> map(mapper: (V) -> R): InputMapper<R> {
+        return InputMapper(values
+            .map { (type, triggers) -> type to triggers.map { trigger -> trigger.map(mapper) } }
+            .associate { it })
     }
 
     class Builder<V> internal constructor() {
