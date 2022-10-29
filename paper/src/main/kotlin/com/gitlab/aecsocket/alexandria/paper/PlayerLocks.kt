@@ -155,7 +155,9 @@ data class PlayerLockInstance(
     val onRelease: OnRelease,
     val threadName: String,
     val stackTrace: List<StackTraceElement>,
-)
+) {
+    override fun toString() = "PlayerLockInstance(${type.name}, id=$id)"
+}
 
 class PlayerLocks internal constructor(
     private val alexandria: Alexandria

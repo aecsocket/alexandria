@@ -17,5 +17,6 @@ object Serializers {
         .registerExact(EmptyShapeSerializer)
         .registerExact(ShapeSerializer)
         .register(QuantifierSerializer)
+        .register(InputMapperSerializer)
         .build()
 }
