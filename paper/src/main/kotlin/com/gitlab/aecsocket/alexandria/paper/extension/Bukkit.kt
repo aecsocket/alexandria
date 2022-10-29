@@ -7,6 +7,8 @@ import org.bukkit.Bukkit
 import org.bukkit.attribute.AttributeInstance
 import org.bukkit.attribute.AttributeModifier
 import org.bukkit.entity.Entity
+import org.bukkit.entity.Player
+import org.bukkit.inventory.ItemStack
 
 val bukkitCurrentTick get() = Bukkit.getCurrentTick()
 @Suppress("DEPRECATION")
@@ -37,4 +39,16 @@ var Entity.looking: Quaternion
 fun AttributeInstance.forceModifier(modifier: AttributeModifier) {
     removeModifier(modifier)
     addModifier(modifier)
+}
+
+fun Player.give(item: ItemStack) {
+    val inventory = inventory
+    val heldItemSlot = inventory.heldItemSlot
+    if (inventory.getItem(heldItemSlot).isEmpty()) {
+        inventory.setItem(heldItemSlot, item)
+    } else {
+        inventory.addItem(item).forEach { (_, nonAdded) ->
+            world.dropItem(location, nonAdded)
+        }
+    }
 }

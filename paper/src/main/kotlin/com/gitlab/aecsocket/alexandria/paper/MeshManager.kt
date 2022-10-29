@@ -102,14 +102,7 @@ class MeshManager internal constructor() : PacketListener {
                 // due to how we handle storing the last team applied,
                 // we can't send separate glowing colors to separate players
                 field = value
-                val packet = WrapperPlayServerTeams(AlexandriaTeams.colorToTeam(value),
-                    WrapperPlayServerTeams.TeamMode.ADD_ENTITIES, Optional.empty(),
-                    entityId.toString()
-                )
-
-                lastTrackedPlayers.forEach { player ->
-                    player.sendPacket(packet)
-                }
+                glowingColor(value)
             }
 
         override var item = item
@@ -127,10 +120,17 @@ class MeshManager internal constructor() : PacketListener {
             }
         }
 
-        private fun item() = listOf(
+        protected fun item() = listOf(
             WrapperPlayServerEntityEquipment(protocolId, listOf(
                 Equipment(EquipmentSlot.HELMET, SpigotConversionUtil.fromBukkitItemStack(item))
             ))
+        )
+
+        protected fun glowingColor(color: NamedTextColor) = listOf(
+            WrapperPlayServerTeams(AlexandriaTeams.colorToTeam(color),
+                WrapperPlayServerTeams.TeamMode.ADD_ENTITIES, Optional.empty(),
+                entityId.toString()
+            )
         )
 
         protected fun position(transform: Transform) = transform.translation.y { it - yOffset }.run {
@@ -159,28 +159,7 @@ class MeshManager internal constructor() : PacketListener {
                 EntityData(15, EntityDataTypes.BYTE, (0x10).toByte()),
                 EntityData(16, EntityDataTypes.ROTATION, headRotation(transform)),
             ))
-        ) + item()
-
-        override fun spawn(players: Iterable<Player>) {
-            val position = position(transform)
-            val headRotation = headRotation(transform)
-
-            val packets = listOf(
-                WrapperPlayServerSpawnEntity(protocolId,
-                    Optional.of(UUID.randomUUID()), EntityTypes.ARMOR_STAND,
-                    position, 0f, 0f, 0f, 0, Optional.empty()
-                ),
-                WrapperPlayServerEntityMetadata(protocolId, listOf(
-                    EntityData(0, EntityDataTypes.BYTE, (0x20).toByte()), // invisible
-                    EntityData(15, EntityDataTypes.BYTE, (0x10).toByte()), // marker
-                    EntityData(16, EntityDataTypes.ROTATION, headRotation), // head pose
-                ))
-            ) + item()
-
-            players.forEach { player ->
-                packets.forEach { player.sendPacket(it) }
-            }
-        }
+        ) + item() + glowingColor(glowingColor)
 
         override fun glowing(state: Boolean, players: Iterable<Player>) {
             val packet = WrapperPlayServerEntityMetadata(protocolId, listOf(
