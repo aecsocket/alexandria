@@ -102,7 +102,10 @@ class MeshManager internal constructor() : PacketListener {
                 // due to how we handle storing the last team applied,
                 // we can't send separate glowing colors to separate players
                 field = value
-                glowingColor(value)
+                val packets = glowingColor(value)
+                lastTrackedPlayers.forEach { player ->
+                    packets.forEach { player.sendPacket(it) }
+                }
             }
 
         override var item = item
