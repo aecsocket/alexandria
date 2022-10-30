@@ -31,6 +31,10 @@ data class SteeringInputs(
 class AlexandriaPlayer internal constructor(
     val handle: Player
 ) {
+    internal var lastSwing = 0
+    internal var lastClick = 0
+    internal var lastStartDig = 0
+
     val effector: Effector = PlayerEffector()
     var steering: SteeringInputs = SteeringInputs()
         private set

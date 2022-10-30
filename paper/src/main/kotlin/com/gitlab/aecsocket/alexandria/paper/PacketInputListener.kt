@@ -13,60 +13,66 @@ import com.gitlab.aecsocket.alexandria.core.input.Input.MenuType.HORSE
 import com.gitlab.aecsocket.alexandria.core.input.Input.MouseButton.LEFT
 import com.gitlab.aecsocket.alexandria.core.input.Input.MouseButton.RIGHT
 import com.gitlab.aecsocket.alexandria.paper.extension.bukkitCurrentTick
+import net.minecraft.server.level.ServerPlayerGameMode
 import net.minecraft.world.item.UseAnim
+import org.bukkit.craftbukkit.v1_19_R1.entity.CraftPlayer
 import org.bukkit.craftbukkit.v1_19_R1.inventory.CraftItemStack
 import org.bukkit.entity.Player
-import java.util.*
+import java.lang.invoke.MethodHandles
+
+data class InputEvent(
+    val player: Player,
+    val input: Input,
+    val cancel: () -> Unit
+)
 
 class PacketInputListener(
-    val callback: (Event) -> Unit,
+    val callback: (InputEvent) -> Unit,
 ) : PacketListener {
-    interface Event {
-        val input: Input
-        val player: Player
+    private val hIsDestroying = MethodHandles
+        .privateLookupIn(ServerPlayerGameMode::class.java, MethodHandles.lookup())
+        .findVarHandle(
+            ServerPlayerGameMode::class.java,
+            "f", // isDestroyingBlock
+            Boolean::class.javaPrimitiveType
+        )
 
-        fun cancel()
-    }
-
-    private val lastSwing = HashMap<UUID, Int>()
-    private val lastClick = HashMap<UUID, Int>()
-
-    private fun isSwinging(player: Player) = lastSwing[player.uniqueId] == bukkitCurrentTick
+    private fun isSwinging(player: Player) = player.alexandria.lastSwing == bukkitCurrentTick
 
     private fun markSwinging(player: Player) {
-        lastSwing[player.uniqueId] = bukkitCurrentTick
+        player.alexandria.lastSwing = bukkitCurrentTick
     }
 
-    private fun isClicking(player: Player) = lastClick[player.uniqueId] == bukkitCurrentTick
+    private fun isClicking(player: Player) = player.alexandria.lastClick == bukkitCurrentTick
 
     private fun markClicking(player: Player) {
-        lastClick[player.uniqueId] = bukkitCurrentTick
+        player.alexandria.lastClick = bukkitCurrentTick
+    }
+
+    private fun isStartingDigging(player: Player) = player.alexandria.lastStartDig == bukkitCurrentTick
+
+    private fun markStartingDigging(player: Player) {
+        player.alexandria.lastStartDig = bukkitCurrentTick
     }
 
     override fun onPacketReceive(event: PacketReceiveEvent) {
         val player = event.player as? Player ?: return
         if (!player.isValid) return
 
-        data class EventImpl(
-            override val input: Input,
-            val onCancel: () -> Unit
-        ) : Event {
-            override val player: Player get() = player
-
-            override fun cancel() {
-                event.isCancelled = true
-                onCancel()
-            }
-        }
-
-        fun call(input: Input, onCancel: () -> Unit = {}) {
-            callback(EventImpl(input, onCancel))
+        fun call(input: Input, cancel: () -> Unit = {}) {
+            callback(InputEvent(player, input, cancel))
         }
 
         when (event.packetType) {
             Client.ANIMATION -> {
                 val packet = WrapperPlayClientAnimation(event)
-                if (packet.hand == InteractionHand.MAIN_HAND && !isSwinging(player) && !isClicking(player)) {
+                if (
+                    packet.hand == InteractionHand.MAIN_HAND
+                    && !isSwinging(player)
+                    && !isClicking(player)
+                    && !isStartingDigging(player)
+                    && !(hIsDestroying.get((player as CraftPlayer).handle.gameMode) as Boolean)
+                ) {
                     call(Mouse(LEFT, MouseState.UNDEFINED))
                 }
             }
@@ -102,6 +108,7 @@ class PacketInputListener(
                     }
 
                     DiggingAction.START_DIGGING -> {
+                        markStartingDigging(player)
                         call(Mouse(LEFT, MouseState.DOWN))
                     }
                     DiggingAction.CANCELLED_DIGGING,

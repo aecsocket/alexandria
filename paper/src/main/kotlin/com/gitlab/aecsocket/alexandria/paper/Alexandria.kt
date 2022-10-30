@@ -11,6 +11,8 @@ import com.gitlab.aecsocket.alexandria.core.LogList
 import com.gitlab.aecsocket.alexandria.core.TableAlign
 import com.gitlab.aecsocket.alexandria.core.extension.force
 import com.gitlab.aecsocket.alexandria.core.extension.walkFile
+import com.gitlab.aecsocket.alexandria.core.input.Input
+import com.gitlab.aecsocket.alexandria.core.input.InputType
 import com.gitlab.aecsocket.alexandria.core.serializer.Serializers
 import com.gitlab.aecsocket.alexandria.paper.extension.registerEvents
 import com.gitlab.aecsocket.alexandria.paper.extension.scheduleRepeating
@@ -37,6 +39,7 @@ import org.bstats.bukkit.Metrics
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
+import org.bukkit.event.player.PlayerDropItemEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.map.MapFont
@@ -71,6 +74,10 @@ private const val DATABASE_NAME = "alexandria.db"
 
 private lateinit var instance: Alexandria
 val AlexandriaAPI get() = instance
+
+fun interface InputHandler {
+    fun handle(event: InputEvent)
+}
 
 class Alexandria : BasePlugin() {
     private data class Registration(
@@ -112,6 +119,7 @@ class Alexandria : BasePlugin() {
     val playerPersistence = PlayerPersistence(this)
 
     private val registrations = ArrayList<Registration>()
+    private val inputHandlers = ArrayList<InputHandler>()
 
     init {
         instance = this
@@ -141,6 +149,16 @@ class Alexandria : BasePlugin() {
                 playerFor(player).onPacketReceive(event)
             }
         })
+        PacketEvents.getAPI().eventManager.registerListener(PacketInputListener { event ->
+            when (event.input.type) {
+                InputType.DROP -> {}
+                else -> {
+                    inputHandlers.forEach { handler ->
+                        handler.handle(event)
+                    }
+                }
+            }
+        }, PacketListenerPriority.NORMAL)
         registerEvents(object : Listener {
             @EventHandler
             fun on(event: PlayerJoinEvent) {
@@ -151,13 +169,20 @@ class Alexandria : BasePlugin() {
             fun on(event: PlayerQuitEvent) {
                 _players.remove(event.player)?.dispose()
             }
+
+            @EventHandler
+            fun on(event: PlayerDropItemEvent) {
+                val input = InputEvent(event.player, Input.Drop) { event.isCancelled = true }
+                inputHandlers.forEach { handler ->
+                    handler.handle(input)
+                }
+            }
         })
         registerConsumer(this,
             onLoad = {
                 addDefaultI18N()
             }
         )
-
         scheduleRepeating {
             _players.forEach { (_, player) -> player.update() }
             meshes.update()
@@ -343,6 +368,10 @@ class Alexandria : BasePlugin() {
         onLoad: LoadContext.() -> Unit = {},
     ) {
         registrations.add(Registration(plugin, onInit, onLoad))
+    }
+
+    fun inputHandler(handler: InputHandler) {
+        inputHandlers.add(handler)
     }
 
     fun configLoader(): AbstractConfigurationLoader.Builder<*, *> =
