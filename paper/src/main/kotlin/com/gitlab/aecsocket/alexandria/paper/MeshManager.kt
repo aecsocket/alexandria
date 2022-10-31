@@ -29,6 +29,8 @@ sealed interface Mesh {
 
     fun trackedPlayers(): Iterable<Player>
 
+    fun updateTrackedPlayers(getter: () -> Iterable<Player>)
+
     fun spawn(players: Iterable<Player>)
 
     fun spawn(player: Player) = spawn(setOf(player))
@@ -90,7 +92,7 @@ class MeshManager internal constructor() : PacketListener {
     sealed class BaseMesh(
         override val id: UUID,
         item: ItemStack,
-        private val getTrackedPlayers: () -> Iterable<Player>,
+        var getTrackedPlayers: () -> Iterable<Player>,
         private val yOffset: Double,
     ) : Mesh {
         val entityId: UUID = UUID.randomUUID()
@@ -115,6 +117,10 @@ class MeshManager internal constructor() : PacketListener {
             }
 
         override fun trackedPlayers() = getTrackedPlayers()
+
+        override fun updateTrackedPlayers(getter: () -> Iterable<Player>) {
+            getTrackedPlayers = getter
+        }
 
         protected fun update(packets: Iterable<PacketWrapper<*>>) {
             val players = getTrackedPlayers()

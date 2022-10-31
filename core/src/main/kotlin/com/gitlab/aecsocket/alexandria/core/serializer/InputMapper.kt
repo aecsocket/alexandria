@@ -5,9 +5,11 @@ import com.gitlab.aecsocket.alexandria.core.extension.forceList
 import com.gitlab.aecsocket.alexandria.core.extension.typeToken
 import com.gitlab.aecsocket.alexandria.core.input.InputMapper
 import com.gitlab.aecsocket.alexandria.core.input.InputType
+import io.leangen.geantyref.GenericTypeReflector
 import org.spongepowered.configurate.ConfigurationNode
 import org.spongepowered.configurate.serialize.SerializationException
 import org.spongepowered.configurate.serialize.TypeSerializer
+import java.lang.reflect.AnnotatedType
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
 
