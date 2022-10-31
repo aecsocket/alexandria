@@ -10,10 +10,6 @@ data class SoundEffect(
     val dropoff: Double,
     val range: Double
 ) {
-    val sqrDropoff = dropoff * dropoff
-
-    val sqrRange = range * range
-
     fun copy(
         name: Key = sound.name(),
         source: Sound.Source = sound.source(),

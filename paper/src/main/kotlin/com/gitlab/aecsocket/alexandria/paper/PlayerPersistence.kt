@@ -29,7 +29,6 @@ import org.spongepowered.configurate.objectmapping.ConfigSerializable
 import java.io.File
 import java.util.*
 
-private const val CONFIG_PATH = "player_persistence"
 private const val TABLE_NAME = "player_persistence"
 private const val DATA_PATH = "player_persistence"
 
@@ -64,8 +63,8 @@ class PlayerPersistence internal constructor(
     private val onSave = ArrayList<(OnSave) -> Unit>()
     private val onLoad = ArrayList<(OnLoad) -> Unit>()
 
-    internal fun load(settings: ConfigurationNode) {
-        this.settings = settings.node(CONFIG_PATH).get { Settings() }
+    internal fun load() {
+        this.settings = alexandria.settings.playerPersistence
         if (!this.settings.enabled) return
 
         alexandria.useDb { conn -> conn.createStatement().use { stmt ->

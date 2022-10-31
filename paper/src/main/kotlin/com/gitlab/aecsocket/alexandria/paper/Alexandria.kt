@@ -51,6 +51,7 @@ import org.spongepowered.configurate.hocon.HoconConfigurationLoader
 import org.spongepowered.configurate.kotlin.dataClassFieldDiscoverer
 import org.spongepowered.configurate.kotlin.extensions.get
 import org.spongepowered.configurate.loader.AbstractConfigurationLoader
+import org.spongepowered.configurate.objectmapping.ConfigSerializable
 import org.spongepowered.configurate.objectmapping.ObjectMapper
 import org.spongepowered.configurate.serialize.TypeSerializerCollection
 import org.spongepowered.configurate.util.NamingSchemes
@@ -80,6 +81,13 @@ fun interface InputHandler {
 }
 
 class Alexandria : BasePlugin() {
+    @ConfigSerializable
+    data class Settings(
+        val soundEngine: SoundEngine.Settings = SoundEngine.Settings(),
+        val playerActions: PlayerActions.Settings = PlayerActions.Settings(),
+        val playerPersistence: PlayerPersistence.Settings = PlayerPersistence.Settings(),
+    )
+
     private data class Registration(
         val plugin: BasePlugin,
         val onInit: InitContext.() -> Unit,
@@ -98,6 +106,7 @@ class Alexandria : BasePlugin() {
         fun addDefaultI18N()
     }
 
+    lateinit var settings: Settings private set
     lateinit var padding: String private set
     lateinit var charSizes: MapFont private set
     lateinit var i18n: I18N<Component> private set
@@ -327,6 +336,8 @@ class Alexandria : BasePlugin() {
                 return false
             }
 
+            this.settings = settings.force()
+
             padding = settings.node(PADDING).get { " " }
             charSizes = MinecraftFont()
             settings.node(CHAR_WIDTHS).childrenMap().forEach { (char, width) ->
@@ -348,9 +359,9 @@ class Alexandria : BasePlugin() {
                 return null
             }
 
-            tryLoad(PlayerActions::class) { playerActions.load(settings) }?.let { return it }
-            tryLoad(PlayerPersistence::class) { playerPersistence.load(settings) }?.let { return it }
-            tryLoad(SoundEngine::class) { soundEngine.load(settings) }?.let { return it }
+            soundEngine.load()
+            playerActions.load()
+            playerPersistence.load()
 
             return true
         }

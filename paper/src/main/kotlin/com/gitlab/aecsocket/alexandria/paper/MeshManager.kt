@@ -105,9 +105,7 @@ class MeshManager internal constructor() : PacketListener {
                 // we can't send separate glowing colors to separate players
                 field = value
                 val packets = glowingColor(value)
-                lastTrackedPlayers.forEach { player ->
-                    packets.forEach { player.sendPacket(it) }
-                }
+                update(packets)
             }
 
         override var item = item
@@ -122,25 +120,11 @@ class MeshManager internal constructor() : PacketListener {
             getTrackedPlayers = getter
         }
 
-        protected fun update(packets: Iterable<PacketWrapper<*>>) {
-            val players = getTrackedPlayers()
-            players.forEach { player ->
-                packets.forEach { player.sendPacket(it) }
+        protected fun update(packets: () -> Iterable<PacketWrapper<*>>) {
+            lastTrackedPlayers.forEach { player ->
+                packets().forEach { player.sendPacket(it) }
             }
         }
-
-        protected fun item() = listOf(
-            WrapperPlayServerEntityEquipment(protocolId, listOf(
-                Equipment(EquipmentSlot.HELMET, SpigotConversionUtil.fromBukkitItemStack(item))
-            ))
-        )
-
-        protected fun glowingColor(color: NamedTextColor) = listOf(
-            WrapperPlayServerTeams(AlexandriaTeams.colorToTeam(color),
-                WrapperPlayServerTeams.TeamMode.ADD_ENTITIES, Optional.empty(),
-                entityId.toString()
-            )
-        )
 
         protected fun position(transform: Transform) = transform.translation.y { it - yOffset }.run {
             Vector3d(x, y, z)
@@ -150,33 +134,59 @@ class MeshManager internal constructor() : PacketListener {
             Vector3f(x.toFloat(), y.toFloat(), z.toFloat())
         }
 
-        protected fun transform(positionId: Int, rotationId: Int) = listOf(
-            WrapperPlayServerEntityTeleport(positionId,
-                position(transform), 0f, 0f, false),
-            WrapperPlayServerEntityMetadata(rotationId, listOf(
-                EntityData(16, EntityDataTypes.ROTATION, headRotation(transform))
-            ))
-        )
 
-        protected fun spawnStand(position: Vector3d) = listOf(
-            WrapperPlayServerSpawnEntity(protocolId,
-                Optional.of(entityId), EntityTypes.ARMOR_STAND,
-                position, 0f, 0f, 0f, 0, Optional.empty()
-            ),
-            WrapperPlayServerEntityMetadata(protocolId, listOf(
-                EntityData(0, EntityDataTypes.BYTE, (0x20).toByte()),
-                EntityData(15, EntityDataTypes.BYTE, (0x10).toByte()),
-                EntityData(16, EntityDataTypes.ROTATION, headRotation(transform)),
-            ))
-        ) + item() + glowingColor(glowingColor)
+        protected fun item(): () -> List<PacketWrapper<*>> = {
+            val stack = SpigotConversionUtil.fromBukkitItemStack(item)
+            listOf(
+                WrapperPlayServerEntityEquipment(protocolId, listOf(Equipment(EquipmentSlot.HELMET, stack)))
+            )
+        }
+
+        protected fun glowingColor(color: NamedTextColor): () -> List<PacketWrapper<*>> = {
+            val team = AlexandriaTeams.colorToTeam(color)
+            val eid = entityId.toString()
+            listOf(
+                WrapperPlayServerTeams(team, WrapperPlayServerTeams.TeamMode.ADD_ENTITIES, Optional.empty(), eid)
+            )
+        }
+
+        protected fun transform(positionId: Int, rotationId: Int): () -> List<PacketWrapper<*>> = {
+            val position = position(transform)
+            val headRotation = headRotation(transform)
+            listOf(
+                WrapperPlayServerEntityTeleport(positionId, position, 0f, 0f, false),
+                WrapperPlayServerEntityMetadata(rotationId, listOf(
+                    EntityData(16, EntityDataTypes.ROTATION, headRotation)
+                ))
+            )
+        }
+
+        protected fun spawnStand(position: Vector3d): () -> List<PacketWrapper<*>> {
+            val pItem = item()
+            val pGlowingColor = glowingColor(glowingColor)
+            return {
+                val headRotation = headRotation(transform)
+                listOf(
+                    WrapperPlayServerSpawnEntity(protocolId,
+                        Optional.of(entityId), EntityTypes.ARMOR_STAND,
+                        position, 0f, 0f, 0f, 0, Optional.empty()
+                    ),
+                    WrapperPlayServerEntityMetadata(protocolId, listOf(
+                        EntityData(0, EntityDataTypes.BYTE, (0x20).toByte()),
+                        EntityData(15, EntityDataTypes.BYTE, (0x10).toByte()),
+                        EntityData(16, EntityDataTypes.ROTATION, headRotation),
+                    ))
+                ) + pItem() + pGlowingColor()
+            }
+        }
 
         override fun glowing(state: Boolean, players: Iterable<Player>) {
-            val packet = WrapperPlayServerEntityMetadata(protocolId, listOf(
-                EntityData(0, EntityDataTypes.BYTE, (0x20 or (if (state) 0x40 else 0)).toByte()) // invisible + glowing?
-            ))
+            val state = (0x20 or (if (state) 0x40 else 0)).toByte() // invisible + glowing?
 
             players.forEach { player ->
-                player.sendPacket(packet)
+                player.sendPacket(WrapperPlayServerEntityMetadata(protocolId, listOf(
+                    EntityData(0, EntityDataTypes.BYTE, state) // invisible + glowing?
+                )))
             }
         }
     }
@@ -196,14 +206,13 @@ class MeshManager internal constructor() : PacketListener {
         override fun spawn(players: Iterable<Player>) {
             val packets = spawnStand(position(transform))
             players.forEach { player ->
-                packets.forEach { player.sendPacket(it) }
+                packets().forEach { player.sendPacket(it) }
             }
         }
 
         override fun remove(players: Iterable<Player>) {
-            val packet = WrapperPlayServerDestroyEntities(protocolId)
             players.forEach { player ->
-                player.sendPacket(packet)
+                player.sendPacket(WrapperPlayServerDestroyEntities(protocolId))
             }
         }
     }
@@ -224,25 +233,26 @@ class MeshManager internal constructor() : PacketListener {
 
         override fun spawn(players: Iterable<Player>) {
             val position = position(transform)
-            val packets = spawnStand(position) + listOf(
-                WrapperPlayServerSpawnEntity(vehicleId,
-                    Optional.of(UUID.randomUUID()), EntityTypes.AREA_EFFECT_CLOUD,
-                    position, 0f, 0f, 0f, 0, Optional.empty()
-                ),
-                WrapperPlayServerEntityMetadata(vehicleId, listOf(
-                    EntityData(8, EntityDataTypes.FLOAT, 0f)
-                )),
-                WrapperPlayServerSetPassengers(vehicleId, intArrayOf(protocolId))
-            )
+            val pSpawnStand = spawnStand(position)
+            val vehicleUuid = UUID.randomUUID()
+            val passengersArray = intArrayOf(protocolId)
+
             players.forEach { player ->
-                packets.forEach { player.sendPacket(it) }
+                pSpawnStand().forEach { player.sendPacket(it) }
+                player.sendPacket(WrapperPlayServerSpawnEntity(vehicleId,
+                    Optional.of(vehicleUuid), EntityTypes.AREA_EFFECT_CLOUD,
+                    position, 0f, 0f, 0f, 0, Optional.empty()
+                ))
+                player.sendPacket(WrapperPlayServerEntityMetadata(vehicleId, listOf(
+                    EntityData(8, EntityDataTypes.FLOAT, 0f)
+                )))
+                player.sendPacket(WrapperPlayServerSetPassengers(vehicleId, passengersArray))
             }
         }
 
         override fun remove(players: Iterable<Player>) {
-            val packet = WrapperPlayServerDestroyEntities(protocolId, vehicleId)
             players.forEach { player ->
-                player.sendPacket(packet)
+                player.sendPacket(WrapperPlayServerDestroyEntities(protocolId, vehicleId))
             }
         }
     }

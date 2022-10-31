@@ -13,8 +13,6 @@ import org.spongepowered.configurate.kotlin.extensions.get
 import org.spongepowered.configurate.objectmapping.ConfigSerializable
 import kotlin.math.min
 
-private const val CONFIG_PATH = "player_actions"
-
 data class PlayerAction(
     val getName: (I18N<Component>) -> Component,
     val onUpdate: (UpdateContext) -> Unit = {},
@@ -121,8 +119,8 @@ class PlayerActions internal constructor(
 
     override fun createFor(player: AlexandriaPlayer) = PlayerData(player)
 
-    internal fun load(settings: ConfigurationNode) {
-        this.settings = settings.node(CONFIG_PATH).get { Settings() }
+    internal fun load() {
+        this.settings = alexandria.settings.playerActions
     }
 
     private fun makeActionText(
