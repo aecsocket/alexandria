@@ -60,7 +60,10 @@ class PacketInputListener(
         if (!player.isValid) return
 
         fun call(input: Input, cancel: () -> Unit = {}) {
-            callback(InputEvent(player, input, cancel))
+            callback(InputEvent(player, input) {
+                event.isCancelled = true
+                cancel()
+            })
         }
 
         when (event.packetType) {
