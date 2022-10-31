@@ -12,12 +12,13 @@ const val SPEED_IN_AIR = 340.29
 
 @ConfigSerializable
 data class SoundEngineEffect(
+    val all: List<SoundEffect> = emptyList(),
     val outdoors: List<SoundEffect> = emptyList(),
     val indoors: List<SoundEffect> = emptyList(),
     val mixed: List<SoundEffect> = emptyList(),
 ) {
     companion object {
-        val Empty = SoundEngineEffect(emptyList(), emptyList(), emptyList())
+        val Empty = SoundEngineEffect()
     }
 }
 
@@ -40,6 +41,8 @@ class SoundEngine internal constructor(
     }
 
     fun play(location: Location, effect: SoundEngineEffect) {
+        if (!alexandria.isEnabled) return
+
         val txOutdoors = outdoors(location)
         val position = location.position()
         location.world.players.forEach { player ->
@@ -74,6 +77,7 @@ class SoundEngine internal constructor(
                 }
             }
 
+            playAll(1f, effect.all)
             if (volOutdoors > 0f) playAll(volOutdoors, effect.outdoors)
             if (volIndoors > 0f) playAll(volIndoors, effect.indoors)
             if (volMixed > 0f) playAll(volMixed, effect.mixed)
