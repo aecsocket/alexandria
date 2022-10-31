@@ -49,10 +49,10 @@ class PacketInputListener(
         player.alexandria.lastClick = bukkitCurrentTick
     }
 
-    private fun isStartingDigging(player: Player) = player.alexandria.lastStartDig == bukkitCurrentTick
+    private fun isDigging(player: Player) = player.alexandria.digging
 
-    private fun markStartingDigging(player: Player) {
-        player.alexandria.lastStartDig = bukkitCurrentTick
+    private fun setDigging(player: Player, value: Boolean) {
+        player.alexandria.digging = value
     }
 
     override fun onPacketReceive(event: PacketReceiveEvent) {
@@ -73,8 +73,7 @@ class PacketInputListener(
                     packet.hand == InteractionHand.MAIN_HAND
                     && !isSwinging(player)
                     && !isClicking(player)
-                    && !isStartingDigging(player)
-                    && !(hIsDestroying.get((player as CraftPlayer).handle.gameMode) as Boolean)
+                    && !isDigging(player)
                 ) {
                     call(Mouse(LEFT, MouseState.UNDEFINED))
                 }
@@ -111,11 +110,12 @@ class PacketInputListener(
                     }
 
                     DiggingAction.START_DIGGING -> {
-                        markStartingDigging(player)
+                        setDigging(player, true)
                         call(Mouse(LEFT, MouseState.DOWN))
                     }
                     DiggingAction.CANCELLED_DIGGING,
                     DiggingAction.FINISHED_DIGGING -> {
+                        setDigging(player, false)
                         call(Mouse(LEFT, MouseState.UP))
                     }
 

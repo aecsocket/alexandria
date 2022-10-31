@@ -33,7 +33,7 @@ class AlexandriaPlayer internal constructor(
 ) {
     internal var lastSwing = 0
     internal var lastClick = 0
-    internal var lastStartDig = 0
+    internal var digging = false
 
     val effector: Effector = PlayerEffector()
     var steering: SteeringInputs = SteeringInputs()
