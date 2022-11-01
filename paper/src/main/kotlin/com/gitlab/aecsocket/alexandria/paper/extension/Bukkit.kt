@@ -4,8 +4,10 @@ import com.gitlab.aecsocket.alexandria.core.extension.*
 import com.gitlab.aecsocket.alexandria.core.physics.Quaternion
 import com.gitlab.aecsocket.alexandria.core.physics.Transform
 import org.bukkit.Bukkit
+import org.bukkit.Chunk
 import org.bukkit.attribute.AttributeInstance
 import org.bukkit.attribute.AttributeModifier
+import org.bukkit.craftbukkit.v1_19_R1.CraftChunk
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
@@ -51,4 +53,9 @@ fun Player.give(item: ItemStack) {
             world.dropItem(location, nonAdded)
         }
     }
+}
+
+fun Chunk.trackedPlayers(): List<Player> {
+    val handle = (this as CraftChunk).handle
+    return handle.level.chunkSource.chunkMap.getPlayers(handle.pos, false).map { it.bukkitEntity }
 }
