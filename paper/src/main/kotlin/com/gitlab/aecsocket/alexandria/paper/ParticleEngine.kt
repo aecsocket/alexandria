@@ -11,6 +11,8 @@ import org.spongepowered.configurate.objectmapping.meta.Setting
 data class ParticleEngineEffect(
     @Setting(nodeFromParent = true) val effects: List<ParticleEffect> = emptyList(),
 ) {
+    fun map(transform: (ParticleEffect) -> ParticleEffect) = ParticleEngineEffect(effects.map(transform))
+
     companion object {
         val Empty = ParticleEngineEffect()
     }

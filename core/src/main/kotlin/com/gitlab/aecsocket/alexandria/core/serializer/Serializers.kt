@@ -16,6 +16,7 @@ object Serializers {
         .registerExact(ColorModSerializer)
         .registerExact(EmptyShapeSerializer)
         .registerExact(ShapeSerializer)
+        .registerExact(RangeMapFloatSerializer)
         .register(QuantifierSerializer)
         .register(InputMapperSerializer)
         .build()

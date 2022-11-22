@@ -39,7 +39,7 @@ object ParticleEffectSerializer : TypeSerializer<ParticleEffect> {
         }
         return ParticleEffect(
             particle,
-            node.node(COUNT).get { 0.0 },
+            node.node(COUNT).get { 0f },
             node.node(SIZE).get { Vector3.Zero },
             node.node(SPEED).get { 0.0 },
             data

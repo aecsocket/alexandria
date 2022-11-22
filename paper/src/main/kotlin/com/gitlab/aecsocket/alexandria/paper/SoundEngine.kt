@@ -17,6 +17,13 @@ data class SoundEngineEffect(
     val indoors: List<SoundEffect> = emptyList(),
     val mixed: List<SoundEffect> = emptyList(),
 ) {
+    fun map(transform: (SoundEffect) -> SoundEffect) = SoundEngineEffect(
+        all.map(transform),
+        outdoors.map(transform),
+        indoors.map(transform),
+        mixed.map(transform),
+    )
+
     companion object {
         val Empty = SoundEngineEffect()
     }

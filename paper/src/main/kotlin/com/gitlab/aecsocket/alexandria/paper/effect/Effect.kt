@@ -22,7 +22,7 @@ data class SoundEffect(
 
 data class ParticleEffect(
     val particle: Particle,
-    val count: Double = 0.0,
+    val count: Float = 0f,
     val size: Vector3 = Vector3.Zero,
     val speed: Double = 0.0,
     val data: Any? = null
