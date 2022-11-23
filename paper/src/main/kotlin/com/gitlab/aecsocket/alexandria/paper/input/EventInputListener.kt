@@ -13,6 +13,7 @@ import org.bukkit.event.player.PlayerSwapHandItemsEvent
 import org.bukkit.event.player.PlayerToggleFlightEvent
 import org.bukkit.event.player.PlayerToggleSneakEvent
 import org.bukkit.event.player.PlayerToggleSprintEvent
+import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.plugin.Plugin
 
 class EventInputListener(
@@ -26,6 +27,7 @@ class EventInputListener(
 
             @EventHandler
             fun on(event: PlayerInteractEvent) {
+                if (event.hand != EquipmentSlot.HAND) return
                 call(event.player, Input.Mouse(
                     if (event.action.isLeftClick) Input.MouseButton.LEFT else Input.MouseButton.RIGHT,
                     Input.MouseState.UNDEFINED
