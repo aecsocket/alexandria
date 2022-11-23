@@ -20,7 +20,7 @@ class EventInputListener(
 ) {
     fun enable(plugin: Plugin) {
         plugin.registerEvents(object : Listener {
-            fun call(player: Player, input: Input, cancel: () -> Unit = {}) {
+            fun call(player: Player, input: Input, cancel: () -> Unit) {
                 callback(InputEvent(player, input, cancel))
             }
 
@@ -29,7 +29,7 @@ class EventInputListener(
                 call(event.player, Input.Mouse(
                     if (event.action.isLeftClick) Input.MouseButton.LEFT else Input.MouseButton.RIGHT,
                     Input.MouseState.UNDEFINED
-                ))
+                )) { event.isCancelled = true }
             }
 
             @EventHandler
