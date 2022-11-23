@@ -1,4 +1,4 @@
-package com.gitlab.aecsocket.alexandria.paper
+package com.gitlab.aecsocket.alexandria.paper.input
 
 import com.github.retrooper.packetevents.event.PacketListener
 import com.github.retrooper.packetevents.event.PacketReceiveEvent
@@ -12,19 +12,13 @@ import com.gitlab.aecsocket.alexandria.core.input.Input.MenuType.ADVANCEMENTS
 import com.gitlab.aecsocket.alexandria.core.input.Input.MenuType.HORSE
 import com.gitlab.aecsocket.alexandria.core.input.Input.MouseButton.LEFT
 import com.gitlab.aecsocket.alexandria.core.input.Input.MouseButton.RIGHT
+import com.gitlab.aecsocket.alexandria.paper.alexandria
 import com.gitlab.aecsocket.alexandria.paper.extension.bukkitCurrentTick
 import net.minecraft.server.level.ServerPlayerGameMode
 import net.minecraft.world.item.UseAnim
-import org.bukkit.craftbukkit.v1_19_R1.entity.CraftPlayer
 import org.bukkit.craftbukkit.v1_19_R1.inventory.CraftItemStack
 import org.bukkit.entity.Player
 import java.lang.invoke.MethodHandles
-
-data class InputEvent(
-    val player: Player,
-    val input: Input,
-    val cancel: () -> Unit
-)
 
 class PacketInputListener(
     val callback: (InputEvent) -> Unit,
@@ -162,12 +156,4 @@ class PacketInputListener(
             }
         }
     }
-}
-
-fun scrollDirection(next: Int, last: Int): ScrollDirection? {
-    return if (next == 0 && last == 8) ScrollDirection.DOWN
-        else if (next == 8 && last == 0) ScrollDirection.UP
-        else if (next > last) ScrollDirection.DOWN
-        else if (last > next) ScrollDirection.UP
-        else null
 }

@@ -33,19 +33,23 @@ sealed interface Input {
         override val type get() = InputType.HELD_ITEM
     }
 
-    data class Sneak(val now: Boolean) : Input {
+    interface Toggleable : Input {
+        val now: Boolean
+    }
+
+    data class Sneak(override val now: Boolean) : Toggleable {
         override val type get() = InputType.SNEAK
     }
 
-    data class Sprint(val now: Boolean) : Input {
+    data class Sprint(override val now: Boolean) : Toggleable {
         override val type get() = InputType.SPRINT
     }
 
-    data class Flight(val now: Boolean) : Input {
+    data class Flight(override val now: Boolean) : Toggleable {
         override val type get() = InputType.FLIGHT
     }
 
-    data class HorseJump(val now: Boolean) : Input {
+    data class HorseJump(override val now: Boolean) : Toggleable {
         override val type get() = InputType.HORSE_JUMP
     }
 

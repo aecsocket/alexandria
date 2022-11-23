@@ -11,11 +11,11 @@ import com.gitlab.aecsocket.alexandria.core.LogList
 import com.gitlab.aecsocket.alexandria.core.TableAlign
 import com.gitlab.aecsocket.alexandria.core.extension.force
 import com.gitlab.aecsocket.alexandria.core.extension.walkFile
-import com.gitlab.aecsocket.alexandria.core.input.Input
-import com.gitlab.aecsocket.alexandria.core.input.InputType
 import com.gitlab.aecsocket.alexandria.core.serializer.Serializers
 import com.gitlab.aecsocket.alexandria.paper.extension.registerEvents
 import com.gitlab.aecsocket.alexandria.paper.extension.scheduleRepeating
+import com.gitlab.aecsocket.alexandria.paper.input.EventInputListener
+import com.gitlab.aecsocket.alexandria.paper.input.InputEvent
 import com.gitlab.aecsocket.alexandria.paper.serializer.PaperSerializers
 import com.gitlab.aecsocket.glossa.adventure.MiniMessageI18N
 import com.gitlab.aecsocket.glossa.adventure.load
@@ -39,7 +39,6 @@ import org.bstats.bukkit.Metrics
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
-import org.bukkit.event.player.PlayerDropItemEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.map.MapFont
@@ -63,7 +62,6 @@ import java.sql.Connection
 import java.sql.SQLException
 import java.util.*
 import kotlin.io.path.isDirectory
-import kotlin.reflect.KClass
 
 private const val ENABLE_BSTATS = "enable_bstats"
 private const val LOCALE = "locale"
@@ -76,9 +74,7 @@ private const val DATABASE_NAME = "alexandria.db"
 private lateinit var instance: Alexandria
 val AlexandriaAPI get() = instance
 
-fun interface InputHandler {
-    fun handle(event: InputEvent)
-}
+typealias InputHandler = (event: InputEvent) -> Unit
 
 class Alexandria : BasePlugin() {
     @ConfigSerializable
@@ -129,7 +125,7 @@ class Alexandria : BasePlugin() {
     val playerPersistence = PlayerPersistence(this)
 
     private val registrations = ArrayList<Registration>()
-    private val inputHandlers = ArrayList<InputHandler>()
+    private val onInput = ArrayList<InputHandler>()
 
     init {
         instance = this
@@ -159,16 +155,11 @@ class Alexandria : BasePlugin() {
                 playerFor(player).onPacketReceive(event)
             }
         })
-        PacketEvents.getAPI().eventManager.registerListener(PacketInputListener { event ->
-            when (event.input.type) {
-                InputType.DROP -> {}
-                else -> {
-                    inputHandlers.forEach { handler ->
-                        handler.handle(event)
-                    }
-                }
-            }
-        }, PacketListenerPriority.NORMAL)
+
+        EventInputListener { event ->
+            onInput.forEach { it(event) }
+        }.enable(this)
+
         registerEvents(object : Listener {
             @EventHandler
             fun on(event: PlayerJoinEvent) {
@@ -178,14 +169,6 @@ class Alexandria : BasePlugin() {
             @EventHandler
             fun on(event: PlayerQuitEvent) {
                 _players.remove(event.player)?.dispose()
-            }
-
-            @EventHandler
-            fun on(event: PlayerDropItemEvent) {
-                val input = InputEvent(event.player, Input.Drop) { event.isCancelled = true }
-                inputHandlers.forEach { handler ->
-                    handler.handle(input)
-                }
             }
         })
         registerConsumer(this,
@@ -350,16 +333,6 @@ class Alexandria : BasePlugin() {
 
             paddingWidth = widthOf(padding)
 
-            fun tryLoad(featureType: KClass<*>, action: () -> Unit): Boolean? {
-                try {
-                    action()
-                } catch (ex: Exception) {
-                    log.line(LogLevel.Error, ex) { "Could not load ${featureType.simpleName} settings" }
-                    return false
-                }
-                return null
-            }
-
             soundEngine.load()
             playerActions.load()
             playerPersistence.load()
@@ -382,8 +355,8 @@ class Alexandria : BasePlugin() {
         registrations.add(Registration(plugin, onInit, onLoad))
     }
 
-    fun inputHandler(handler: InputHandler) {
-        inputHandlers.add(handler)
+    fun onInput(handler: InputHandler) {
+        onInput.add(handler)
     }
 
     fun configLoader(): AbstractConfigurationLoader.Builder<*, *> =

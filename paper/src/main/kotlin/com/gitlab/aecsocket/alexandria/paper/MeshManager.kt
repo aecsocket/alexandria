@@ -181,11 +181,11 @@ class MeshManager internal constructor() : PacketListener {
         }
 
         override fun glowing(state: Boolean, players: Iterable<Player>) {
-            val state = (0x20 or (if (state) 0x40 else 0)).toByte() // invisible + glowing?
+            val flags = (0x20 or (if (state) 0x40 else 0)).toByte() // invisible + glowing?
 
             players.forEach { player ->
                 player.sendPacket(WrapperPlayServerEntityMetadata(protocolId, listOf(
-                    EntityData(0, EntityDataTypes.BYTE, state) // invisible + glowing?
+                    EntityData(0, EntityDataTypes.BYTE, flags) // invisible + glowing?
                 )))
             }
         }

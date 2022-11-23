@@ -1,73 +1,72 @@
 package com.gitlab.aecsocket.alexandria.core.input
 
-class InputMapper<V> private constructor(
-    private val values: Map<InputType, List<Trigger<V>>>
+import org.spongepowered.configurate.objectmapping.ConfigSerializable
+import org.spongepowered.configurate.objectmapping.meta.Setting
+
+@ConfigSerializable
+class InputMapper<V>(
+    @Setting(nodeFromParent = true) private val values: Map<InputType, List<Value<V>>>
 ) {
-    private data class Trigger<V>(
-        val tags: Set<String>,
+    interface Filter {
+        fun matches(input: Input): Boolean
+    }
+
+    object TrueFilter : Filter {
+        override fun matches(input: Input) = true
+    }
+
+    @ConfigSerializable
+    data class MouseFilter(
+        val button: Input.MouseButton? = null,
+        val state: Input.MouseState? = null,
+    ) : Filter {
+        override fun matches(input: Input) = input is Input.Mouse &&
+            (button == null || input.button == button) &&
+            (state == null || input.state == state)
+    }
+
+    @ConfigSerializable
+    data class HeldItemFilter(
+        val direction: Input.ScrollDirection? = null,
+    ) : Filter {
+        override fun matches(input: Input) = input is Input.HeldItem &&
+            (direction == null || input.direction == direction)
+    }
+
+    @ConfigSerializable
+    data class ToggleableFilter(
+        val now: Boolean? = null,
+    ) : Filter {
+        override fun matches(input: Input) = input is Input.Toggleable &&
+            (now == null || input.now == now)
+    }
+
+    @ConfigSerializable
+    data class MenuFilter(
+        val menu: Input.MenuType? = null,
+        val open: Boolean? = null,
+    ) : Filter {
+        override fun matches(input: Input) = input is Input.Menu &&
+            (menu == null || input.menu == menu) &&
+            (open == null || input.open == open)
+    }
+
+    data class Value<V>(
+        val filter: Filter,
         val value: V
     ) {
-        fun <R> map(mapper: (V) -> R): Trigger<R> {
-            return Trigger(tags, mapper(value))
-        }
+        fun <R> map(transform: (V) -> R) = Value(filter, transform(value))
     }
 
-    fun get(input: Input, tags: Collection<String>): V? {
-        val allTags = when (input) {
-            is Input.Mouse -> listOf(input.button.key, input.state.key)
-            is Input.SwapHands -> emptyList()
-            is Input.Drop -> emptyList()
-            is Input.HeldItem -> listOf(input.direction.key)
-            is Input.Sneak -> listOf(input.now.toString())
-            is Input.Sprint -> listOf(input.now.toString())
-            is Input.Flight -> listOf(input.now.toString())
-            is Input.HorseJump -> listOf(input.now.toString())
-            is Input.ElytraFlight -> emptyList()
-            is Input.Menu -> listOf(input.menu.key, input.open.toString())
-            is Input.LeaveBed -> emptyList()
-        } + tags
-
-        values[input.type]?.let { triggers ->
-            triggers.forEach { trigger ->
-                if (allTags.containsAll(trigger.tags)) {
-                    return trigger.value
-                }
-            }
-        }
-        return null
+    fun matches(input: Input): List<V> {
+        return (values[input.type] ?: return emptyList())
+            .filter { (filter) -> filter.matches(input) }
+            .map { (_, value) -> value }
     }
 
-    fun <R> map(mapper: (V) -> R): InputMapper<R> {
-        return InputMapper(values
-            .map { (type, triggers) -> type to triggers.map { trigger -> trigger.map(mapper) } }
-            .associate { it })
-    }
-
-    class Builder<V> internal constructor() {
-        private data class BuildTrigger<V>(
-            val inputType: InputType,
-            val tags: Iterable<String>,
-            val value: V
-        )
-
-        private val triggers = ArrayList<BuildTrigger<V>>()
-
-        fun trigger(inputType: InputType, tags: Iterable<String>, value: V): Builder<V> {
-            triggers.add(BuildTrigger(inputType, tags, value))
-            return this
-        }
-
-        fun build(): InputMapper<V> {
-            val byInputType = HashMap<InputType, MutableList<Trigger<V>>>()
-            triggers.forEach { (inputType, tags, value) ->
-                byInputType.computeIfAbsent(inputType) { ArrayList() }
-                    .add(Trigger(tags.toSet(), value))
-            }
-            return InputMapper(byInputType)
-        }
-    }
-
-    companion object {
-        fun <V> builder() = Builder<V>()
+    fun <R> map(transform: (V) -> R): InputMapper<R> {
+        return InputMapper(values.map { (type, values) ->
+            type to values.map { it.map(transform) }
+        }.associate { it })
     }
 }
