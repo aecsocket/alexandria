@@ -1,8 +1,7 @@
 package com.gitlab.aecsocket.alexandria.core
 
 import com.gitlab.aecsocket.alexandria.core.extension.nextVector3
-import com.gitlab.aecsocket.alexandria.core.physics.Vector3
-import com.gitlab.aecsocket.alexandria.core.physics.quaternionOfAxes
+import com.gitlab.aecsocket.alexandria.core.physics.*
 import org.junit.jupiter.api.Test
 import kotlin.random.Random
 
@@ -10,13 +9,11 @@ import kotlin.random.Random
 class PhysicsTest {
     @Test
     fun testTransform() {
-        val up = Vector3.Y
-        val dir = Random.Default.nextVector3().normalized
-
-        println("$up | ${dir.asString("%ff")}")
-        val v1 = up.cross(dir).normalized
-        val v2 = dir.cross(v1).normalized
-        println("$v1 | $v2")
-        println(quaternionOfAxes(v1, v2, dir))
+        val ray = Ray(
+            Vector3(0.926141, 1.217214, 1.556720),
+            Vector3(-0.237886, -0.502104, -0.831446)
+        )
+        val box = BoxShape(Vector3(0.5))
+        testRayBox(ray, box)
     }
 }

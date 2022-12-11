@@ -6,6 +6,7 @@ import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes
 import com.github.retrooper.packetevents.protocol.entity.type.EntityTypes
 import com.github.retrooper.packetevents.protocol.player.Equipment
 import com.github.retrooper.packetevents.protocol.player.EquipmentSlot
+import com.github.retrooper.packetevents.util.AdventureSerializer
 import com.github.retrooper.packetevents.util.Vector3d
 import com.github.retrooper.packetevents.util.Vector3f
 import com.github.retrooper.packetevents.wrapper.PacketWrapper
@@ -16,6 +17,7 @@ import com.gitlab.aecsocket.alexandria.core.extension.euler
 import com.gitlab.aecsocket.alexandria.core.physics.Transform
 import com.gitlab.aecsocket.alexandria.paper.extension.bukkitNextEntityId
 import io.github.retrooper.packetevents.util.SpigotConversionUtil
+import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
@@ -38,6 +40,10 @@ sealed interface Mesh {
     fun glowing(state: Boolean, players: Iterable<Player>)
 
     fun glowing(state: Boolean, player: Player) = glowing(state, setOf(player))
+
+    fun name(name: Component?, players: Iterable<Player>)
+
+    fun name(name: Component?, player: Player) = name(name, setOf(player))
 
     fun remove(players: Iterable<Player>)
 
@@ -83,6 +89,8 @@ class MeshManager internal constructor() : PacketListener {
         }
     }
 
+    fun remove(mesh: Mesh, update: Boolean = true) = remove(mesh.id, update)
+
     internal fun update() {
         _meshes.forEach { (_, mesh) ->
             mesh.lastTrackedPlayers = mesh.trackedPlayers()
@@ -121,7 +129,9 @@ class MeshManager internal constructor() : PacketListener {
         }
 
         protected fun update(packets: () -> Iterable<PacketWrapper<*>>) {
-            lastTrackedPlayers.forEach { player ->
+            // trackedPlayers() instead of last* ensures that, if we've just spawned this mesh and want to change glow color,
+            // we aren't using stale (empty) player list
+            trackedPlayers().forEach { player ->
                 packets().forEach { player.sendPacket(it) }
             }
         }
@@ -186,6 +196,16 @@ class MeshManager internal constructor() : PacketListener {
             players.forEach { player ->
                 player.sendPacket(WrapperPlayServerEntityMetadata(protocolId, listOf(
                     EntityData(0, EntityDataTypes.BYTE, flags) // invisible + glowing?
+                )))
+            }
+        }
+
+        override fun name(name: Component?, players: Iterable<Player>) {
+            players.forEach { player ->
+                player.sendPacket(WrapperPlayServerEntityMetadata(protocolId, listOf(
+                    EntityData(2, EntityDataTypes.OPTIONAL_COMPONENT,
+                        name?.let { Optional.of(it) } ?: Optional.empty<Component>()),
+                    EntityData(3, EntityDataTypes.BOOLEAN, name != null)
                 )))
             }
         }

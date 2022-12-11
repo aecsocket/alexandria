@@ -33,8 +33,8 @@ dependencies {
     implementation(libs.cloudMinecraftExtras) { isTransitive = false }
 
     compileOnly(libs.adventureApi)
-    implementation(libs.adventureExtraKotlin)
-    implementation(libs.adventureSerializerConfigurate)
+    implementation(libs.adventureExtraKotlin) { isTransitive = false }
+    implementation(libs.adventureSerializerConfigurate) { isTransitive = false }
 
     implementation(libs.packetEventsSpigot)
 
@@ -51,17 +51,26 @@ dependencies {
 tasks {
     shadowJar {
         mergeServiceFiles()
-        // can't exclude `net/kyori/` here beacuse of glossa's configurate component serializer
-        // but otherwise packetevents will include adventure-api here
+
+        // kt-runtime
+        exclude("kotlin/")
+        exclude("kotlinx/")
+
+        exclude("com/google/gson/")
+        exclude("com/ibm/icu/")
+
         listOf(
             "org.jetbrains",
             "org.intellij",
-
             "org.bstats",
-        ).forEach { relocate(it, "${project.group}.lib.$it") }
 
-        exclude("kotlin/")
-        exclude("kotlinx/")
+            "org.spongepowered.configurate",
+            "io.leangen.geantyref",
+            "com.typesafe.config",
+            "cloud.commandframework",
+            "com.github.retrooper.packetevents",
+            "io.github.retrooper.packetevents",
+        ).forEach { relocate(it, "${project.group}.lib.$it") }
     }
 
     assemble {

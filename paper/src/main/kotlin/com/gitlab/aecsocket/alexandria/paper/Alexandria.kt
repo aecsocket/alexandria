@@ -118,6 +118,7 @@ class Alexandria : BasePlugin() {
 
     val playerLocks = PlayerLocks(this)
     val playerActions = PlayerActions(this)
+    val contextCallbacks = ContextCallbacks(this)
     val debugBoard = DebugBoard()
     val soundEngine = SoundEngine(this)
     val particleEngine = ParticleEngine(this)
