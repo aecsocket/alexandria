@@ -13,6 +13,6 @@ Alexandria cause it's a library haha get it
 
 ### [Quickstart and documentation](https://phosphorous.gitlab.io/alexandria)
 
-### Downloads
+### Downloads for v0.5.4
 
-* [Paper 0.5.4](https://gitlab.com/api/v4/projects/37885661/jobs/artifacts/main/raw/paper/build/libs/alexandria-paper-0.5.4.jar?job=build)
+* [Paper](https://gitlab.com/api/v4/projects/37885661/jobs/artifacts/main/raw/paper/build/libs/alexandria-paper-0.5.4.jar?job=build)
