@@ -56,14 +56,12 @@ tasks {
         exclude("kotlin/")
         exclude("kotlinx/")
 
-        exclude("com/google/gson/")
-        exclude("com/ibm/icu/")
-
         listOf(
             "org.jetbrains",
             "org.intellij",
             "org.bstats",
 
+            "com.ibm.icu",
             "org.spongepowered.configurate",
             "io.leangen.geantyref",
             "com.typesafe.config",
