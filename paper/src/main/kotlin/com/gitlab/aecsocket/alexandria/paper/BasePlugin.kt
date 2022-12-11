@@ -3,9 +3,7 @@ package com.gitlab.aecsocket.alexandria.paper
 import com.gitlab.aecsocket.alexandria.core.LogLevel
 import com.gitlab.aecsocket.alexandria.core.LogList
 import com.gitlab.aecsocket.alexandria.core.Logging
-import com.gitlab.aecsocket.alexandria.core.extension.force
 import com.gitlab.aecsocket.alexandria.core.extension.walkFile
-import com.gitlab.aecsocket.alexandria.core.keyed.Keyed
 import com.gitlab.aecsocket.alexandria.paper.extension.disable
 import com.gitlab.aecsocket.alexandria.paper.extension.scheduleDelayed
 import com.gitlab.aecsocket.glossa.core.I18N
@@ -17,10 +15,8 @@ import net.kyori.adventure.text.format.TextColor
 import org.bukkit.plugin.java.JavaPlugin
 import org.spongepowered.configurate.ConfigurationNode
 import org.spongepowered.configurate.ConfigurationOptions
-import org.spongepowered.configurate.hocon.HoconConfigurationLoader
 import org.spongepowered.configurate.kotlin.dataClassFieldDiscoverer
 import org.spongepowered.configurate.kotlin.extensions.get
-import org.spongepowered.configurate.objectmapping.ConfigSerializable
 import org.spongepowered.configurate.objectmapping.ObjectMapper
 import org.spongepowered.configurate.util.NamingSchemes
 import java.io.File
@@ -30,7 +26,6 @@ import java.nio.file.Path
 import kotlin.io.path.isRegularFile
 import kotlin.io.path.name
 
-const val PATH_MANIFEST = "manifest.conf"
 const val PATH_SETTINGS = "settings.conf"
 const val PATH_LANG = "lang"
 
@@ -52,23 +47,20 @@ private val manifestConfigOptions = ConfigurationOptions.defaults()
         it.registerAnnotatedObjects(mapper.build())
     }
 
-fun chatPrefixOf(name: String, color: TextColor) =
+private fun chatPrefixOf(name: String, color: TextColor) =
     Component.text("{$name} ", color)
 
-abstract class BasePlugin : JavaPlugin() {
-    @ConfigSerializable
-    data class Manifest(
-        val name: String,
-        val chatName: String,
-        val accentColor: TextColor,
-        val langPaths: List<String>,
-        val savedPaths: List<String>,
-    ) {
-        init {
-            Keyed.validate(name)
-        }
-    }
+data class PluginManifest(
+    val name: String,
+    val displayName: String = name,
+    val accentColor: TextColor,
+    val langPaths: List<String>,
+    val savedPaths: List<String>
+)
 
+abstract class BasePlugin(
+    val manifest: PluginManifest
+) : JavaPlugin() {
     val log = Logging({
         fun String.crop(target: Int, padder: String.(Int) -> String) = if (length > target) substring(0, target)
             else padder(this, target)
@@ -78,12 +70,7 @@ abstract class BasePlugin : JavaPlugin() {
         logger.info("$threadName $it")
     })
 
-    val manifest = HoconConfigurationLoader.builder()
-        .source { resource(PATH_MANIFEST).bufferedReader() }
-        .build()
-        .load(manifestConfigOptions)
-        .force<Manifest>()
-    val chatPrefix = chatPrefixOf(manifest.chatName, manifest.accentColor)
+    val chatPrefix = chatPrefixOf(manifest.displayName, manifest.accentColor)
 
     override fun onEnable() {
         if (!dataFolder.exists()) {
@@ -112,26 +99,23 @@ abstract class BasePlugin : JavaPlugin() {
     fun load(): LoadResult {
         val log = LogList()
 
-        val settings = try {
+        val config = try {
             AlexandriaAPI.configLoader().file(dataFolder.resolve(PATH_SETTINGS)).build().load()
         } catch (ex: Exception) {
             log.line(LogLevel.Error, ex) { "Could not load settings from $PATH_SETTINGS" }
             return LoadResult(log, false)
         }
 
-        try {
-            if (!loadInternal(log, settings))
-                return LoadResult(log, false)
+        return try {
+            LoadResult(log, loadInternal(log, config))
         } catch (ex: Exception) {
-            log.line(LogLevel.Error, ex) { "Could not load data" }
-            return LoadResult(log, false)
+            log.line(LogLevel.Error, ex) { "Could not load plugin" }
+            LoadResult(log, false)
         }
-
-        return LoadResult(log, true)
     }
 
-    protected open fun loadInternal(log: LogList, settings: ConfigurationNode): Boolean {
-        val logLevel = LogLevel.valueOf(settings.node(LOG_LEVEL).get { LogLevel.Verbose.name })
+    protected open fun loadInternal(log: LogList, config: ConfigurationNode): Boolean {
+        val logLevel = LogLevel.valueOf(config.node(LOG_LEVEL).get { LogLevel.Verbose.name })
         this.log.level = logLevel
 
         return true

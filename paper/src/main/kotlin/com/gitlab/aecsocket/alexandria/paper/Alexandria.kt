@@ -33,6 +33,7 @@ import net.kyori.adventure.audience.Audience
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.Component.empty
 import net.kyori.adventure.text.Component.text
+import net.kyori.adventure.text.format.TextColor
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import org.bstats.bukkit.Metrics
@@ -48,7 +49,6 @@ import org.spongepowered.configurate.ConfigurationNode
 import org.spongepowered.configurate.ConfigurationOptions
 import org.spongepowered.configurate.hocon.HoconConfigurationLoader
 import org.spongepowered.configurate.kotlin.dataClassFieldDiscoverer
-import org.spongepowered.configurate.kotlin.extensions.get
 import org.spongepowered.configurate.loader.AbstractConfigurationLoader
 import org.spongepowered.configurate.objectmapping.ConfigSerializable
 import org.spongepowered.configurate.objectmapping.ObjectMapper
@@ -63,11 +63,6 @@ import java.sql.SQLException
 import java.util.*
 import kotlin.io.path.isDirectory
 
-private const val ENABLE_BSTATS = "enable_bstats"
-private const val LOCALE = "locale"
-private const val PADDING = "padding"
-private const val CHAR_WIDTHS = "char_widths"
-
 private const val BSTATS_ID = 16725
 private const val DATABASE_NAME = "alexandria.db"
 
@@ -76,12 +71,31 @@ val AlexandriaAPI get() = instance
 
 typealias InputHandler = (event: InputEvent) -> Unit
 
-class Alexandria : BasePlugin() {
+class Alexandria : BasePlugin(PluginManifest("alexandria",
+    accentColor = TextColor.color(0x745f86),
+    langPaths = listOf(
+        "lang/default_en-US.conf",
+        "lang/en-US.conf"
+    ),
+    savedPaths = listOf(
+        "settings.conf",
+        "lang/en-US.conf"
+    )
+)) {
     @ConfigSerializable
     data class Settings(
+        val enableBstats: Boolean = true,
+        val locale: Locale = Locale.ROOT,
+        val text: Text,
         val soundEngine: SoundEngine.Settings = SoundEngine.Settings(),
         val playerActions: PlayerActions.Settings = PlayerActions.Settings(),
         val playerPersistence: PlayerPersistence.Settings = PlayerPersistence.Settings(),
+    )
+
+    @ConfigSerializable
+    data class Text(
+        val padding: String = " ",
+        val charWidths: Map<Char, Int> = emptyMap(),
     )
 
     private data class Registration(
@@ -102,16 +116,14 @@ class Alexandria : BasePlugin() {
         fun addDefaultI18N()
     }
 
-    lateinit var settings: Settings private set
-    lateinit var padding: String private set
-    lateinit var charSizes: MapFont private set
-    lateinit var i18n: I18N<Component> private set
     lateinit var configOptions: ConfigurationOptions private set
+    lateinit var settings: Settings private set
+    lateinit var i18n: I18N<Component> private set
     internal var db: HikariDataSource? = null
         private set
-
     var paddingWidth: Int = -1
         private set
+    lateinit var charSizes: MapFont private set
 
     private val _players = HashMap<Player, AlexandriaPlayer>()
     val players: Map<Player, AlexandriaPlayer> get() = _players
@@ -184,163 +196,159 @@ class Alexandria : BasePlugin() {
     }
 
     override fun initInternal(): Boolean {
-        if (super.initInternal()) {
-            val serializers = TypeSerializerCollection.defaults().childBuilder()
-                .registerAll(Serializers.ALL)
-                .registerAll(PaperSerializers.ALL)
+        if (!super.initInternal()) return false
 
-            val initCtx = object : InitContext {
-                override val serializers get() = serializers
-            }
+        val serializers = TypeSerializerCollection.defaults().childBuilder()
+            .registerAll(Serializers.ALL)
+            .registerAll(PaperSerializers.ALL)
 
-            registrations.forEach { it.onInit(initCtx) }
-
-            configOptions = ConfigurationOptions.defaults()
-                .serializers(serializers.registerAnnotatedObjects(
-                    ObjectMapper.factoryBuilder()
-                        .addDiscoverer(dataClassFieldDiscoverer())
-                        .defaultNamingScheme(NamingSchemes.SNAKE_CASE)
-                        .build())
-                    .build())
-
-            playerLocks.enable()
-            playerPersistence.enable()
-
-            return true
+        val initCtx = object : InitContext {
+            override val serializers get() = serializers
         }
-        return false
+
+        registrations.forEach { it.onInit(initCtx) }
+
+        configOptions = ConfigurationOptions.defaults()
+            .serializers(serializers.registerAnnotatedObjects(
+                ObjectMapper.factoryBuilder()
+                    .addDiscoverer(dataClassFieldDiscoverer())
+                    .defaultNamingScheme(NamingSchemes.SNAKE_CASE)
+                    .build())
+                .build())
+
+        playerLocks.enable()
+        playerPersistence.enable()
+
+        return true
     }
 
-    override fun loadInternal(log: LogList, settings: ConfigurationNode): Boolean {
-        if (super.loadInternal(log, settings)) {
-            if (settings.node(ENABLE_BSTATS).get { true }) {
-                Metrics(this, BSTATS_ID)
-            }
+    override fun loadInternal(log: LogList, config: ConfigurationNode): Boolean {
+        if (!super.loadInternal(log, config)) return false
+        settings = config.force()
 
-            val locale = settings.node(LOCALE).get { Locale.ROOT }
-            i18n = MiniMessageI18N.Builder().apply {
-                data class I18NSource(
-                    val name: String,
-                    val source: () -> BufferedReader,
-                )
-
-                fun loadFromSource(warnLevel: LogLevel, source: I18NSource) {
-                    try {
-                        load(configLoader().source(source.source).build())
-                        log.line(LogLevel.Verbose) { "Loaded language resource ${source.name}" }
-                    } catch (ex: ConfigurateException) {
-                        log.line(warnLevel, ex) { "Could not parse language resource ${source.name}" }
-                    }
-                }
-
-                data class I18NRoot(
-                    val name: String,
-                    val path: Path,
-                )
-
-                fun loadFromRoot(root: I18NRoot) {
-                    walkFile(root.path,
-                        onVisit = { path, _ ->
-                            loadFromSource(LogLevel.Warning, I18NSource("${root.name} : $path") {
-                                Files.newBufferedReader(path)
-                            })
-                            FileVisitResult.CONTINUE
-                        },
-                        onFail = { path, ex ->
-                            log.line(LogLevel.Warning, ex) { "Could not access language resource ${root.name} : $path" }
-                            FileVisitResult.CONTINUE
-                        }
-                    )
-                }
-
-                // get data from registrations
-                val sources = ArrayList<I18NSource>()
-                val roots = ArrayList<I18NRoot>()
-
-                registrations.forEach { reg ->
-                    val regName = reg.plugin.manifest.name
-                    reg.onLoad(object : LoadContext {
-                        override fun addI18NSource(name: String, path: String?, source: () -> BufferedReader) {
-                            val baseName = "$regName/$name"
-                            sources.add(I18NSource(path?.let { "$baseName : $it" } ?: baseName, source))
-                        }
-
-                        override fun addI18NRoot(name: String?, path: Path) {
-                            roots.add(I18NRoot(name?.let { "$regName/$it" } ?: regName, path))
-                        }
-
-                        override fun addDefaultI18N() {
-                            // default sources
-                            reg.plugin.manifest.langPaths.forEach { path ->
-                                addI18NSource("jar", path) {
-                                    reg.plugin.resource(path).bufferedReader()
-                                }
-                            }
-                            addI18NRoot(path = reg.plugin.dataFolder.resolve(PATH_LANG).toPath())
-
-                            // default accent style
-                            style("accent_$regName") { color(reg.plugin.manifest.accentColor) }
-                        }
-                    })
-                }
-
-                // load from sources
-                sources.forEach { loadFromSource(LogLevel.Error, it) }
-
-                // load from file system
-                roots.forEach {
-                    if (it.path.isDirectory()) {
-                        loadFromRoot(it)
-                    }
-                }
-
-                // calculate num of unique locales and message keys
-                val locales = HashSet<Locale>()
-                val keys = HashSet<String>()
-                translations.forEach { root ->
-                    locales.add(root.locale)
-                    root.visit { node, path ->
-                        if (node is TranslationNode.Value)
-                            keys.add(path.joinToString(PATH_SEPARATOR))
-                    }
-                }
-
-                log.line(LogLevel.Info) { "Loaded translations for ${locales.size} locales, ${keys.size} keys, ${styles.size} styles, ${formats.sizeOfAll()} formats" }
-            }.build(locale, MiniMessage.miniMessage())
-            log.line(LogLevel.Info) { "Initialized translations, default locale: ${locale.toLanguageTag()}" }
-
-            db?.close()
-            val db = HikariDataSource(HikariConfig().apply {
-                jdbcUrl = "jdbc:sqlite:${dataFolder.resolve(DATABASE_NAME).absolutePath}"
-            }).also { this.db = it }
-            try {
-                db.connection.close()
-                log.line(LogLevel.Verbose) { "Connected to database" }
-            } catch (ex: SQLException) {
-                log.line(LogLevel.Error, ex) { "Could not establish connection to local database" }
-                return false
-            }
-
-            this.settings = settings.force()
-
-            padding = settings.node(PADDING).get { " " }
-            charSizes = MinecraftFont()
-            settings.node(CHAR_WIDTHS).childrenMap().forEach { (char, width) ->
-                charSizes.setChar(
-                    char.toString()[0],
-                    MapFont.CharacterSprite(width.force(), 0, booleanArrayOf())
-                )
-            }
-
-            paddingWidth = widthOf(padding)
-
-            soundEngine.load()
-            playerActions.load()
-            playerPersistence.load()
-
-            return true
+        // bStats
+        if (settings.enableBstats) {
+            Metrics(this, BSTATS_ID)
         }
-        return false
+
+        // locale
+        val locale = settings.locale
+        i18n = MiniMessageI18N.Builder().apply {
+            data class I18NSource(
+                val name: String,
+                val source: () -> BufferedReader,
+            )
+
+            fun loadFromSource(warnLevel: LogLevel, source: I18NSource) {
+                try {
+                    load(configLoader().source(source.source).build())
+                    log.line(LogLevel.Verbose) { "Loaded language resource ${source.name}" }
+                } catch (ex: ConfigurateException) {
+                    log.line(warnLevel, ex) { "Could not parse language resource ${source.name}" }
+                }
+            }
+
+            data class I18NRoot(
+                val name: String,
+                val path: Path,
+            )
+
+            fun loadFromRoot(root: I18NRoot) {
+                walkFile(root.path,
+                    onVisit = { path, _ ->
+                        loadFromSource(LogLevel.Warning, I18NSource("${root.name} : $path") {
+                            Files.newBufferedReader(path)
+                        })
+                        FileVisitResult.CONTINUE
+                    },
+                    onFail = { path, ex ->
+                        log.line(LogLevel.Warning, ex) { "Could not access language resource ${root.name} : $path" }
+                        FileVisitResult.CONTINUE
+                    }
+                )
+            }
+
+            // get data from registrations
+            val sources = ArrayList<I18NSource>()
+            val roots = ArrayList<I18NRoot>()
+
+            registrations.forEach { reg ->
+                val regName = reg.plugin.manifest.name
+                reg.onLoad(object : LoadContext {
+                    override fun addI18NSource(name: String, path: String?, source: () -> BufferedReader) {
+                        val baseName = "$regName/$name"
+                        sources.add(I18NSource(path?.let { "$baseName : $it" } ?: baseName, source))
+                    }
+
+                    override fun addI18NRoot(name: String?, path: Path) {
+                        roots.add(I18NRoot(name?.let { "$regName/$it" } ?: regName, path))
+                    }
+
+                    override fun addDefaultI18N() {
+                        // default sources
+                        reg.plugin.manifest.langPaths.forEach { path ->
+                            addI18NSource("jar", path) {
+                                reg.plugin.resource(path).bufferedReader()
+                            }
+                        }
+                        addI18NRoot(path = reg.plugin.dataFolder.resolve(PATH_LANG).toPath())
+
+                        // default accent style
+                        style("accent_$regName") { color(reg.plugin.manifest.accentColor) }
+                    }
+                })
+            }
+
+            // load from sources
+            sources.forEach { loadFromSource(LogLevel.Error, it) }
+
+            // load from file system
+            roots.forEach {
+                if (it.path.isDirectory()) {
+                    loadFromRoot(it)
+                }
+            }
+
+            // calculate num of unique locales and message keys
+            val locales = HashSet<Locale>()
+            val keys = HashSet<String>()
+            translations.forEach { root ->
+                locales.add(root.locale)
+                root.visit { node, path ->
+                    if (node is TranslationNode.Value)
+                        keys.add(path.joinToString(PATH_SEPARATOR))
+                }
+            }
+
+            log.line(LogLevel.Info) { "Loaded translations for ${locales.size} locales, ${keys.size} keys, ${styles.size} styles, ${formats.sizeOfAll()} formats" }
+        }.build(locale, MiniMessage.miniMessage())
+        log.line(LogLevel.Info) { "Initialized translations, default locale: ${locale.toLanguageTag()}" }
+
+        // db
+        db?.close()
+        val db = HikariDataSource(HikariConfig().apply {
+            jdbcUrl = "jdbc:sqlite:${dataFolder.resolve(DATABASE_NAME).absolutePath}"
+        }).also { this.db = it }
+        try {
+            db.connection.close()
+            log.line(LogLevel.Verbose) { "Connected to database" }
+        } catch (ex: SQLException) {
+            log.line(LogLevel.Error, ex) { "Could not establish connection to local database" }
+            return false
+        }
+
+        // text
+        charSizes = MinecraftFont()
+        paddingWidth = widthOf(settings.text.padding)
+        settings.text.charWidths.forEach { (char, width) ->
+            charSizes.setChar(char, MapFont.CharacterSprite(width, 0, booleanArrayOf()))
+        }
+
+        soundEngine.load()
+        playerActions.load()
+        playerPersistence.load()
+
+        return true
     }
 
     override fun onDisable() {
@@ -398,7 +406,7 @@ class Alexandria : BasePlugin() {
         widthOf(PlainTextComponentSerializer.plainText().serialize(component))
 
     fun paddingFor(width: Int) =
-        padding.repeat(width / (paddingWidth + 1))
+        settings.text.padding.repeat(width / (paddingWidth + 1))
 
     fun paddingForWidth(component: Component) =
         paddingFor(widthOf(component))

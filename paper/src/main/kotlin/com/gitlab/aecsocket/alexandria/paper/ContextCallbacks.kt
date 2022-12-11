@@ -2,14 +2,10 @@ package com.gitlab.aecsocket.alexandria.paper
 
 import com.gitlab.aecsocket.alexandria.core.physics.Transform
 import com.gitlab.aecsocket.alexandria.core.physics.Vector3
-import com.gitlab.aecsocket.alexandria.paper.extension.registerEvents
 import com.gitlab.aecsocket.alexandria.paper.extension.rotation
 import net.kyori.adventure.text.Component
 import org.bukkit.Material
 import org.bukkit.entity.Player
-import org.bukkit.event.EventHandler
-import org.bukkit.event.Listener
-import org.bukkit.event.player.PlayerSwapHandItemsEvent
 import org.bukkit.inventory.ItemStack
 
 private val NAME_OFFSET = Vector3(0.0, -0.4, 0.0)
@@ -49,7 +45,7 @@ class ContextCallback internal constructor(
         val offset = topEntries.size + 1
         val label = alexandria.meshes.create(
             AIR,
-            Transform(position, player.location.rotation()) + Transform(Vector3(0.0, offset * 0.5, 0.0)),
+            Transform(position, player.location.rotation()).times(Transform(Vector3(0.0, offset * 0.5, 0.0))),
             { setOf(player) },
             false
         )

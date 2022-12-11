@@ -9,7 +9,7 @@ data class Transform(
 ) {
     val inverse get() = Transform(-translation, rotation.inverse)
 
-    operator fun plus(t: Transform) = Transform(
+    operator fun times(t: Transform) = Transform(
         rotation * t.translation + translation,
         rotation * t.rotation,
     )

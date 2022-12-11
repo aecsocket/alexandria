@@ -60,6 +60,10 @@ data class Ray(
     val invDir: Vector3 = dir.inv
 ) {
     fun point(t: Double) = pos + dir * t
+
+    fun asString(fmt: String = "%f") = "Ray(${pos.asString(fmt)}, ${dir.asString(fmt)})"
+
+    override fun toString() = asString(DECIMAL_FORMAT)
 }
 
 fun Transform.apply(r: Ray): Ray {

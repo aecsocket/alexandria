@@ -49,7 +49,7 @@ abstract class BaseCommand(
     abstract val plugin: BasePlugin
 
     val pluginName = plugin.manifest.name
-    val rootName = plugin.manifest.chatName
+    val rootName = plugin.manifest.displayName
     protected val manager = PaperCommandManager(
         plugin,
         CommandExecutionCoordinator.simpleCoordinator(),
