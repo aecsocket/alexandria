@@ -69,6 +69,9 @@ data class Vector2(val x: Double = 0.0, val y: Double = 0.0) {
     fun asString(fmt: String = "%f") = "($fmt, $fmt)".format(x, y)
     override fun toString() = asString(DECIMAL_FORMAT)
 
+    override fun equals(other: Any?) = other is Vector2 &&
+            x.compareTo(other.x) == 0 && y.compareTo(other.y) == 0
+
     companion object {
         val Zero = Vector2(0.0)
         val X = Vector2(1.0, 0.0)
@@ -178,6 +181,9 @@ data class Vector3(val x: Double = 0.0, val y: Double = 0.0, val z: Double = 0.0
     fun asString(fmt: String = "%f") = "($fmt, $fmt, $fmt)".format(x, y, z)
     override fun toString() = asString(DECIMAL_FORMAT)
 
+    override fun equals(other: Any?) = other is Vector3 &&
+            x.compareTo(other.x) == 0 && y.compareTo(other.y) == 0 && z.compareTo(other.z) == 0
+
     companion object {
         val Zero = Vector3(0.0)
         val X = Vector3(1.0, 0.0, 0.0)
@@ -259,6 +265,9 @@ data class Vector4(val x: Double = 0.0, val y: Double = 0.0, val z: Double = 0.0
 
     fun asString(fmt: String = "%f") = "($fmt, $fmt, $fmt, $fmt)".format(x, y, z, w)
     override fun toString() = asString(DECIMAL_FORMAT)
+
+    override fun equals(other: Any?) = other is Vector4 &&
+            x.compareTo(other.x) == 0 && y.compareTo(other.y) == 0 && z.compareTo(other.z) == 0 && w.compareTo(other.w) == 0
 
     companion object {
         val Zero = Vector4(0.0)

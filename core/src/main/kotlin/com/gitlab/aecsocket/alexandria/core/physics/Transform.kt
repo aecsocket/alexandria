@@ -1,5 +1,7 @@
 package com.gitlab.aecsocket.alexandria.core.physics
 
+import com.gitlab.aecsocket.alexandria.core.extension.matrix
+import com.gitlab.aecsocket.alexandria.core.extension.transform
 import org.spongepowered.configurate.objectmapping.ConfigSerializable
 
 @ConfigSerializable
@@ -7,7 +9,10 @@ data class Transform(
     val translation: Vector3 = Vector3.Zero,
     val rotation: Quaternion = Quaternion.Identity,
 ) {
-    val inverse get() = Transform(-translation, rotation.inverse)
+    val inverse: Transform get() {
+        val rotInv = rotation.inverse
+        return Transform(rotInv * -translation, rotInv)
+    }
 
     operator fun times(t: Transform) = Transform(
         rotation * t.translation + translation,
@@ -21,7 +26,7 @@ data class Transform(
     // · v is a world-space vector
     fun invert(v: Vector3) = rotation.inverse * (v - translation)
 
-    fun asString(fmt: String = "%f") = "[${translation.asString(fmt)}, ${rotation.asString(fmt)}]"
+    fun asString(fmt: String = "%f") = "Transform(${translation.asString(fmt)}, ${rotation.asString(fmt)})"
 
     override fun toString() = asString(DECIMAL_FORMAT)
 
@@ -29,3 +34,5 @@ data class Transform(
         val Identity = Transform()
     }
 }
+
+fun transformDelta(from: Transform, to: Transform) = from.inverse * to

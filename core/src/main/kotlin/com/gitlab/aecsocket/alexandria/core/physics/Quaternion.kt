@@ -1,6 +1,7 @@
 package com.gitlab.aecsocket.alexandria.core.physics
 
 import com.gitlab.aecsocket.alexandria.core.extension.EPSILON
+import com.gitlab.aecsocket.alexandria.core.extension.quaternion
 import kotlin.math.*
 
 // https://github.com/jMonkeyEngine/jmonkeyengine/blob/master/jme3-core/src/main/java/com/jme3/math/Quaternion.java
@@ -20,9 +21,6 @@ data class Quaternion(val x: Double, val y: Double, val z: Double, val w: Double
             else Quaternion(x/length, y/length, z/length, w/length)
         }
 
-    // TODO we can just assume that this quaternion is a unit quaternion
-    // so we don't need to normalize or anything, just get conjugate
-    // https://github.com/mrdoob/three.js/blob/dev/src/math/Quaternion.js #invert
     val inverse: Quaternion
         get() {
             val norm = norm
@@ -57,6 +55,9 @@ data class Quaternion(val x: Double, val y: Double, val z: Double, val w: Double
 
     fun asString(fmt: String = "%f") = "($fmt + ${fmt}i + ${fmt}j + ${fmt}k)".format(w, x, y, z)
     override fun toString() = asString(DECIMAL_FORMAT)
+
+    override fun equals(other: Any?) = other is Quaternion &&
+            x.compareTo(other.x) == 0 && y.compareTo(other.y) == 0 && z.compareTo(other.z) == 0 && w.compareTo(other.w) == 0
 
     companion object {
         val Identity = Quaternion(0.0, 0.0, 0.0, 1.0)
@@ -105,54 +106,11 @@ fun quaternionOfAxisAngle(axis: Vector3, angle: Double): Quaternion {
 }
 
 // must all be normalized
-fun quaternionOfAxes(x: Vector3, y: Vector3, z: Vector3): Quaternion {
-    val (m00, m10, m20) = x
-    val (m01, m11, m21) = y
-    val (m02, m12, m22) = z
-    val t = m00 + m11 + m22
-    return when {
-        t >= 0 -> {
-            val s = sqrt(t + 1)
-            val s2 = 0.5 / s
-            Quaternion(
-                (m21 - m12) * s2,
-                (m02 - m20) * s2,
-                (m10 - m01) * s2,
-                s * 0.5,
-            )
-        }
-        m00 > m11 && m00 > m22 -> {
-            val s = sqrt(1 + m00 - m11 - m22)
-            val s2 = 0.5 / s
-            Quaternion(
-                s * 0.5,
-                (m10 + m01) * s2,
-                (m02 + m20) * s2,
-                (m21 - m12) * s2,
-            )
-        }
-        m11 > m22 -> {
-            val s = sqrt(1 + m11 - m00 - m22)
-            val s2 = 0.5 / s
-            Quaternion(
-                (m10 + m01) * s2,
-                s * 0.5,
-                (m21 + m12) * s2,
-                (m02 - m20) * s2,
-            )
-        }
-        else -> {
-            val s = sqrt(1 + m22 - m00 - m11)
-            val s2 = 0.5 / s
-            Quaternion(
-                (m02 + m20) * s2,
-                (m21 + m12) * s2,
-                s * 0.5,
-                (m10 - m01) * s2,
-            )
-        }
-    }
-}
+fun quaternionOfAxes(x: Vector3, y: Vector3, z: Vector3) = Matrix3(
+    x.x, y.x, z.x,
+    x.y, y.y, z.y,
+    x.z, y.z, z.z
+).quaternion()
 
 // https://github.com/mrdoob/three.js/blob/dev/src/math/Quaternion.js#L358
 fun quaternionFromTo(from: Vector3, to: Vector3): Quaternion {

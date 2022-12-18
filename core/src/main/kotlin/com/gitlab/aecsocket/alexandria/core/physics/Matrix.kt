@@ -101,8 +101,7 @@ data class Matrix4(
         n30*s, n31*s, n32*s, n33*s,
     )
 
-    val inverse: Matrix4
-        get() {
+    val inverse: Matrix4 get() {
         val fA0 = n00*n11 - n01*n10
         val fA1 = n00*n12 - n02*n10
         val fA2 = n00*n13 - n03*n10
@@ -117,12 +116,30 @@ data class Matrix4(
         val fB5 = n22*n33 - n23*n32
         val det = fA0*fB5 - fA1*fB4 + fA2*fB3 + fA3*fB2 - fA4*fB1 + fA5*fB0
 
-        return if (abs(det) <= 0.0) Zero else Matrix4(
-            +n11 * fB5 - n12 * fB4 + n13 * fB3,  -n01 * fB5 + n02 * fB4 - n03 * fB3,  +n31 * fA5 - n32 * fA4 + n33 * fA3,  -n21 * fA5 + n22 * fA4 - n23 * fA3,
-            -n10 * fB5 + n12 * fB2 - n13 * fB1,  +n00 * fB5 - n02 * fB2 + n03 * fB1,  -n30 * fA5 + n32 * fA2 - n33 * fA1,  +n20 * fA5 - n22 * fA2 + n23 * fA1,
-            +n10 * fB4 - n11 * fB2 + n13 * fB0,  -n00 * fB4 + n01 * fB2 - n03 * fB0,  +n30 * fA4 - n31 * fA2 + n33 * fA0,  -n20 * fA4 + n21 * fA2 - n23 * fA0,
-            -n10 * fB3 + n11 * fB1 - n12 * fB0,  +n00 * fB3 - n01 * fB1 + n02 * fB0,  -n30 * fA3 + n31 * fA1 - n32 * fA0,  +n20 * fA3 - n21 * fA1 + n22 * fA0,
-        ) * (1 / det)
+        return if (abs(det) <= 0) Zero else {
+            val f00 = +n11*fB5 - n12*fB4 + n13*fB3
+            val f10 = -n10*fB5 + n12*fB2 - n13*fB1
+            val f20 = +n10*fB4 - n11*fB2 + n13*fB0
+            val f30 = -n10*fB3 + n11*fB1 - n12*fB0
+            val f01 = -n01*fB5 + n02*fB4 - n03*fB3
+            val f11 = +n00*fB5 - n02*fB2 + n03*fB1
+            val f21 = -n00*fB4 + n01*fB2 - n03*fB0
+            val f31 = +n00*fB3 - n01*fB1 + n02*fB0
+            val f02 = +n31*fA5 - n32*fA4 + n33*fA3
+            val f12 = -n30*fA5 + n32*fA2 - n33*fA1
+            val f22 = +n30*fA4 - n31*fA2 + n33*fA0
+            val f32 = -n30*fA3 + n31*fA1 - n32*fA0
+            val f03 = -n21*fA5 + n22*fA4 - n23*fA3
+            val f13 = +n20*fA5 - n22*fA2 + n23*fA1
+            val f23 = -n20*fA4 + n21*fA2 - n23*fA0
+            val f33 = +n20*fA3 - n21*fA1 + n22*fA0
+            Matrix4(
+                f00, f01, f02, f03,
+                f10, f11, f12, f13,
+                f20, f21, f22, f23,
+                f30, f31, f32, f33
+            ) * (1 / det)
+        }
     }
 
     // get column

@@ -1,17 +1,20 @@
 package com.gitlab.aecsocket.alexandria.core
 
+import com.gitlab.aecsocket.alexandria.core.extension.*
 import com.gitlab.aecsocket.alexandria.core.physics.*
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import kotlin.random.Random
 
 // this class is for quickly testing different physics maths classes
 class PhysicsTest {
     @Test
     fun testTransform() {
-        val ray = Ray(
-            Vector3(0.926141, 1.217214, 1.556720),
-            Vector3(-0.237886, -0.502104, -0.831446)
+        val transform = Transform(
+            Random.nextVector3(),
+            Random.nextQuaternion()
         )
-        val box = BoxShape(Vector3(0.5))
-        box.testRay(ray)
+
+        //assertEquals(transform.inverse, transform.matrix().inverse.transform())
     }
 }

@@ -27,18 +27,18 @@ object InputMapperSerializer : TypeSerializer<InputMapper<*>> {
                 throw SerializationException(values, type, "Invalid input type value", ex)
             }
 
-            inputType to values.forceList(type).map { value ->
+            inputType to values.forceList(type).map { valueNode ->
                 val filter = when (inputType) {
-                    InputType.MOUSE -> value.force<InputMapper.MouseFilter>()
-                    InputType.HELD_ITEM -> value.force<InputMapper.HeldItemFilter>()
-                    InputType.SNEAK -> value.force<InputMapper.ToggleableFilter>()
-                    InputType.SPRINT -> value.force<InputMapper.ToggleableFilter>()
-                    InputType.FLIGHT -> value.force<InputMapper.ToggleableFilter>()
-                    InputType.HORSE_JUMP -> value.force<InputMapper.ToggleableFilter>()
-                    InputType.MENU -> value.force<InputMapper.MenuFilter>()
+                    InputType.MOUSE -> valueNode.force<InputMapper.MouseFilter>()
+                    InputType.HELD_ITEM -> valueNode.force<InputMapper.HeldItemFilter>()
+                    InputType.SNEAK -> valueNode.force<InputMapper.ToggleableFilter>()
+                    InputType.SPRINT -> valueNode.force<InputMapper.ToggleableFilter>()
+                    InputType.FLIGHT -> valueNode.force<InputMapper.ToggleableFilter>()
+                    InputType.HORSE_JUMP -> valueNode.force<InputMapper.ToggleableFilter>()
+                    InputType.MENU -> valueNode.force<InputMapper.MenuFilter>()
                     else -> InputMapper.TrueFilter
                 }
-                val value = entrySerial.deserialize(entryType, if (value.hasChild(VALUE)) value.node(VALUE) else value)
+                val value = entrySerial.deserialize(entryType, if (valueNode.hasChild(VALUE)) valueNode.node(VALUE) else valueNode)
                 InputMapper.Value(filter, value)
             }
         }.associate { it }
