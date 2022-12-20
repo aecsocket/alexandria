@@ -23,12 +23,7 @@ import com.gitlab.aecsocket.glossa.core.I18N
 import com.gitlab.aecsocket.glossa.core.PATH_SEPARATOR
 import com.gitlab.aecsocket.glossa.core.TranslationNode
 import com.gitlab.aecsocket.glossa.core.visit
-import com.zaxxer.hikari.HikariConfig
-import com.zaxxer.hikari.HikariDataSource
 import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
 import net.kyori.adventure.audience.Audience
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.Component.empty
@@ -58,13 +53,10 @@ import java.io.BufferedReader
 import java.nio.file.FileVisitResult
 import java.nio.file.Files
 import java.nio.file.Path
-import java.sql.Connection
-import java.sql.SQLException
 import java.util.*
 import kotlin.io.path.isDirectory
 
 private const val BSTATS_ID = 16725
-private const val DATABASE_NAME = "alexandria.db"
 
 private lateinit var instance: Alexandria
 val AlexandriaAPI get() = instance
@@ -88,8 +80,7 @@ class Alexandria : BasePlugin(PluginManifest("alexandria",
         val locale: Locale = Locale.ROOT,
         val text: Text,
         val soundEngine: SoundEngine.Settings = SoundEngine.Settings(),
-        val playerActions: PlayerActions.Settings = PlayerActions.Settings(),
-        val playerPersistence: PlayerPersistence.Settings = PlayerPersistence.Settings(),
+        val playerActions: PlayerActions.Settings = PlayerActions.Settings()
     )
 
     @ConfigSerializable
@@ -119,8 +110,6 @@ class Alexandria : BasePlugin(PluginManifest("alexandria",
     lateinit var configOptions: ConfigurationOptions private set
     lateinit var settings: Settings private set
     lateinit var i18n: I18N<Component> private set
-    internal var db: HikariDataSource? = null
-        private set
     var paddingWidth: Int = -1
         private set
     lateinit var charSizes: MapFont private set
@@ -135,7 +124,6 @@ class Alexandria : BasePlugin(PluginManifest("alexandria",
     val soundEngine = SoundEngine(this)
     val particleEngine = ParticleEngine(this)
     val meshes = MeshManager()
-    val playerPersistence = PlayerPersistence(this)
 
     private val registrations = ArrayList<Registration>()
     private val onInput = ArrayList<InputHandler>()
@@ -217,7 +205,6 @@ class Alexandria : BasePlugin(PluginManifest("alexandria",
                 .build())
 
         playerLocks.enable()
-        playerPersistence.enable()
 
         return true
     }
@@ -324,19 +311,6 @@ class Alexandria : BasePlugin(PluginManifest("alexandria",
         }.build(locale, MiniMessage.miniMessage())
         log.line(LogLevel.Info) { "Initialized translations, default locale: ${locale.toLanguageTag()}" }
 
-        // db
-        db?.close()
-        val db = HikariDataSource(HikariConfig().apply {
-            jdbcUrl = "jdbc:sqlite:${dataFolder.resolve(DATABASE_NAME).absolutePath}"
-        }).also { this.db = it }
-        try {
-            db.connection.close()
-            log.line(LogLevel.Verbose) { "Connected to database" }
-        } catch (ex: SQLException) {
-            log.line(LogLevel.Error, ex) { "Could not establish connection to local database" }
-            return false
-        }
-
         // text
         charSizes = MinecraftFont()
         paddingWidth = widthOf(settings.text.padding)
@@ -346,7 +320,6 @@ class Alexandria : BasePlugin(PluginManifest("alexandria",
 
         soundEngine.load()
         playerActions.load()
-        playerPersistence.load()
 
         return true
     }
@@ -374,24 +347,6 @@ class Alexandria : BasePlugin(PluginManifest("alexandria",
     fun playerFor(player: Player) = _players.computeIfAbsent(player) { AlexandriaPlayer(it) }
 
     fun i18nFor(aud: Audience) = if (aud is Player) i18n.withLocale(aud.locale()) else i18n
-
-    internal fun useDb(action: (Connection) -> Unit) {
-        try {
-            db?.connection?.use(action)
-        } catch (ex: Exception) {
-            log.line(LogLevel.Warning, ex) { "An error occurred performing a database action" }
-        }
-    }
-
-    internal fun useIO(block: CoroutineScope.() -> Unit) {
-        runBlocking(Dispatchers.IO) {
-            try {
-                block(this)
-            } catch (ex: Exception) {
-                log.line(LogLevel.Warning, ex) { "An error occurred performing an IO action" }
-            }
-        }
-    }
 
     fun widthOf(text: String): Int {
         // our own error message will be more useful for admins

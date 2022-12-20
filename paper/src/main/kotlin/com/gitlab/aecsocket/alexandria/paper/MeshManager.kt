@@ -6,7 +6,6 @@ import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes
 import com.github.retrooper.packetevents.protocol.entity.type.EntityTypes
 import com.github.retrooper.packetevents.protocol.player.Equipment
 import com.github.retrooper.packetevents.protocol.player.EquipmentSlot
-import com.github.retrooper.packetevents.util.AdventureSerializer
 import com.github.retrooper.packetevents.util.Vector3d
 import com.github.retrooper.packetevents.util.Vector3f
 import com.github.retrooper.packetevents.wrapper.PacketWrapper
@@ -140,7 +139,7 @@ class MeshManager internal constructor() : PacketListener {
             Vector3d(x, y, z)
         }
 
-        protected fun headRotation(transform: Transform) = transform.rotation.euler(EulerOrder.ZYX).x { -it }.degrees.run {
+        protected fun headRotation(transform: Transform) = transform.rotation.euler(EulerOrder.YZX).x { -it }.degrees.run {
             Vector3f(x.toFloat(), y.toFloat(), z.toFloat())
         }
 

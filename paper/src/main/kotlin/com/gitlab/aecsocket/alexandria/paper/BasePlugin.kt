@@ -82,12 +82,16 @@ abstract class BasePlugin(
     }
 
     private fun init() {
-        if (initInternal()) {
+        val shouldDisable = if (!initInternal())
+            true
+        else {
             val (log, success) = load()
             log.forEach { this.log.record(it) }
-            if (!success)
-                disable()
-        } else disable()
+            !success
+        }
+
+        if (shouldDisable)
+            scheduleDelayed { disable() }
     }
 
     protected open fun initInternal(): Boolean {

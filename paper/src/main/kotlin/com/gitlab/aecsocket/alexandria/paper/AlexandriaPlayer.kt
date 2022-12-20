@@ -20,10 +20,13 @@ import org.spongepowered.configurate.objectmapping.ConfigSerializable
 import java.util.*
 import kotlin.collections.HashMap
 
+private const val CLIENT_STEER_SPEED = 0.98f
+private const val CLIENT_STEER_MULT = 1f / CLIENT_STEER_SPEED
+
 @ConfigSerializable
 data class SteeringInputs(
-    val forwards: Float = 0f,
-    val sideways: Float = 0f,
+    val forward: Float = 0f,
+    val left: Float = 0f,
     val jump: Boolean = false,
     val dismount: Boolean = false,
 )
@@ -77,8 +80,8 @@ class AlexandriaPlayer internal constructor(
             PacketType.Play.Client.STEER_VEHICLE -> {
                 val packet = WrapperPlayClientSteerVehicle(event)
                 steering = SteeringInputs(
-                    clamp(packet.forward, -1f, 1f),
-                    clamp(packet.sideways, -1f, 1f),
+                    clamp(packet.forward * CLIENT_STEER_MULT, -1f, 1f),
+                    clamp(packet.sideways * CLIENT_STEER_MULT, -1f, 1f),
                     packet.isJump,
                     packet.isUnmount
                 )

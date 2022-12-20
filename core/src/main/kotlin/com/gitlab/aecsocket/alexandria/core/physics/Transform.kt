@@ -1,7 +1,5 @@
 package com.gitlab.aecsocket.alexandria.core.physics
 
-import com.gitlab.aecsocket.alexandria.core.extension.matrix
-import com.gitlab.aecsocket.alexandria.core.extension.transform
 import org.spongepowered.configurate.objectmapping.ConfigSerializable
 
 @ConfigSerializable

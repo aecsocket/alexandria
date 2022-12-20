@@ -195,8 +195,8 @@ data class Vector3(val x: Double = 0.0, val y: Double = 0.0, val z: Double = 0.0
         val Down = Vector3(0.0, -1.0, 0.0)
         val Forward = Vector3(0.0, 0.0, 1.0)
         val Backward = Vector3(0.0, 0.0, -1.0)
-        val Right = Vector3(1.0, 0.0, 0.0)
-        val Left = Vector3(-1.0, 0.0, 0.0)
+        val Left = Vector3(1.0, 0.0, 0.0)
+        val Right = Vector3(-1.0, 0.0, 0.0)
     }
 }
 
