@@ -80,8 +80,6 @@ fun JRandom.nextMatrix4() = Matrix4(
     nextDouble(), nextDouble(), nextDouble(), nextDouble()
 )
 
-private fun trig(ang: Double) = sin(ang / 2) to cos(ang / 2)
-
 // Eulers
 
 typealias Euler3 = Vector3
@@ -101,9 +99,9 @@ enum class EulerOrder {
 
 // https://github.com/mrdoob/three.js/blob/dev/src/math/Quaternion.js#L223
 fun Euler3.quaternion(order: EulerOrder): Quaternion {
-    val (s1, c1) = trig(x)
-    val (s2, c2) = trig(y)
-    val (s3, c3) = trig(z)
+    val s1 = sin(x); val c1 = cos(x)
+    val s2 = sin(y); val c2 = cos(y)
+    val s3 = sin(z); val c3 = cos(z)
 
     return when (order) {
         EulerOrder.XYZ -> Quaternion(
@@ -126,36 +124,6 @@ fun Euler3.quaternion(order: EulerOrder): Quaternion {
         )
     }
 }
-
-// Polar
-
-typealias Polar2 = Vector2
-
-val Polar2.pitch get() = x
-val Polar2.yaw get() = y
-
-val Polar2.radians get() = map { it.radians }
-val Polar2.degrees get() = map { it.degrees }
-
-// copied from Bukkit's vector (I think?)
-fun Polar2.cartesian(): Vector3 {
-    val xz = cos(pitch)
-    return Vector3(
-        -xz * sin(yaw),
-        -sin(pitch),
-        xz * cos(yaw),
-    )
-}
-
-fun Polar2.euler() = Euler3(pitch, yaw, 0.0)
-
-fun Vector3.heading(): Polar2 {
-    val pitch = atan(-y / sqrt(x*x + z*z))
-    val yaw = atan2(-x, z) + PI*2
-    return Polar2(pitch, yaw)
-}
-
-fun Vector3.euler() = heading().euler()
 
 // Matrix -> ...
 
@@ -277,7 +245,7 @@ fun Quaternion.euler(order: EulerOrder): Euler3 {
 
 fun Transform.matrix(): Matrix4 {
     return Matrix4(rotation.matrix(),
-        translation.x, translation.y, translation.z,
+        position.x, position.y, position.z,
         0.0, 0.0, 0.0, 1.0
     )
 }

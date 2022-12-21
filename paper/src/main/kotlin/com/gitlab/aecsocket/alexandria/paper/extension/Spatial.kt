@@ -4,6 +4,7 @@ import com.gitlab.aecsocket.alexandria.core.extension.*
 import com.gitlab.aecsocket.alexandria.core.physics.Point3
 import com.gitlab.aecsocket.alexandria.core.physics.Transform
 import com.gitlab.aecsocket.alexandria.core.physics.Vector3
+import com.gitlab.aecsocket.alexandria.core.physics.quaternionLooking
 import org.bukkit.Location
 import org.bukkit.World
 import org.bukkit.util.BoundingBox
@@ -20,8 +21,6 @@ operator fun Vector3.div(v: Vector)     = Vector3(x / v.x, y  /v.y, z / v.z)
 operator fun Vector3.div(l: Location)   = Vector3(x / l.x, y / l.y, z / l.z)
 fun Vector3.location(world: World, pitch: Float = 0f, yaw: Float = 0f) =
     Location(world, x, y, z, yaw, pitch)
-fun Vector3.location(world: World, heading: Polar2) =
-    Location(world, x, y, z, heading.yaw.degrees.toFloat(), heading.pitch.degrees.toFloat())
 
 operator fun Vector.component1() = x
 operator fun Vector.component2() = y
@@ -76,9 +75,8 @@ fun Location.copy(
 ) = Location(world, x, y, z, yaw, pitch)
 fun Location.position() = Vector3(x, y, z)
 fun Location.point() = Point3(blockX, blockY, blockZ)
-fun Location.heading() = Polar2(pitch.radians.toDouble(), yaw.radians.toDouble())
 fun Location.direction() = direction.alexandria()
-fun Location.rotation() = Euler3(pitch.toDouble(), -yaw.toDouble(), 0.0).radians.quaternion(EulerOrder.ZYX)
+fun Location.rotation() = Euler3(pitch.toDouble() / 2.0, -yaw.toDouble() / 2.0, 0.0).radians.quaternion(EulerOrder.YZX)
 fun Location.transform() = Transform(position(), rotation())
 
 val BoundingBox.extent get() = Vector3(

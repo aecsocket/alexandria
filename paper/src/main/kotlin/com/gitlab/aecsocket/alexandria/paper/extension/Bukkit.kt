@@ -21,10 +21,10 @@ var Entity.transform: Transform
     get() = Transform(
         // we ignore pitch, because entities can't really *rotate* up/down
         rotation = Euler3(y = -location.yaw.radians.toDouble()).quaternion(EulerOrder.ZYX),
-        translation = location.position(),
+        position = location.position(),
     )
     set(value) {
-        val (x, y, z) = value.translation
+        val (x, y, z) = value.position
         val yaw = value.rotation.euler(EulerOrder.XYZ).yaw.degrees.toFloat()
         val location = location.copy(x = x, y = y, z = z, yaw = yaw)
         teleport(location)

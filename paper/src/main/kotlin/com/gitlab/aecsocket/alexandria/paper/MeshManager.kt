@@ -135,7 +135,7 @@ class MeshManager internal constructor() : PacketListener {
             }
         }
 
-        protected fun position(transform: Transform) = transform.translation.y { it - yOffset }.run {
+        protected fun position(transform: Transform) = transform.position.y { it - yOffset }.run {
             Vector3d(x, y, z)
         }
 
