@@ -7,7 +7,7 @@ import org.bukkit.Bukkit
 import org.bukkit.Chunk
 import org.bukkit.attribute.AttributeInstance
 import org.bukkit.attribute.AttributeModifier
-import org.bukkit.craftbukkit.v1_19_R1.CraftChunk
+import org.bukkit.craftbukkit.v1_19_R2.CraftChunk
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack

@@ -4,7 +4,7 @@ import com.gitlab.aecsocket.alexandria.core.physics.Point3
 import net.minecraft.core.BlockPos
 import net.minecraft.network.protocol.game.ClientboundBlockDestructionPacket
 import org.bukkit.GameMode
-import org.bukkit.craftbukkit.v1_19_R1.entity.CraftPlayer
+import org.bukkit.craftbukkit.v1_19_R2.entity.CraftPlayer
 import org.bukkit.entity.Player
 
 fun Player.sendBlockDamage(id: Int, position: Point3, stage: Int) {

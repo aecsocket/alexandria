@@ -3,11 +3,12 @@ package com.gitlab.aecsocket.alexandria.paper.serializer
 import com.gitlab.aecsocket.alexandria.core.extension.force
 import com.gitlab.aecsocket.alexandria.paper.extension.bukkit
 import net.kyori.adventure.key.Key
+import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.resources.ResourceLocation
 import org.bukkit.Keyed
 import org.bukkit.Particle
 import org.bukkit.Registry
-import org.bukkit.craftbukkit.v1_19_R1.CraftParticle
+import org.bukkit.craftbukkit.v1_19_R2.CraftParticle
 import org.spongepowered.configurate.ConfigurationNode
 import org.spongepowered.configurate.serialize.SerializationException
 import org.spongepowered.configurate.serialize.TypeSerializer
@@ -43,7 +44,7 @@ object ParticleSerializer : TypeSerializer<Particle> {
     override fun serialize(type: Type, obj: Particle?, node: ConfigurationNode) {
         if (obj == null) node.set(null)
         else {
-            val resource = net.minecraft.core.Registry.PARTICLE_TYPE.getKey(CraftParticle.toNMS(obj).type)
+            val resource = BuiltInRegistries.PARTICLE_TYPE.getKey(CraftParticle.toNMS(obj).type)
                 ?: throw SerializationException(node, type, "Particle $obj has no key")
             node.set(Key.key(resource.namespace, resource.path))
         }
@@ -52,7 +53,7 @@ object ParticleSerializer : TypeSerializer<Particle> {
     override fun deserialize(type: Type, node: ConfigurationNode): Particle {
         val key = node.force<Key>()
         val resource = ResourceLocation(key.namespace(), key.value())
-        val particleType = net.minecraft.core.Registry.PARTICLE_TYPE.get(resource)
+        val particleType = BuiltInRegistries.PARTICLE_TYPE.get(resource)
             ?: throw SerializationException(node, type, "Invalid Particle $key")
         return CraftParticle.toBukkit(particleType)
     }

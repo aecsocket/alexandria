@@ -16,7 +16,7 @@ import com.gitlab.aecsocket.alexandria.paper.alexandria
 import com.gitlab.aecsocket.alexandria.paper.extension.bukkitCurrentTick
 import net.minecraft.server.level.ServerPlayerGameMode
 import net.minecraft.world.item.UseAnim
-import org.bukkit.craftbukkit.v1_19_R1.inventory.CraftItemStack
+import org.bukkit.craftbukkit.v1_19_R2.inventory.CraftItemStack
 import org.bukkit.entity.Player
 import java.lang.invoke.MethodHandles
 
