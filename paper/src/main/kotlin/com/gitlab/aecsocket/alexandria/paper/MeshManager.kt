@@ -20,7 +20,12 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
+import org.spongepowered.configurate.objectmapping.ConfigSerializable
 import java.util.*
+
+private const val INTERP_HEIGHT = -1.4385 // Y change from model to location of armor stand
+private const val SNAPPING_HEIGHT = -1.8135 // Y change from model to location of armor stand on AEC
+private const val SMALL_HEIGHT = 0.7125 // Y change from normal to small stand to make the model position match
 
 sealed interface Mesh {
     val id: UUID
@@ -49,6 +54,12 @@ sealed interface Mesh {
     fun remove(player: Player) = remove(setOf(player))
 }
 
+@ConfigSerializable
+data class MeshSettings(
+    val snapping: Boolean = false,
+    val small: Boolean = false
+)
+
 class MeshManager internal constructor() : PacketListener {
     private val _meshes = HashMap<UUID, BaseMesh>()
     val meshes: Map<UUID, Mesh> get() = _meshes
@@ -69,12 +80,12 @@ class MeshManager internal constructor() : PacketListener {
         item: ItemStack,
         transform: Transform,
         getTrackedPlayers: () -> Iterable<Player>,
-        interpolated: Boolean = true
+        settings: MeshSettings
     ): Mesh {
         val id = nextMeshId()
         return (
-            if (interpolated) InterpMesh(id, item, transform, getTrackedPlayers)
-            else NonInterpMesh(id, item, transform, getTrackedPlayers)
+            if (settings.snapping) SnappingMesh(id, item, transform, getTrackedPlayers, settings.small)
+            else InterpMesh(id, item, transform, getTrackedPlayers, settings.small)
         ).also {
             _meshes[id] = it
         }
@@ -100,11 +111,13 @@ class MeshManager internal constructor() : PacketListener {
         override val id: UUID,
         item: ItemStack,
         var getTrackedPlayers: () -> Iterable<Player>,
-        private val yOffset: Double,
+        private val small: Boolean,
+        yOffset: Double,
     ) : Mesh {
         val entityId: UUID = UUID.randomUUID()
         val protocolId = bukkitNextEntityId
         var lastTrackedPlayers: Iterable<Player> = emptySet()
+        private val yOffset = yOffset + (if (small) SMALL_HEIGHT else 0.0)
 
         override var glowingColor: NamedTextColor = NamedTextColor.WHITE
             set(value) {
@@ -135,11 +148,11 @@ class MeshManager internal constructor() : PacketListener {
             }
         }
 
-        protected fun position(transform: Transform) = transform.position.y { it - yOffset }.run {
+        protected fun position(transform: Transform) = transform.position.y { it + yOffset }.run {
             Vector3d(x, y, z)
         }
 
-        protected fun headRotation(transform: Transform) = transform.rotation.euler(EulerOrder.YZX).x { -it }.degrees.run {
+        protected fun headRotation(transform: Transform) = transform.rotation.euler(EulerOrder.YZX).y { -it }.degrees.run {
             Vector3f(x.toFloat(), y.toFloat(), z.toFloat())
         }
 
@@ -182,7 +195,7 @@ class MeshManager internal constructor() : PacketListener {
                     ),
                     WrapperPlayServerEntityMetadata(protocolId, listOf(
                         EntityData(0, EntityDataTypes.BYTE, (0x20).toByte()),
-                        EntityData(15, EntityDataTypes.BYTE, (0x10).toByte()),
+                        EntityData(15, EntityDataTypes.BYTE, ((if (small) 0x01 else 0) or 0x10).toByte()),
                         EntityData(16, EntityDataTypes.ROTATION, headRotation),
                     ))
                 ) + pItem() + pGlowingColor()
@@ -215,7 +228,8 @@ class MeshManager internal constructor() : PacketListener {
         item: ItemStack,
         transform: Transform,
         getTrackedPlayers: () -> Iterable<Player>,
-    ) : BaseMesh(id, item, getTrackedPlayers, 1.45) {
+        small: Boolean
+    ) : BaseMesh(id, item, getTrackedPlayers, small, INTERP_HEIGHT) {
         override var transform = transform
             set(value) {
                 field = value
@@ -236,12 +250,13 @@ class MeshManager internal constructor() : PacketListener {
         }
     }
 
-    class NonInterpMesh internal constructor(
+    class SnappingMesh internal constructor(
         id: UUID,
         item: ItemStack,
         transform: Transform,
         getTrackedPlayers: () -> Iterable<Player>,
-    ) : BaseMesh(id, item, getTrackedPlayers, 1.82) {
+        small: Boolean
+    ) : BaseMesh(id, item, getTrackedPlayers, small, SNAPPING_HEIGHT) {
         val vehicleId = bukkitNextEntityId
 
         override var transform = transform

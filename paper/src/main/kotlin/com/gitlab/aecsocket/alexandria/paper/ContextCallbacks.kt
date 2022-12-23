@@ -47,7 +47,7 @@ class ContextCallback internal constructor(
             AIR,
             Transform(position, player.location.rotation()).times(Transform(Vector3(0.0, offset * 0.5, 0.0))),
             { setOf(player) },
-            false
+            MeshSettings(snapping = false, small = false)
         )
         return CallbackEntry(name, function, label).also {
             _topEntries.add(it)
@@ -82,7 +82,7 @@ class ContextCallbacks internal constructor(
                 AIR,
                 byNameOffset(position),
                 { setOf(player.handle) },
-                false
+                MeshSettings(snapping = false, small = false)
             )
             return ContextCallback(alexandria, player.handle, position, mesh)
         }
