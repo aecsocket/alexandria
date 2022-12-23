@@ -93,8 +93,11 @@ val Euler3.degrees get() = map { it.degrees }
 
 enum class EulerOrder {
     XYZ,
+    YXZ,
+    ZXY,
     ZYX,
     YZX,
+    XZY
 }
 
 // https://github.com/mrdoob/three.js/blob/dev/src/math/Quaternion.js#L223
@@ -103,24 +106,58 @@ fun Euler3.quaternion(order: EulerOrder): Quaternion {
     val s2 = sin(y); val c2 = cos(y)
     val s3 = sin(z); val c3 = cos(z)
 
+    /*
+                    float f = sin(0.5F * x);
+        float g = cos(0.5F * x);
+        float h = sin(0.5F * y);
+        float i = cos(0.5F * y);
+        float j = sin(0.5F * z);
+        float k = cos(0.5F * z);
+        this.i = f * i * k + g * h * j;
+        this.j = g * h * k - f * i * j;
+        this.k = f * h * k + g * i * j;
+        this.r = g * i * k - f * h * j;
+
+
+
+     */
+
     return when (order) {
         EulerOrder.XYZ -> Quaternion(
             s1*c2*c3 + c1*s2*s3,
             c1*s2*c3 - s1*c2*s3,
             c1*c2*s3 + s1*s2*c3,
-            c1*c2*c3 - s1*s2*s3,
+            c1*c2*c3 - s1*s2*s3
+        )
+        EulerOrder.YXZ -> Quaternion(
+            s1*c2*c3 + c1*s2*s3,
+            c1*s2*c3 - s1*c2*s3,
+            c1*c2*s3 - s1*s2*c3,
+            c1*c2*c3 + s1*s2*s3
+        )
+        EulerOrder.ZXY -> Quaternion(
+            s1*c2*c3 - c1*s2*s3,
+            c1*s2*c3 + s1*c2*s3,
+            c1*c2*s3 + s1*s2*c3,
+            c1*c2*c3 - s1*s2*s3
         )
         EulerOrder.ZYX -> Quaternion(
             s1*c2*c3 - c1*s2*s3,
             c1*s2*c3 + s1*c2*s3,
             c1*c2*s3 - s1*s2*c3,
-            c1*c2*c3 + s1*s2*s3,
+            c1*c2*c3 + s1*s2*s3
         )
         EulerOrder.YZX -> Quaternion(
             s1*c2*c3 + c1*s2*s3,
             c1*s2*c3 + s1*c2*s3,
             c1*c2*s3 - s1*s2*c3,
-            c1*c2*c3 - s1*s2*s3,
+            c1*c2*c3 - s1*s2*s3
+        )
+        EulerOrder.XZY -> Quaternion(
+            s1*c2*c3 - c1*s2*s3,
+            c1*s2*c3 - s1*c2*s3,
+            c1*c2*s3 + s1*s2*c3,
+            c1*c2*c3 + s1*s2*s3,
         )
     }
 }
@@ -185,6 +222,30 @@ fun Matrix3.euler(order: EulerOrder): Euler3 {
                 0.0,
             )
         }
+        EulerOrder.YXZ -> {
+            val x = asin(-clamp(n12, -1.0, 1.0))
+            if (abs(n12) < ONE_EPSILON) Euler3(
+                x,
+                atan2(n02, n22),
+                atan2(n10, n11)
+            ) else Euler3(
+                x,
+                atan2(-n20, n00),
+                0.0
+            )
+        }
+        EulerOrder.ZXY -> {
+            val x = asin(clamp(n21, -1.0, 1.0))
+            return if (abs(n21) < ONE_EPSILON) Euler3(
+                x,
+                atan2(-n20, n22),
+                atan2(-n01, n11)
+            ) else Euler3(
+                x,
+                0.0,
+                atan2(n10, n00)
+            )
+        }
         EulerOrder.ZYX -> {
             val y = asin(-clamp(n20, -1.0, 1.0))
             if (abs(n20) < ONE_EPSILON) Euler3(
@@ -207,6 +268,18 @@ fun Matrix3.euler(order: EulerOrder): Euler3 {
                 0.0,
                 atan2(n02, n22),
                 z,
+            )
+        }
+        EulerOrder.XZY -> {
+            val z = asin(-clamp(n01, -1.0, 1.0))
+            return if (abs(n01) < ONE_EPSILON) Euler3(
+                atan2(n21, n11),
+                atan2(n02, n00),
+                z
+            ) else Euler3(
+                atan2(-n12, n22),
+                0.0,
+                z
             )
         }
     }

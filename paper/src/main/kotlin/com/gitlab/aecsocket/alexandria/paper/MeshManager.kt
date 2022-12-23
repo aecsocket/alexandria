@@ -15,6 +15,7 @@ import com.gitlab.aecsocket.alexandria.core.extension.degrees
 import com.gitlab.aecsocket.alexandria.core.extension.euler
 import com.gitlab.aecsocket.alexandria.core.physics.Transform
 import com.gitlab.aecsocket.alexandria.paper.extension.bukkitNextEntityId
+import com.mojang.math.Quaternion
 import io.github.retrooper.packetevents.util.SpigotConversionUtil
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
@@ -152,8 +153,8 @@ class MeshManager internal constructor() : PacketListener {
             Vector3d(x, y, z)
         }
 
-        protected fun headRotation(transform: Transform) = transform.rotation.euler(EulerOrder.YZX).y { -it }.degrees.run {
-            Vector3f(x.toFloat(), y.toFloat(), z.toFloat())
+        protected fun headRotation(transform: Transform) = transform.rotation.euler(EulerOrder.ZYX).degrees.run {
+            Vector3f(x.toFloat(), -y.toFloat(), -z.toFloat())
         }
 
 
