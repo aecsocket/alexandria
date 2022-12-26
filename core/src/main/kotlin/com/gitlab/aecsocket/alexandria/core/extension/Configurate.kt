@@ -37,7 +37,7 @@ fun ConfigurationNode.forceList(type: Type, vararg args: String): List<Configura
             return list
         throw SerializationException(this, type, "Field must be expressed as list of [${args.joinToString()}], found ${list.size}")
     }
-    throw SerializationException(this, type, "Field must be expressed as list")
+    throw SerializationException(this, type, "Field must be expressed as list of [${args.joinToString()}]")
 }
 
 fun ConfigurationNode.forceMap(type: Type) = if (isMap) childrenMap()
