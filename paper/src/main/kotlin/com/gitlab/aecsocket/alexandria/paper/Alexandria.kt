@@ -121,8 +121,8 @@ class Alexandria : BasePlugin(PluginManifest("alexandria",
     val playerActions = PlayerActions(this)
     val contextCallbacks = ContextCallbacks(this)
     val debugBoard = DebugBoard()
-    val soundEngine = SoundEngine(this)
-    val particleEngine = ParticleEngine(this)
+    val sounds = SoundEngine(this)
+    val particles = ParticleEngine(this)
     val meshes = MeshManager()
 
     private val registrations = ArrayList<Registration>()
@@ -318,7 +318,7 @@ class Alexandria : BasePlugin(PluginManifest("alexandria",
             charSizes.setChar(char, MapFont.CharacterSprite(width, 0, booleanArrayOf()))
         }
 
-        soundEngine.load()
+        sounds.load()
         playerActions.load()
 
         return true

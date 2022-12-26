@@ -4,7 +4,9 @@ import com.gitlab.aecsocket.alexandria.core.extension.clamp01
 import com.gitlab.aecsocket.alexandria.paper.effect.SoundEffect
 import com.gitlab.aecsocket.alexandria.paper.extension.scheduleDelayed
 import com.gitlab.aecsocket.alexandria.paper.extension.position
+import com.gitlab.aecsocket.alexandria.paper.extension.trackedPlayers
 import org.bukkit.Location
+import org.bukkit.entity.Player
 import org.spongepowered.configurate.objectmapping.ConfigSerializable
 import kotlin.math.abs
 
@@ -47,12 +49,12 @@ class SoundEngine internal constructor(
         return location.block.lightFromSky / 15f
     }
 
-    fun play(location: Location, effect: SoundEngineEffect) {
+    fun play(effect: SoundEngineEffect, location: Location, targets: Iterable<Player>) {
         if (!alexandria.isEnabled) return
 
         val txOutdoors = outdoors(location)
         val position = location.position()
-        location.world.players.forEach { player ->
+        targets.forEach { player ->
             val axPlayer = player.alexandria
             val distance = player.location.distance(location)
             val rxOutdoors = outdoors(player.location)
@@ -89,5 +91,14 @@ class SoundEngine internal constructor(
             if (volIndoors > 0f) playAll(volIndoors, effect.indoors)
             if (volMixed > 0f) playAll(volMixed, effect.mixed)
         }
+    }
+
+    fun play(effect: SoundEngineEffect, location: Location, target: Player) {
+        play(effect, location, setOf(target))
+    }
+
+    fun play(effect: SoundEngineEffect, location: Location) {
+        if (!location.isChunkLoaded) return
+        play(effect, location, location.chunk.trackedPlayers())
     }
 }

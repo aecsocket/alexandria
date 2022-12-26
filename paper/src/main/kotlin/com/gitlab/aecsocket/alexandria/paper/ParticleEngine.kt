@@ -1,5 +1,7 @@
 package com.gitlab.aecsocket.alexandria.paper
 
+import com.gitlab.aecsocket.alexandria.core.physics.Vector3
+import com.gitlab.aecsocket.alexandria.paper.effect.Effector
 import com.gitlab.aecsocket.alexandria.paper.effect.ParticleEffect
 import com.gitlab.aecsocket.alexandria.paper.extension.position
 import com.gitlab.aecsocket.alexandria.paper.extension.trackedPlayers
@@ -21,16 +23,21 @@ data class ParticleEngineEffect(
 class ParticleEngine internal constructor(
     private val alexandria: Alexandria
 ) {
-    fun spawn(location: Location, effect: ParticleEngineEffect) {
+    fun spawn(effect: ParticleEngineEffect, position: Vector3, targets: Iterable<Effector>) {
         if (!alexandria.isEnabled) return
 
-        val players = location.chunk.trackedPlayers().map { it.alexandria.effector }
-        val position = location.position()
-
-        players.forEach { player ->
+        targets.forEach { effector ->
             effect.effects.forEach {
-                player.showParticle(it, position)
+                effector.showParticle(it, position)
             }
         }
+    }
+
+    fun spawn(effect: ParticleEngineEffect, position: Vector3, target: Effector) {
+        spawn(effect, position, setOf(target))
+    }
+
+    fun spawn(effect: ParticleEngineEffect, location: Location) {
+        spawn(effect, location.position(), location.chunk.trackedPlayers().map { it.alexandria.effector })
     }
 }
