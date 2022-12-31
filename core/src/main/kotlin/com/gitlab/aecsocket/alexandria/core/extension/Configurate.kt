@@ -24,10 +24,16 @@ fun <V> ConfigurationNode.getIfExists(type: TypeToken<V>): V? = if (virtual()) n
 
 inline fun <reified V> ConfigurationNode.getIfExists() = getIfExists(typeToken<V>())
 
-fun <V> ConfigurationNode.force(type: TypeToken<V>) = get(type)
+fun ConfigurationNode.force(type: Type) = get(type)
+    ?: throw SerializationException(this, type, "A value is required for this field")
+
+fun <V : Any> ConfigurationNode.force(type: KClass<V>) = get(type.java)
+    ?: throw SerializationException(this, type.java, "A value is required for this field")
+
+fun <V : Any> ConfigurationNode.force(type: TypeToken<V>) = get(type)
     ?: throw SerializationException(this, type.type, "A value is required for this field")
 
-inline fun <reified V> ConfigurationNode.force() = force(typeToken<V>())
+inline fun <reified V : Any> ConfigurationNode.force() = force(typeToken<V>())
 
 fun ConfigurationNode.forceList(type: Type) = if (isList) childrenList()
     else throw SerializationException(this, type, "Field must be expressed as list")

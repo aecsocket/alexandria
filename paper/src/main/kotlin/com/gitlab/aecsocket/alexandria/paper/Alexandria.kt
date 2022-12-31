@@ -313,10 +313,10 @@ class Alexandria : BasePlugin(PluginManifest("alexandria",
 
         // text
         charSizes = MinecraftFont()
-        paddingWidth = widthOf(settings.text.padding)
         settings.text.charWidths.forEach { (char, width) ->
             charSizes.setChar(char, MapFont.CharacterSprite(width, 0, booleanArrayOf()))
         }
+        paddingWidth = widthOf(settings.text.padding)
 
         sounds.load()
         playerActions.load()

@@ -3,6 +3,7 @@ package com.gitlab.aecsocket.alexandria.core
 import net.kyori.adventure.extra.kotlin.join
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.Component.empty
+import org.spongepowered.configurate.objectmapping.ConfigSerializable
 import kotlin.math.max
 
 enum class TableAlign {
@@ -164,4 +165,21 @@ abstract class ComponentTableRenderer(
 ) : AbstractTableRenderer<Component>(align, justify, colSeparator, rowSeparator) {
     override fun join(values: Iterable<Component>) =
         values.join()
+}
+
+@ConfigSerializable
+data class TableAligns(
+    val align: List<TableAlign> = emptyList(),
+    val justify: List<TableAlign> = emptyList()
+) {
+    fun aligner(): (Int) -> TableAlign = {
+        if (it < align.size) align[it] else align.lastOrNull() ?: TableAlign.START
+    }
+    fun justifier(): (Int) -> TableAlign = {
+        if (it < justify.size) justify[it] else justify.lastOrNull() ?: TableAlign.START
+    }
+
+    companion object {
+        val Default = TableAligns()
+    }
 }
