@@ -1,5 +1,6 @@
 package com.gitlab.aecsocket.alexandria.core.extension
 
+import io.leangen.geantyref.GenericTypeReflector
 import io.leangen.geantyref.TypeToken
 import net.kyori.adventure.extra.kotlin.join
 import net.kyori.adventure.text.Component
@@ -14,6 +15,7 @@ import org.spongepowered.configurate.serialize.SerializationException
 import org.spongepowered.configurate.serialize.TypeSerializer
 import org.spongepowered.configurate.serialize.TypeSerializerCollection
 import java.lang.reflect.Type
+import java.util.function.Predicate
 import kotlin.reflect.KClass
 
 inline fun <reified T> typeToken() = object : TypeToken<T>() {}
@@ -42,6 +44,13 @@ fun ConfigurationNode.forceList(type: Type, vararg args: String): List<Configura
 
 fun ConfigurationNode.forceMap(type: Type) = if (isMap) childrenMap()
     else throw SerializationException(this, type, "A map is required for this field")
+
+fun <T : Any> matchExactErased(type: KClass<T>): Predicate<Type> {
+    val erased = GenericTypeReflector.erase(type.java)
+    return Predicate<Type> { test -> GenericTypeReflector.erase(test) == erased }
+}
+
+inline fun <reified T : Any> matchExactErased() = matchExactErased(T::class)
 
 fun <T : Any> TypeSerializerCollection.Builder.register(type: KClass<T>, serializer: TypeSerializer<T>) =
     register(type.java, serializer)

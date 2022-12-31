@@ -45,6 +45,7 @@ class CommandException(
 
 abstract class BaseCommand(
     plugin: BasePlugin,
+    vararg aliases: String = emptyArray()
 ) {
     abstract val plugin: BasePlugin
 
@@ -165,7 +166,7 @@ abstract class BaseCommand(
             })
             .apply(manager) { it }
 
-        root = manager.commandBuilder(rootName, desc("Core command plugin."))
+        root = manager.commandBuilder(rootName, desc("Core command plugin."), *aliases)
         manager.command(root
             .literal("help", desc("Lists help information."))
             .argument(StringArgument.optional("query", StringArgument.StringMode.GREEDY))

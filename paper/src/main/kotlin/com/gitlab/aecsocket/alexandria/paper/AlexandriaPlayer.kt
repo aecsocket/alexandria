@@ -101,9 +101,11 @@ class AlexandriaPlayer internal constructor(
         }
 
         override fun showParticle(effect: ParticleEffect, position: Vector3) {
-            handle.spawnParticle(effect.particle, position.location(handle.world), effect.count.toInt(),
-                effect.size.x, effect.size.y, effect.size.z,
-                effect.speed, effect.data)
+            val (px, py, pz) = position
+            val (sx, sy, sz) = effect.size
+            handle.spawnParticle(effect.particle,
+                px, py, pz, effect.count.toInt(),
+                sx, sy, sz, effect.speed, effect.data)
         }
     }
 }
