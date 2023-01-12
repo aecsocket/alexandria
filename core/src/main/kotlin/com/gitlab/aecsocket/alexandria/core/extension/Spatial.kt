@@ -102,25 +102,9 @@ enum class EulerOrder {
 
 // https://github.com/mrdoob/three.js/blob/dev/src/math/Quaternion.js#L223
 fun Euler3.quaternion(order: EulerOrder): Quaternion {
-    val s1 = sin(x); val c1 = cos(x)
-    val s2 = sin(y); val c2 = cos(y)
-    val s3 = sin(z); val c3 = cos(z)
-
-    /*
-                    float f = sin(0.5F * x);
-        float g = cos(0.5F * x);
-        float h = sin(0.5F * y);
-        float i = cos(0.5F * y);
-        float j = sin(0.5F * z);
-        float k = cos(0.5F * z);
-        this.i = f * i * k + g * h * j;
-        this.j = g * h * k - f * i * j;
-        this.k = f * h * k + g * i * j;
-        this.r = g * i * k - f * h * j;
-
-
-
-     */
+    val s1 = sin(x / 2); val c1 = cos(x / 2)
+    val s2 = sin(y / 2); val c2 = cos(y / 2)
+    val s3 = sin(z / 2); val c3 = cos(z / 2)
 
     return when (order) {
         EulerOrder.XYZ -> Quaternion(

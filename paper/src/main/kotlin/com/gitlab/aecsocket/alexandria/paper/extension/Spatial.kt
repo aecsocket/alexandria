@@ -76,7 +76,7 @@ fun Location.copy(
 fun Location.position() = Vector3(x, y, z)
 fun Location.point() = Point3(blockX, blockY, blockZ)
 fun Location.direction() = direction.alexandria()
-fun Location.rotation() = Euler3(pitch.toDouble() / 2.0, -yaw.toDouble() / 2.0, 0.0).radians.quaternion(EulerOrder.YZX)
+fun Location.rotation() = Euler3(pitch.toDouble(), -yaw.toDouble(), 0.0).radians.quaternion(EulerOrder.YZX)
 fun Location.transform() = Transform(position(), rotation())
 
 val BoundingBox.extent get() = Vector3(
