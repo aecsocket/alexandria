@@ -10,6 +10,7 @@ import com.github.retrooper.packetevents.util.Vector3d
 import com.github.retrooper.packetevents.util.Vector3f
 import com.github.retrooper.packetevents.wrapper.PacketWrapper
 import com.github.retrooper.packetevents.wrapper.play.server.*
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerTeams.ScoreBoardTeamInfo
 import com.gitlab.aecsocket.alexandria.core.extension.EulerOrder
 import com.gitlab.aecsocket.alexandria.core.extension.degrees
 import com.gitlab.aecsocket.alexandria.core.extension.euler
@@ -168,7 +169,7 @@ class MeshManager internal constructor() : PacketListener {
             val team = AlexandriaTeams.colorToTeam(color)
             val eid = entityId.toString()
             listOf(
-                WrapperPlayServerTeams(team, WrapperPlayServerTeams.TeamMode.ADD_ENTITIES, Optional.empty(), eid)
+                WrapperPlayServerTeams(team, WrapperPlayServerTeams.TeamMode.ADD_ENTITIES, null as ScoreBoardTeamInfo?, eid)
             )
         }
 

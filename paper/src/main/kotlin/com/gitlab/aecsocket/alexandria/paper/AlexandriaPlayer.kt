@@ -12,7 +12,6 @@ import com.gitlab.aecsocket.alexandria.core.physics.Vector3
 import com.gitlab.aecsocket.alexandria.paper.effect.Effector
 import com.gitlab.aecsocket.alexandria.paper.effect.ParticleEffect
 import com.gitlab.aecsocket.alexandria.paper.effect.SoundEffect
-import com.gitlab.aecsocket.alexandria.paper.extension.location
 import com.gitlab.aecsocket.alexandria.paper.extension.position
 import net.kyori.adventure.text.Component
 import org.bukkit.entity.Player
@@ -53,11 +52,11 @@ class AlexandriaPlayer internal constructor(
             handle.sendPacket(WrapperPlayServerTeams(
                 teamName,
                 WrapperPlayServerTeams.TeamMode.CREATE,
-                Optional.of(WrapperPlayServerTeams.ScoreBoardTeamInfo(
+                WrapperPlayServerTeams.ScoreBoardTeamInfo(
                     Component.empty(), null, null,
                     WrapperPlayServerTeams.NameTagVisibility.ALWAYS, WrapperPlayServerTeams.CollisionRule.ALWAYS,
                     color, WrapperPlayServerTeams.OptionData.NONE
-                ))
+                )
             ))
         }
     }
