@@ -28,21 +28,23 @@ object ParticleEffectSerializer : TypeSerializer<ParticleEffect> {
     }
 
     override fun deserialize(type: Type, node: ConfigurationNode): ParticleEffect {
-        val particle = node.node(PARTICLE).force<Particle>()
-        val data = when (val dataType = particle.dataType) {
-            Void::class.java -> null
-            /* note: it's valid to have the data be null here
+        if (node.isMap) {
+            val particle = node.node(PARTICLE).force<Particle>()
+            val data = when (val dataType = particle.dataType) {
+                Void::class.java -> null
+                /* note: it's valid to have the data be null here
                even if the particle is deserialized with no data,
                and the particle requires data,
                it can always be provided through code later */
-            else -> node.node(DATA).get(dataType)
-        }
-        return ParticleEffect(
-            particle,
-            node.node(COUNT).get { 0f },
-            node.node(SIZE).get { Vector3.Zero },
-            node.node(SPEED).get { 0.0 },
-            data
-        )
+                else -> node.node(DATA).get(dataType)
+            }
+            return ParticleEffect(
+                particle,
+                node.node(COUNT).get { 0f },
+                node.node(SIZE).get { Vector3.Zero },
+                node.node(SPEED).get { 0.0 },
+                data
+            )
+        } else return ParticleEffect(node.force())
     }
 }
