@@ -173,8 +173,8 @@ class Alexandria : BasePlugin(PluginManifest("alexandria",
             }
         })
         registerConsumer(this,
-            onLoad = {
-                addDefaultI18N()
+            onLoad = { ctx ->
+                ctx.addDefaultI18N()
             }
         )
         scheduleRepeating {
@@ -331,8 +331,8 @@ class Alexandria : BasePlugin(PluginManifest("alexandria",
 
     fun registerConsumer(
         plugin: BasePlugin,
-        onInit: InitContext.() -> Unit = {},
-        onLoad: LoadContext.() -> Unit = {},
+        onInit: (InitContext) -> Unit = {},
+        onLoad: (LoadContext) -> Unit = {},
     ) {
         registrations.add(Registration(plugin, onInit, onLoad))
     }
