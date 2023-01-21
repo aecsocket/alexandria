@@ -14,7 +14,14 @@ enum class TableAlign {
 
 typealias TableCell<T> = Collection<T>
 
-typealias TableRow<T> = Iterable<TableCell<T>>
+data class TableRow<T>(
+    val cells: Iterable<TableCell<T>>,
+    val prefix: T? = null,
+    val suffix: T? = null
+) : Iterable<TableCell<T>> by cells
+
+fun <T> tableRowOf(vararg cells: TableCell<T>, prefix: T? = null, suffix: T? = null) =
+    TableRow(cells.toList(), prefix, suffix)
 
 data class TableDimensions(val rowHeights: List<Int>, val colWidths: List<Int>)
 
@@ -64,6 +71,8 @@ abstract class AbstractTableRenderer<T>(
 
     override fun render(rows: Iterable<TableRow<T>>) =
         render(rows, tableDimensionsOf(rows, this::widthOf))
+
+    protected abstract fun empty(): T
 
     protected abstract fun join(values: Iterable<T>): T
 
@@ -122,7 +131,9 @@ abstract class AbstractTableRenderer<T>(
                 colIdx++
             }
 
-            lines.addAll(rowLines.map { join(it) })
+            val prefix = row.prefix ?: empty()
+            val suffix = row.suffix ?: empty()
+            lines.addAll(rowLines.map { join(listOf(prefix) + it + listOf(suffix)) })
             if (rowIter.hasNext()) {
                 lines.addAll(rowSeparator(colWidths))
             }
@@ -140,6 +151,8 @@ abstract class StringTableRenderer(
     colSeparator: String = "",
     rowSeparator: (List<Int>) -> Iterable<String> = { emptySet() },
 ) : AbstractTableRenderer<String>(align, justify, colSeparator, rowSeparator) {
+    override fun empty() = ""
+
     override fun join(values: Iterable<String>) =
         values.joinToString("")
 }
@@ -163,6 +176,8 @@ abstract class ComponentTableRenderer(
     colSeparator: Component = empty(),
     rowSeparator: (List<Int>) -> Iterable<Component> = { emptySet() },
 ) : AbstractTableRenderer<Component>(align, justify, colSeparator, rowSeparator) {
+    override fun empty() = Component.empty()
+
     override fun join(values: Iterable<Component>) =
         values.join()
 }
