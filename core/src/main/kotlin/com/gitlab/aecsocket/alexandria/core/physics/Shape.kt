@@ -5,6 +5,7 @@ import org.spongepowered.configurate.objectmapping.ConfigSerializable
 import org.spongepowered.configurate.objectmapping.meta.Required
 import org.spongepowered.configurate.objectmapping.meta.Setting
 import kotlin.math.abs
+import kotlin.math.sign
 import kotlin.math.sqrt
 
 sealed interface Shape {
@@ -39,8 +40,50 @@ data class CollisionInfo(
     val normal: Vector3,
 )
 
+enum class ShapeAxis { X, Y, Z }
+
 object EmptyShape : Shape {
     override fun testRay(ray: Ray) = null
+}
+
+@ConfigSerializable
+data class CompoundShape(
+    @Setting(nodeFromParent = true) val children: List<Child>
+) : Shape {
+    override fun testRay(ray: Ray): CollisionInfo? {
+        return children
+            .mapNotNull { (child, transform) ->
+                child.testRay(transform.invert(ray))
+            }
+            .minByOrNull { it.tIn }
+    }
+
+    @ConfigSerializable
+    data class Child(
+        val shape: Shape,
+        val transform: Transform
+    )
+}
+
+@ConfigSerializable
+data class PlaneShape(
+    @Required val normal: Vector3
+) : Shape {
+    // https://stackoverflow.com/questions/23975555/how-to-do-ray-plane-intersection
+    override fun testRay(ray: Ray): CollisionInfo? {
+        val denom = normal.dot(ray.dir)
+        if (abs(denom) > EPSILON) {
+            val t = (-ray.pos).dot(normal) / denom
+            return if (t >= EPSILON) CollisionInfo(t, t + EPSILON, normal) else null
+        }
+        return null
+    }
+
+    companion object {
+        val X = PlaneShape(Vector3.X)
+        val Y = PlaneShape(Vector3.Y)
+        val Z = PlaneShape(Vector3.Z)
+    }
 }
 
 @ConfigSerializable
@@ -98,41 +141,42 @@ data class BoxShape(
 }
 
 @ConfigSerializable
-data class PlaneShape(
-    @Required val normal: Vector3
+data class CylinderShape(
+    @Required val radius: Double,
+    @Required val height: Double,
+    @Required val axis: ShapeAxis
 ) : Shape {
-    // https://stackoverflow.com/questions/23975555/how-to-do-ray-plane-intersection
+    // https://iquilezles.org/articles/intersectors/
+    // NOTE: here, tIn = tOut
     override fun testRay(ray: Ray): CollisionInfo? {
-        val denom = normal.dot(ray.dir)
-        if (abs(denom) > EPSILON) {
-            val t = (-ray.pos).dot(normal) / denom
-            return if (t >= EPSILON) CollisionInfo(t, t + EPSILON, normal) else null
+        val pa = when (axis) {
+            ShapeAxis.X -> Vector3(height / 2, 0.0, 0.0)
+            ShapeAxis.Y -> Vector3(0.0, height / 2, 0.0)
+            ShapeAxis.Z -> Vector3(0.0, 0.0, height / 2)
         }
-        return null
-    }
+        val pb = -pa
 
-    companion object {
-        val X = PlaneShape(Vector3.X)
-        val Y = PlaneShape(Vector3.Y)
-        val Z = PlaneShape(Vector3.Z)
-    }
-}
+        val ba = pb - pa
+        val oc = ray.pos - pa
+        val baba = ba.dot(ba)
+        val bard = ba.dot(ray.dir)
+        val baoc = ba.dot(oc)
+        val k2 = baba - bard * bard
+        val k1 = baba * oc.dot(ray.dir) - baoc * bard
+        val k0 = baba * oc.dot(oc) - baoc * baoc - radius * radius * baba
+        var h = k1 * k1 - k2 * k0
 
-@ConfigSerializable
-data class CompoundShape(
-    @Setting(nodeFromParent = true) val children: List<Child>
-) : Shape {
-    override fun testRay(ray: Ray): CollisionInfo? {
-        return children
-            .mapNotNull { (child, transform) ->
-                child.testRay(transform.invert(ray))
-            }
-            .minByOrNull { it.tIn }
-    }
+        if (h < 0.0) return null
 
-    @ConfigSerializable
-    data class Child(
-        val shape: Shape,
-        val transform: Transform
-    )
+        h = sqrt(h)
+        var t = (-k1 - h) / k2
+
+        // body
+        val y = baoc + t * bard
+        if (y > 0.0 && y < baba) return CollisionInfo(t, t, (oc + (ray.dir * t) - ba * y / baba) / radius)
+        // caps
+        t = ((if (y < 0.0) 0.0 else baba) - baoc) / bard
+        return if (abs(k1 + k2 * t) < h) CollisionInfo(t, t, ba * sign(y) / sqrt(baba))
+        else null
+    }
 }

@@ -8,6 +8,7 @@ import org.spongepowered.configurate.serialize.TypeSerializer
 import java.lang.reflect.Type
 
 
+private const val HEIGHT = "height"
 private const val RADIUS = "radius"
 private const val HALF_EXTENT = "half_extent"
 private const val NORMAL = "normal"
@@ -31,9 +32,10 @@ object ShapeSerializer : TypeSerializer<Shape> {
             val list = node.childrenList()
             if (list.isEmpty()) EmptyShape else node.force<CompoundShape>()
         } else when {
-            node.hasChild(RADIUS) -> SphereShape(node.node(RADIUS).force())
-            node.hasChild(HALF_EXTENT) -> BoxShape(node.node(HALF_EXTENT).force())
-            node.hasChild(NORMAL) -> PlaneShape(node.node(NORMAL).force())
+            node.hasChild(HEIGHT) -> node.force<CylinderShape>()
+            node.hasChild(RADIUS) -> node.force<SphereShape>()
+            node.hasChild(HALF_EXTENT) -> node.force<BoxShape>()
+            node.hasChild(NORMAL) -> node.force<PlaneShape>()
             else -> throw SerializationException(node, type, "Invalid shape format")
         }
     }
