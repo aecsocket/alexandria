@@ -1,4 +1,4 @@
-package com.gitlab.aecsocket.alexandria.paper
+package com.gitlab.aecsocket.alexandria.core
 
 import com.gitlab.aecsocket.glossa.core.I18N
 import com.gitlab.aecsocket.glossa.core.I18NArgs

@@ -8,6 +8,7 @@ import com.github.retrooper.packetevents.event.PacketSendEvent
 import com.github.retrooper.packetevents.wrapper.PacketWrapper
 import com.gitlab.aecsocket.alexandria.core.LogLevel
 import com.gitlab.aecsocket.alexandria.core.LogList
+import com.gitlab.aecsocket.alexandria.core.ReplacingI18N
 import com.gitlab.aecsocket.alexandria.core.TableAlign
 import com.gitlab.aecsocket.alexandria.core.extension.force
 import com.gitlab.aecsocket.alexandria.core.extension.walkFile

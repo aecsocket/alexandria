@@ -9,37 +9,41 @@ import org.spongepowered.configurate.kotlin.extensions.get
 import org.spongepowered.configurate.serialize.TypeSerializer
 import java.lang.reflect.Type
 
-private const val IN = "in"
-private const val OUT = "out"
+private const val FROM = "from"
+private const val TO = "to"
 private const val MIN = "min"
 private const val MAX = "max"
+private const val RECIPROCAL = "reciprocal"
 
 object RangeMapFloatSerializer : TypeSerializer<RangeMapFloat> {
     override fun serialize(type: Type, obj: RangeMapFloat?, node: ConfigurationNode) {
         if (obj == null) node.set(null)
         else {
-            val nIn = node.node(IN)
-            nIn.appendListNode().set(obj.inFrom)
-            nIn.appendListNode().set(obj.inTo)
+            val nIn = node.node(FROM)
+            nIn.appendListNode().set(obj.fromA)
+            nIn.appendListNode().set(obj.fromB)
 
-            val nOut = node.node(OUT)
-            nOut.appendListNode().set(obj.outFrom)
-            nOut.appendListNode().set(obj.outTo)
+            val nOut = node.node(TO)
+            nOut.appendListNode().set(obj.toA)
+            nOut.appendListNode().set(obj.toB)
 
-            if (obj.outMin > Float.NEGATIVE_INFINITY) node.node(MIN).set(obj.outMin)
-            if (obj.outMax < Float.POSITIVE_INFINITY) node.node(MAX).set(obj.outMax)
+            if (obj.toMin > Float.NEGATIVE_INFINITY) node.node(MIN).set(obj.toMin)
+            if (obj.toMax < Float.POSITIVE_INFINITY) node.node(MAX).set(obj.toMax)
+
+            if (obj.reciprocal) node.node(RECIPROCAL).set(true)
         }
     }
 
     override fun deserialize(type: Type, node: ConfigurationNode): RangeMapFloat {
-        val lIn = node.node(IN).forceList(type, "from", "to")
-        val lOut = node.node(OUT).forceList(type, "from", "to")
+        val lIn = node.node(FROM).forceList(type, "from", "to")
+        val lOut = node.node(TO).forceList(type, "from", "to")
 
         return RangeMapFloat(
             lIn[0].force(), lIn[1].force(),
             lOut[0].force(), lOut[1].force(),
             node.node(MIN).get { Float.NEGATIVE_INFINITY },
-            node.node(MAX).get { Float.POSITIVE_INFINITY }
+            node.node(MAX).get { Float.POSITIVE_INFINITY },
+            node.node(RECIPROCAL).get { false }
         )
     }
 }
@@ -48,28 +52,31 @@ object RangeMapDoubleSerializer : TypeSerializer<RangeMapDouble> {
     override fun serialize(type: Type, obj: RangeMapDouble?, node: ConfigurationNode) {
         if (obj == null) node.set(null)
         else {
-            val nIn = node.node(IN)
-            nIn.appendListNode().set(obj.inFrom)
-            nIn.appendListNode().set(obj.inTo)
+            val nIn = node.node(FROM)
+            nIn.appendListNode().set(obj.fromA)
+            nIn.appendListNode().set(obj.fromB)
 
-            val nOut = node.node(OUT)
-            nOut.appendListNode().set(obj.outFrom)
-            nOut.appendListNode().set(obj.outTo)
+            val nOut = node.node(TO)
+            nOut.appendListNode().set(obj.toA)
+            nOut.appendListNode().set(obj.toB)
 
-            if (obj.outMin > Double.NEGATIVE_INFINITY) node.node(MIN).set(obj.outMin)
-            if (obj.outMax < Double.POSITIVE_INFINITY) node.node(MAX).set(obj.outMax)
+            if (obj.toMin > Double.NEGATIVE_INFINITY) node.node(MIN).set(obj.toMin)
+            if (obj.toMax < Double.POSITIVE_INFINITY) node.node(MAX).set(obj.toMax)
+
+            if (obj.reciprocal) node.node(RECIPROCAL).set(true)
         }
     }
 
     override fun deserialize(type: Type, node: ConfigurationNode): RangeMapDouble {
-        val lIn = node.node(IN).forceList(type, "from", "to")
-        val lOut = node.node(OUT).forceList(type, "from", "to")
+        val lIn = node.node(FROM).forceList(type, "from", "to")
+        val lOut = node.node(TO).forceList(type, "from", "to")
 
         return RangeMapDouble(
             lIn[0].force(), lIn[1].force(),
             lOut[0].force(), lOut[1].force(),
             node.node(MIN).get { Double.NEGATIVE_INFINITY },
-            node.node(MAX).get { Double.POSITIVE_INFINITY }
+            node.node(MAX).get { Double.POSITIVE_INFINITY },
+            node.node(RECIPROCAL).get { false }
         )
     }
 }
