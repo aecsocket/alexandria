@@ -28,6 +28,7 @@ import net.kyori.adventure.audience.Audience
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.Component.empty
 import net.kyori.adventure.text.Component.text
+import net.kyori.adventure.text.TextReplacementConfig
 import net.kyori.adventure.text.format.TextColor
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
@@ -57,6 +58,17 @@ import java.util.*
 import kotlin.io.path.isDirectory
 
 private const val BSTATS_ID = 16725
+
+private val textReplacements = listOf(
+    TextReplacementConfig.builder()
+        .matchLiteral("\u00a0") // non-breaking space (NBSP), from ICU messages
+        .replacement(" ")
+        .build(),
+    TextReplacementConfig.builder()
+        .matchLiteral("\u202f") // narrow non-breaking space (NNBSP)
+        .replacement(" ")
+        .build()
+)
 
 private lateinit var instance: Alexandria
 val AlexandriaAPI get() = instance
@@ -220,7 +232,7 @@ class Alexandria : BasePlugin(PluginManifest("alexandria",
 
         // locale
         val locale = settings.locale
-        i18n = MiniMessageI18N.Builder().apply {
+        val rawI18N = MiniMessageI18N.Builder().apply {
             data class I18NSource(
                 val name: String,
                 val source: () -> BufferedReader,
@@ -309,6 +321,8 @@ class Alexandria : BasePlugin(PluginManifest("alexandria",
 
             log.line(LogLevel.Info) { "Loaded translations for ${locales.size} locales, ${keys.size} keys, ${styles.size} styles, ${formats.sizeOfAll()} formats" }
         }.build(locale, MiniMessage.miniMessage())
+        i18n = ReplacingI18N(rawI18N, textReplacements)
+
         log.line(LogLevel.Info) { "Initialized translations, default locale: ${locale.toLanguageTag()}" }
 
         // text

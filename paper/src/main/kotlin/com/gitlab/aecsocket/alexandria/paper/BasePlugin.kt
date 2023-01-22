@@ -33,20 +33,6 @@ private const val LOG_LEVEL = "log_level"
 private const val CONFIG_FILE_EXT = ".conf"
 private const val THREAD_NAME_WIDTH = 10
 
-private val TEXT_REPLACEMENT = TextReplacementConfig.builder()
-    .matchLiteral("\u00a0") // non-breaking space, from ICU messages
-    .replacement(" ")
-    .build()
-
-private val manifestConfigOptions = ConfigurationOptions.defaults()
-    .serializers {
-        val mapper = ObjectMapper.factoryBuilder()
-            .addDiscoverer(dataClassFieldDiscoverer())
-            .defaultNamingScheme(NamingSchemes.SNAKE_CASE)
-        it.registerAll(ConfigurateComponentSerializer.configurate().serializers())
-        it.registerAnnotatedObjects(mapper.build())
-    }
-
 private fun chatPrefixOf(name: String, color: TextColor) =
     Component.text("{$name} ", color)
 
@@ -180,7 +166,7 @@ abstract class BasePlugin(
     fun sendMessage(audience: Audience, content: Iterable<Component>) {
         // send individually so lines appear right in console
         chatMessages(content).forEach {
-            audience.sendMessage(it.replaceText(TEXT_REPLACEMENT))
+            audience.sendMessage(it)
         }
     }
 
