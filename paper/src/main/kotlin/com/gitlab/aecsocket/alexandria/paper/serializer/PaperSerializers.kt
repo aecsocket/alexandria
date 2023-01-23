@@ -6,7 +6,7 @@ import net.kyori.adventure.serializer.configurate4.ConfigurateComponentSerialize
 import org.spongepowered.configurate.serialize.TypeSerializerCollection
 
 object PaperSerializers {
-    val ALL: TypeSerializerCollection = TypeSerializerCollection.builder()
+    val All: TypeSerializerCollection = TypeSerializerCollection.builder()
         .registerExact(MaterialSerializer)
         .registerExact(EntityTypeSerializer)
         .registerExact(StatisticSerializer)

@@ -19,17 +19,15 @@ import com.gitlab.aecsocket.alexandria.paper.input.EventInputListener
 import com.gitlab.aecsocket.alexandria.paper.input.InputEvent
 import com.gitlab.aecsocket.alexandria.paper.serializer.PaperSerializers
 import com.gitlab.aecsocket.glossa.adventure.MiniMessageI18N
+import com.gitlab.aecsocket.glossa.adventure.TextReplacerI18N
 import com.gitlab.aecsocket.glossa.adventure.load
-import com.gitlab.aecsocket.glossa.core.I18N
-import com.gitlab.aecsocket.glossa.core.PATH_SEPARATOR
-import com.gitlab.aecsocket.glossa.core.TranslationNode
-import com.gitlab.aecsocket.glossa.core.visit
+import com.gitlab.aecsocket.glossa.core.*
 import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder
 import net.kyori.adventure.audience.Audience
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.Component.empty
 import net.kyori.adventure.text.Component.text
 import net.kyori.adventure.text.TextReplacementConfig
+import net.kyori.adventure.text.format.Style
 import net.kyori.adventure.text.format.TextColor
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
@@ -49,6 +47,7 @@ import org.spongepowered.configurate.kotlin.dataClassFieldDiscoverer
 import org.spongepowered.configurate.loader.AbstractConfigurationLoader
 import org.spongepowered.configurate.objectmapping.ConfigSerializable
 import org.spongepowered.configurate.objectmapping.ObjectMapper
+import org.spongepowered.configurate.serialize.SerializationException
 import org.spongepowered.configurate.serialize.TypeSerializerCollection
 import org.spongepowered.configurate.util.NamingSchemes
 import java.io.BufferedReader
@@ -76,25 +75,27 @@ val AlexandriaAPI get() = instance
 
 typealias InputHandler = (event: InputEvent) -> Unit
 
-class Alexandria : BasePlugin(PluginManifest("alexandria",
+class Alexandria : BasePlugin<Alexandria.Settings>(PluginManifest("alexandria",
     accentColor = TextColor.color(0x745f86),
     langPaths = listOf(
+        "lang/default_root.conf",
         "lang/default_en-US.conf",
-        "lang/en-US.conf"
+        "lang/root.conf"
     ),
     savedPaths = listOf(
         "settings.conf",
-        "lang/en-US.conf"
+        "lang/root.conf"
     )
-)) {
+), Settings::class, Settings()) {
     @ConfigSerializable
     data class Settings(
+        override val logLevel: LogLevel = LogLevel.Verbose,
         val enableBstats: Boolean = true,
         val locale: Locale = Locale.ROOT,
-        val text: Text,
+        val text: Text = Text(),
         val soundEngine: SoundEngine.Settings = SoundEngine.Settings(),
         val playerActions: PlayerActions.Settings = PlayerActions.Settings()
-    )
+    ) : BasePluginSettings
 
     @ConfigSerializable
     data class Text(
@@ -103,7 +104,7 @@ class Alexandria : BasePlugin(PluginManifest("alexandria",
     )
 
     private data class Registration(
-        val plugin: BasePlugin,
+        val plugin: BasePlugin<*>,
         val onInit: InitContext.() -> Unit,
         val onLoad: LoadContext.() -> Unit,
     )
@@ -121,7 +122,6 @@ class Alexandria : BasePlugin(PluginManifest("alexandria",
     }
 
     lateinit var configOptions: ConfigurationOptions private set
-    lateinit var settings: Settings private set
     lateinit var i18n: I18N<Component> private set
     var paddingWidth: Int = -1
         private set
@@ -155,8 +155,8 @@ class Alexandria : BasePlugin(PluginManifest("alexandria",
     }
 
     override fun onEnable() {
-        super.onEnable()
         AlexandriaCommand(this)
+
         PacketEvents.getAPI().init()
         PacketEvents.getAPI().eventManager.registerListener(object : PacketListenerAbstract(PacketListenerPriority.LOW) {
             override fun onPacketSend(event: PacketSendEvent) {
@@ -169,11 +169,9 @@ class Alexandria : BasePlugin(PluginManifest("alexandria",
                 playerFor(player).onPacketReceive(event)
             }
         })
-
         EventInputListener { event ->
             onInput.forEach { it(event) }
         }.enable(this)
-
         registerEvents(object : Listener {
             @EventHandler
             fun on(event: PlayerJoinEvent) {
@@ -185,6 +183,7 @@ class Alexandria : BasePlugin(PluginManifest("alexandria",
                 _players.remove(event.player)?.dispose()
             }
         })
+
         registerConsumer(this,
             onLoad = { ctx ->
                 ctx.addDefaultI18N()
@@ -194,14 +193,16 @@ class Alexandria : BasePlugin(PluginManifest("alexandria",
             _players.forEach { (_, player) -> player.update() }
             meshes.update()
         }
+
+        super.onEnable()
     }
 
     override fun initInternal(): Boolean {
         if (!super.initInternal()) return false
 
         val serializers = TypeSerializerCollection.defaults().childBuilder()
-            .registerAll(Serializers.ALL)
-            .registerAll(PaperSerializers.ALL)
+            .registerAll(Serializers.All)
+            .registerAll(PaperSerializers.All)
 
         val initCtx = object : InitContext {
             override val serializers get() = serializers
@@ -222,18 +223,17 @@ class Alexandria : BasePlugin(PluginManifest("alexandria",
         return true
     }
 
-    override fun loadInternal(log: LogList, config: ConfigurationNode): Boolean {
-        if (!super.loadInternal(log, config)) return false
-        settings = config.force()
+    override fun loadInternal(log: LogList): Boolean {
+        if (!super.loadInternal(log)) return false
 
         // bStats
         if (settings.enableBstats) {
             Metrics(this, BSTATS_ID)
         }
 
-        // locale
+        // i18n
         val locale = settings.locale
-        val rawI18N = MiniMessageI18N.Builder().apply {
+        val mmI18NBuilder = MiniMessageI18N.Builder().apply {
             data class I18NSource(
                 val name: String,
                 val source: () -> BufferedReader,
@@ -294,7 +294,7 @@ class Alexandria : BasePlugin(PluginManifest("alexandria",
                         addI18NRoot(path = reg.plugin.dataFolder.resolve(PATH_LANG).toPath())
 
                         // default accent style
-                        style("accent_$regName") { color(reg.plugin.manifest.accentColor) }
+                        styles["accent_$regName"] = Style.style(reg.plugin.manifest.accentColor)
                     }
                 })
             }
@@ -320,9 +320,16 @@ class Alexandria : BasePlugin(PluginManifest("alexandria",
                 }
             }
 
-            log.line(LogLevel.Info) { "Loaded translations for ${locales.size} locales, ${keys.size} keys, ${styles.size} styles, ${formats.sizeOfAll()} formats" }
-        }.build(locale, MiniMessage.miniMessage())
-        i18n = ReplacingI18N(rawI18N, textReplacements)
+            log.line(LogLevel.Info) { "Loaded translations for ${locales.size} locales, ${keys.size} keys, ${substitutions.size} substitutions, ${styles.size} styles" }
+        }
+
+        i18n = try {
+            val baseI18N = mmI18NBuilder.build(locale, MiniMessage.miniMessage())
+            TextReplacerI18N(baseI18N, textReplacements)
+        } catch (ex: I18NBuildException) {
+            log.line(LogLevel.Error, ex) { "Could not load translations" }
+            EmptyI18N(Component.empty())
+        }
 
         log.line(LogLevel.Info) { "Initialized translations, default locale: ${locale.toLanguageTag()}" }
 
@@ -345,7 +352,7 @@ class Alexandria : BasePlugin(PluginManifest("alexandria",
     }
 
     fun registerConsumer(
-        plugin: BasePlugin,
+        plugin: BasePlugin<*>,
         onInit: (InitContext) -> Unit = {},
         onLoad: (LoadContext) -> Unit = {},
     ) {
@@ -397,7 +404,7 @@ class Alexandria : BasePlugin(PluginManifest("alexandria",
     inner class ComponentTableRenderer(
         align: (Int) -> TableAlign = { TableAlign.START },
         justify: (Int) -> TableAlign = { TableAlign.START },
-        colSeparator: Component = empty(),
+        colSeparator: Component = Component.empty(),
         rowSeparator: (List<Int>) -> Iterable<Component> = { emptySet() },
     ) : com.gitlab.aecsocket.alexandria.core.ComponentTableRenderer(align, justify, colSeparator, rowSeparator) {
         override fun widthOf(value: Component) =

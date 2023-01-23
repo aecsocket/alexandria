@@ -55,9 +55,9 @@ interface LogAcceptor {
 }
 
 class Logging(
-    val logger: (String) -> Unit,
     var level: LogLevel = LogLevel.Verbose,
     var longStackTraces: Boolean = true,
+    val logger: (String) -> Unit
 ) : LogAcceptor {
     override fun record(record: LogRecord) {
         if (record.level.value >= this.level.value) {
@@ -82,7 +82,7 @@ class ForwardingLogging(
     }
 }
 
-fun loggingOf(logger: Logger) = Logging({ logger.log(Level.INFO, it) })
+fun loggingOf(logger: Logger) = Logging { logger.log(Level.INFO, it) }
 
 class LogList : ArrayList<LogRecord>(), LogAcceptor {
     override fun record(record: LogRecord) {

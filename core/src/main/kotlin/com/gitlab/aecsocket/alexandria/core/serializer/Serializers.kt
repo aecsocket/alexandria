@@ -5,8 +5,9 @@ import com.gitlab.aecsocket.alexandria.core.extension.registerExact
 import org.spongepowered.configurate.serialize.TypeSerializerCollection
 
 object Serializers {
-    val ALL: TypeSerializerCollection = TypeSerializerCollection.builder()
+    val All: TypeSerializerCollection = TypeSerializerCollection.builder()
         .registerExact(LocaleSerializer)
+        .registerExact(LogLevelSerializer)
         .registerExact(DurationSerializer)
         .registerExact(Vector2Serializer)
         .registerExact(Vector3Serializer)

@@ -3,28 +3,22 @@ package com.gitlab.aecsocket.alexandria.paper
 import com.gitlab.aecsocket.alexandria.core.LogLevel
 import com.gitlab.aecsocket.alexandria.core.LogList
 import com.gitlab.aecsocket.alexandria.core.Logging
+import com.gitlab.aecsocket.alexandria.core.extension.force
 import com.gitlab.aecsocket.alexandria.core.extension.walkFile
 import com.gitlab.aecsocket.alexandria.paper.extension.disable
-import com.gitlab.aecsocket.alexandria.paper.extension.scheduleDelayed
-import com.gitlab.aecsocket.glossa.core.I18N
 import net.kyori.adventure.audience.Audience
-import net.kyori.adventure.serializer.configurate4.ConfigurateComponentSerializer
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.TextReplacementConfig
 import net.kyori.adventure.text.format.TextColor
 import org.bukkit.plugin.java.JavaPlugin
 import org.spongepowered.configurate.ConfigurationNode
-import org.spongepowered.configurate.ConfigurationOptions
-import org.spongepowered.configurate.kotlin.dataClassFieldDiscoverer
 import org.spongepowered.configurate.kotlin.extensions.get
-import org.spongepowered.configurate.objectmapping.ObjectMapper
-import org.spongepowered.configurate.util.NamingSchemes
 import java.io.File
 import java.io.InputStream
 import java.nio.file.FileVisitResult
 import java.nio.file.Path
 import kotlin.io.path.isRegularFile
 import kotlin.io.path.name
+import kotlin.reflect.KClass
 
 const val PATH_SETTINGS = "settings.conf"
 const val PATH_LANG = "lang"
@@ -44,40 +38,46 @@ data class PluginManifest(
     val savedPaths: List<String>
 )
 
-abstract class BasePlugin(
-    val manifest: PluginManifest
+interface BasePluginSettings {
+    val logLevel: LogLevel
+}
+
+abstract class BasePlugin<S : BasePluginSettings>(
+    val manifest: PluginManifest,
+    private val settingsType: KClass<S>,
+    private val defaultSettings: S
 ) : JavaPlugin() {
-    val log = Logging({
+    val log = Logging {
         fun String.crop(target: Int, padder: String.(Int) -> String) = if (length > target) substring(0, target)
             else padder(this, target)
 
         val threadName = Thread.currentThread().name.crop(THREAD_NAME_WIDTH, String::padEnd)
 
         logger.info("$threadName $it")
-    })
-
+    }
     val chatPrefix = chatPrefixOf(manifest.displayName, manifest.accentColor)
+    lateinit var settings: S private set
 
-    override fun onEnable() {
+    override fun onLoad() {
         if (!dataFolder.exists()) {
             manifest.savedPaths.forEach { path ->
                 saveResource(path, false)
             }
         }
-        scheduleDelayed { init() }
     }
 
-    private fun init() {
-        val shouldDisable = if (!initInternal())
-            true
-        else {
-            val (log, success) = load()
-            log.forEach { this.log.record(it) }
-            !success
-        }
+    override fun onEnable() {
+        if (!init())
+            disable()
+    }
 
-        if (shouldDisable)
-            scheduleDelayed { disable() }
+    private fun init(): Boolean {
+        if (!initInternal())
+            return false
+
+        val (log, success) = load()
+        log.forEach { this.log.record(it) }
+        return success
     }
 
     protected open fun initInternal(): Boolean {
@@ -89,24 +89,24 @@ abstract class BasePlugin(
     fun load(): LoadResult {
         val log = LogList()
 
-        val config = try {
-            AlexandriaAPI.configLoader().file(dataFolder.resolve(PATH_SETTINGS)).build().load()
+        settings = try {
+            val node = AlexandriaAPI.configLoader().file(dataFolder.resolve(PATH_SETTINGS)).build().load()
+            node.force(settingsType)
         } catch (ex: Exception) {
             log.line(LogLevel.Error, ex) { "Could not load settings from $PATH_SETTINGS" }
-            return LoadResult(log, false)
+            defaultSettings
         }
 
         return try {
-            LoadResult(log, loadInternal(log, config))
+            LoadResult(log, loadInternal(log))
         } catch (ex: Exception) {
             log.line(LogLevel.Error, ex) { "Could not load plugin" }
             LoadResult(log, false)
         }
     }
 
-    protected open fun loadInternal(log: LogList, config: ConfigurationNode): Boolean {
-        val logLevel = LogLevel.valueOf(config.node(LOG_LEVEL).get { LogLevel.Verbose.name })
-        this.log.level = logLevel
+    protected open fun loadInternal(log: LogList): Boolean {
+        this.log.level = settings.logLevel
 
         return true
     }
@@ -155,22 +155,18 @@ abstract class BasePlugin(
 
     fun i18n(value: String) = "${manifest.name}.$value"
 
-    fun chatMessage(content: Component): Component {
+    fun chatMessageOf(content: Component): Component {
         return Component.empty()
             .append(chatPrefix)
             .append(content)
     }
 
-    fun chatMessages(content: Iterable<Component>) = content.map { chatMessage(it) }
+    fun chatMessagesOf(content: Iterable<Component>) = content.map { chatMessageOf(it) }
 
     fun sendMessage(audience: Audience, content: Iterable<Component>) {
         // send individually so lines appear right in console
-        chatMessages(content).forEach {
+        chatMessagesOf(content).forEach {
             audience.sendMessage(it)
         }
-    }
-
-    fun sendMessage(audience: Audience, content: I18N<Component>.() -> List<Component>) {
-        sendMessage(audience, content(AlexandriaAPI.i18nFor(audience)))
     }
 }

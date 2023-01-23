@@ -44,10 +44,10 @@ class CommandException(
 ) : RuntimeException(cause)
 
 abstract class BaseCommand(
-    plugin: BasePlugin,
+    plugin: BasePlugin<*>,
     vararg aliases: String = emptyArray()
 ) {
-    abstract val plugin: BasePlugin
+    abstract val plugin: BasePlugin<*>
 
     val pluginName = plugin.manifest.name
     val rootName = plugin.manifest.displayName
@@ -129,7 +129,7 @@ abstract class BaseCommand(
 
             handler(ctx)
 
-            val lines = plugin.chatMessages(i18n.safe("error.caption.$key", mArgs)).toMutableList()
+            val lines = plugin.chatMessagesOf(i18n.safe("error.caption.$key", mArgs)).toMutableList()
             if (mShowException) {
                 lines.add(stackTrace(ex, i18n) {
                     text("  ").append(i18n.safeOne("error.stack_trace") {

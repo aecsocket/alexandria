@@ -9,7 +9,7 @@ class LoggingTest {
         val ex = IllegalStateException("Exception message", IllegalStateException("Cause")).apply {
             addSuppressed(IllegalStateException("Suppressed"))
         }
-        val log = Logging({ println(it) })
+        val log = Logging { println(it) }
         LogLevel.Values.forEach { (name, level) ->
             assertEquals(name, level.name)
             log.line(level, ex) { "Level $name" }
