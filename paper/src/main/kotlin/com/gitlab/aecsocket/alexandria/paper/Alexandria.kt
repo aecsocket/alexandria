@@ -155,6 +155,7 @@ class Alexandria : BasePlugin<Alexandria.Settings>(PluginManifest("alexandria",
     }
 
     override fun onEnable() {
+        super.onEnable()
         AlexandriaCommand(this)
 
         PacketEvents.getAPI().init()
@@ -184,17 +185,11 @@ class Alexandria : BasePlugin<Alexandria.Settings>(PluginManifest("alexandria",
             }
         })
 
-        registerConsumer(this,
-            onLoad = { ctx ->
-                ctx.addDefaultI18N()
-            }
-        )
+        registerDefaultConsumer()
         scheduleRepeating {
             _players.forEach { (_, player) -> player.update() }
             meshes.update()
         }
-
-        super.onEnable()
     }
 
     override fun initInternal(): Boolean {
@@ -387,6 +382,14 @@ class Alexandria : BasePlugin<Alexandria.Settings>(PluginManifest("alexandria",
 
     fun paddingForWidth(component: Component) =
         paddingFor(widthOf(component))
+
+    private fun registerDefaultConsumer() {
+        registerConsumer(this,
+            onLoad = { ctx ->
+                ctx.addDefaultI18N()
+            }
+        )
+    }
 
     inner class StringTableRenderer(
         align: (Int) -> TableAlign = { TableAlign.START },

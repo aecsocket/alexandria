@@ -6,6 +6,7 @@ import com.gitlab.aecsocket.alexandria.core.Logging
 import com.gitlab.aecsocket.alexandria.core.extension.force
 import com.gitlab.aecsocket.alexandria.core.extension.walkFile
 import com.gitlab.aecsocket.alexandria.paper.extension.disable
+import com.gitlab.aecsocket.alexandria.paper.extension.scheduleDelayed
 import net.kyori.adventure.audience.Audience
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.TextColor
@@ -67,8 +68,9 @@ abstract class BasePlugin<S : BasePluginSettings>(
     }
 
     override fun onEnable() {
-        if (!init())
-            disable()
+        scheduleDelayed {
+            if (!init()) disable()
+        }
     }
 
     private fun init(): Boolean {
