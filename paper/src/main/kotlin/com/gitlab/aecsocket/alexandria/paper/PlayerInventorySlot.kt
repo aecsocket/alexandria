@@ -1,5 +1,6 @@
 package com.gitlab.aecsocket.alexandria.paper
 
+import com.gitlab.aecsocket.alexandria.paper.extension.bukkitAir
 import org.bukkit.Material
 import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
@@ -12,7 +13,7 @@ sealed interface PlayerInventorySlot {
 
     data class ByInteger(val slot: Int) : PlayerInventorySlot {
         override fun getFrom(inventory: PlayerInventory): ItemStack {
-            return inventory.getItem(slot) ?: ItemStack(Material.AIR)
+            return inventory.getItem(slot) ?: bukkitAir
         }
 
         override fun asInt(inventory: PlayerInventory) = slot

@@ -132,11 +132,11 @@ class Alexandria : BasePlugin<Alexandria.Settings>(PluginManifest("alexandria",
 
     val playerLocks = PlayerLocks(this)
     val playerActions = PlayerActions(this)
-    val contextCallbacks = ContextCallbacks(this)
     val debugBoard = DebugBoard()
     val sounds = SoundEngine(this)
     val particles = ParticleEngine(this)
     val meshes = MeshManager()
+    val contextMenu = ContextMenu(this)
 
     private val registrations = ArrayList<Registration>()
     private val onInput = ArrayList<InputHandler>()
@@ -202,7 +202,6 @@ class Alexandria : BasePlugin<Alexandria.Settings>(PluginManifest("alexandria",
         val initCtx = object : InitContext {
             override val serializers get() = serializers
         }
-
         registrations.forEach { it.onInit(initCtx) }
 
         configOptions = ConfigurationOptions.defaults()
@@ -214,6 +213,7 @@ class Alexandria : BasePlugin<Alexandria.Settings>(PluginManifest("alexandria",
                 .build())
 
         playerLocks.enable()
+        contextMenu.enable()
 
         return true
     }

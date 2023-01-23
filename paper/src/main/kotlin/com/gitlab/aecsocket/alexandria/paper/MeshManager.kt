@@ -15,10 +15,12 @@ import com.gitlab.aecsocket.alexandria.core.extension.EulerOrder
 import com.gitlab.aecsocket.alexandria.core.extension.degrees
 import com.gitlab.aecsocket.alexandria.core.extension.euler
 import com.gitlab.aecsocket.alexandria.core.physics.Transform
+import com.gitlab.aecsocket.alexandria.paper.extension.bukkitAir
 import com.gitlab.aecsocket.alexandria.paper.extension.bukkitNextEntityId
 import io.github.retrooper.packetevents.util.SpigotConversionUtil
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.spongepowered.configurate.objectmapping.ConfigSerializable
@@ -27,20 +29,23 @@ import java.util.*
 private const val INTERP_HEIGHT = -1.4385 // Y change from model to location of armor stand
 private const val SNAPPING_HEIGHT = -1.8135 // Y change from model to location of armor stand on AEC
 private const val SMALL_HEIGHT = 0.7125 // Y change from normal to small stand to make the model position match
+private const val TEXT_HEIGHT = 1.05 // Y change from model origin to nameplate origin
+
+enum class MeshMode {
+    ITEM,
+    TEXT
+}
 
 sealed interface Mesh {
     val id: UUID
-    var item: ItemStack
+    var mode: MeshMode
     var transform: Transform
+    var item: ItemStack
     var glowingColor: NamedTextColor
 
     fun trackedPlayers(): Iterable<Player>
 
-    fun updateTrackedPlayers(getter: () -> Iterable<Player>)
-
-    fun spawn(players: Iterable<Player>)
-
-    fun spawn(player: Player) = spawn(setOf(player))
+    fun updatePlayerTracker(playerTracker: PlayerTracker)
 
     fun glowing(state: Boolean, players: Iterable<Player>)
 
@@ -49,6 +54,10 @@ sealed interface Mesh {
     fun name(name: Component?, players: Iterable<Player>)
 
     fun name(name: Component?, player: Player) = name(name, setOf(player))
+
+    fun spawn(players: Iterable<Player>)
+
+    fun spawn(player: Player) = spawn(setOf(player))
 
     fun remove(players: Iterable<Player>)
 
@@ -61,36 +70,48 @@ data class MeshSettings(
     val small: Boolean = false
 )
 
+fun interface PlayerTracker {
+    fun players(): Iterable<Player>
+}
+
 class MeshManager internal constructor() : PacketListener {
     private val _meshes = HashMap<UUID, BaseMesh>()
     val meshes: Map<UUID, Mesh> get() = _meshes
 
-    fun nextMeshId(): UUID {
-        var id = UUID.randomUUID()
-        while (_meshes.contains(id)) {
-            id = UUID.randomUUID()
-        }
-        return id
-    }
+    fun nextMeshId() = UUID.randomUUID()
 
     operator fun contains(id: UUID) = _meshes.contains(id)
 
     operator fun get(id: UUID): Mesh? = _meshes[id]
 
     fun create(
-        item: ItemStack,
         transform: Transform,
-        getTrackedPlayers: () -> Iterable<Player>,
-        settings: MeshSettings
+        playerTracker: PlayerTracker,
+        settings: MeshSettings,
+        mode: MeshMode,
+        item: ItemStack
     ): Mesh {
         val id = nextMeshId()
         return (
-            if (settings.snapping) SnappingMesh(id, item, transform, getTrackedPlayers, settings.small)
-            else InterpMesh(id, item, transform, getTrackedPlayers, settings.small)
+            if (settings.snapping) SnappingMesh(id, transform, playerTracker, mode, settings.small, item)
+            else InterpMesh(id, transform, playerTracker, mode, settings.small, item)
         ).also {
             _meshes[id] = it
         }
     }
+
+    fun createItem(
+        transform: Transform,
+        playerTracker: PlayerTracker,
+        settings: MeshSettings,
+        item: ItemStack
+    ) = create(transform, playerTracker, settings, MeshMode.ITEM, item)
+
+    fun createText(
+        transform: Transform,
+        playerTracker: PlayerTracker,
+        settings: MeshSettings
+    ) = create(transform, playerTracker, settings, MeshMode.TEXT, bukkitAir)
 
     fun remove(id: UUID, update: Boolean = true): Mesh? {
         return _meshes.remove(id)?.also {
@@ -110,15 +131,35 @@ class MeshManager internal constructor() : PacketListener {
 
     sealed class BaseMesh(
         override val id: UUID,
-        item: ItemStack,
-        var getTrackedPlayers: () -> Iterable<Player>,
+        transform: Transform,
+        private var playerTracker: PlayerTracker,
+        mode: MeshMode,
         private val small: Boolean,
-        yOffset: Double,
+        item: ItemStack,
+        private val baseYOffset: Double
     ) : Mesh {
         val entityId: UUID = UUID.randomUUID()
         val protocolId = bukkitNextEntityId
         var lastTrackedPlayers: Iterable<Player> = emptySet()
-        private val yOffset = yOffset + (if (small) SMALL_HEIGHT else 0.0)
+        override var transform = transform
+            set(value) {
+                field = value
+                update(transform())
+            }
+        override var mode = mode
+            set(value) {
+                field = value
+                yOffset = computeYOffset()
+                update(transform())
+            }
+
+        private var yOffset = computeYOffset()
+
+        private fun computeYOffset() =
+            baseYOffset + when (mode) {
+                MeshMode.TEXT -> TEXT_HEIGHT
+                MeshMode.ITEM -> if (small) SMALL_HEIGHT else 0.0
+            }
 
         override var glowingColor: NamedTextColor = NamedTextColor.WHITE
             set(value) {
@@ -135,11 +176,13 @@ class MeshManager internal constructor() : PacketListener {
                 update(item())
             }
 
-        override fun trackedPlayers() = getTrackedPlayers()
+        override fun trackedPlayers() = playerTracker.players()
 
-        override fun updateTrackedPlayers(getter: () -> Iterable<Player>) {
-            getTrackedPlayers = getter
+        override fun updatePlayerTracker(playerTracker: PlayerTracker) {
+            this.playerTracker = playerTracker
         }
+
+        protected abstract fun transform(): () -> List<PacketWrapper<*>>
 
         protected fun update(packets: () -> Iterable<PacketWrapper<*>>) {
             // trackedPlayers() instead of last* ensures that, if we've just spawned this mesh and want to change glow color,
@@ -153,19 +196,19 @@ class MeshManager internal constructor() : PacketListener {
             Vector3d(x, y, z)
         }
 
-        protected fun headRotation(transform: Transform) = transform.rotation.euler(EulerOrder.ZYX).degrees.run {
+        private fun headRotation(transform: Transform) = transform.rotation.euler(EulerOrder.ZYX).degrees.run {
             Vector3f(x.toFloat(), -y.toFloat(), -z.toFloat())
         }
 
 
-        protected fun item(): () -> List<PacketWrapper<*>> = {
+        private fun item(): () -> List<PacketWrapper<*>> = {
             val stack = SpigotConversionUtil.fromBukkitItemStack(item)
             listOf(
                 WrapperPlayServerEntityEquipment(protocolId, listOf(Equipment(EquipmentSlot.HELMET, stack)))
             )
         }
 
-        protected fun glowingColor(color: NamedTextColor): () -> List<PacketWrapper<*>> = {
+        private fun glowingColor(color: NamedTextColor): () -> List<PacketWrapper<*>> = {
             val team = AlexandriaTeams.colorToTeam(color)
             val eid = entityId.toString()
             listOf(
@@ -217,7 +260,9 @@ class MeshManager internal constructor() : PacketListener {
             players.forEach { player ->
                 player.sendPacket(WrapperPlayServerEntityMetadata(protocolId, listOf(
                     EntityData(2, EntityDataTypes.OPTIONAL_COMPONENT,
-                        name?.let { Optional.of(it) } ?: Optional.empty<Component>()),
+                        name?.let {
+                            Optional.of(GsonComponentSerializer.gson().serialize(it))
+                        } ?: Optional.empty<Component>()),
                     EntityData(3, EntityDataTypes.BOOLEAN, name != null)
                 )))
             }
@@ -226,16 +271,13 @@ class MeshManager internal constructor() : PacketListener {
 
     class InterpMesh internal constructor(
         id: UUID,
-        item: ItemStack,
         transform: Transform,
-        getTrackedPlayers: () -> Iterable<Player>,
-        small: Boolean
-    ) : BaseMesh(id, item, getTrackedPlayers, small, INTERP_HEIGHT) {
-        override var transform = transform
-            set(value) {
-                field = value
-                update(transform(protocolId, protocolId))
-            }
+        playerTracker: PlayerTracker,
+        mode: MeshMode,
+        small: Boolean,
+        item: ItemStack
+    ) : BaseMesh(id, transform, playerTracker, mode, small, item, INTERP_HEIGHT) {
+        override fun transform() = transform(protocolId, protocolId)
 
         override fun spawn(players: Iterable<Player>) {
             val packets = spawnStand(position(transform))
@@ -253,18 +295,15 @@ class MeshManager internal constructor() : PacketListener {
 
     class SnappingMesh internal constructor(
         id: UUID,
-        item: ItemStack,
         transform: Transform,
-        getTrackedPlayers: () -> Iterable<Player>,
-        small: Boolean
-    ) : BaseMesh(id, item, getTrackedPlayers, small, SNAPPING_HEIGHT) {
+        playerTracker: PlayerTracker,
+        mode: MeshMode,
+        small: Boolean,
+        item: ItemStack
+    ) : BaseMesh(id, transform, playerTracker, mode, small, item, SNAPPING_HEIGHT) {
         val vehicleId = bukkitNextEntityId
 
-        override var transform = transform
-            set(value) {
-                field = value
-                update(transform(vehicleId, protocolId))
-            }
+        override fun transform() = transform(vehicleId, protocolId)
 
         override fun spawn(players: Iterable<Player>) {
             val position = position(transform)
