@@ -1,5 +1,5 @@
 Alexandria
-[![Latest version](https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fgitlab.com%2Fapi%2Fv4%2Fprojects%2F37885661%2Fpackages%2Fmaven%2Fio%2Fgitlab%2Faecsocket%2Falexandria-core%2Fmaven-metadata.xml)](https://gitlab.com/phosphorous/alexandria/-/packages/8022977)
+[![Latest version](https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fgitlab.com%2Fapi%2Fv4%2Fprojects%2F37885661%2Fpackages%2Fmaven%2Fio%2Fgitlab%2Faecsocket%2Falexandria-core%2Fmaven-metadata.xml)](https://gitlab.com/phosphorous/alexandria/-/packages/12085488)
 [![Pipeline status](https://img.shields.io/gitlab/pipeline-status/phosphorous/alexandria?branch=main)](https://gitlab.com/phosphorous/alexandria/-/pipelines/latest)
 ===
 
