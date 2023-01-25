@@ -1,6 +1,6 @@
 name: "Alexandria"
 description: "@description@"
-main: "@group@.paper.Alexandria"
+main: "@group@.alexandria.paper.Alexandria"
 version: "@version@"
 api-version: "1.19"
 authors: [ "aecsocket" ]
