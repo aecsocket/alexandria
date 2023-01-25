@@ -1,5 +1,4 @@
 plugins {
-    kotlin("jvm")
     id("io.papermc.paperweight.userdev")
     id("com.github.johnrengelman.shadow")
     id("xyz.jpenilla.run-paper")
@@ -8,8 +7,6 @@ plugins {
 val minecraft = libs.versions.minecraft.get()
 
 repositories {
-    mavenLocal()
-    mavenCentral()
     maven("https://repo.papermc.io/repository/maven-public/")
     maven("https://gitlab.com/api/v4/groups/9631292/-/packages/maven")
     maven("https://oss.sonatype.org/content/repositories/snapshots")
