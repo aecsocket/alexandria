@@ -6,6 +6,9 @@ import org.bukkit.plugin.Plugin
 import java.io.IOException
 import java.io.InputStream
 
+@Suppress("DEPRECATION")
+fun nextEntityId() = Bukkit.getUnsafe().nextEntityId()
+
 fun Plugin.resource(path: String): InputStream {
     val url = javaClass.classLoader.getResource(path)
         ?: throw RuntimeException("Resource at $path does not exist")
