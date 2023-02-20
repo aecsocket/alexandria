@@ -1,9 +1,0 @@
-name: "Alexandria"
-description: "@description@"
-main: "@group@.alexandria.paper.Alexandria"
-version: "@version@"
-api-version: "1.19"
-authors: [ "aecsocket" ]
-website: "https://phosphorous.gitlab.io/alexandria"
-
-depend: [ "KtRuntime" ]

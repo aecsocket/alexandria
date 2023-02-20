@@ -1,0 +1,18 @@
+translations:
+  en-US:
+    command:
+      about: "<p2><plugin_name> v<p1>{version}</p1> by <p1>{authors}</p1>"
+      reload:
+        start: "<p2>Reloading..."
+        stop: >-
+          <p2>Reloaded with {num_messages, plural,
+            =0 {no messages.}
+            one {<p1>#</p1> message:}
+            other {<p1>#</p1> messages:}
+          }
+        log:
+          trace: "<p3> · {message}"
+          debug: "<p3> · {message}"
+          info: "<p2> · {message}"
+          warn: "<sw> ! {message}"
+          error: "<se> ! {message}"
