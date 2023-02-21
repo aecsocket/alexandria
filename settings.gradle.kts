@@ -15,4 +15,4 @@ plugins {
 rootProject.name = "alexandria"
 
 include("alexandria-core")
-include("alexandria-api-paper")
+include("alexandria-paper")

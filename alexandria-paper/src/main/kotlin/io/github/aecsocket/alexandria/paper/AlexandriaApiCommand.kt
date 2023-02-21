@@ -1,4 +1,4 @@
-package io.github.aecsocket.alexandria.api.paper
+package io.github.aecsocket.alexandria.paper
 
 import cloud.commandframework.Command
 import cloud.commandframework.arguments.standard.StringArgument
@@ -7,7 +7,6 @@ import cloud.commandframework.context.CommandContext
 import cloud.commandframework.execution.CommandExecutionCoordinator
 import cloud.commandframework.minecraft.extras.MinecraftHelp
 import cloud.commandframework.paper.PaperCommandManager
-import io.github.aecsocket.alexandria.api.paper.extension.locale
 import io.github.aecsocket.alexandria.core.LogLevel
 import io.github.aecsocket.alexandria.core.extension.getOr
 import io.github.aecsocket.glossa.core.Message
@@ -15,6 +14,7 @@ import io.github.aecsocket.glossa.core.MessageProxy
 import net.kyori.adventure.audience.Audience
 import net.kyori.adventure.text.Component.text
 import org.bukkit.command.CommandSender
+import org.bukkit.entity.Player
 
 typealias Context = CommandContext<CommandSender>
 
@@ -39,7 +39,10 @@ open class AlexandriaApiCommand(
         }
     }
 
-    fun Audience.locale() = locale(plugin.settings.defaultLocale)
+    fun Audience.locale() = when (this) {
+        is Player -> locale()
+        else -> plugin.settings.defaultLocale
+    }
 
     fun <T : Any> MessageProxy<T>.forAudience(audience: Audience) = forLocale(audience.locale())
 

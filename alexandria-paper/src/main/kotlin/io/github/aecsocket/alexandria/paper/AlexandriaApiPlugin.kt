@@ -1,6 +1,6 @@
-package io.github.aecsocket.alexandria.api.paper
+package io.github.aecsocket.alexandria.paper
 
-import io.github.aecsocket.alexandria.api.paper.extension.resource
+import io.github.aecsocket.alexandria.paper.extension.resource
 import io.github.aecsocket.alexandria.core.*
 import io.github.aecsocket.glossa.configurate.fromConfigLoader
 import io.github.aecsocket.glossa.core.Glossa
@@ -16,10 +16,12 @@ import org.spongepowered.configurate.yaml.YamlConfigurationLoader
 import java.util.Locale
 
 private const val PATH_SETTINGS = "settings.yml"
+private const val PATH_LANG = "lang"
 private val defaultLanguageResources = listOf(
-    "lang/alexandria/root.yml",
-    "lang/alexandria/en-US.yml",
+    "alexandria/lang/root.yml",
+    "alexandria/lang/en-US.yml",
 )
+val fallbackLocale = Locale.forLanguageTag("en-US")
 
 abstract class AlexandriaApiPlugin(
     val manifest: Manifest,
@@ -67,18 +69,37 @@ abstract class AlexandriaApiPlugin(
             loadSettings(null)
         }
 
-        glossa = glossaStandard(
+        val glossa = glossaStandard(
             defaultLocale = settings.defaultLocale,
             invalidMessageProvider = InvalidMessageProvider.DefaultLogging(logger)
         ) {
             (defaultLanguageResources + manifest.languageResources).forEach { path ->
                 try {
                     fromConfigLoader(configLoaderBuilder().source { resource(path).bufferedReader() }.build())
+                    log.debug("Loaded language resource from jar:$path")
                 } catch (ex: Exception) {
-                    log.warn("Could not load language resource from $path", ex)
+                    log.warn("Could not load language resource from jar:$path", ex)
                 }
             }
+
+            dataFolder.resolve(PATH_LANG).walkTopDown()
+                .onFail { file, ex ->
+                    val path = file.relativeTo(dataFolder)
+                    log.warn("Could not open language resource at $path", ex)
+                }
+                .forEach { file ->
+                    val path = file.relativeTo(dataFolder)
+                    try {
+                        fromConfigLoader(configLoaderBuilder().file(file).build())
+                        log.debug("Loaded language resource from $path")
+                    } catch (ex: Exception) {
+                        log.warn("Could not load language resource from $path", ex)
+                    }
+                }
         }
+        log.info("Loaded ${glossa.countSubstitutions()} substitutions, ${glossa.countStyles()} styles, ${glossa.countMessages()} messages, ${glossa.countLocales()} locales")
+
+        this.glossa = glossa
     }
 
     protected open fun load(log: LoggingList) {}

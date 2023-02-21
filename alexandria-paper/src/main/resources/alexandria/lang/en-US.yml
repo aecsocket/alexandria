@@ -11,8 +11,8 @@ translations:
             other {<p1>#</p1> messages:}
           }
         log:
-          trace: "<p3> · {message}"
-          debug: "<p3> · {message}"
-          info: "<p2> · {message}"
-          warn: "<sw> ! {message}"
-          error: "<se> ! {message}"
+          trace: "<p3>  · {message}"
+          debug: "<p3>  · {message}"
+          info: "<p2>  · {message}"
+          warn: "<sw>  ! {message}"
+          error: "<se>  ! {message}"

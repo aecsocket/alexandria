@@ -4,3 +4,4 @@ styles:
   p3: { color: dark_gray }
   sw: { color: yellow }
   se: { color: red }
+  sk: { color: dark_green }

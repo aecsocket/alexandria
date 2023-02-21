@@ -7,10 +7,6 @@ plugins {
 
 val minecraft = libs.versions.minecraft.get()
 
-repositories {
-    maven("https://repo.papermc.io/repository/maven-public/")
-}
-
 dependencies {
     implementation(projects.alexandriaCore)
     paperweight.paperDevBundle("$minecraft-R0.1-SNAPSHOT")
