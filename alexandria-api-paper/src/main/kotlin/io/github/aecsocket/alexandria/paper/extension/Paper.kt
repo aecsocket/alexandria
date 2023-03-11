@@ -1,6 +1,7 @@
 package io.github.aecsocket.alexandria.paper.extension
 
 import org.bukkit.Bukkit
+import org.bukkit.NamespacedKey
 import org.bukkit.event.Listener
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
@@ -13,6 +14,8 @@ import kotlin.contracts.contract
 
 @Suppress("DEPRECATION")
 fun nextEntityId() = Bukkit.getUnsafe().nextEntityId()
+
+fun Plugin.key(value: String) = NamespacedKey(this, value)
 
 fun Plugin.resource(path: String): InputStream {
     val url = javaClass.classLoader.getResource(path)

@@ -14,7 +14,7 @@ versions:
   configurate: 4.1.2
   cloud: 1.8.0
   minecraft: 1.19.3
-  glossa: 0.1.0-SNAPSHOT
+  glossa: 1.0.1
 
 dependencies:
   indraCommon: { group: net.kyori, name: indra-common, version: { ref: indra } }
