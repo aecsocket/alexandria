@@ -1,4 +1,4 @@
-package io.github.aecsocket.alexandria.core
+package io.github.aecsocket.alexandria
 
 import net.kyori.adventure.bossbar.BossBar
 import net.kyori.adventure.text.Component

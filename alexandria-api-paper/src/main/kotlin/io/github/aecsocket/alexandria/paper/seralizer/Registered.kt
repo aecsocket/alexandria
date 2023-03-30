@@ -1,7 +1,7 @@
 package io.github.aecsocket.alexandria.paper.seralizer
 
-import io.github.aecsocket.alexandria.core.extension.force
-import io.github.aecsocket.alexandria.paper.extension.toNamespaced
+import io.github.aecsocket.alexandria.extension.force
+import io.github.aecsocket.alexandria.paper.extension.asNamespaced
 import net.kyori.adventure.key.Key
 import org.bukkit.Keyed
 import org.bukkit.Registry
@@ -23,7 +23,7 @@ open class RegisteredSerializer<T : Keyed>(
 
     override fun deserialize(type: Type, node: ConfigurationNode): T {
         val key = node.force<Key>()
-        return registry[key.toNamespaced()]
+        return registry[key.asNamespaced()]
             ?: throw SerializationException(node, type, "Invalid $typeName $key")
     }
 }

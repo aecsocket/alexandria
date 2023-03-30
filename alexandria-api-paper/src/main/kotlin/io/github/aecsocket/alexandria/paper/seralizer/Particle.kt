@@ -1,11 +1,11 @@
 package io.github.aecsocket.alexandria.paper.seralizer
 
-import io.github.aecsocket.alexandria.core.extension.force
+import io.github.aecsocket.alexandria.extension.force
 import net.kyori.adventure.key.Key
 import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.resources.ResourceLocation
 import org.bukkit.Particle
-import org.bukkit.craftbukkit.v1_19_R2.CraftParticle
+import org.bukkit.craftbukkit.v1_19_R3.CraftParticle
 import org.spongepowered.configurate.ConfigurationNode
 import org.spongepowered.configurate.serialize.SerializationException
 import org.spongepowered.configurate.serialize.TypeSerializer

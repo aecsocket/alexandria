@@ -1,4 +1,4 @@
-package io.github.aecsocket.alexandria.core
+package io.github.aecsocket.alexandria
 
 private fun error(prop: String, message: String): Nothing =
     throw IllegalArgumentException("($prop) assertion failed: $message")

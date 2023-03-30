@@ -2,7 +2,6 @@ plugins {
     id("base-conventions")
     id("java-library")
     id("net.kyori.indra")
-    id("net.kyori.indra.publishing")
 }
 
 indra {

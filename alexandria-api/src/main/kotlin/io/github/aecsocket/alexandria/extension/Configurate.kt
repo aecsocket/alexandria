@@ -1,4 +1,4 @@
-package io.github.aecsocket.alexandria.core.extension
+package io.github.aecsocket.alexandria.extension
 
 import io.github.aecsocket.glossa.configurate.LocaleSerializer
 import io.leangen.geantyref.TypeToken

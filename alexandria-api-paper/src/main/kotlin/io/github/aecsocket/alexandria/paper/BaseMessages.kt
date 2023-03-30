@@ -1,9 +1,9 @@
 package io.github.aecsocket.alexandria.paper
 
-import io.github.aecsocket.glossa.core.Message
+import io.github.aecsocket.glossa.Message
 import net.kyori.adventure.text.Component
 
-interface AlexandriaApiMessages {
+interface BaseMessages {
     val command: Command
     interface Command {
         fun about(

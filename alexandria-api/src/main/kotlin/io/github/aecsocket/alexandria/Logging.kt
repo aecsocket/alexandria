@@ -1,4 +1,4 @@
-package io.github.aecsocket.alexandria.core
+package io.github.aecsocket.alexandria
 
 import java.util.logging.Level
 import java.util.logging.Logger

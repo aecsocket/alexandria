@@ -1,4 +1,4 @@
-package io.github.aecsocket.alexandria.core
+package io.github.aecsocket.alexandria
 
 val kebabCasePattern = Regex("([a-z0-9-])+")
 val snakeCasePattern = Regex("([a-z0-9_])+")

@@ -1,11 +1,11 @@
 package io.github.aecsocket.alexandria.paper
 
+import io.github.aecsocket.alexandria.*
 import io.github.aecsocket.alexandria.paper.extension.resource
-import io.github.aecsocket.alexandria.core.*
 import io.github.aecsocket.glossa.configurate.fromConfigLoader
-import io.github.aecsocket.glossa.core.Glossa
-import io.github.aecsocket.glossa.core.InvalidMessageProvider
-import io.github.aecsocket.glossa.core.glossaStandard
+import io.github.aecsocket.glossa.Glossa
+import io.github.aecsocket.glossa.InvalidMessageProvider
+import io.github.aecsocket.glossa.glossaStandard
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.Component.text
 import net.kyori.adventure.text.format.TextColor
@@ -23,7 +23,7 @@ private val defaultLanguageResources = listOf(
 )
 val fallbackLocale = Locale.forLanguageTag("en-US")
 
-abstract class AlexandriaApiPlugin(
+abstract class AlexandriaPlugin(
     val manifest: Manifest,
 ) : JavaPlugin() {
     data class Manifest(

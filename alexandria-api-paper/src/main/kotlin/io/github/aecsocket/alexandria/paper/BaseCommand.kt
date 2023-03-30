@@ -7,10 +7,10 @@ import cloud.commandframework.context.CommandContext
 import cloud.commandframework.execution.CommandExecutionCoordinator
 import cloud.commandframework.minecraft.extras.MinecraftHelp
 import cloud.commandframework.paper.PaperCommandManager
-import io.github.aecsocket.alexandria.core.LogLevel
-import io.github.aecsocket.alexandria.core.extension.getOr
-import io.github.aecsocket.glossa.core.Message
-import io.github.aecsocket.glossa.core.MessageProxy
+import io.github.aecsocket.alexandria.LogLevel
+import io.github.aecsocket.alexandria.extension.getOr
+import io.github.aecsocket.glossa.Message
+import io.github.aecsocket.glossa.MessageProxy
 import net.kyori.adventure.audience.Audience
 import net.kyori.adventure.text.Component.text
 import org.bukkit.command.CommandSender
@@ -20,9 +20,9 @@ typealias Context = CommandContext<CommandSender>
 
 private const val QUERY = "query"
 
-open class AlexandriaApiCommand(
-    private val plugin: AlexandriaApiPlugin,
-    private val messages: MessageProxy<AlexandriaApiMessages>,
+open class BaseCommand(
+    private val plugin: AlexandriaPlugin,
+    private val messages: MessageProxy<BaseMessages>,
 ) {
     val manager = PaperCommandManager(
         plugin,

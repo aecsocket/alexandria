@@ -1,4 +1,4 @@
-package io.github.aecsocket.alexandria.core.extension
+package io.github.aecsocket.alexandria.extension
 
 import cloud.commandframework.Command
 import cloud.commandframework.context.CommandContext

@@ -1,6 +1,6 @@
 package io.github.aecsocket.alexandria.paper
 
-import io.github.aecsocket.alexandria.core.math.Vec3d
+import io.github.aecsocket.klam.DVec3
 import org.bukkit.Particle
 import org.bukkit.entity.Player
 import org.spongepowered.configurate.objectmapping.ConfigSerializable
@@ -10,11 +10,11 @@ import org.spongepowered.configurate.objectmapping.meta.Required
 data class ParticleEffect(
     @Required val particle: Particle,
     val count: Float = 0.0f,
-    val size: Vec3d = Vec3d.Zero,
+    val size: DVec3 = DVec3(0.0),
     val speed: Double = 0.0,
     val data: Any? = null,
 ) {
-    fun spawnTo(player: Player, position: Vec3d) {
+    fun spawnTo(player: Player, position: DVec3) {
         player.spawnParticle(
             particle,
             position.x, position.y, position.z,

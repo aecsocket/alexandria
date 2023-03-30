@@ -1,5 +1,6 @@
 plugins {
     id("kotlin-conventions")
+    id("publishing-conventions")
     id("io.papermc.paperweight.userdev")
     id("com.github.johnrengelman.shadow")
     id("xyz.jpenilla.run-paper")
@@ -8,15 +9,16 @@ plugins {
 val minecraft = libs.versions.minecraft.get()
 
 dependencies {
-    implementation(projects.alexandriaCore)
+    implementation(projects.alexandriaApi)
     paperweight.paperDevBundle("$minecraft-R0.1-SNAPSHOT")
+    implementation(libs.klam)
     implementation(libs.configurateCore)
     implementation(libs.configurateExtraKotlin)
     implementation(libs.configurateYaml)
     implementation(libs.cloudCore)
     implementation(libs.cloudPaper)
     implementation(libs.cloudMinecraftExtras)
-    implementation(libs.glossaCore)
+    implementation(libs.glossaApi)
     implementation(libs.glossaConfigurate)
 }
 
