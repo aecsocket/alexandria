@@ -5,7 +5,7 @@ import net.kyori.adventure.text.Component
 import org.spongepowered.configurate.objectmapping.ConfigSerializable
 
 @ConfigSerializable
-data class BossBarSettings(
+data class BossBarDescriptor(
     val progress: Float = 1f,
     val color: BossBar.Color = BossBar.Color.WHITE,
     val overlay: BossBar.Overlay = BossBar.Overlay.PROGRESS,
