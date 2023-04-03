@@ -11,6 +11,7 @@ val minecraft = libs.versions.minecraft.get()
 dependencies {
     implementation(projects.alexandriaApi)
     paperweight.paperDevBundle("$minecraft-R0.1-SNAPSHOT")
+    compileOnly("dev.folia", "folia-api", "$minecraft-R0.1-SNAPSHOT")
     implementation(libs.klam)
     implementation(libs.configurateCore)
     implementation(libs.configurateExtraKotlin)

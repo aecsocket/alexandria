@@ -8,9 +8,13 @@ import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.plugin.Plugin
 import java.io.IOException
 import java.io.InputStream
-import kotlin.contracts.ExperimentalContracts
-import kotlin.contracts.InvocationKind
-import kotlin.contracts.contract
+
+val isFolia = try {
+    Class.forName("io.papermc.paper.threadedregions.RegionizedServer")
+    true
+} catch (ex: ClassNotFoundException) {
+    false
+}
 
 @Suppress("DEPRECATION")
 fun nextEntityId() = Bukkit.getUnsafe().nextEntityId()
@@ -31,12 +35,6 @@ fun Plugin.resource(path: String): InputStream {
 
 fun Plugin.registerEvents(listener: Listener) =
     Bukkit.getPluginManager().registerEvents(listener, this)
-
-fun Plugin.runRepeating(period: Long = 1, delay: Long = 0, block: () -> Unit) =
-    Bukkit.getScheduler().scheduleSyncRepeatingTask(this, block, delay, period)
-
-fun Plugin.runDelayed(delay: Long = 0, block: () -> Unit) =
-    Bukkit.getScheduler().scheduleSyncDelayedTask(this, block, delay)
 
 fun <M : ItemMeta> ItemStack.withMeta(block: (M) -> Unit): ItemStack {
     editMeta { meta ->
