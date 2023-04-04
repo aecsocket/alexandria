@@ -21,16 +21,8 @@ class FoliaScheduling(val plugin: Plugin) : Scheduling {
 
     override fun onServer() = object : SchedulingContext {
         override fun launch(block: suspend CoroutineScope.() -> Unit) {
-            val dispatcher = object : CoroutineDispatcher() {
-                override fun dispatch(context: CoroutineContext, block: Runnable) {
-                    server.globalRegionScheduler.run(plugin) { block.run() }
-                }
-            }
-            // the dispatcher provided will hopefully be able to schedule child coroutines using the server scheduler
-            // but we still wrap this in another scheduler task, so that `runBlocking` blocks in the worker thread
-            // blocking that thread isn't ideal, but it's better than blocking the launch caller thread
             server.globalRegionScheduler.run(plugin) {
-                runBlocking(dispatcher, block)
+                runBlocking(ImmediateCoroutineDispatcher, block)
             }
         }
 
@@ -45,13 +37,8 @@ class FoliaScheduling(val plugin: Plugin) : Scheduling {
 
     override fun onEntity(entity: Entity) = object : SchedulingContext {
         override fun launch(block: suspend CoroutineScope.() -> Unit) {
-            val dispatcher = object : CoroutineDispatcher() {
-                override fun dispatch(context: CoroutineContext, block: Runnable) {
-                    entity.scheduler.run(plugin, { block.run() }, null)
-                }
-            }
             entity.scheduler.run(plugin, {
-                runBlocking(dispatcher, block)
+                runBlocking(ImmediateCoroutineDispatcher, block)
             }, null)
         }
 
@@ -66,13 +53,8 @@ class FoliaScheduling(val plugin: Plugin) : Scheduling {
 
     override fun onChunk(world: World, chunkX: Int, chunkZ: Int) = object : SchedulingContext {
         override fun launch(block: suspend CoroutineScope.() -> Unit) {
-            val dispatcher = object : CoroutineDispatcher() {
-                override fun dispatch(context: CoroutineContext, block: Runnable) {
-                    server.regionScheduler.run(plugin, world, chunkX, chunkZ) { block.run() }
-                }
-            }
             server.regionScheduler.run(plugin, world, chunkX, chunkZ) {
-                runBlocking(dispatcher, block)
+                runBlocking(ImmediateCoroutineDispatcher, block)
             }
         }
 

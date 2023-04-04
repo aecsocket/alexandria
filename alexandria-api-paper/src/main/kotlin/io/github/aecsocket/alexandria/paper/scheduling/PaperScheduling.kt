@@ -22,13 +22,8 @@ class PaperScheduling(val plugin: Plugin) : Scheduling {
 
     override fun onServer() = object : SchedulingContext {
         override fun launch(block: suspend CoroutineScope.() -> Unit) {
-            val dispatcher = object : CoroutineDispatcher() {
-                override fun dispatch(context: CoroutineContext, block: Runnable) {
-                    scheduler.runTask(plugin, block)
-                }
-            }
             scheduler.runTask(plugin, Runnable {
-                runBlocking(dispatcher, block)
+                runBlocking(ImmediateCoroutineDispatcher, block)
             })
         }
 
@@ -43,15 +38,8 @@ class PaperScheduling(val plugin: Plugin) : Scheduling {
 
     override fun onEntity(entity: Entity) = object : SchedulingContext {
         override fun launch(block: suspend CoroutineScope.() -> Unit) {
-            val dispatcher = object : CoroutineDispatcher() {
-                override fun dispatch(context: CoroutineContext, block: Runnable) {
-                    scheduler.runTask(plugin, Runnable {
-                        if (entity.isValid) block.run()
-                    })
-                }
-            }
             scheduler.runTask(plugin, Runnable {
-                runBlocking(dispatcher, block)
+                runBlocking(ImmediateCoroutineDispatcher, block)
             })
         }
 
