@@ -11,6 +11,7 @@ import io.github.aecsocket.alexandria.LogLevel
 import io.github.aecsocket.alexandria.extension.getOr
 import io.github.aecsocket.glossa.Message
 import io.github.aecsocket.glossa.MessageProxy
+import kotlinx.coroutines.runBlocking
 import net.kyori.adventure.audience.Audience
 import net.kyori.adventure.text.Component.text
 import org.bukkit.command.CommandSender
@@ -48,23 +49,29 @@ open class BaseCommand(
 
     fun <C> Command.Builder<C>.alexandriaPermission(permission: String) = permission("$pluginId.command.$permission")
 
+    fun <C> Command.Builder<C>.alexandriaHandler(block: suspend (CommandContext<C>) -> Unit) = handler { ctx ->
+        runBlocking {
+            block(ctx)
+        }
+    }
+
     init {
         if (manager.hasCapability(CloudBukkitCapabilities.BRIGADIER))
             manager.registerBrigadier()
 
         manager.command(root
             .literal("about")
-            .handler(::about)
+            .alexandriaHandler(::about)
         )
         manager.command(root
             .literal("help")
             .argument(StringArgument.optional(QUERY, StringArgument.StringMode.GREEDY))
-            .handler(::help)
+            .alexandriaHandler(::help)
         )
         manager.command(root
             .literal("reload")
             .alexandriaPermission("reload")
-            .handler(::reload)
+            .alexandriaHandler(::reload)
         )
     }
 

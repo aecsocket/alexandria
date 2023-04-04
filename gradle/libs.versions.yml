@@ -4,12 +4,13 @@ metadata:
 
 plugins:
   com.github.johnrengelman.shadow: 8.1.1
-  io.papermc.paperweight.userdev: 1.5.3
+  io.papermc.paperweight.userdev: 1.5.4
   xyz.jpenilla.run-paper: 2.0.1
 
 versions:
   indra: 3.0.1
   kotlin: 1.8.20-RC2
+  kotlinxCoroutines: 1.7.0-Beta
   adventure: 4.13.0
   klam: 0.1.1-SNAPSHOT
   configurate: 4.1.2
@@ -22,6 +23,7 @@ dependencies:
   indraPublishingSonatype: { group: net.kyori, name: indra-publishing-sonatype, version: { ref: indra } }
   kotlin: { group: org.jetbrains.kotlin, name: kotlin-gradle-plugin, version: { ref: kotlin } }
   kotlinReflect: { group: org.jetbrains.kotlin, name: kotlin-reflect, version: { ref: kotlin } }
+  kotlinxCoroutinesCore: { group: org.jetbrains.kotlinx, name: kotlinx-coroutines-core, version: { ref: kotlinxCoroutines } }
   adventureApi: { group: net.kyori, name: adventure-api, version: { ref: adventure } }
   adventureSerializerConfigurate: { group: net.kyori, name: adventure-serializer-configurate4, version: { ref: adventure } }
   klam: { group: io.github.aecsocket, name: klam, version: { ref: klam } }

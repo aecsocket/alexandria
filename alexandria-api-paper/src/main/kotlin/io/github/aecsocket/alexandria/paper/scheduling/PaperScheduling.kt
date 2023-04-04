@@ -1,81 +1,73 @@
 package io.github.aecsocket.alexandria.paper.scheduling
 
-import org.bukkit.Bukkit
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Runnable
+import kotlinx.coroutines.runBlocking
 import org.bukkit.World
 import org.bukkit.entity.Entity
 import org.bukkit.plugin.Plugin
-import org.bukkit.scheduler.BukkitRunnable
+import org.bukkit.scheduler.BukkitTask
+import java.util.function.Consumer
+import kotlin.coroutines.CoroutineContext
 
 class PaperScheduling(val plugin: Plugin) : Scheduling {
-    private fun wrap(block: TaskContext.() -> Unit) = object : BukkitRunnable() {
-        val self get() = this
+    private val scheduler = plugin.server.scheduler
 
-        override fun run() {
-            block(object : TaskContext {
-                override fun cancelCurrentTask() {
-                    self.cancel()
+    private fun wrap(task: BukkitTask) = object : TaskContext {
+        override fun cancel() {
+            task.cancel()
+        }
+    }
+
+    override fun onServer() = object : SchedulingContext {
+        override fun launch(block: suspend CoroutineScope.() -> Unit) {
+            val dispatcher = object : CoroutineDispatcher() {
+                override fun dispatch(context: CoroutineContext, block: Runnable) {
+                    scheduler.runTask(plugin, block)
                 }
+            }
+            scheduler.runTask(plugin, Runnable {
+                runBlocking(dispatcher, block)
             })
         }
-    }
 
-    override fun onServer(block: TaskContext.() -> Unit) = object : SchedulingContext {
-        override fun run() {
-            wrap(block).runTask(plugin)
+        override fun runLater(delay: Long, block: () -> Unit) {
+            scheduler.runTaskLater(plugin, Runnable(block), delay)
         }
 
-        override fun runLater(delay: Long) {
-            wrap(block).runTaskLater(plugin, delay)
-        }
-
-        override fun runRepeating(period: Long, delay: Long) {
-            wrap(block).runTaskTimer(plugin, delay, period)
+        override fun runRepeating(period: Long, delay: Long, block: (TaskContext) -> Unit) {
+            scheduler.runTaskTimer(plugin, { task -> block(wrap(task)) }, delay, period)
         }
     }
 
-    override fun onEntity(entity: Entity, onFailure: () -> Unit, onSuccess: TaskContext.() -> Unit) = object : SchedulingContext {
-        override fun run() {
-            wrap {
-                if (entity.isValid) onSuccess()
-                else {
-                    onFailure()
-                    cancelCurrentTask()
+    override fun onEntity(entity: Entity) = object : SchedulingContext {
+        override fun launch(block: suspend CoroutineScope.() -> Unit) {
+            val dispatcher = object : CoroutineDispatcher() {
+                override fun dispatch(context: CoroutineContext, block: Runnable) {
+                    scheduler.runTask(plugin, Runnable {
+                        if (entity.isValid) block.run()
+                    })
                 }
-            }.runTask(plugin)
+            }
+            scheduler.runTask(plugin, Runnable {
+                runBlocking(dispatcher, block)
+            })
         }
 
-        override fun runLater(delay: Long) {
-            wrap {
-                if (entity.isValid) onSuccess()
-                else {
-                    onFailure()
-                    cancelCurrentTask()
-                }
-            }.runTaskLater(plugin, delay)
+        override fun runLater(delay: Long, block: () -> Unit) {
+            scheduler.runTaskLater(plugin, Runnable {
+                if (entity.isValid) block()
+            }, delay)
         }
 
-        override fun runRepeating(period: Long, delay: Long) {
-            wrap {
-                if (entity.isValid) onSuccess()
-                else {
-                    onFailure()
-                    cancelCurrentTask()
-                }
-            }.runTaskTimer(plugin, delay, period)
+        override fun runRepeating(period: Long, delay: Long, block: (TaskContext) -> Unit) {
+            scheduler.runTaskTimer(plugin, { task ->
+                if (entity.isValid) block(wrap(task))
+                else task.cancel()
+            }, delay, period)
         }
     }
 
-    override fun onChunk(world: World, chunkX: Int, chunkZ: Int, block: TaskContext.() -> Unit) = object : SchedulingContext {
-        override fun run() {
-            wrap(block).runTask(plugin)
-        }
-
-        override fun runLater(delay: Long) {
-            wrap(block).runTaskLater(plugin, delay)
-        }
-
-        override fun runRepeating(period: Long, delay: Long) {
-            wrap(block).runTaskTimer(plugin, delay, period)
-        }
-    }
+    override fun onChunk(world: World, chunkX: Int, chunkZ: Int) = onServer()
 }

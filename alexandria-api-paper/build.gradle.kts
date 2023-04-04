@@ -6,12 +6,12 @@ plugins {
     id("xyz.jpenilla.run-paper")
 }
 
-val minecraft = libs.versions.minecraft.get()
+val minecraft: String = libs.versions.minecraft.get()
 
 dependencies {
     implementation(projects.alexandriaApi)
-    compileOnly("dev.folia", "folia-api", "$minecraft-R0.1-SNAPSHOT")
-    paperweight.paperDevBundle("$minecraft-R0.1-SNAPSHOT")
+    paperweight.foliaDevBundle("$minecraft-R0.1-SNAPSHOT")
+    implementation(libs.kotlinxCoroutinesCore)
     implementation(libs.klam)
     implementation(libs.configurateCore)
     implementation(libs.configurateExtraKotlin)
