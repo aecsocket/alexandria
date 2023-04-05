@@ -4,6 +4,7 @@ plugins {
 }
 
 dependencies {
+    implementation(libs.kotlinxCoroutinesCore)
     implementation(libs.adventureApi)
     implementation(libs.adventureSerializerConfigurate)
     implementation(libs.klam)
