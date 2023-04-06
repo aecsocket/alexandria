@@ -22,34 +22,40 @@ class PaperScheduling(val plugin: Plugin) : Scheduling {
 
     override fun onServer() = object : SchedulingContext {
         override fun launch(block: suspend CoroutineScope.() -> Unit) {
+            if (!plugin.isEnabled) return
             scheduler.runTask(plugin, Runnable {
                 runBlocking(ImmediateCoroutineDispatcher, block)
             })
         }
 
         override fun runLater(delay: Long, block: () -> Unit) {
+            if (!plugin.isEnabled) return
             scheduler.runTaskLater(plugin, Runnable(block), delay)
         }
 
         override fun runRepeating(period: Long, delay: Long, block: (TaskContext) -> Unit) {
+            if (!plugin.isEnabled) return
             scheduler.runTaskTimer(plugin, { task -> block(wrap(task)) }, delay, period)
         }
     }
 
     override fun onEntity(entity: Entity) = object : SchedulingContext {
         override fun launch(block: suspend CoroutineScope.() -> Unit) {
+            if (!plugin.isEnabled) return
             scheduler.runTask(plugin, Runnable {
                 runBlocking(ImmediateCoroutineDispatcher, block)
             })
         }
 
         override fun runLater(delay: Long, block: () -> Unit) {
+            if (!plugin.isEnabled) return
             scheduler.runTaskLater(plugin, Runnable {
                 if (entity.isValid) block()
             }, delay)
         }
 
         override fun runRepeating(period: Long, delay: Long, block: (TaskContext) -> Unit) {
+            if (!plugin.isEnabled) return
             scheduler.runTaskTimer(plugin, { task ->
                 if (entity.isValid) block(wrap(task))
                 else task.cancel()

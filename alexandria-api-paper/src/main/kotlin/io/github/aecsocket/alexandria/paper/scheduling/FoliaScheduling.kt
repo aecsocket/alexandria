@@ -21,48 +21,57 @@ class FoliaScheduling(val plugin: Plugin) : Scheduling {
 
     override fun onServer() = object : SchedulingContext {
         override fun launch(block: suspend CoroutineScope.() -> Unit) {
+            if (!plugin.isEnabled) return
             server.globalRegionScheduler.run(plugin) {
                 runBlocking(ImmediateCoroutineDispatcher, block)
             }
         }
 
         override fun runLater(delay: Long, block: () -> Unit) {
+            if (!plugin.isEnabled) return
             server.globalRegionScheduler.runDelayed(plugin, { block() }, delay)
         }
 
         override fun runRepeating(period: Long, delay: Long, block: (TaskContext) -> Unit) {
+            if (!plugin.isEnabled) return
             server.globalRegionScheduler.runAtFixedRate(plugin, { task -> block(wrap(task)) }, delay, period)
         }
     }
 
     override fun onEntity(entity: Entity) = object : SchedulingContext {
         override fun launch(block: suspend CoroutineScope.() -> Unit) {
+            if (!plugin.isEnabled) return
             entity.scheduler.run(plugin, {
                 runBlocking(ImmediateCoroutineDispatcher, block)
             }, null)
         }
 
         override fun runLater(delay: Long, block: () -> Unit) {
+            if (!plugin.isEnabled) return
             entity.scheduler.runDelayed(plugin, { block() }, null, delay)
         }
 
         override fun runRepeating(period: Long, delay: Long, block: (TaskContext) -> Unit) {
+            if (!plugin.isEnabled) return
             entity.scheduler.runAtFixedRate(plugin, { task -> block(wrap(task)) }, null, delay, period)
         }
     }
 
     override fun onChunk(world: World, chunkX: Int, chunkZ: Int) = object : SchedulingContext {
         override fun launch(block: suspend CoroutineScope.() -> Unit) {
+            if (!plugin.isEnabled) return
             server.regionScheduler.run(plugin, world, chunkX, chunkZ) {
                 runBlocking(ImmediateCoroutineDispatcher, block)
             }
         }
 
         override fun runLater(delay: Long, block: () -> Unit) {
+            if (!plugin.isEnabled) return
             server.regionScheduler.runDelayed(plugin, world, chunkX, chunkZ, { block() }, delay)
         }
 
         override fun runRepeating(period: Long, delay: Long, block: (TaskContext) -> Unit) {
+            if (!plugin.isEnabled) return
             server.regionScheduler.runAtFixedRate(plugin, world, chunkX, chunkZ, { task -> block(wrap(task)) }, delay, period)
         }
     }
