@@ -3,6 +3,7 @@ package io.github.aecsocket.alexandria.paper
 import io.github.aecsocket.alexandria.*
 import io.github.aecsocket.alexandria.paper.extension.isFolia
 import io.github.aecsocket.alexandria.paper.extension.resource
+import io.github.aecsocket.alexandria.paper.extension.sanitizeText
 import io.github.aecsocket.alexandria.paper.scheduling.FoliaScheduling
 import io.github.aecsocket.alexandria.paper.scheduling.PaperScheduling
 import io.github.aecsocket.alexandria.paper.scheduling.Scheduling
@@ -52,7 +53,7 @@ abstract class AlexandriaPlugin(
 
     fun asChat(component: Component) = text()
         .append(chatPrefix)
-        .append(component)
+        .append(sanitizeText(component))
         .build()
 
     protected abstract fun configOptions(): ConfigurationOptions
