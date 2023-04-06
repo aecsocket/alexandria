@@ -12,11 +12,11 @@ versions:
   kotlin: 1.8.20-RC2
   kotlinxCoroutines: 1.7.0-Beta
   adventure: 4.13.0
-  klam: 0.1.1-SNAPSHOT
+  klam: 0.1.1
   configurate: 4.1.2
   cloud: 1.8.3
   minecraft: 1.19.4
-  glossa: 1.0.3-SNAPSHOT
+  glossa: 1.0.3
 
 dependencies:
   indraCommon: { group: net.kyori, name: indra-common, version: { ref: indra } }
