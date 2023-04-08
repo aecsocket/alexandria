@@ -12,7 +12,7 @@ versions:
   kotlin: 1.8.20-RC2
   kotlinxCoroutines: 1.7.0-Beta
   adventure: 4.13.0
-  klam: 0.1.2-SNAPSHOT
+  klam: 0.1.2
   configurate: 4.1.2
   cloud: 1.8.3
   minecraft: 1.19.4
