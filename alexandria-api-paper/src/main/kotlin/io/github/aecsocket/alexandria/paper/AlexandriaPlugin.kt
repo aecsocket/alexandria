@@ -26,7 +26,7 @@ private val defaultLanguageResources = listOf(
     "alexandria/lang/root.yml",
     "alexandria/lang/en-US.yml",
 )
-val fallbackLocale = Locale.forLanguageTag("en-US")
+val fallbackLocale: Locale = Locale.forLanguageTag("en-US")
 
 abstract class AlexandriaPlugin(
     val manifest: Manifest,
