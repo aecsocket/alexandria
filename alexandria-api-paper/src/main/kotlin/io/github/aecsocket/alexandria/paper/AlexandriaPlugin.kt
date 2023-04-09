@@ -48,6 +48,7 @@ abstract class AlexandriaPlugin(
 
     private val chatPrefix = text("(${manifest.id}) ", manifest.accentColor)
     abstract val settings: Settings
+    protected abstract val configOptions: ConfigurationOptions
     lateinit var glossa: Glossa
     lateinit var scheduling: Scheduling
 
@@ -56,11 +57,9 @@ abstract class AlexandriaPlugin(
         .append(sanitizeText(component))
         .build()
 
-    protected abstract fun configOptions(): ConfigurationOptions
-
     protected fun configLoaderBuilder(): YamlConfigurationLoader.Builder =
         YamlConfigurationLoader.builder()
-            .defaultOptions(configOptions())
+            .defaultOptions(configOptions)
 
     protected abstract fun loadSettings(node: ConfigurationNode?)
 

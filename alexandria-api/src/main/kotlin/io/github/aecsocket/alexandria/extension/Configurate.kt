@@ -1,8 +1,6 @@
 package io.github.aecsocket.alexandria.extension
 
-import io.github.aecsocket.glossa.configurate.LocaleSerializer
 import io.leangen.geantyref.TypeToken
-import net.kyori.adventure.serializer.configurate4.ConfigurateComponentSerializer
 import org.spongepowered.configurate.ConfigurationNode
 import org.spongepowered.configurate.serialize.SerializationException
 import org.spongepowered.configurate.serialize.TypeSerializer
