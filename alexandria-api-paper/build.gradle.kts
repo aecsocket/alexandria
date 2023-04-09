@@ -8,6 +8,10 @@ plugins {
 
 val minecraft: String = libs.versions.minecraft.get()
 
+repositories {
+    maven("https://repo.codemc.io/repository/maven-snapshots/") // packetEventsApi
+}
+
 dependencies {
     implementation(projects.alexandriaApi)
     paperweight.foliaDevBundle("$minecraft-R0.1-SNAPSHOT")
@@ -21,6 +25,8 @@ dependencies {
     implementation(libs.cloudMinecraftExtras)
     implementation(libs.glossaApi)
     implementation(libs.glossaConfigurate)
+    compileOnly(libs.packetEventsApi)
+    compileOnly(libs.packetEventsSpigot)
 }
 
 tasks {

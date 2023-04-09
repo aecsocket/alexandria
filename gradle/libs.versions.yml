@@ -17,6 +17,7 @@ versions:
   cloud: 1.8.3
   minecraft: 1.19.4
   glossa: 1.0.3
+  packetEvents: 2.0.0-SNAPSHOT
 
 dependencies:
   indraCommon: { group: net.kyori, name: indra-common, version: { ref: indra } }
@@ -36,3 +37,5 @@ dependencies:
   cloudMinecraftExtras: { group: cloud.commandframework, name: cloud-minecraft-extras, version: { ref: cloud } }
   glossaApi: { group: io.github.aecsocket, name: glossa-api, version: { ref: glossa } }
   glossaConfigurate: { group: io.github.aecsocket, name: glossa-configurate, version: { ref: glossa } }
+  packetEventsApi: { group: com.github.retrooper.packetevents, name: api, version: { ref: packetEvents } }
+  packetEventsSpigot: { group: com.github.retrooper.packetevents, name: spigot, version: { ref: packetEvents } }
