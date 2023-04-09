@@ -57,7 +57,7 @@ abstract class AlexandriaPlugin(
         .append(sanitizeText(component))
         .build()
 
-    protected fun configLoaderBuilder(): YamlConfigurationLoader.Builder =
+    fun configLoaderBuilder(): YamlConfigurationLoader.Builder =
         YamlConfigurationLoader.builder()
             .defaultOptions(configOptions)
 
