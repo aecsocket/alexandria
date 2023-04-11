@@ -16,7 +16,7 @@ versions:
   configurate: 4.1.2
   cloud: 1.8.3
   minecraft: 1.19.4
-  glossa: 1.0.3
+  glossa: 1.0.4
   packetEvents: 2.0.0-SNAPSHOT
 
 dependencies:
