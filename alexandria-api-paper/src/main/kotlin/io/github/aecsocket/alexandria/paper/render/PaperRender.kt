@@ -1,12 +1,10 @@
 package io.github.aecsocket.alexandria.paper.render
 
+import io.github.aecsocket.alexandria.Billboard
 import io.github.aecsocket.alexandria.Render
-import io.github.aecsocket.klam.DAffine3
-import io.github.aecsocket.klam.FVec3
-import io.github.aecsocket.klam.RGBA
-import io.github.aecsocket.klam.fromARGB
+import io.github.aecsocket.alexandria.TextAlignment
+import io.github.aecsocket.klam.*
 import net.kyori.adventure.text.Component
-import org.bukkit.entity.Display.Billboard
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
@@ -45,26 +43,29 @@ interface TextRender : PaperRender {
 }
 
 sealed interface RenderDescriptor {
-    val scale: FVec3
+    val tracker: PlayerTracker
     val billboard: Billboard
+    val viewRange: Float
+    val interpolationDelay: Int
+    val interpolationDuration: Int
 }
 
 data class ModelDescriptor(
-    override val scale: FVec3 = FVec3(1.0f),
-    override val billboard: Billboard = Billboard.FIXED,
     val item: ItemStack,
+    override val tracker: PlayerTracker,
+    override val billboard: Billboard = Billboard.NONE,
+    override val viewRange: Float = 1.0f,
+    override val interpolationDelay: Int = 0,
+    override val interpolationDuration: Int = 0,
 ) : RenderDescriptor
 
-enum class TextAlignment {
-    LEFT,
-    RIGHT,
-    CENTER,
-}
-
 data class TextDescriptor(
-    override val scale: FVec3 = FVec3(1.0f),
-    override val billboard: Billboard = Billboard.CENTER,
     val text: Component,
+    override val tracker: PlayerTracker,
+    override val billboard: Billboard = Billboard.ALL,
+    override val viewRange: Float = 1.0f,
+    override val interpolationDelay: Int = 0,
+    override val interpolationDuration: Int = 0,
     val lineWidth: Int = 200,
     val backgroundColor: RGBA = fromARGB(0x40000000),
     val hasShadow: Boolean = false,
@@ -73,14 +74,14 @@ data class TextDescriptor(
 ) : RenderDescriptor
 
 interface Renders {
-    fun createModel(descriptor: ModelDescriptor, tracker: PlayerTracker, transform: DAffine3): ModelRender
+    fun createModel(descriptor: ModelDescriptor, basePosition: DVec3, transform: FAffine3): ModelRender
 
-    fun createText(descriptor: TextDescriptor, tracker: PlayerTracker, transform: DAffine3): TextRender
+    fun createText(descriptor: TextDescriptor, basePosition: DVec3, transform: FAffine3): TextRender
 
-    fun create(descriptor: RenderDescriptor, tracker: PlayerTracker, transform: DAffine3): PaperRender {
+    fun create(descriptor: RenderDescriptor, basePosition: DVec3, transform: FAffine3): PaperRender {
         return when (descriptor) {
-            is ModelDescriptor -> createModel(descriptor, tracker, transform)
-            is TextDescriptor -> createText(descriptor, tracker, transform)
+            is ModelDescriptor -> createModel(descriptor, basePosition, transform)
+            is TextDescriptor -> createText(descriptor, basePosition, transform)
         }
     }
 }
