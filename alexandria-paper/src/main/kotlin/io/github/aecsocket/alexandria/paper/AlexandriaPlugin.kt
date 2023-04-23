@@ -17,6 +17,7 @@ import net.kyori.adventure.text.format.TextColor
 import org.bukkit.plugin.java.JavaPlugin
 import org.spongepowered.configurate.ConfigurationNode
 import org.spongepowered.configurate.ConfigurationOptions
+import org.spongepowered.configurate.loader.AbstractConfigurationLoader
 import org.spongepowered.configurate.yaml.YamlConfigurationLoader
 import java.util.Locale
 
@@ -57,7 +58,7 @@ abstract class AlexandriaPlugin(
         .append(sanitizeText(component))
         .build()
 
-    fun configLoaderBuilder(): YamlConfigurationLoader.Builder =
+    fun configLoaderBuilder(): AbstractConfigurationLoader.Builder<*, *> =
         YamlConfigurationLoader.builder()
             .defaultOptions(configOptions)
 

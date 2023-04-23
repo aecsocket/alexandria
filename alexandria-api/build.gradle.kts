@@ -4,10 +4,9 @@ plugins {
 }
 
 dependencies {
-    implementation(libs.kotlinxCoroutinesCore)
-    implementation(libs.adventureApi)
-    implementation(libs.klam)
-    implementation(libs.configurateCore)
-    implementation(libs.cloudCore)
-    implementation(libs.glossaApi)
+    api(libs.kotlinxCoroutinesCore)
+    api(libs.klam)
+    api(libs.configurateCore)
+    api(libs.cloudCore)
+    api(libs.glossa)
 }
