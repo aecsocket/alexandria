@@ -6,4 +6,8 @@
 
 Multiplatform utilities for Minecraft projects
 
+### [GitHub](https://github.com/aecsocket/alexandria) · [Docs](https://aecsocket.github.io/alexandria)
+
 </div>
+
+Generic utilities for use in my other projects. Not much documentation yet.

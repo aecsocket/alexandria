@@ -29,4 +29,8 @@ tasks {
     assemble {
         dependsOn(shadowJar)
     }
+
+    shadowJar {
+        exclude("plugin.yml")
+    }
 }
