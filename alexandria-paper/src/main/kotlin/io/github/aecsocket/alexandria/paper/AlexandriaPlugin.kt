@@ -77,7 +77,7 @@ abstract class AlexandriaPlugin(
 
         val glossa = glossaStandard(
             defaultLocale = settings.defaultLocale,
-            invalidMessageProvider = InvalidMessageProvider.DefaultLogging(logger)
+            invalidMessageProvider = InvalidMessageProvider.DefaultLogging(getLogger())
         ) {
             (defaultLanguageResources + manifest.languageResources).forEach { path ->
                 try {
