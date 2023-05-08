@@ -124,7 +124,7 @@ abstract class AlexandriaPlugin(
         val log = LoggingList()
         defaultLoad(log)
         load(log)
-        log.logTo(logger)
+        log.logTo(getLogger())
     }
 
     fun reload(): LoggingList {
@@ -132,7 +132,7 @@ abstract class AlexandriaPlugin(
         defaultLoad(log)
         load(log)
         reload(log)
-        log.logTo(logger)
+        log.logTo(getLogger())
         return log
     }
 }
