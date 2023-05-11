@@ -20,10 +20,10 @@ class FoliaScheduling(val plugin: Plugin) : Scheduling {
     }
 
     override fun onServer() = object : SchedulingContext {
-        override fun launch(block: suspend CoroutineScope.() -> Unit) {
+        override fun launch(block: () -> Unit) {
             if (!plugin.isEnabled) return
             server.globalRegionScheduler.run(plugin) {
-                runBlocking(ImmediateCoroutineDispatcher, block)
+                block()
             }
         }
 
@@ -39,10 +39,10 @@ class FoliaScheduling(val plugin: Plugin) : Scheduling {
     }
 
     override fun onEntity(entity: Entity) = object : SchedulingContext {
-        override fun launch(block: suspend CoroutineScope.() -> Unit) {
+        override fun launch(block: () -> Unit) {
             if (!plugin.isEnabled) return
             entity.scheduler.run(plugin, {
-                runBlocking(ImmediateCoroutineDispatcher, block)
+                block()
             }, null)
         }
 
@@ -58,10 +58,10 @@ class FoliaScheduling(val plugin: Plugin) : Scheduling {
     }
 
     override fun onChunk(world: World, chunkX: Int, chunkZ: Int) = object : SchedulingContext {
-        override fun launch(block: suspend CoroutineScope.() -> Unit) {
+        override fun launch(block: () -> Unit) {
             if (!plugin.isEnabled) return
             server.regionScheduler.run(plugin, world, chunkX, chunkZ) {
-                runBlocking(ImmediateCoroutineDispatcher, block)
+                block()
             }
         }
 

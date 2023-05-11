@@ -67,7 +67,7 @@ data class TextDescriptor(
     override val interpolationDelay: Int = 0,
     override val interpolationDuration: Int = 0,
     val lineWidth: Int = 200,
-    val backgroundColor: RGBA = fromARGB(0x40000000),
+    val backgroundColor: IVec4 = fromARGB(0x40000000),
     val hasShadow: Boolean = false,
     val isSeeThrough: Boolean = false,
     val alignment: TextAlignment = TextAlignment.CENTER,

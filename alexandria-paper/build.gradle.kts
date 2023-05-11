@@ -1,9 +1,9 @@
 plugins {
     id("kotlin-conventions")
     id("publishing-conventions")
-    id("io.papermc.paperweight.userdev")
-    id("com.github.johnrengelman.shadow")
-    id("xyz.jpenilla.run-paper")
+    alias(libs.plugins.shadow)
+    alias(libs.plugins.paperweight.userdev)
+    alias(libs.plugins.run.paper)
 }
 
 val minecraft: String = libs.versions.minecraft.get()
@@ -15,14 +15,14 @@ repositories {
 dependencies {
     paperweight.foliaDevBundle("$minecraft-R0.1-SNAPSHOT")
     api(projects.alexandriaApi)
-    api(libs.configurateExtraKotlin)
-    api(libs.configurateYaml)
-    api(libs.adventureSerializerConfigurate)
-    api(libs.klamConfigurate)
-    api(libs.cloudPaper)
-    api(libs.cloudMinecraftExtras)
-    api(libs.glossaConfigurate)
-    api(libs.packetEventsSpigot)
+    api(libs.configurate.extra.kotlin)
+    api(libs.configurate.yaml)
+    api(libs.adventure.serializer.configurate4)
+    api(libs.klam.configurate)
+    api(libs.cloud.paper)
+    api(libs.cloud.minecraft.extras)
+    api(libs.glossa.configurate)
+    api(libs.packetevents.spigot)
 }
 
 tasks {

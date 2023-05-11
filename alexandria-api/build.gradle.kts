@@ -4,9 +4,12 @@ plugins {
 }
 
 dependencies {
-    api(libs.kotlinxCoroutinesCore)
+    api(libs.kotlinx.coroutines.core)
+    api(libs.configurate.core)
     api(libs.klam)
-    api(libs.configurateCore)
-    api(libs.cloudCore)
+    api(libs.klam.configurate)
     api(libs.glossa)
+    api(libs.glossa.configurate)
+    api(libs.cloud.core)
+    api(libs.cloud.minecraft.extras)
 }

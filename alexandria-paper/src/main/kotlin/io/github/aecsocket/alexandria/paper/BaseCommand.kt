@@ -47,9 +47,9 @@ open class BaseCommand(
 
     fun <T : Any> MessageProxy<T>.forAudience(audience: Audience) = forLocale(audience.locale())
 
-    fun <C> Command.Builder<C>.alexandriaPermission(permission: String) = permission("$pluginId.command.$permission")
+    fun <C> Command.Builder<C>.axPermission(permission: String) = permission("$pluginId.command.$permission")
 
-    fun <C> Command.Builder<C>.alexandriaHandler(block: suspend (CommandContext<C>) -> Unit) = handler { ctx ->
+    fun <C> Command.Builder<C>.axHandler(block: suspend (CommandContext<C>) -> Unit) = handler { ctx ->
         runBlocking {
             block(ctx)
         }
@@ -61,17 +61,17 @@ open class BaseCommand(
 
         manager.command(root
             .literal("about")
-            .alexandriaHandler(::about)
+            .axHandler(::about)
         )
         manager.command(root
             .literal("help")
             .argument(StringArgument.optional(QUERY, StringArgument.StringMode.GREEDY))
-            .alexandriaHandler(::help)
+            .axHandler(::help)
         )
         manager.command(root
             .literal("reload")
-            .alexandriaPermission("reload")
-            .alexandriaHandler(::reload)
+            .axPermission("reload")
+            .axHandler(::reload)
         )
     }
 

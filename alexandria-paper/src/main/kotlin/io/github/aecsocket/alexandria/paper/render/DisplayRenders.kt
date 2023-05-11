@@ -45,10 +45,10 @@ class DisplayRenders(private val packets: PacketEventsAPI<*>) : Renders {
         val interpolationDelay = descriptor.interpolationDelay
         val interpolationDuration = descriptor.interpolationDuration
 
-        override var basePosition = DVec3(basePosition)
-            get() = DVec3(field)
+        override var basePosition = basePosition
+            get() = field
             set(value) {
-                field = DVec3(value)
+                field = value
                 val packet = WrapperPlayServerEntityTeleport(
                     protocolId,
                     value.run { Vector3d(x, y, z) },
@@ -61,10 +61,10 @@ class DisplayRenders(private val packets: PacketEventsAPI<*>) : Renders {
                 }
             }
 
-        override var transform = FAffine3(transform)
-            get() = FAffine3(field)
+        override var transform = transform
+            get() = field
             set(value) {
-                field = FAffine3(value)
+                field = value
                 val packet = WrapperPlayServerEntityMetadata(protocolId, listOf(
                     metadataInterpolationDelay(),
                     metadataInterpolationDuration(),
@@ -217,14 +217,13 @@ class DisplayRenders(private val packets: PacketEventsAPI<*>) : Renders {
             EntityData(24, EntityDataTypes.INT, backgroundColor),
             // 26: Text Display/Bitfield
             EntityData(26, EntityDataTypes.BYTE, (
-                    (if (hasShadow) 0x1 else 0) or
-                            (if (isSeeThrough) 0x2 else 0) or
-                            when (alignment) {
-                                TextAlignment.CENTER -> 0
-                                TextAlignment.LEFT -> 0x8
-                                TextAlignment.RIGHT -> 0x10
-                            }
-                    ).toByte()
+                (if (hasShadow) 0x1 else 0) or
+                (if (isSeeThrough) 0x2 else 0) or
+                when (alignment) {
+                    TextAlignment.CENTER -> 0
+                    TextAlignment.LEFT -> 0x8
+                    TextAlignment.RIGHT -> 0x10
+                }).toByte()
             )
         )
     }

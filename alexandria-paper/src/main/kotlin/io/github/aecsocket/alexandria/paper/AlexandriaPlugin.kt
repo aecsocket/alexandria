@@ -3,7 +3,7 @@ package io.github.aecsocket.alexandria.paper
 import io.github.aecsocket.alexandria.*
 import io.github.aecsocket.alexandria.paper.extension.isFolia
 import io.github.aecsocket.alexandria.paper.extension.resource
-import io.github.aecsocket.alexandria.paper.extension.sanitizeText
+import io.github.aecsocket.alexandria.extension.sanitizeText
 import io.github.aecsocket.alexandria.paper.scheduling.FoliaScheduling
 import io.github.aecsocket.alexandria.paper.scheduling.PaperScheduling
 import io.github.aecsocket.alexandria.paper.scheduling.Scheduling
@@ -20,12 +20,13 @@ import org.spongepowered.configurate.ConfigurationOptions
 import org.spongepowered.configurate.loader.AbstractConfigurationLoader
 import org.spongepowered.configurate.yaml.YamlConfigurationLoader
 import java.util.Locale
+import java.util.logging.Logger
 
 private const val PATH_SETTINGS = "settings.yml"
 private const val PATH_LANG = "lang"
 private val defaultLanguageResources = listOf(
-    "alexandria/lang/root.yml",
-    "alexandria/lang/en-US.yml",
+    "io/github/aecsocket/alexandria/paper/lang/root.yml",
+    "io/github/aecsocket/alexandria/paper/lang/en-US.yml",
 )
 val fallbackLocale: Locale = Locale.forLanguageTag("en-US")
 
@@ -53,6 +54,10 @@ abstract class AlexandriaPlugin(
     lateinit var glossa: Glossa
     lateinit var scheduling: Scheduling
 
+    // avoids issues with accessing field instead of getter in earlier Paper versions
+    // since the field later became private in Paper, but the Folia API was not updated
+    val logging: Logger get() = getLogger()
+
     fun asChat(component: Component) = text()
         .append(chatPrefix)
         .append(sanitizeText(component))
@@ -77,7 +82,7 @@ abstract class AlexandriaPlugin(
 
         val glossa = glossaStandard(
             defaultLocale = settings.defaultLocale,
-            invalidMessageProvider = InvalidMessageProvider.DefaultLogging(getLogger())
+            invalidMessageProvider = InvalidMessageProvider.DefaultLogging(logging)
         ) {
             (defaultLanguageResources + manifest.languageResources).forEach { path ->
                 try {
@@ -124,7 +129,7 @@ abstract class AlexandriaPlugin(
         val log = LoggingList()
         defaultLoad(log)
         load(log)
-        log.logTo(getLogger())
+        log.logTo(logging)
     }
 
     fun reload(): LoggingList {
@@ -132,7 +137,7 @@ abstract class AlexandriaPlugin(
         defaultLoad(log)
         load(log)
         reload(log)
-        log.logTo(getLogger())
+        log.logTo(logging)
         return log
     }
 }

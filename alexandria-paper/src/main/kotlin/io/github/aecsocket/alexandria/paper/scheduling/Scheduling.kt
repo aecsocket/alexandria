@@ -1,21 +1,17 @@
 package io.github.aecsocket.alexandria.paper.scheduling
 
 import io.papermc.paper.math.Position
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Runnable
 import org.bukkit.Chunk
 import org.bukkit.Location
 import org.bukkit.World
 import org.bukkit.entity.Entity
-import kotlin.coroutines.CoroutineContext
 
 interface TaskContext {
     fun cancel()
 }
 
 interface SchedulingContext {
-    fun launch(block: suspend CoroutineScope.() -> Unit)
+    fun launch(block: () -> Unit)
 
     fun runLater(delay: Long, block: () -> Unit)
 
@@ -38,11 +34,4 @@ interface Scheduling {
 
     fun onChunk(chunk: Chunk): SchedulingContext =
         onChunk(chunk.world, chunk.x, chunk.z)
-}
-
-object ImmediateCoroutineDispatcher : CoroutineDispatcher() {
-    override fun isDispatchNeeded(context: CoroutineContext) = false
-    override fun dispatch(context: CoroutineContext, block: Runnable) {
-        block.run()
-    }
 }
