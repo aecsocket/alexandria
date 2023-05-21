@@ -1,4 +1,4 @@
-package io.github.aecsocket.alexandria
+package io.github.aecsocket.alexandria.sync
 
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock

@@ -15,13 +15,9 @@ repositories {
 dependencies {
     paperweight.foliaDevBundle("$minecraft-R0.1-SNAPSHOT")
     api(projects.alexandriaApi)
-    api(libs.configurate.extra.kotlin)
-    api(libs.configurate.yaml)
-    api(libs.adventure.serializer.configurate4)
-    api(libs.klam.configurate)
+
+    api(libs.configurate.toml)
     api(libs.cloud.paper)
-    api(libs.cloud.minecraft.extras)
-    api(libs.glossa.configurate)
     api(libs.packetevents.spigot)
 }
 

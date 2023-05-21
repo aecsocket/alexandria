@@ -1,121 +1,43 @@
 package io.github.aecsocket.alexandria.paper
 
-import io.github.aecsocket.alexandria.*
+import io.github.aecsocket.alexandria.ListLogger
+import io.github.aecsocket.alexandria.hook.AlexandriaHook
+import io.github.aecsocket.alexandria.hook.AlexandriaManifest
+import io.github.aecsocket.alexandria.hook.AlexandriaSettings
 import io.github.aecsocket.alexandria.paper.extension.isFolia
-import io.github.aecsocket.alexandria.paper.extension.resource
-import io.github.aecsocket.alexandria.extension.sanitizeText
 import io.github.aecsocket.alexandria.paper.scheduling.FoliaScheduling
 import io.github.aecsocket.alexandria.paper.scheduling.PaperScheduling
 import io.github.aecsocket.alexandria.paper.scheduling.Scheduling
-import io.github.aecsocket.glossa.configurate.fromConfigLoader
 import io.github.aecsocket.glossa.Glossa
-import io.github.aecsocket.glossa.InvalidMessageProvider
-import io.github.aecsocket.glossa.glossaStandard
+import io.github.aecsocket.glossa.GlossaStandard
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.Component.text
-import net.kyori.adventure.text.format.TextColor
 import org.bukkit.plugin.java.JavaPlugin
 import org.spongepowered.configurate.ConfigurationNode
-import org.spongepowered.configurate.ConfigurationOptions
-import org.spongepowered.configurate.loader.AbstractConfigurationLoader
-import org.spongepowered.configurate.yaml.YamlConfigurationLoader
-import java.util.Locale
-import java.util.logging.Logger
 
-private const val PATH_SETTINGS = "settings.yml"
-private const val PATH_LANG = "lang"
-private val defaultLanguageResources = listOf(
-    "io/github/aecsocket/alexandria/paper/lang/root.yml",
-    "io/github/aecsocket/alexandria/paper/lang/en-US.yml",
-)
-val fallbackLocale: Locale = Locale.forLanguageTag("en-US")
+const val SETTINGS_PATH = "settings.toml"
+const val LANG_PATH = "lang"
 
-abstract class AlexandriaPlugin(
-    val manifest: Manifest,
-) : JavaPlugin() {
-    data class Manifest(
-        val id: String,
-        val accentColor: TextColor,
-        val languageResources: List<String> = emptyList(),
-        val savedResources: List<String> = emptyList(),
-    ) {
-        init {
-            validateKey(id, kebabCasePattern)
-        }
-    }
-
-    interface Settings {
-        val defaultLocale: Locale
-    }
-
-    private val chatPrefix = text("(${manifest.id}) ", manifest.accentColor)
-    abstract val settings: Settings
-    protected abstract val configOptions: ConfigurationOptions
-    lateinit var glossa: Glossa
-    lateinit var scheduling: Scheduling
-
+abstract class AlexandriaPlugin<S : AlexandriaSettings>(final override val manifest: AlexandriaManifest) : JavaPlugin(), AlexandriaHook {
     // avoids issues with accessing field instead of getter in earlier Paper versions
     // since the field later became private in Paper, but the Folia API was not updated
-    val logging: Logger get() = getLogger()
+    @Suppress("UsePropertyAccessSyntax")
+    final override val log get() = getLogger()
+    private val settingsFile = dataFolder.resolve(SETTINGS_PATH)
+    private val langFile = dataFolder.resolve(LANG_PATH)
+    private val chatPrefix = AlexandriaHook.chatPrefix(manifest)
 
-    fun asChat(component: Component) = text()
-        .append(chatPrefix)
-        .append(sanitizeText(component))
-        .build()
+    lateinit var scheduling: Scheduling
+        private set
+    final override lateinit var settings: S
+        private set
+    final override lateinit var glossa: Glossa
+        private set
 
-    fun configLoaderBuilder(): AbstractConfigurationLoader.Builder<*, *> =
-        YamlConfigurationLoader.builder()
-            .defaultOptions(configOptions)
-
-    protected abstract fun loadSettings(node: ConfigurationNode?)
-
-    private fun defaultLoad(log: LoggingList) {
-        try {
-            val settingsNode = configLoaderBuilder()
-                .file(dataFolder.resolve(PATH_SETTINGS))
-                .build().load()
-            loadSettings(settingsNode)
-        } catch (ex: Exception) {
-            log.error("Could not load settings from $PATH_SETTINGS", ex)
-            loadSettings(null)
-        }
-
-        val glossa = glossaStandard(
-            defaultLocale = settings.defaultLocale,
-            invalidMessageProvider = InvalidMessageProvider.DefaultLogging(logging)
-        ) {
-            (defaultLanguageResources + manifest.languageResources).forEach { path ->
-                try {
-                    fromConfigLoader(configLoaderBuilder().source { resource(path).bufferedReader() }.build())
-                    log.debug("Loaded language resource from jar:$path")
-                } catch (ex: Exception) {
-                    log.warn("Could not load language resource from jar:$path", ex)
-                }
-            }
-
-            dataFolder.resolve(PATH_LANG).walkTopDown()
-                .onFail { file, ex ->
-                    val path = file.relativeTo(dataFolder)
-                    log.warn("Could not open language resource at $path", ex)
-                }
-                .forEach { file ->
-                    val path = file.relativeTo(dataFolder)
-                    try {
-                        fromConfigLoader(configLoaderBuilder().file(file).build())
-                        log.debug("Loaded language resource from $path")
-                    } catch (ex: Exception) {
-                        log.warn("Could not load language resource from $path", ex)
-                    }
-                }
-        }
-        log.info("Loaded ${glossa.countSubstitutions()} substitutions, ${glossa.countStyles()} styles, ${glossa.countMessages()} messages, ${glossa.countLocales()} locales")
-
-        this.glossa = glossa
-    }
-
-    protected open fun load(log: LoggingList) {}
-
-    protected open fun reload(log: Logging) {}
+    override val hookName get() = name
+    @Suppress("UnstableApiUsage")
+    override val version get() = pluginMeta.version
+    @Suppress("UnstableApiUsage")
+    override val authors: List<String> get() = pluginMeta.authors
 
     override fun onLoad() {
         scheduling = if (isFolia) FoliaScheduling(this) else PaperScheduling(this)
@@ -126,18 +48,35 @@ abstract class AlexandriaPlugin(
             }
         }
 
-        val log = LoggingList()
-        defaultLoad(log)
-        load(log)
-        log.logTo(logging)
+        AlexandriaHook.load(
+            hook = this,
+            settingsFile = settingsFile,
+            loadSettings = ::loadSettings,
+            onGlossaBuild = ::onGlossaBuild,
+            setFields = ::setFields
+        )
     }
 
-    fun reload(): LoggingList {
-        val log = LoggingList()
-        defaultLoad(log)
-        load(log)
-        reload(log)
-        log.logTo(logging)
-        return log
+    override fun reload(): ListLogger {
+        return AlexandriaHook.reload(
+            hook = this,
+            settingsFile = settingsFile,
+            loadSettings = ::loadSettings,
+            onGlossaBuild = ::onGlossaBuild,
+            setFields = ::setFields,
+        )
     }
+
+    protected abstract fun loadSettings(node: ConfigurationNode): S
+
+    private fun onGlossaBuild(model: GlossaStandard.Model) {
+        AlexandriaHook.loadGlossaFromFiles(this@AlexandriaPlugin, model, log, langFile)
+    }
+
+    private fun setFields(settings: S, glossa: Glossa) {
+        this.settings = settings
+        this.glossa = glossa
+    }
+
+    override fun asChat(comp: Component) = AlexandriaHook.asChat(chatPrefix, comp)
 }

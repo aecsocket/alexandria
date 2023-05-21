@@ -1,7 +1,14 @@
 styles:
+  # variable info
   p1: { color: white }
+  # generic info
   p2: { color: gray }
+  # detail, fine info
   p3: { color: dark_gray }
-  sw: { color: yellow }
-  se: { color: red }
+
+  # key
   sk: { color: dark_green }
+  # warning
+  sw: { color: yellow }
+  # error
+  se: { color: red }

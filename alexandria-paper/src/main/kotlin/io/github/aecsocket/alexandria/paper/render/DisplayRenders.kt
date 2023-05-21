@@ -46,7 +46,6 @@ class DisplayRenders(private val packets: PacketEventsAPI<*>) : Renders {
         val interpolationDuration = descriptor.interpolationDuration
 
         override var basePosition = basePosition
-            get() = field
             set(value) {
                 field = value
                 val packet = WrapperPlayServerEntityTeleport(
@@ -62,7 +61,6 @@ class DisplayRenders(private val packets: PacketEventsAPI<*>) : Renders {
             }
 
         override var transform = transform
-            get() = field
             set(value) {
                 field = value
                 val packet = WrapperPlayServerEntityMetadata(protocolId, listOf(
@@ -88,7 +86,7 @@ class DisplayRenders(private val packets: PacketEventsAPI<*>) : Renders {
 
         private fun metadataTranslation() =
             // 10: Display/Translation
-            EntityData(10, EntityDataTypes.VECTOR3F, transform.position.run { Vector3f(x, y, z) })
+            EntityData(10, EntityDataTypes.VECTOR3F, transform.translation.run { Vector3f(x, y, z) })
 
         private fun metadataScale() =
             // 11: Display/Scale

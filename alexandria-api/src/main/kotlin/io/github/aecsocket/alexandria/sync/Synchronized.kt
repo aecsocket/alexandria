@@ -1,4 +1,4 @@
-package io.github.aecsocket.alexandria
+package io.github.aecsocket.alexandria.sync
 
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind

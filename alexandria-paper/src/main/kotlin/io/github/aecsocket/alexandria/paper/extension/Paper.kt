@@ -21,18 +21,6 @@ fun nextEntityId() = Bukkit.getUnsafe().nextEntityId()
 
 fun Plugin.key(value: String) = NamespacedKey(this, value)
 
-fun Plugin.resource(path: String): InputStream {
-    val url = javaClass.classLoader.getResource(path)
-        ?: throw RuntimeException("Resource at $path does not exist")
-    try {
-        val connection = url.openConnection()
-        connection.useCaches = false
-        return connection.getInputStream()
-    } catch (ex: IOException) {
-        throw RuntimeException("Could not load resource from $path", ex)
-    }
-}
-
 fun Plugin.registerEvents(listener: Listener) =
     Bukkit.getPluginManager().registerEvents(listener, this)
 
