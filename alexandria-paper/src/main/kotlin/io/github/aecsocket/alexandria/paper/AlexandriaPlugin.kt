@@ -39,11 +39,13 @@ abstract class AlexandriaPlugin<S : AlexandriaSettings>(final override val manif
     @Suppress("UnstableApiUsage")
     override val authors: List<String> get() = pluginMeta.authors
 
+    protected abstract val savedResources: List<String>
+
     override fun onLoad() {
         scheduling = if (isFolia) FoliaScheduling(this) else PaperScheduling(this)
 
         if (!dataFolder.exists()) {
-            manifest.savedResources.forEach { path ->
+            savedResources.forEach { path ->
                 saveResource(path, false)
             }
         }

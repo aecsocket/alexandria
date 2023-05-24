@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "alexandria",
+  "version": "$version",
+
+  "name": "Alexandria",
+  "description": "$description",
+  "authors": [
+    "aecsocket"
+  ],
+  "contact": {
+    "homepage": "https://github.com/aecsocket/alexandria",
+    "sources": "https://github.com/aecsocket/alexandria"
+  },
+  "license": "MIT",
+
+  "environment": "*",
+
+  "depends": {
+    "fabricloader": ">=0.14.19",
+    "fabric-api": "0.81.1+1.19.4",
+    "minecraft": "1.19.4",
+    "java": ">=17"
+  }
+}

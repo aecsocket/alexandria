@@ -1,6 +1,9 @@
 package io.github.aecsocket.alexandria.extension
 
+import io.github.aecsocket.glossa.configurate.LocaleSerializer
+import io.github.aecsocket.klam.configurate.klamSerializers
 import io.leangen.geantyref.TypeToken
+import net.kyori.adventure.serializer.configurate4.ConfigurateComponentSerializer
 import org.spongepowered.configurate.ConfigurationNode
 import org.spongepowered.configurate.serialize.SerializationException
 import org.spongepowered.configurate.serialize.TypeSerializer
@@ -26,3 +29,9 @@ inline fun <reified T> TypeSerializerCollection.Builder.register(serializer: Typ
 
 inline fun <reified T> TypeSerializerCollection.Builder.registerExact(serializer: TypeSerializer<T>) =
     registerExact(T::class.java, serializer)
+
+val alexandriaApiSerializers: TypeSerializerCollection = TypeSerializerCollection.defaults().childBuilder()
+    .registerAll(klamSerializers)
+    .registerAll(ConfigurateComponentSerializer.configurate().serializers())
+    .registerExact(LocaleSerializer)
+    .build()

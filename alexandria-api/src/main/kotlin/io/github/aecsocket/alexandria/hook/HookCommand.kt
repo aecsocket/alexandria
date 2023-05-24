@@ -11,8 +11,10 @@ import io.github.aecsocket.glossa.MessageProxy
 import io.github.aecsocket.glossa.messageProxy
 import kotlinx.coroutines.runBlocking
 import net.kyori.adventure.audience.Audience
+import net.kyori.adventure.identity.Identity
 import net.kyori.adventure.text.Component.text
 import java.util.logging.Level
+import kotlin.jvm.optionals.getOrElse
 
 private const val QUERY = "query"
 
@@ -42,7 +44,10 @@ abstract class HookCommand<C : Audience>(
         )
     }
 
-    protected abstract fun <T : Any> MessageProxy<T>.forAudience(sender: C): T
+    fun <T : Any> MessageProxy<T>.forAudience(sender: Audience): T {
+        val locale = sender.get(Identity.LOCALE).getOrElse { hook.settings.defaultLocale }
+        return forLocale(locale)
+    }
 
     private fun about(ctx: CommandContext<C>) {
         val sender = ctx.sender

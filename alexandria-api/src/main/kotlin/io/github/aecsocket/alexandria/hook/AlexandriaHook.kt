@@ -34,7 +34,6 @@ data class AlexandriaManifest(
     val id: String,
     val accentColor: TextColor,
     val languageResources: List<String> = emptyList(),
-    val savedResources: List<String> = emptyList(),
 ) {
     init {
         validateKey(id, kebabCasePattern)
