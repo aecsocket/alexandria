@@ -1,6 +1,6 @@
 package io.github.aecsocket.alexandria.fabric
 
-import io.github.aecsocket.alexandria.ListLogger
+import io.github.aecsocket.alexandria.log.ListLog
 import io.github.aecsocket.alexandria.hook.AlexandriaHook
 import io.github.aecsocket.alexandria.hook.AlexandriaManifest
 import io.github.aecsocket.alexandria.hook.AlexandriaSettings
@@ -48,7 +48,7 @@ abstract class AlexandriaMod<S : AlexandriaSettings>(final override val manifest
         )
     }
 
-    override fun reload(): ListLogger {
+    override fun reload(): ListLog {
         return AlexandriaHook.reload(
             hook = this,
             settingsFile = settingsFile,

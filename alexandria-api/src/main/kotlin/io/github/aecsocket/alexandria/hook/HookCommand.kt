@@ -77,9 +77,9 @@ abstract class HookCommand<C : Audience>(
         messages.command.reload.start().sendTo(sender)
         val log = hook.reload()
         messages.command.reload.stop(
-            numMessages = log.records.size,
+            numMessages = log.entries.size,
         ).sendTo(sender)
-        log.records.forEach { entry ->
+        log.entries.forEach { entry ->
             val logMessages = messages.command.reload.log
             when (entry.level) {
                 Level.FINER, Level.FINEST -> logMessages.debug(entry.message)

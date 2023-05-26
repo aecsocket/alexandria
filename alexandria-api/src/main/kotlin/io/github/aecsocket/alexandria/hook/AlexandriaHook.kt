@@ -1,11 +1,10 @@
 package io.github.aecsocket.alexandria.hook
 
-import io.github.aecsocket.alexandria.ListLogger
 import io.github.aecsocket.alexandria.extension.resource
 import io.github.aecsocket.alexandria.extension.sanitizeText
-import io.github.aecsocket.alexandria.extension.severe
 import io.github.aecsocket.alexandria.extension.warning
 import io.github.aecsocket.alexandria.kebabCasePattern
+import io.github.aecsocket.alexandria.log.*
 import io.github.aecsocket.alexandria.validateKey
 import io.github.aecsocket.glossa.Glossa
 import io.github.aecsocket.glossa.GlossaStandard
@@ -21,7 +20,6 @@ import org.spongepowered.configurate.ConfigurationOptions
 import org.spongepowered.configurate.yaml.YamlConfigurationLoader
 import java.io.File
 import java.util.Locale
-import java.util.logging.Logger
 
 private const val CONFIG_EXT = ".toml"
 private val defaultLanguageResources = listOf(
@@ -47,7 +45,7 @@ interface AlexandriaSettings {
 interface AlexandriaHook {
     val manifest: AlexandriaManifest
 
-    val log: Logger
+    val log: Log
     val settings: AlexandriaSettings
     val glossa: Glossa
     val configOptions: ConfigurationOptions
@@ -56,11 +54,11 @@ interface AlexandriaHook {
     val version: String
     val authors: List<String>
 
-    fun onLoad(log: Logger) {}
+    fun onLoad(log: Log) {}
 
-    fun onReload(log: Logger) {}
+    fun onReload(log: Log) {}
 
-    fun reload(): ListLogger
+    fun reload(): ListLog
 
     fun asChat(comp: Component): Component
 
@@ -71,9 +69,9 @@ interface AlexandriaHook {
             loadSettings: (ConfigurationNode) -> S,
             onGlossaBuild: GlossaStandard.Model.() -> Unit,
             setFields: (S, Glossa) -> Unit,
-            block: (Logger) -> Unit,
-        ): ListLogger {
-            val log = ListLogger()
+            block: (Log) -> Unit,
+        ): ListLog {
+            val log = ListLog()
 
             val (settings, glossa) = baseLoad(hook, log, settingsFile, loadSettings, onGlossaBuild)
             setFields(settings, glossa)
@@ -90,7 +88,7 @@ interface AlexandriaHook {
             loadSettings: (ConfigurationNode) -> S,
             onGlossaBuild: GlossaStandard.Model.() -> Unit,
             setFields: (S, Glossa) -> Unit,
-        ): ListLogger {
+        ): ListLog {
             return loadInternal(hook, settingsFile, loadSettings, onGlossaBuild, setFields) { log ->
                 hook.onLoad(log)
             }
@@ -102,7 +100,7 @@ interface AlexandriaHook {
             loadSettings: (ConfigurationNode) -> S,
             onGlossaBuild: GlossaStandard.Model.() -> Unit,
             setFields: (S, Glossa) -> Unit,
-        ): ListLogger {
+        ): ListLog {
             return loadInternal(hook, settingsFile, loadSettings, onGlossaBuild, setFields) { log ->
                 hook.onReload(log)
             }
@@ -110,7 +108,7 @@ interface AlexandriaHook {
 
         private fun <S : AlexandriaSettings> baseLoad(
             hook: AlexandriaHook,
-            log: Logger,
+            log: Log,
             settingsFile: File,
             loadSettings: (ConfigurationNode) -> S,
             onGlossaBuild: GlossaStandard.Model.() -> Unit,
@@ -122,7 +120,7 @@ interface AlexandriaHook {
                 val settingsNode = settingsLoader.load()
                 loadSettings(settingsNode)
             } catch (ex: Exception) {
-                log.severe(ex) { "Could not load settings from $settingsFile" }
+                log.error(ex) { "Could not load settings from $settingsFile" }
                 loadSettings(settingsLoader.createNode())
             }
 
@@ -133,29 +131,29 @@ interface AlexandriaHook {
                 (defaultLanguageResources + hook.manifest.languageResources).forEach { path ->
                     try {
                         fromConfigLoader(hook.yamlConfigLoader().source { resource(path).bufferedReader() }.build())
-                        log.fine { "Loaded language resource from jar:$path" }
+                        log.debug { "Loaded language resource from jar:$path" }
                     } catch (ex: Exception) {
-                        log.warning(ex) { "Could not load language resource from jar:$path" }
+                        log.warn(ex) { "Could not load language resource from jar:$path" }
                     }
                 }
 
                 onGlossaBuild(this)
             }
-            log.info("Loaded ${glossa.countSubstitutions()} substitutions, ${glossa.countStyles()} styles, ${glossa.countMessages()} messages, ${glossa.countLocales()} locales")
+            log.info { "Loaded ${glossa.countSubstitutions()} substitutions, ${glossa.countStyles()} styles, ${glossa.countMessages()} messages, ${glossa.countLocales()} locales" }
 
             return settings to glossa
         }
 
-        fun loadGlossaFromFiles(hook: AlexandriaHook, model: GlossaStandard.Model, log: Logger, root: File) {
+        fun loadGlossaFromFiles(hook: AlexandriaHook, model: GlossaStandard.Model, log: Log, root: File) {
             root.walkTopDown().forEach { file ->
                 if (!file.endsWith(CONFIG_EXT)) return@forEach
                 val path = file.relativeTo(root)
 
                 try {
                     model.fromConfigLoader(hook.yamlConfigLoader().file(file).build())
-                    log.fine("Loaded language resource from $path")
+                    log.trace { "Loaded language resource from $path" }
                 } catch (ex: Exception) {
-                    log.warning(ex) { "Could not load language resource from $path" }
+                    log.warn(ex) { "Could not load language resource from $path" }
                 }
             }
         }
