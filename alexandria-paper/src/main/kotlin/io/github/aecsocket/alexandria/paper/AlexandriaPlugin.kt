@@ -4,6 +4,7 @@ import io.github.aecsocket.alexandria.log.ListLog
 import io.github.aecsocket.alexandria.hook.AlexandriaHook
 import io.github.aecsocket.alexandria.hook.AlexandriaManifest
 import io.github.aecsocket.alexandria.hook.AlexandriaSettings
+import io.github.aecsocket.alexandria.log.Slf4JLog
 import io.github.aecsocket.alexandria.paper.extension.isFolia
 import io.github.aecsocket.alexandria.paper.scheduling.FoliaScheduling
 import io.github.aecsocket.alexandria.paper.scheduling.PaperScheduling
@@ -18,10 +19,7 @@ const val SETTINGS_PATH = "settings.toml"
 const val LANG_PATH = "lang"
 
 abstract class AlexandriaPlugin<S : AlexandriaSettings>(final override val manifest: AlexandriaManifest) : JavaPlugin(), AlexandriaHook {
-    // avoids issues with accessing field instead of getter in earlier Paper versions
-    // since the field later became private in Paper, but the Folia API was not updated
-    @Suppress("UsePropertyAccessSyntax")
-    final override val log get() = getLogger()
+    final override val log = Slf4JLog(slF4JLogger)
     private val settingsFile = dataFolder.resolve(SETTINGS_PATH)
     private val langFile = dataFolder.resolve(LANG_PATH)
     private val chatPrefix = AlexandriaHook.chatPrefix(manifest)

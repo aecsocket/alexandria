@@ -4,18 +4,20 @@ import io.github.aecsocket.alexandria.log.ListLog
 import io.github.aecsocket.alexandria.hook.AlexandriaHook
 import io.github.aecsocket.alexandria.hook.AlexandriaManifest
 import io.github.aecsocket.alexandria.hook.AlexandriaSettings
+import io.github.aecsocket.alexandria.log.Log
+import io.github.aecsocket.alexandria.log.Slf4JLog
 import io.github.aecsocket.glossa.Glossa
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.loader.api.FabricLoader
 import net.kyori.adventure.text.Component
+import org.slf4j.LoggerFactory
 import org.spongepowered.configurate.ConfigurationNode
-import java.util.logging.Logger
 import kotlin.jvm.optionals.getOrNull
 
 abstract class AlexandriaMod<S : AlexandriaSettings>(final override val manifest: AlexandriaManifest) : ModInitializer, AlexandriaHook {
     val modId = manifest.id
 
-    override val log: Logger = Logger.getLogger(modId)
+    override val log: Log = Slf4JLog(LoggerFactory.getLogger(modId))
     private val settingsFile = FabricLoader.getInstance().configDir.resolve("$modId.toml").toFile()
     private val chatPrefix = AlexandriaHook.chatPrefix(manifest)
 

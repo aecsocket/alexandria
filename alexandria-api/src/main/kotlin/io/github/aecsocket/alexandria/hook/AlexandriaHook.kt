@@ -2,7 +2,6 @@ package io.github.aecsocket.alexandria.hook
 
 import io.github.aecsocket.alexandria.extension.resource
 import io.github.aecsocket.alexandria.extension.sanitizeText
-import io.github.aecsocket.alexandria.extension.warning
 import io.github.aecsocket.alexandria.kebabCasePattern
 import io.github.aecsocket.alexandria.log.*
 import io.github.aecsocket.alexandria.validateKey
@@ -126,7 +125,7 @@ interface AlexandriaHook {
 
             val glossa = glossaStandard(
                 defaultLocale = settings.defaultLocale,
-                invalidMessageProvider = InvalidMessageProvider.DefaultLogging(hook.log),
+                invalidMessageProvider = InvalidMessageProvider.Logging { hook.log.warn { it } },
             ) {
                 (defaultLanguageResources + hook.manifest.languageResources).forEach { path ->
                     try {

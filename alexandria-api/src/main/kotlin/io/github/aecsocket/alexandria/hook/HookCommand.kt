@@ -13,7 +13,7 @@ import kotlinx.coroutines.runBlocking
 import net.kyori.adventure.audience.Audience
 import net.kyori.adventure.identity.Identity
 import net.kyori.adventure.text.Component.text
-import java.util.logging.Level
+import org.slf4j.event.Level
 import kotlin.jvm.optionals.getOrElse
 
 private const val QUERY = "query"
@@ -82,11 +82,11 @@ abstract class HookCommand<C : Audience>(
         log.entries.forEach { entry ->
             val logMessages = messages.command.reload.log
             when (entry.level) {
-                Level.FINER, Level.FINEST -> logMessages.debug(entry.message)
-                Level.CONFIG, Level.FINE -> logMessages.trace(entry.message)
-                Level.WARNING -> logMessages.warn(entry.message)
-                Level.SEVERE -> logMessages.error(entry.message)
-                else -> logMessages.info(entry.message)
+                Level.TRACE -> logMessages.trace(entry.message)
+                Level.DEBUG -> logMessages.debug(entry.message)
+                Level.INFO -> logMessages.info(entry.message)
+                Level.WARN -> logMessages.warn(entry.message)
+                Level.ERROR -> logMessages.error(entry.message)
             }.sendTo(sender)
         }
     }

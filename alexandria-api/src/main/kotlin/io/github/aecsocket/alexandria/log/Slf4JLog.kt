@@ -3,7 +3,7 @@ package io.github.aecsocket.alexandria.log
 import org.slf4j.Logger
 import org.slf4j.event.Level
 
-class Slf4jLog(
+class Slf4JLog(
     val backing: Logger,
 ) : Log {
     override fun log(entry: LogEntry) {
