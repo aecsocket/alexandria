@@ -14,8 +14,8 @@ dependencies {
     api(projects.alexandriaApi)
 
     modImplementation(libs.fabric.loader)
-    modImplementation(libs.adventure.platform.fabric)
+    modApi(libs.adventure.platform.fabric)
     include(libs.adventure.platform.fabric)
-    modImplementation(libs.cloud.fabric)
+    modApi(libs.cloud.fabric)
     include(libs.cloud.fabric)
 }
