@@ -17,4 +17,8 @@ rootProject.name = "alexandria"
 
 include("alexandria-api")
 include("alexandria-paper")
-include("alexandria-fabric")
+// don't include fabric build in the CI because it eats too much RAM and crashes
+// TODO: make this work lol
+if (!providers.environmentVariable("CI").map { it.toBoolean() }.get()) {
+    include("alexandria-fabric")
+}
