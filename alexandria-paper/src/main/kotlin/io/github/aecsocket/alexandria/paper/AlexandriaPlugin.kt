@@ -11,6 +11,7 @@ import io.github.aecsocket.alexandria.paper.scheduling.PaperScheduling
 import io.github.aecsocket.alexandria.paper.scheduling.Scheduling
 import io.github.aecsocket.glossa.Glossa
 import io.github.aecsocket.glossa.GlossaStandard
+import io.github.aecsocket.klam.DVec3
 import net.kyori.adventure.text.Component
 import org.bukkit.plugin.java.JavaPlugin
 import org.spongepowered.configurate.ConfigurationNode

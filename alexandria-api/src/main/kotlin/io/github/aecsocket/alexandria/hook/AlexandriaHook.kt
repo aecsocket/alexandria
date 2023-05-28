@@ -75,7 +75,6 @@ interface AlexandriaHook {
             val (settings, glossa) = baseLoad(hook, log, settingsFile, loadSettings, onGlossaBuild)
             setFields(settings, glossa)
             block(log)
-            hook.onLoad(log)
             log.logTo(hook.log)
 
             return log
