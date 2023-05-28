@@ -16,8 +16,9 @@ jobs:
         java-version: 17
     - uses: gradle/gradle-build-action@v2
     - name: Build
+      # remapping Fabric uses too much memory for the GitHub CI runner!!
       run: |
-        ./gradlew --stacktrace build reobfJar
+        ./gradlew --stacktrace --info build reobfJar -x :alexandria-fabric:build
     - uses: actions/upload-artifact@v3
       with:
         name: artifacts
