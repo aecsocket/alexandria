@@ -18,13 +18,13 @@ import kotlin.jvm.optionals.getOrElse
 
 private const val QUERY = "query"
 
-abstract class HookCommand<C : Audience>(
+abstract class AlexandriaCommand<C : Audience>(
     private val hook: AlexandriaHook,
     val manager: CommandManager<C>,
 ) {
     val pluginId = hook.manifest.id
     val root = manager.commandBuilder(pluginId)
-    private val messages = hook.glossa.messageProxy<HookMessages>()
+    private val messages = hook.glossa.messageProxy<AlexandriaMessages>()
     private val help = MinecraftHelp("/$pluginId help", { it }, manager)
 
     init {

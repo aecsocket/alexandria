@@ -11,7 +11,7 @@ repositories {
 dependencies {
     minecraft(libs.minecraft)
     mappings(loom.officialMojangMappings())
-    api(projects.alexandriaApi)
+    api(projects.alexandriaCommon)
 
     modImplementation(libs.fabric.loader)
     modApi(libs.adventure.platform.fabric)

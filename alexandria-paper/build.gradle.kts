@@ -14,7 +14,7 @@ repositories {
 
 dependencies {
     paperweight.foliaDevBundle("$minecraft-R0.1-SNAPSHOT")
-    api(projects.alexandriaApi)
+    api(projects.alexandriaCommon)
 
     api(libs.configurate.toml)
     api(libs.cloud.paper)

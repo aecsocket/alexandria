@@ -1,0 +1,7 @@
+styles:
+  p1: { color: white }
+  p2: { color: gray }
+  p3: { color: dark_gray }
+  sw: { color: yellow }
+  se: { color: red }
+  sk: { color: dark_green }

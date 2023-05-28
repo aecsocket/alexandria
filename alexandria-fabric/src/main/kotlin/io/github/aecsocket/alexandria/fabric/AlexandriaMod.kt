@@ -14,7 +14,8 @@ import org.slf4j.LoggerFactory
 import org.spongepowered.configurate.ConfigurationNode
 import kotlin.jvm.optionals.getOrNull
 
-abstract class AlexandriaMod<S : AlexandriaSettings>(final override val manifest: AlexandriaManifest) : ModInitializer, AlexandriaHook {
+abstract class AlexandriaMod<S : AlexandriaSettings>(final override val manifest: AlexandriaManifest) : ModInitializer,
+    AlexandriaHook {
     val modId = manifest.id
 
     override val log: Log = Slf4JLog(LoggerFactory.getLogger(modId))

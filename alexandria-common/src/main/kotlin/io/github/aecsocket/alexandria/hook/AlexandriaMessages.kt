@@ -3,7 +3,7 @@ package io.github.aecsocket.alexandria.hook
 import io.github.aecsocket.glossa.Message
 import net.kyori.adventure.text.Component
 
-interface HookMessages {
+interface AlexandriaMessages {
     val command: Command
     interface Command {
         fun about(

@@ -11,7 +11,6 @@ import io.github.aecsocket.alexandria.paper.scheduling.PaperScheduling
 import io.github.aecsocket.alexandria.paper.scheduling.Scheduling
 import io.github.aecsocket.glossa.Glossa
 import io.github.aecsocket.glossa.GlossaStandard
-import io.github.aecsocket.klam.DVec3
 import net.kyori.adventure.text.Component
 import org.bukkit.plugin.java.JavaPlugin
 import org.spongepowered.configurate.ConfigurationNode
@@ -19,7 +18,8 @@ import org.spongepowered.configurate.ConfigurationNode
 const val SETTINGS_PATH = "settings.toml"
 const val LANG_PATH = "lang"
 
-abstract class AlexandriaPlugin<S : AlexandriaSettings>(final override val manifest: AlexandriaManifest) : JavaPlugin(), AlexandriaHook {
+abstract class AlexandriaPlugin<S : AlexandriaSettings>(final override val manifest: AlexandriaManifest) : JavaPlugin(),
+    AlexandriaHook {
     final override val log = Slf4JLog(slF4JLogger)
     private val settingsFile = dataFolder.resolve(SETTINGS_PATH)
     private val langFile = dataFolder.resolve(LANG_PATH)
