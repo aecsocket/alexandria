@@ -99,9 +99,7 @@ abstract class AlexandriaCommand<C : Audience>(
 
     fun <C> Command.Builder<C>.axPermission(permission: String) = permission("$pluginId.command.$permission")
 
-    fun <C> Command.Builder<C>.axHandler(block: suspend (CommandContext<C>) -> Unit) = handler { ctx ->
-        runBlocking {
-            block(ctx)
-        }
+    fun <C> Command.Builder<C>.axHandler(block: (CommandContext<C>) -> Unit) = handler { ctx ->
+        block(ctx)
     }
 }
