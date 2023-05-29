@@ -12,7 +12,9 @@ import net.minecraft.world.item.ItemStack
 
 fun ServerEntity.packetReceiver() = (this as BroadcastAccessor).broadcast
 
-sealed interface FabricRender : Render
+sealed interface FabricRender : Render {
+    var receiver: (Packet<*>) -> Unit
+}
 
 interface ModelRender : FabricRender {
     var item: ItemStack
