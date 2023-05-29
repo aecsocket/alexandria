@@ -10,7 +10,7 @@ import org.spongepowered.configurate.serialize.SerializationException
 import org.spongepowered.configurate.serialize.TypeSerializer
 import java.lang.reflect.Type
 
-open class RegisteredSerializer<T : Keyed>(
+class RegisteredSerializer<T : Keyed>(
     private val registry: Registry<T>,
     private val typeName: String
 ) : TypeSerializer<T> {

@@ -97,9 +97,23 @@ abstract class AlexandriaCommand<C : Audience>(
         }
     }
 
-    fun <C> Command.Builder<C>.axPermission(permission: String) = permission("$pluginId.command.$permission")
+    fun Command.Builder<C>.axPermission(permission: String) = permission("$pluginId.command.$permission")
 
-    fun <C> Command.Builder<C>.axHandler(block: (CommandContext<C>) -> Unit) = handler { ctx ->
-        block(ctx)
+    fun Command.Builder<C>.axHandler(block: (CommandContext<C>) -> Unit) = handler { ctx ->
+        try {
+            block(ctx)
+        } catch (ex: CommandException) {
+            ex.text.sendTo(ctx.sender)
+        }
+    }
+
+    private class CommandException(val text: Message) : RuntimeException()
+
+    fun error(text: Message): Nothing {
+        throw CommandException(text)
+    }
+
+    fun mustBePlayer(sender: C): Nothing {
+        error(messages.forAudience(sender).error.sender.mustBePlayer())
     }
 }

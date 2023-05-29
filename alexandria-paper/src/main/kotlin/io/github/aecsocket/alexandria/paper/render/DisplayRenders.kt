@@ -13,24 +13,37 @@ import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerDe
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityMetadata
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityTeleport
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSpawnEntity
-import io.github.aecsocket.alexandria.Billboard
-import io.github.aecsocket.alexandria.TextAlignment
+import io.github.aecsocket.alexandria.*
 import io.github.aecsocket.alexandria.paper.extension.nextEntityId
 import io.github.aecsocket.klam.DVec3
 import io.github.aecsocket.klam.FAffine3
 import io.github.aecsocket.klam.asARGB
 import io.github.retrooper.packetevents.util.SpigotConversionUtil
+import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer
 import org.bukkit.entity.Player
+import org.bukkit.inventory.ItemStack
 import java.util.*
 
 class DisplayRenders(private val packets: PacketEventsAPI<*>) : Renders {
-    override fun createModel(descriptor: ModelDescriptor, basePosition: DVec3, transform: FAffine3): ModelRender {
-        return DisplayModelRender(basePosition, transform, nextEntityId(), descriptor)
+    override fun createModel(
+        descriptor: ModelDescriptor,
+        item: ItemStack,
+        tracker: PlayerTracker,
+        basePosition: DVec3,
+        transform: FAffine3
+    ): ModelRender {
+        return DisplayModelRender(basePosition, transform, nextEntityId(), descriptor, tracker, item)
     }
 
-    override fun createText(descriptor: TextDescriptor, basePosition: DVec3, transform: FAffine3): TextRender {
-        return DisplayTextRender(basePosition, transform, nextEntityId(), descriptor)
+    override fun createText(
+        descriptor: TextDescriptor,
+        text: Component,
+        tracker: PlayerTracker,
+        basePosition: DVec3,
+        transform: FAffine3,
+    ): TextRender {
+        return DisplayTextRender(basePosition, transform, nextEntityId(), descriptor, tracker, text)
     }
 
     private abstract inner class DisplayRender(
@@ -38,8 +51,8 @@ class DisplayRenders(private val packets: PacketEventsAPI<*>) : Renders {
         transform: FAffine3,
         val protocolId: Int,
         descriptor: RenderDescriptor,
+        override var tracker: PlayerTracker,
     ) : PaperRender {
-        override var tracker = descriptor.tracker
         val billboard = descriptor.billboard
         val viewRange = descriptor.viewRange
         val interpolationDelay = descriptor.interpolationDelay
@@ -156,8 +169,10 @@ class DisplayRenders(private val packets: PacketEventsAPI<*>) : Renders {
         transform: FAffine3,
         netId: Int,
         descriptor: ModelDescriptor,
-    ) : DisplayRender(basePosition, transform, netId, descriptor), ModelRender {
-        override var item = descriptor.item
+        tracker: PlayerTracker,
+        item: ItemStack,
+    ) : DisplayRender(basePosition, transform, netId, descriptor, tracker), ModelRender {
+        override var item = item
             set(value) {
                 field = value
                 val packet = WrapperPlayServerEntityMetadata(protocolId, listOf(
@@ -184,13 +199,15 @@ class DisplayRenders(private val packets: PacketEventsAPI<*>) : Renders {
         transform: FAffine3,
         netId: Int,
         descriptor: TextDescriptor,
-    ) : DisplayRender(basePosition, transform, netId, descriptor), TextRender {
+        tracker: PlayerTracker,
+        text: Component,
+    ) : DisplayRender(basePosition, transform, netId, descriptor, tracker), TextRender {
         val lineWidth = descriptor.lineWidth
         val backgroundColor = asARGB(descriptor.backgroundColor)
         val hasShadow = descriptor.hasShadow
         val isSeeThrough = descriptor.isSeeThrough
         val alignment = descriptor.alignment
-        override var text = descriptor.text
+        override var text = text
             set(value) {
                 field = value
                 val packet = WrapperPlayServerEntityMetadata(protocolId, listOf(

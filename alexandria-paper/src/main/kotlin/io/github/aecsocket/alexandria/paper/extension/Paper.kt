@@ -8,8 +8,6 @@ import org.bukkit.event.Listener
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.plugin.Plugin
-import java.io.IOException
-import java.io.InputStream
 
 val isFolia = try {
     Class.forName("io.papermc.paper.threadedregions.RegionizedServer")
