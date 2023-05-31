@@ -2,8 +2,7 @@ package io.github.aecsocket.alexandria.paper
 
 import io.github.aecsocket.alexandria.log.ListLog
 import io.github.aecsocket.alexandria.hook.AlexandriaHook
-import io.github.aecsocket.alexandria.hook.AlexandriaManifest
-import io.github.aecsocket.alexandria.hook.AlexandriaSettings
+import io.github.aecsocket.alexandria.log.Log
 import io.github.aecsocket.alexandria.log.Slf4JLog
 import io.github.aecsocket.alexandria.paper.extension.isFolia
 import io.github.aecsocket.alexandria.paper.scheduling.FoliaScheduling
@@ -14,34 +13,74 @@ import io.github.aecsocket.glossa.GlossaStandard
 import net.kyori.adventure.text.Component
 import org.bukkit.plugin.java.JavaPlugin
 import org.spongepowered.configurate.ConfigurationNode
+import org.spongepowered.configurate.ConfigurationOptions
 
-const val SETTINGS_PATH = "settings.toml"
-const val LANG_PATH = "lang"
+private const val SETTINGS_PATH = "settings.toml"
+private const val LANG_PATH = "lang"
 
-abstract class AlexandriaPlugin<S : AlexandriaSettings>(final override val manifest: AlexandriaManifest) : JavaPlugin(),
-    AlexandriaHook {
-    final override val log = Slf4JLog(slF4JLogger)
-    private val settingsFile = dataFolder.resolve(SETTINGS_PATH)
-    private val langFile = dataFolder.resolve(LANG_PATH)
-    private val chatPrefix = AlexandriaHook.chatPrefix(manifest)
+abstract class AlexandriaPlugin<S : AlexandriaHook.Settings>(
+    manifest: AlexandriaHook.Manifest,
+    configOptions: ConfigurationOptions,
+    private val savedResources: List<String>,
+) : JavaPlugin() {
+    val log = Slf4JLog(slF4JLogger)
+
+    protected abstract fun loadSettings(node: ConfigurationNode): S
+
+    protected abstract fun onInit(log: Log)
+
+    protected abstract fun onLoad(log: Log)
+
+    protected abstract fun onReload(log: Log)
+
+    protected abstract fun onDestroy(log: Log)
+
+    protected val ax = object : AlexandriaHook<S>(
+        manifest = manifest,
+        log = log,
+        settingsFile = dataFolder.resolve(SETTINGS_PATH),
+        configOptions = configOptions,
+    ) {
+        val langFile = dataFolder.resolve(LANG_PATH)
+
+        override val meta: Meta
+            get() = this@AlexandriaPlugin.axMeta
+
+        override fun loadSettings(node: ConfigurationNode) =
+            this@AlexandriaPlugin.loadSettings(node)
+
+        override fun onGlossaBuild(log: Log, model: GlossaStandard.Model) {
+            model.fromFiles(log, langFile)
+        }
+
+        override fun onInit(log: Log) =
+            this@AlexandriaPlugin.onInit(log)
+
+        override fun onLoad(log: Log) =
+            this@AlexandriaPlugin.onLoad(log)
+
+        override fun onReload(log: Log) =
+            this@AlexandriaPlugin.onReload(log)
+    }
+
+    val settings: S
+        get() = ax.settings
+
+    val glossa: Glossa
+        get() = ax.glossa
 
     lateinit var scheduling: Scheduling
         private set
-    final override lateinit var settings: S
-        private set
-    final override lateinit var glossa: Glossa
-        private set
+    private lateinit var axMeta: AlexandriaHook.Meta
 
-    override val hookName get() = name
-    @Suppress("UnstableApiUsage")
-    override val version get() = pluginMeta.version
-    @Suppress("UnstableApiUsage")
-    override val authors: List<String> get() = pluginMeta.authors
-
-    protected abstract val savedResources: List<String>
-
-    override fun onLoad() {
+    final override fun onLoad() {
         scheduling = if (isFolia) FoliaScheduling(this) else PaperScheduling(this)
+        @Suppress("UnstableApiUsage")
+        axMeta = AlexandriaHook.Meta(
+            name = pluginMeta.name,
+            version = pluginMeta.version,
+            authors = pluginMeta.authors,
+        )
 
         if (!dataFolder.exists()) {
             savedResources.forEach { path ->
@@ -49,35 +88,20 @@ abstract class AlexandriaPlugin<S : AlexandriaSettings>(final override val manif
             }
         }
 
-        AlexandriaHook.load(
-            hook = this,
-            settingsFile = settingsFile,
-            loadSettings = ::loadSettings,
-            onGlossaBuild = ::onGlossaBuild,
-            setFields = ::setFields
-        )
+        ax.init()
     }
 
-    override fun reload(): ListLog {
-        return AlexandriaHook.reload(
-            hook = this,
-            settingsFile = settingsFile,
-            loadSettings = ::loadSettings,
-            onGlossaBuild = ::onGlossaBuild,
-            setFields = ::setFields,
-        )
+    final override fun onDisable() {
+        onDestroy(log)
     }
 
-    protected abstract fun loadSettings(node: ConfigurationNode): S
-
-    private fun onGlossaBuild(model: GlossaStandard.Model) {
-        AlexandriaHook.loadGlossaFromFiles(this@AlexandriaPlugin, model, log, langFile)
+    fun reload(): ListLog {
+        return ax.reload()
     }
 
-    private fun setFields(settings: S, glossa: Glossa) {
-        this.settings = settings
-        this.glossa = glossa
-    }
+    fun yamlConfigLoader() = ax.yamlConfigLoader()
 
-    override fun asChat(comp: Component) = AlexandriaHook.asChat(chatPrefix, comp)
+    fun tomlConfigLoader() = ax.tomlConfigLoader()
+
+    fun asChat(comp: Component) = ax.asChat(comp)
 }

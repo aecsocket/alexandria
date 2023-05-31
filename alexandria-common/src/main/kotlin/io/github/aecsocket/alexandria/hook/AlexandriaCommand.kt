@@ -19,7 +19,7 @@ import kotlin.jvm.optionals.getOrElse
 private const val QUERY = "query"
 
 abstract class AlexandriaCommand<C : Audience>(
-    private val hook: AlexandriaHook,
+    private val hook: AlexandriaHook<*>,
     val manager: CommandManager<C>,
 ) {
     val pluginId = hook.manifest.id
@@ -53,10 +53,11 @@ abstract class AlexandriaCommand<C : Audience>(
         val sender = ctx.sender
         val messages = messages.forAudience(sender)
 
+        val meta = hook.meta
         messages.command.about(
-            pluginName = text(hook.hookName, hook.manifest.accentColor),
-            version = hook.version,
-            authors = hook.authors.joinToString()
+            pluginName = text(meta.name, hook.manifest.accentColor),
+            version = meta.version,
+            authors = meta.authors.joinToString()
         ).sendTo(sender)
     }
 

@@ -20,153 +20,131 @@ import org.spongepowered.configurate.yaml.YamlConfigurationLoader
 import java.io.File
 import java.util.Locale
 
-private const val CONFIG_EXT = ".toml"
-private val defaultLanguageResources = listOf(
+private const val LANG_EXT = ".yml"
+private val defaultLangResources = listOf(
     "io/github/aecsocket/alexandria/lang/root.yml",
     "io/github/aecsocket/alexandria/lang/en-US.yml",
 )
 val fallbackLocale: Locale = Locale.forLanguageTag("en-US")
 
-data class AlexandriaManifest(
-    val id: String,
-    val accentColor: TextColor,
-    val languageResources: List<String> = emptyList(),
+abstract class AlexandriaHook<S : AlexandriaHook.Settings>(
+    val manifest: Manifest,
+    private val log: Log,
+    private val settingsFile: File,
+    private val configOptions: ConfigurationOptions,
 ) {
-    init {
-        validateKey(id, kebabCasePattern)
+    data class Manifest(
+        val id: String,
+        val accentColor: TextColor,
+        val langResources: List<String>,
+    ) {
+        init {
+            validateKey(id, kebabCasePattern)
+        }
     }
-}
 
-interface AlexandriaSettings {
-    val defaultLocale: Locale
-}
+    data class Meta(
+        val name: String,
+        val version: String,
+        val authors: List<String>,
+    )
 
-interface AlexandriaHook {
-    val manifest: AlexandriaManifest
+    interface Settings {
+        val defaultLocale: Locale
+    }
 
-    val log: Log
-    val settings: AlexandriaSettings
-    val glossa: Glossa
-    val configOptions: ConfigurationOptions
+    private val chatPrefix = text("(${manifest.id}) ", manifest.accentColor)
 
-    val hookName: String
-    val version: String
-    val authors: List<String>
+    lateinit var settings: S
+        private set
+    lateinit var glossa: Glossa
+        private set
 
-    fun onLoad(log: Log) {}
+    abstract val meta: Meta
 
-    fun onReload(log: Log) {}
+    protected abstract fun loadSettings(node: ConfigurationNode): S
 
-    fun reload(): ListLog
+    protected abstract fun onGlossaBuild(log: Log, model: GlossaStandard.Model)
 
-    fun asChat(comp: Component): Component
+    protected abstract fun onInit(log: Log)
 
-    companion object {
-        private fun <S : AlexandriaSettings> loadInternal(
-            hook: AlexandriaHook,
-            settingsFile: File,
-            loadSettings: (ConfigurationNode) -> S,
-            onGlossaBuild: GlossaStandard.Model.() -> Unit,
-            setFields: (S, Glossa) -> Unit,
-            block: (Log) -> Unit,
-        ): ListLog {
-            val log = ListLog()
+    protected abstract fun onLoad(log: Log)
 
-            val (settings, glossa) = baseLoad(hook, log, settingsFile, loadSettings, onGlossaBuild)
-            setFields(settings, glossa)
-            block(log)
-            log.logTo(hook.log)
+    protected abstract fun onReload(log: Log)
 
-            return log
-        }
+    fun yamlConfigLoader(): YamlConfigurationLoader.Builder = YamlConfigurationLoader.builder()
+        .defaultOptions(configOptions)
 
-        fun <S : AlexandriaSettings> load(
-            hook: AlexandriaHook,
-            settingsFile: File,
-            loadSettings: (ConfigurationNode) -> S,
-            onGlossaBuild: GlossaStandard.Model.() -> Unit,
-            setFields: (S, Glossa) -> Unit,
-        ): ListLog {
-            return loadInternal(hook, settingsFile, loadSettings, onGlossaBuild, setFields) { log ->
-                hook.onLoad(log)
-            }
-        }
+    fun tomlConfigLoader(): TOMLConfigurationLoader.Builder = TOMLConfigurationLoader.builder()
+        .defaultOptions(configOptions)
 
-        fun <S : AlexandriaSettings> reload(
-            hook: AlexandriaHook,
-            settingsFile: File,
-            loadSettings: (ConfigurationNode) -> S,
-            onGlossaBuild: GlossaStandard.Model.() -> Unit,
-            setFields: (S, Glossa) -> Unit,
-        ): ListLog {
-            return loadInternal(hook, settingsFile, loadSettings, onGlossaBuild, setFields) { log ->
-                hook.onReload(log)
-            }
-        }
+    fun asChat(comp: Component) = text()
+        .append(chatPrefix)
+        .append(sanitizeText(comp))
+        .build()
 
-        private fun <S : AlexandriaSettings> baseLoad(
-            hook: AlexandriaHook,
-            log: Log,
-            settingsFile: File,
-            loadSettings: (ConfigurationNode) -> S,
-            onGlossaBuild: GlossaStandard.Model.() -> Unit,
-        ): Pair<S, Glossa> {
-            val settingsLoader = hook.tomlConfigLoader()
-                .file(settingsFile)
-                .build()
-            val settings = try {
-                val settingsNode = settingsLoader.load()
-                loadSettings(settingsNode)
-            } catch (ex: Exception) {
-                log.error(ex) { "Could not load settings from $settingsFile" }
-                loadSettings(settingsLoader.createNode())
-            }
+    fun init() {
+        loadInternal(log)
+        onInit(log)
+        onLoad(log)
+    }
 
-            val glossa = glossaStandard(
-                defaultLocale = settings.defaultLocale,
-                invalidMessageProvider = InvalidMessageProvider.Logging { hook.log.warn { it } },
-            ) {
-                (defaultLanguageResources + hook.manifest.languageResources).forEach { path ->
-                    try {
-                        fromConfigLoader(hook.yamlConfigLoader().source { resource(path).bufferedReader() }.build())
-                        log.debug { "Loaded language resource from jar:$path" }
-                    } catch (ex: Exception) {
-                        log.warn(ex) { "Could not load language resource from jar:$path" }
-                    }
-                }
+    fun reload(): ListLog {
+        val log = ListLog()
 
-                onGlossaBuild(this)
-            }
-            log.info { "Loaded ${glossa.countSubstitutions()} substitutions, ${glossa.countStyles()} styles, ${glossa.countMessages()} messages, ${glossa.countLocales()} locales" }
+        loadInternal(log)
+        onLoad(log)
+        onReload(log)
+        log.logTo(this.log)
 
-            return settings to glossa
-        }
+        return log
+    }
 
-        fun loadGlossaFromFiles(hook: AlexandriaHook, model: GlossaStandard.Model, log: Log, root: File) {
-            root.walkTopDown().forEach { file ->
-                if (!file.endsWith(CONFIG_EXT)) return@forEach
-                val path = file.relativeTo(root)
-
-                try {
-                    model.fromConfigLoader(hook.yamlConfigLoader().file(file).build())
-                    log.trace { "Loaded language resource from $path" }
-                } catch (ex: Exception) {
-                    log.warn(ex) { "Could not load language resource from $path" }
-                }
-            }
-        }
-
-        fun chatPrefix(manifest: AlexandriaManifest) = text("(${manifest.id}) ", manifest.accentColor)
-
-        fun asChat(chatPrefix: Component, comp: Component) = text()
-            .append(chatPrefix)
-            .append(sanitizeText(comp))
+    private fun loadInternal(log: Log) {
+        val settingsLoader = tomlConfigLoader()
+            .file(settingsFile)
             .build()
+        val settings = try {
+            val settingsNode = settingsLoader.load()
+            loadSettings(settingsNode).also {
+                log.debug { "Loaded settings from $settingsFile" }
+            }
+        } catch (ex: Exception) {
+            log.error(ex) { "Could not load settings from $settingsFile" }
+            loadSettings(settingsLoader.createNode())
+        }
+        this.settings = settings
+
+        val glossa = glossaStandard(
+            defaultLocale = settings.defaultLocale,
+            invalidMessageProvider = InvalidMessageProvider.Logging { log.warn { it } },
+        ) {
+            (defaultLangResources + manifest.langResources).forEach { path ->
+                try {
+                    fromConfigLoader(yamlConfigLoader().source { resource(path).bufferedReader() }.build())
+                    log.debug { "Loaded language resource from jar:$path" }
+                } catch (ex: Exception) {
+                    log.warn(ex) { "Could not load language resource from jar:$path" }
+                }
+            }
+
+            onGlossaBuild(log, this)
+        }
+        log.info { "Loaded ${glossa.countSubstitutions()} substitutions, ${glossa.countStyles()} styles, ${glossa.countMessages()} messages, ${glossa.countLocales()} locales" }
+        this.glossa = glossa
+    }
+
+    protected fun GlossaStandard.Model.fromFiles(log: Log, root: File) {
+        root.walkTopDown().forEach { file ->
+            if (!file.endsWith(LANG_EXT)) return@forEach
+            val path = file.relativeTo(root)
+
+            try {
+                fromConfigLoader(yamlConfigLoader().file(file).build())
+                log.debug { "Loaded language resource from $path" }
+            } catch (ex: Exception) {
+                log.warn(ex) { "Could not load language resource from $path" }
+            }
+        }
     }
 }
-
-fun AlexandriaHook.yamlConfigLoader(): YamlConfigurationLoader.Builder = YamlConfigurationLoader.builder()
-    .defaultOptions(configOptions)
-
-fun AlexandriaHook.tomlConfigLoader(): TOMLConfigurationLoader.Builder = TOMLConfigurationLoader.builder()
-    .defaultOptions(configOptions)
