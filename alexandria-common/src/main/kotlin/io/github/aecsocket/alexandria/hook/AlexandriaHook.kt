@@ -66,6 +66,8 @@ abstract class AlexandriaHook<S : AlexandriaHook.Settings>(
 
     protected abstract fun onGlossaBuild(log: Log, model: GlossaStandard.Model)
 
+    protected abstract fun onPreInit(log: Log)
+
     protected abstract fun onInit(log: Log)
 
     protected abstract fun onLoad(log: Log)
@@ -85,6 +87,7 @@ abstract class AlexandriaHook<S : AlexandriaHook.Settings>(
 
     fun init() {
         loadInternal(log)
+        onPreInit(log)
         onLoad(log)
         onInit(log)
     }

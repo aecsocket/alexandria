@@ -27,13 +27,15 @@ abstract class AlexandriaPlugin<S : AlexandriaHook.Settings>(
 
     protected abstract fun loadSettings(node: ConfigurationNode): S
 
-    protected abstract fun onInit(log: Log)
+    protected open fun onPreInit(log: Log) {}
 
-    protected abstract fun onLoad(log: Log)
+    protected open fun onInit(log: Log) {}
 
-    protected abstract fun onReload(log: Log)
+    protected open fun onLoad(log: Log) {}
 
-    protected abstract fun onDestroy(log: Log)
+    protected open fun onReload(log: Log) {}
+
+    protected open fun onDestroy(log: Log) {}
 
     protected val ax = object : AlexandriaHook<S>(
         manifest = manifest,
@@ -52,6 +54,9 @@ abstract class AlexandriaPlugin<S : AlexandriaHook.Settings>(
         override fun onGlossaBuild(log: Log, model: GlossaStandard.Model) {
             model.fromFiles(log, langFile)
         }
+
+        override fun onPreInit(log: Log) =
+            this@AlexandriaPlugin.onPreInit(log)
 
         override fun onInit(log: Log) =
             this@AlexandriaPlugin.onInit(log)

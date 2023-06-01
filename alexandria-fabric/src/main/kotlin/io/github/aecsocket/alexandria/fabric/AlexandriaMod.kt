@@ -23,11 +23,13 @@ abstract class AlexandriaMod<S : AlexandriaHook.Settings>(
 
     protected abstract fun loadSettings(node: ConfigurationNode): S
 
-    protected abstract fun onInit(log: Log)
+    protected open fun onPreInit(log: Log) {}
 
-    protected abstract fun onLoad(log: Log)
+    protected open fun onInit(log: Log) {}
 
-    protected abstract fun onReload(log: Log)
+    protected open fun onLoad(log: Log) {}
+
+    protected open fun onReload(log: Log) {}
 
     protected val ax = object : AlexandriaHook<S>(
         manifest = manifest,
@@ -42,6 +44,9 @@ abstract class AlexandriaMod<S : AlexandriaHook.Settings>(
             this@AlexandriaMod.loadSettings(node)
 
         override fun onGlossaBuild(log: Log, model: GlossaStandard.Model) {}
+
+        override fun onPreInit(log: Log) =
+            this@AlexandriaMod.onPreInit(log)
 
         override fun onInit(log: Log) =
             this@AlexandriaMod.onInit(log)
