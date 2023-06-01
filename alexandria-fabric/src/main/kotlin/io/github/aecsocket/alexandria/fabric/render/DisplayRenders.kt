@@ -1,20 +1,17 @@
 package io.github.aecsocket.alexandria.fabric.render
 
-import io.github.aecsocket.alexandria.ModelDescriptor
-import io.github.aecsocket.alexandria.RenderDescriptor
-import io.github.aecsocket.alexandria.TextDescriptor
+import io.github.aecsocket.alexandria.ItemRenderDesc
+import io.github.aecsocket.alexandria.DisplayRenderDesc
+import io.github.aecsocket.alexandria.TextRenderDesc
 import io.github.aecsocket.klam.DVec3
 import io.github.aecsocket.klam.FAffine3
 import net.kyori.adventure.text.Component
 import net.minecraft.network.protocol.Packet
-import net.minecraft.network.protocol.game.ClientboundTeleportEntityPacket
-import net.minecraft.world.entity.Entity
-import net.minecraft.world.entity.EntityType
 import net.minecraft.world.item.ItemStack
 
 class DisplayRenders : Renders {
     override fun createModel(
-        descriptor: ModelDescriptor,
+        descriptor: ItemRenderDesc,
         item: ItemStack,
         receiver: (Packet<*>) -> Unit,
         basePosition: DVec3,
@@ -24,7 +21,7 @@ class DisplayRenders : Renders {
     }
 
     override fun createText(
-        descriptor: TextDescriptor,
+        descriptor: TextRenderDesc,
         text: Component,
         receiver: (Packet<*>) -> Unit,
         basePosition: DVec3,
@@ -37,7 +34,7 @@ class DisplayRenders : Renders {
         basePosition: DVec3,
         transform: FAffine3,
         val protocolId: Int,
-        descriptor: RenderDescriptor,
+        descriptor: DisplayRenderDesc,
         override var receiver: (Packet<*>) -> Unit,
     ) : FabricRender {
         val billboard = descriptor.billboard

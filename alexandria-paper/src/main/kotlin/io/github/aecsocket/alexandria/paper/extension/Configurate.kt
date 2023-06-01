@@ -1,11 +1,9 @@
 package io.github.aecsocket.alexandria.paper.extension
 
 import io.github.aecsocket.alexandria.extension.alexandriaApiSerializers
+import io.github.aecsocket.alexandria.extension.register
 import io.github.aecsocket.alexandria.extension.registerExact
-import io.github.aecsocket.alexandria.paper.seralizer.ParticleSerializer
-import io.github.aecsocket.alexandria.paper.seralizer.entityTypeSerializer
-import io.github.aecsocket.alexandria.paper.seralizer.materialSerializer
-import io.github.aecsocket.alexandria.paper.seralizer.statisticSerializer
+import io.github.aecsocket.alexandria.paper.seralizer.*
 import org.spongepowered.configurate.serialize.TypeSerializerCollection
 
 val alexandriaPaperSerializers: TypeSerializerCollection = TypeSerializerCollection.builder()
@@ -14,4 +12,5 @@ val alexandriaPaperSerializers: TypeSerializerCollection = TypeSerializerCollect
     .registerExact(entityTypeSerializer)
     .registerExact(statisticSerializer)
     .registerExact(ParticleSerializer)
+    .register(RawParticleSerializer)
     .build()

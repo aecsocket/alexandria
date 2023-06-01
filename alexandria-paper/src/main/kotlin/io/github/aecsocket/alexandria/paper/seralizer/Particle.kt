@@ -1,6 +1,8 @@
 package io.github.aecsocket.alexandria.paper.seralizer
 
+import io.github.aecsocket.alexandria.RawParticle
 import io.github.aecsocket.alexandria.extension.force
+import io.github.aecsocket.alexandria.paper.PaperParticle
 import net.kyori.adventure.key.Key
 import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.resources.ResourceLocation
@@ -27,5 +29,17 @@ object ParticleSerializer : TypeSerializer<Particle> {
         val particleType = BuiltInRegistries.PARTICLE_TYPE.get(resource)
             ?: throw SerializationException(node, type, "Invalid particle $key")
         return CraftParticle.toBukkit(particleType)
+    }
+}
+
+object RawParticleSerializer : TypeSerializer<RawParticle<*>> {
+    override fun serialize(type: Type, obj: RawParticle<*>?, node: ConfigurationNode) {
+        obj as PaperParticle?
+        node.set(obj?.handle)
+    }
+
+    override fun deserialize(type: Type, node: ConfigurationNode): RawParticle<*> {
+        val handle = node.force<Particle>()
+        return PaperParticle(handle)
     }
 }

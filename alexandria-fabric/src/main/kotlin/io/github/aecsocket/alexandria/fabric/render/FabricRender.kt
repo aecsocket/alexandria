@@ -1,8 +1,8 @@
 package io.github.aecsocket.alexandria.fabric.render
 
-import io.github.aecsocket.alexandria.ModelDescriptor
+import io.github.aecsocket.alexandria.ItemRenderDesc
 import io.github.aecsocket.alexandria.Render
-import io.github.aecsocket.alexandria.TextDescriptor
+import io.github.aecsocket.alexandria.TextRenderDesc
 import io.github.aecsocket.alexandria.fabric.mixin.BroadcastAccessor
 import io.github.aecsocket.klam.*
 import net.kyori.adventure.text.Component
@@ -26,7 +26,7 @@ interface TextRender : FabricRender {
 
 interface Renders {
     fun createModel(
-        descriptor: ModelDescriptor,
+        descriptor: ItemRenderDesc,
         item: ItemStack,
         receiver: (Packet<*>) -> Unit,
         basePosition: DVec3,
@@ -34,7 +34,7 @@ interface Renders {
     ): ModelRender
 
     fun createText(
-        descriptor: TextDescriptor,
+        descriptor: TextRenderDesc,
         text: Component,
         receiver: (Packet<*>) -> Unit,
         basePosition: DVec3,
