@@ -6,6 +6,8 @@ import io.github.aecsocket.alexandria.paper.extension.position
 import io.github.aecsocket.alexandria.paper.extension.spawn
 import io.github.aecsocket.klam.*
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.format.TextColor
 import org.bukkit.Color
 import org.bukkit.Material
 import org.bukkit.World
@@ -25,6 +27,7 @@ sealed interface DisplayRender : Render {
     var viewRange: Float
     var interpolationDelay: Int
     var interpolationDuration: Int
+    var glowColor: TextColor?
 
     fun remove()
 }
@@ -88,8 +91,10 @@ object DisplayRenders {
     }
 
     private fun ARGB.convert() = Color.fromARGB(a, r, g, b)
+    private fun TextColor.convert() = Color.fromRGB(red(), green(), blue())
 
-    private fun Color.convert() = ARGB(alpha, red, green, blue)
+    private fun Color.toARGB() = ARGB(alpha, red, green, blue)
+    private fun Color.toTextColor() = TextColor.color(red, green, blue)
 
     private fun setUp(desc: DisplayRenderDesc, target: ByDisplay) {
         target.entity.isPersistent = false
@@ -174,6 +179,14 @@ object DisplayRenders {
                 entity.interpolationDuration = value
             }
 
+        // Spigot is stupid and deprecated this for no reason
+        @Suppress("DEPRECATION")
+        override var glowColor: TextColor?
+            get() = entity.glowColorOverride?.toTextColor()
+            set(value) {
+                entity.glowColorOverride = value?.convert()
+            }
+
         override fun remove() {
             entity.remove()
         }
@@ -204,7 +217,7 @@ object DisplayRenders {
         // Spigot is stupid and deprecated this for no reason
         @Suppress("DEPRECATION")
         override var backgroundColor: ARGB
-            get() = entity.backgroundColor?.convert() ?: ARGB(0)
+            get() = entity.backgroundColor?.toARGB() ?: ARGB(0)
             set(value) {
                 entity.backgroundColor = value.convert()
             }

@@ -3,6 +3,8 @@ package io.github.aecsocket.alexandria
 import io.github.aecsocket.klam.ARGB
 import io.github.aecsocket.klam.DVec3
 import io.github.aecsocket.klam.FAffine3
+import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.format.TextColor
 import org.spongepowered.configurate.objectmapping.ConfigSerializable
 
 enum class Billboard {
@@ -29,6 +31,7 @@ sealed interface DisplayRenderDesc {
     val viewRange: Float
     val interpolationDelay: Int
     val interpolationDuration: Int
+    val glowColor: TextColor?
 }
 
 @ConfigSerializable
@@ -37,6 +40,7 @@ data class ItemRenderDesc(
     override val viewRange: Float = 1.0f,
     override val interpolationDelay: Int = 0,
     override val interpolationDuration: Int = 0,
+    override val glowColor: TextColor? = null,
 ) : DisplayRenderDesc {
     init {
         require(viewRange >= 0.0) { "requires viewRange >= 0.0" }
@@ -51,6 +55,7 @@ data class TextRenderDesc(
     override val viewRange: Float = 1.0f,
     override val interpolationDelay: Int = 0,
     override val interpolationDuration: Int = 0,
+    override val glowColor: TextColor? = null,
     val lineWidth: Int = 200,
     val backgroundColor: ARGB = ARGB(64, 0, 0, 0),
     val hasShadow: Boolean = false,
