@@ -17,7 +17,7 @@ class TestGenArena {
     }
 
     @Test
-    fun testGenArena() {
+    fun testInsertRemove() {
         val arena = genArena<Int>()
         assertEquals(0, arena.size)
         assertTrue(arena.isEmpty())
@@ -30,5 +30,56 @@ class TestGenArena {
         arena.remove(key)
         assertEquals(0, arena.size)
         assertEquals(null, arena[key])
+    }
+
+    @Test
+    fun testABA() {
+        val arena = genArena<Int>()
+        val keyA = arena.insert(5)
+        assertEquals(5, arena[keyA])
+
+        arena.remove(keyA)
+        assertEquals(null, arena[keyA])
+
+        val keyB = arena.insert(10)
+        assertEquals(10, arena[keyB])
+        assertEquals(null, arena[keyA])
+    }
+
+    @Test
+    fun testCapacity() {
+        val arena = genArena<Int>()
+        repeat(1000) {
+            arena.insert(it)
+        }
+        assertEquals(1000, arena.size)
+
+        arena.clear()
+        assertEquals(0, arena.size)
+
+        repeat(1000) {
+            arena.insert(it)
+        }
+        assertEquals(1000, arena.size)
+    }
+
+    @Test
+    fun testIterator() {
+        val arena = genArena<Int>()
+        repeat(3) {
+            arena.insert(it)
+        }
+        assertEquals(3, arena.size)
+        assertEquals(listOf(
+            GenArena.Entry(ArenaKey(0, 0), 0),
+            GenArena.Entry(ArenaKey(1, 0), 1),
+            GenArena.Entry(ArenaKey(2, 0), 2),
+        ), arena.toList())
+
+        arena.remove(ArenaKey(1, 0))
+        assertEquals(listOf(
+            GenArena.Entry(ArenaKey(0, 0), 0),
+            GenArena.Entry(ArenaKey(2, 0), 2),
+        ), arena.toList())
     }
 }

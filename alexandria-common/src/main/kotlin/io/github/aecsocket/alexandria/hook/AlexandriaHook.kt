@@ -85,8 +85,8 @@ abstract class AlexandriaHook<S : AlexandriaHook.Settings>(
 
     fun init() {
         loadInternal(log)
-        onInit(log)
         onLoad(log)
+        onInit(log)
     }
 
     fun reload(): ListLog {

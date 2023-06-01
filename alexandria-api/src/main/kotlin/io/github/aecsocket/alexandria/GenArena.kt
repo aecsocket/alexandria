@@ -34,7 +34,9 @@ interface GenArena<out E> : Iterable<GenArena.Entry<out E>> {
     data class Entry<E>(
         val key: ArenaKey,
         val value: E,
-    )
+    ) {
+        override fun toString() = "($key, $value)"
+    }
 
     val size: Int
 
@@ -95,9 +97,8 @@ class GenArenaImpl<E> internal constructor(capacity: Int) : MutableGenArena<E> {
         private var next: GenArena.Entry<out E>? = compute()
 
         fun compute(): GenArena.Entry<out E>? {
-            if (!iter.hasNext()) return null
-
             while (true) {
+                if (!iter.hasNext()) return null
                 val (index, entry) = iter.next()
                 when (entry) {
                     is Item.Free -> continue
@@ -159,7 +160,7 @@ class GenArenaImpl<E> internal constructor(capacity: Int) : MutableGenArena<E> {
         val end = max(start, upTo)
         val oldHead = freeListHead
         items.ensureCapacity(upTo)
-        (0 until end).map { i ->
+        (start until end).map { i ->
             items.add(Item.Free(
                 nextFree = if (i == end - 1) oldHead else i + 1,
             ))
@@ -178,7 +179,7 @@ class GenArenaImpl<E> internal constructor(capacity: Int) : MutableGenArena<E> {
     }
 
     private fun insertSlowPath(value: E): ArenaKey {
-        items.ensureCapacity(size * 2)
+        reserve(size * 2)
         return tryInsert(value)
             ?: throw IllegalStateException("Add will always succeed after reserving additional space")
     }
