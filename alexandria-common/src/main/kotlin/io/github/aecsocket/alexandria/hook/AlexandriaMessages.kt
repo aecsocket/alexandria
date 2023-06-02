@@ -20,21 +20,6 @@ interface AlexandriaMessages {
             authors: String,
         ): Message
 
-        val reload: Reload
-        interface Reload {
-            fun start(): Message
-            fun stop(
-                numMessages: Int
-            ): Message
-
-            val log: Log
-            interface Log {
-                fun trace(message: String): Message
-                fun debug(message: String): Message
-                fun info(message: String): Message
-                fun warn(message: String): Message
-                fun error(message: String): Message
-            }
-        }
+        fun reload(): Message
     }
 }

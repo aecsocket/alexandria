@@ -1,15 +1,12 @@
 package io.github.aecsocket.alexandria.fabric
 
-import io.github.aecsocket.alexandria.log.ListLog
 import io.github.aecsocket.alexandria.hook.AlexandriaHook
-import io.github.aecsocket.alexandria.log.Log
-import io.github.aecsocket.alexandria.log.Slf4JLog
 import io.github.aecsocket.glossa.Glossa
 import io.github.aecsocket.glossa.GlossaStandard
+import io.github.oshai.kotlinlogging.KotlinLogging
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.loader.api.FabricLoader
 import net.kyori.adventure.text.Component
-import org.slf4j.LoggerFactory
 import org.spongepowered.configurate.ConfigurationNode
 import org.spongepowered.configurate.ConfigurationOptions
 import kotlin.jvm.optionals.getOrNull
@@ -19,17 +16,17 @@ abstract class AlexandriaMod<S : AlexandriaHook.Settings>(
     configOptions: ConfigurationOptions,
 ) : ModInitializer {
     val modId = manifest.id
-    val log = Slf4JLog(LoggerFactory.getLogger(modId))
+    val log = KotlinLogging.logger(modId)
 
     protected abstract fun loadSettings(node: ConfigurationNode): S
 
-    protected open fun onPreInit(log: Log) {}
+    protected open fun onPreInit() {}
 
-    protected open fun onInit(log: Log) {}
+    protected open fun onInit() {}
 
-    protected open fun onLoad(log: Log) {}
+    protected open fun onLoad() {}
 
-    protected open fun onReload(log: Log) {}
+    protected open fun onReload() {}
 
     protected val ax = object : AlexandriaHook<S>(
         manifest = manifest,
@@ -43,19 +40,19 @@ abstract class AlexandriaMod<S : AlexandriaHook.Settings>(
         override fun loadSettings(node: ConfigurationNode) =
             this@AlexandriaMod.loadSettings(node)
 
-        override fun onGlossaBuild(log: Log, model: GlossaStandard.Model) {}
+        override fun onGlossaBuild(model: GlossaStandard.Model) {}
 
-        override fun onPreInit(log: Log) =
-            this@AlexandriaMod.onPreInit(log)
+        override fun onPreInit() =
+            this@AlexandriaMod.onPreInit()
 
-        override fun onInit(log: Log) =
-            this@AlexandriaMod.onInit(log)
+        override fun onInit() =
+            this@AlexandriaMod.onInit()
 
-        override fun onLoad(log: Log) =
-            this@AlexandriaMod.onLoad(log)
+        override fun onLoad() =
+            this@AlexandriaMod.onLoad()
 
-        override fun onReload(log: Log) =
-            this@AlexandriaMod.onReload(log)
+        override fun onReload() =
+            this@AlexandriaMod.onReload()
     }
 
     val settings: S
@@ -78,8 +75,8 @@ abstract class AlexandriaMod<S : AlexandriaHook.Settings>(
         ax.init()
     }
 
-    fun reload(): ListLog {
-        return ax.reload()
+    fun reload() {
+        ax.reload()
     }
 
     fun yamlConfigLoader() = ax.yamlConfigLoader()

@@ -1,15 +1,14 @@
 package io.github.aecsocket.alexandria.paper
 
-import io.github.aecsocket.alexandria.log.ListLog
 import io.github.aecsocket.alexandria.hook.AlexandriaHook
-import io.github.aecsocket.alexandria.log.Log
-import io.github.aecsocket.alexandria.log.Slf4JLog
 import io.github.aecsocket.alexandria.paper.extension.isFolia
 import io.github.aecsocket.alexandria.paper.scheduling.FoliaScheduling
 import io.github.aecsocket.alexandria.paper.scheduling.PaperScheduling
 import io.github.aecsocket.alexandria.paper.scheduling.Scheduling
 import io.github.aecsocket.glossa.Glossa
 import io.github.aecsocket.glossa.GlossaStandard
+import io.github.oshai.kotlinlogging.KotlinLogging
+import io.github.oshai.kotlinlogging.slf4j.logger
 import net.kyori.adventure.text.Component
 import org.bukkit.plugin.java.JavaPlugin
 import org.spongepowered.configurate.ConfigurationNode
@@ -23,19 +22,19 @@ abstract class AlexandriaPlugin<S : AlexandriaHook.Settings>(
     configOptions: ConfigurationOptions,
     private val savedResources: List<String>,
 ) : JavaPlugin() {
-    val log = Slf4JLog(slF4JLogger)
+    val log = KotlinLogging.logger(slF4JLogger)
 
     protected abstract fun loadSettings(node: ConfigurationNode): S
 
-    protected open fun onPreInit(log: Log) {}
+    protected open fun onPreInit() {}
 
-    protected open fun onInit(log: Log) {}
+    protected open fun onInit() {}
 
-    protected open fun onLoad(log: Log) {}
+    protected open fun onLoadData() {}
 
-    protected open fun onReload(log: Log) {}
+    protected open fun onReloadData() {}
 
-    protected open fun onDestroy(log: Log) {}
+    protected open fun onDestroy() {}
 
     protected val ax = object : AlexandriaHook<S>(
         manifest = manifest,
@@ -51,21 +50,21 @@ abstract class AlexandriaPlugin<S : AlexandriaHook.Settings>(
         override fun loadSettings(node: ConfigurationNode) =
             this@AlexandriaPlugin.loadSettings(node)
 
-        override fun onGlossaBuild(log: Log, model: GlossaStandard.Model) {
-            model.fromFiles(log, langFile)
+        override fun onGlossaBuild(model: GlossaStandard.Model) {
+            model.fromFiles(langFile)
         }
 
-        override fun onPreInit(log: Log) =
-            this@AlexandriaPlugin.onPreInit(log)
+        override fun onPreInit() =
+            this@AlexandriaPlugin.onPreInit()
 
-        override fun onInit(log: Log) =
-            this@AlexandriaPlugin.onInit(log)
+        override fun onInit() =
+            this@AlexandriaPlugin.onInit()
 
-        override fun onLoad(log: Log) =
-            this@AlexandriaPlugin.onLoad(log)
+        override fun onLoad() =
+            this@AlexandriaPlugin.onLoadData()
 
-        override fun onReload(log: Log) =
-            this@AlexandriaPlugin.onReload(log)
+        override fun onReload() =
+            this@AlexandriaPlugin.onReloadData()
     }
 
     val settings: S
@@ -97,11 +96,11 @@ abstract class AlexandriaPlugin<S : AlexandriaHook.Settings>(
     }
 
     final override fun onDisable() {
-        onDestroy(log)
+        onDestroy()
     }
 
-    fun reload(): ListLog {
-        return ax.reload()
+    fun reload() {
+        ax.reload()
     }
 
     fun yamlConfigLoader() = ax.yamlConfigLoader()

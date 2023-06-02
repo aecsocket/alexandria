@@ -3,6 +3,7 @@ indra = "3.1.1"
 kotlin = "1.8.21"
 kotlinx-coroutines = "1.6.4"
 slf4j = "2.0.7"
+kotlin-logging = "4.0.0-beta-29"
 adventure = "4.13.0"
 adventure-fabric = "5.8.0"
 klam = "0.2.2"
@@ -23,6 +24,7 @@ kotlin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", versio
 kotlin-reflect = { group = "org.jetbrains.kotlin", name = "kotlin-reflect", version.ref = "kotlin" }
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
 slf4j-api = { group = "org.slf4j", name = "slf4j-api", version.ref = "slf4j" }
+kotlin-logging-jvm = { group = "io.github.oshai", name = "kotlin-logging-jvm", version.ref = "kotlin-logging" }
 adventure-api = { group = "net.kyori", name = "adventure-api", version.ref = "adventure" }
 adventure-serializer-configurate4 = { group = "net.kyori", name = "adventure-serializer-configurate4", version.ref = "adventure" }
 adventure-platform-fabric = { group = "net.kyori", name = "adventure-platform-fabric", version.ref = "adventure-fabric" }

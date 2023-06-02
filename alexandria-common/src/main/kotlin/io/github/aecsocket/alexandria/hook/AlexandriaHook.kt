@@ -3,13 +3,13 @@ package io.github.aecsocket.alexandria.hook
 import io.github.aecsocket.alexandria.extension.resource
 import io.github.aecsocket.alexandria.extension.sanitizeText
 import io.github.aecsocket.alexandria.kebabCasePattern
-import io.github.aecsocket.alexandria.log.*
 import io.github.aecsocket.alexandria.validateKey
 import io.github.aecsocket.glossa.Glossa
 import io.github.aecsocket.glossa.GlossaStandard
 import io.github.aecsocket.glossa.InvalidMessageProvider
 import io.github.aecsocket.glossa.configurate.fromConfigLoader
 import io.github.aecsocket.glossa.glossaStandard
+import io.github.oshai.kotlinlogging.KLogger
 import me.lucko.configurate.toml.TOMLConfigurationLoader
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.Component.text
@@ -29,7 +29,7 @@ val fallbackLocale: Locale = Locale.forLanguageTag("en-US")
 
 abstract class AlexandriaHook<S : AlexandriaHook.Settings>(
     val manifest: Manifest,
-    private val log: Log,
+    private val log: KLogger,
     private val settingsFile: File,
     private val configOptions: ConfigurationOptions,
 ) {
@@ -64,15 +64,15 @@ abstract class AlexandriaHook<S : AlexandriaHook.Settings>(
 
     protected abstract fun loadSettings(node: ConfigurationNode): S
 
-    protected abstract fun onGlossaBuild(log: Log, model: GlossaStandard.Model)
+    protected abstract fun onGlossaBuild(model: GlossaStandard.Model)
 
-    protected abstract fun onPreInit(log: Log)
+    protected abstract fun onPreInit()
 
-    protected abstract fun onInit(log: Log)
+    protected abstract fun onInit()
 
-    protected abstract fun onLoad(log: Log)
+    protected abstract fun onLoad()
 
-    protected abstract fun onReload(log: Log)
+    protected abstract fun onReload()
 
     fun yamlConfigLoader(): YamlConfigurationLoader.Builder = YamlConfigurationLoader.builder()
         .defaultOptions(configOptions)
@@ -86,24 +86,19 @@ abstract class AlexandriaHook<S : AlexandriaHook.Settings>(
         .build()
 
     fun init() {
-        loadInternal(log)
-        onPreInit(log)
-        onLoad(log)
-        onInit(log)
+        loadInternal()
+        onPreInit()
+        onLoad()
+        onInit()
     }
 
-    fun reload(): ListLog {
-        val log = ListLog()
-
-        loadInternal(log)
-        onLoad(log)
-        onReload(log)
-        log.logTo(this.log)
-
-        return log
+    fun reload() {
+        loadInternal()
+        onLoad()
+        onReload()
     }
 
-    private fun loadInternal(log: Log) {
+    private fun loadInternal() {
         val settingsLoader = tomlConfigLoader()
             .file(settingsFile)
             .build()
@@ -131,13 +126,13 @@ abstract class AlexandriaHook<S : AlexandriaHook.Settings>(
                 }
             }
 
-            onGlossaBuild(log, this)
+            onGlossaBuild(this)
         }
         log.info { "Loaded ${glossa.countSubstitutions()} substitutions, ${glossa.countStyles()} styles, ${glossa.countMessages()} messages, ${glossa.countLocales()} locales" }
         this.glossa = glossa
     }
 
-    protected fun GlossaStandard.Model.fromFiles(log: Log, root: File) {
+    protected fun GlossaStandard.Model.fromFiles(root: File) {
         root.walkTopDown().forEach { file ->
             if (!file.endsWith(LANG_EXT)) return@forEach
             val path = file.relativeTo(root)

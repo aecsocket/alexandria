@@ -9,11 +9,9 @@ import io.github.aecsocket.alexandria.extension.getOr
 import io.github.aecsocket.glossa.Message
 import io.github.aecsocket.glossa.MessageProxy
 import io.github.aecsocket.glossa.messageProxy
-import kotlinx.coroutines.runBlocking
 import net.kyori.adventure.audience.Audience
 import net.kyori.adventure.identity.Identity
 import net.kyori.adventure.text.Component.text
-import org.slf4j.event.Level
 import kotlin.jvm.optionals.getOrElse
 
 private const val QUERY = "query"
@@ -75,21 +73,8 @@ abstract class AlexandriaCommand<C : Audience>(
         val sender = ctx.sender
         val messages = messages.forAudience(sender)
 
-        messages.command.reload.start().sendTo(sender)
-        val log = hook.reload()
-        messages.command.reload.stop(
-            numMessages = log.entries.size,
-        ).sendTo(sender)
-        log.entries.forEach { entry ->
-            val logMessages = messages.command.reload.log
-            when (entry.level) {
-                Level.TRACE -> logMessages.trace(entry.message)
-                Level.DEBUG -> logMessages.debug(entry.message)
-                Level.INFO -> logMessages.info(entry.message)
-                Level.WARN -> logMessages.warn(entry.message)
-                Level.ERROR -> logMessages.error(entry.message)
-            }.sendTo(sender)
-        }
+        hook.reload()
+        messages.command.reload().sendTo(sender)
     }
 
     fun Message.sendTo(audience: Audience) {
