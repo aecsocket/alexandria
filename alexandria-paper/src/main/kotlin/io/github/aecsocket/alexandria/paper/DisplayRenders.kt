@@ -13,7 +13,6 @@ import org.bukkit.World
 import org.bukkit.entity.Display
 import org.bukkit.entity.ItemDisplay
 import org.bukkit.entity.TextDisplay
-import org.bukkit.entity.TextDisplay.TextAligment
 import org.bukkit.inventory.ItemStack
 import org.bukkit.util.Transformation
 import org.joml.Quaternionf
@@ -76,17 +75,16 @@ object DisplayRenders {
         Display.Billboard.CENTER     -> Billboard.ALL
     }
 
-    // "TextAligment"? Seriously Spigot?
     private fun TextAlignment.convert() = when (this) {
-        TextAlignment.CENTER -> TextAligment.CENTER
-        TextAlignment.LEFT   -> TextAligment.LEFT
-        TextAlignment.RIGHT  -> TextAligment.RIGHT
+        TextAlignment.CENTER -> TextDisplay.TextAlignment.CENTER
+        TextAlignment.LEFT   -> TextDisplay.TextAlignment.LEFT
+        TextAlignment.RIGHT  -> TextDisplay.TextAlignment.RIGHT
     }
 
-    private fun TextAligment.convert() = when (this) {
-        TextAligment.CENTER -> TextAlignment.CENTER
-        TextAligment.LEFT   -> TextAlignment.LEFT
-        TextAligment.RIGHT  -> TextAlignment.RIGHT
+    private fun TextDisplay.TextAlignment.convert() = when (this) {
+        TextDisplay.TextAlignment.CENTER -> TextAlignment.CENTER
+        TextDisplay.TextAlignment.LEFT   -> TextAlignment.LEFT
+        TextDisplay.TextAlignment.RIGHT  -> TextAlignment.RIGHT
     }
 
     private fun ARGB.convert() = Color.fromARGB(a, r, g, b)
