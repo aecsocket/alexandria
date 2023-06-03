@@ -24,8 +24,11 @@ class Locked<T>(
 
     override fun <R> withLock(block: (T) -> R): R {
         lock()
-        val res = block(value)
-        unlock()
+        val res = try {
+            block(value)
+        } finally {
+            unlock()
+        }
         return res
     }
 }
