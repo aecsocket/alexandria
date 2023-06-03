@@ -3,7 +3,7 @@ package io.github.aecsocket.alexandria
 import kotlin.math.max
 
 /**
- * A key used in a [genArena], which is a wrapper around a [Long].
+ * A key used in a [GenArena], which is a wrapper around a [Long].
  *
  * The upper 32 bits represent the [index], and the lower 32 bits represent the [gen].
  */
@@ -57,7 +57,9 @@ interface MutableGenArena<E> : GenArena<E> {
     fun clear()
 }
 
-fun <E> genArena(capacity: Int = 4): MutableGenArena<E> = GenArenaImpl(capacity)
+// if the kotlin stdlib is allowed to, why can't I?
+@Suppress("FunctionName")
+fun <E> GenArena(capacity: Int = 4): MutableGenArena<E> = GenArenaImpl(capacity)
 
 class GenArenaImpl<E> internal constructor(capacity: Int) : MutableGenArena<E> {
     private sealed interface Item<T> {

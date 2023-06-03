@@ -6,7 +6,6 @@ import io.github.aecsocket.alexandria.paper.extension.position
 import io.github.aecsocket.alexandria.paper.extension.spawn
 import io.github.aecsocket.klam.*
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextColor
 import org.bukkit.Color
 import org.bukkit.Material

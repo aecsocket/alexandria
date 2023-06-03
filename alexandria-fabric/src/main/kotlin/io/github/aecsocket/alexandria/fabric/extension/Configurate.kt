@@ -1,8 +1,8 @@
 package io.github.aecsocket.alexandria.fabric.extension
 
-import io.github.aecsocket.alexandria.extension.alexandriaApiSerializers
+import io.github.aecsocket.alexandria.extension.apiSerializers
 import org.spongepowered.configurate.serialize.TypeSerializerCollection
 
-val alexandriaFabricSerializers: TypeSerializerCollection = TypeSerializerCollection.builder()
-    .registerAll(alexandriaApiSerializers)
+val FABRIC_SERIALIZERS: TypeSerializerCollection = TypeSerializerCollection.builder()
+    .registerAll(apiSerializers)
     .build()

@@ -3,7 +3,6 @@ package io.github.aecsocket.alexandria
 import io.github.aecsocket.klam.ARGB
 import io.github.aecsocket.klam.DVec3
 import io.github.aecsocket.klam.FAffine3
-import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextColor
 import org.spongepowered.configurate.objectmapping.ConfigSerializable
 

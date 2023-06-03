@@ -1,14 +1,9 @@
 package io.github.aecsocket.alexandria.paper.scheduling
 
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Runnable
-import kotlinx.coroutines.runBlocking
 import org.bukkit.World
 import org.bukkit.entity.Entity
 import org.bukkit.plugin.Plugin
-import kotlin.coroutines.CoroutineContext
 
 class FoliaScheduling(val plugin: Plugin) : Scheduling {
     private val server = plugin.server

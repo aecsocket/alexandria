@@ -3,8 +3,6 @@ package io.github.aecsocket.alexandria.extension
 import java.io.IOException
 import java.io.InputStream
 
-const val DEFAULT = "default"
-
 fun Any.resource(path: String): InputStream {
     val url = javaClass.classLoader.getResource(path)
         ?: throw RuntimeException("Resource at $path does not exist")

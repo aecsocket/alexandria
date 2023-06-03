@@ -1,7 +1,5 @@
 package io.github.aecsocket.alexandria.paper.extension
 
-import io.github.aecsocket.alexandria.ParticleEffect
-import io.github.aecsocket.alexandria.extension.DEFAULT
 import io.github.aecsocket.klam.DVec3
 import org.bukkit.Bukkit
 import org.bukkit.Location
@@ -37,7 +35,7 @@ fun <M : ItemMeta> ItemStack.withMeta(block: (M) -> Unit): ItemStack {
     return this
 }
 
-fun <V> Map<String, V>.forWorld(world: World) = get(world.name) ?: get(DEFAULT)
+fun <V> Map<String, V>.forWorld(world: World) = get(world.name) ?: get("default")
 
 inline fun <reified E : Entity> World.spawn(
     location: Location,

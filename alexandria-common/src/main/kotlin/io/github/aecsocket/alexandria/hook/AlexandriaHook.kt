@@ -2,8 +2,6 @@ package io.github.aecsocket.alexandria.hook
 
 import io.github.aecsocket.alexandria.extension.resource
 import io.github.aecsocket.alexandria.extension.sanitizeText
-import io.github.aecsocket.alexandria.kebabCasePattern
-import io.github.aecsocket.alexandria.validateKey
 import io.github.aecsocket.glossa.Glossa
 import io.github.aecsocket.glossa.GlossaStandard
 import io.github.aecsocket.glossa.InvalidMessageProvider
@@ -25,7 +23,7 @@ private val defaultLangResources = listOf(
     "io/github/aecsocket/alexandria/lang/root.yml",
     "io/github/aecsocket/alexandria/lang/en-US.yml",
 )
-val fallbackLocale: Locale = Locale.forLanguageTag("en-US")
+private val keyPattern = Regex("([a-z0-9-])+")
 
 abstract class AlexandriaHook<S : AlexandriaHook.Settings>(
     val manifest: Manifest,
@@ -33,13 +31,18 @@ abstract class AlexandriaHook<S : AlexandriaHook.Settings>(
     private val settingsFile: File,
     private val configOptions: ConfigurationOptions,
 ) {
+    companion object {
+        val FallbackLocale: Locale = Locale.forLanguageTag("en-US")
+    }
+
     data class Manifest(
         val id: String,
         val accentColor: TextColor,
         val langResources: List<String>,
     ) {
         init {
-            validateKey(id, kebabCasePattern)
+            if (!id.matches(keyPattern))
+                throw IllegalArgumentException("Invalid key '$id', must match ${keyPattern.pattern}")
         }
     }
 
