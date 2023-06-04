@@ -1,6 +1,6 @@
 package io.github.aecsocket.alexandria.paper.seralizer
 
-import io.github.aecsocket.alexandria.RawParticle
+import io.github.aecsocket.alexandria.desc.RawParticle
 import io.github.aecsocket.alexandria.extension.force
 import io.github.aecsocket.alexandria.paper.PaperParticle
 import net.kyori.adventure.key.Key
@@ -32,14 +32,35 @@ object ParticleSerializer : TypeSerializer<Particle> {
     }
 }
 
-object RawParticleSerializer : TypeSerializer<RawParticle<*>> {
-    override fun serialize(type: Type, obj: RawParticle<*>?, node: ConfigurationNode) {
-        obj as PaperParticle?
-        node.set(obj?.handle)
+private const val TYPE = "type"
+private const val DATA = "data"
+
+object RawParticleSerializer : TypeSerializer<RawParticle> {
+    override fun serialize(type: Type, obj: RawParticle?, node: ConfigurationNode) {
+        if (obj == null) node.set(null)
+        else {
+            obj as PaperParticle?
+            if (obj.type.dataType == Unit::class.java) {
+                node.set(obj.type)
+            } else {
+                node.node(TYPE).set(obj.type)
+                node.node(DATA).set(obj.data)
+            }
+        }
     }
 
-    override fun deserialize(type: Type, node: ConfigurationNode): RawParticle<*> {
-        val handle = node.force<Particle>()
-        return PaperParticle(handle)
+    override fun deserialize(type: Type, node: ConfigurationNode): RawParticle {
+        return if (node.isMap) {
+            val particleType = node.node(TYPE).force<Particle>()
+            val data = if (particleType.dataType != Unit::class.java) {
+                node.node(DATA).force(particleType.dataType)
+            } else null
+            PaperParticle(particleType, data)
+        } else {
+            val particleType = node.force<Particle>()
+            if (particleType.dataType != Unit::class.java)
+                throw SerializationException(node, type, "Particle type $particleType requires a data parameter")
+            PaperParticle(particleType, null)
+        }
     }
 }

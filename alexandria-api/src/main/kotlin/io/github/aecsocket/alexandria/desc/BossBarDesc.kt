@@ -1,11 +1,11 @@
-package io.github.aecsocket.alexandria
+package io.github.aecsocket.alexandria.desc
 
 import net.kyori.adventure.bossbar.BossBar
 import net.kyori.adventure.text.Component
 import org.spongepowered.configurate.objectmapping.ConfigSerializable
 
 @ConfigSerializable
-data class BossBarDescriptor(
+data class BossBarDesc(
     val progress: Float = 1f,
     val color: BossBar.Color = BossBar.Color.WHITE,
     val overlay: BossBar.Overlay = BossBar.Overlay.PROGRESS,
