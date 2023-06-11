@@ -287,6 +287,6 @@ class DisplayRenders(private val audiences: FabricAudiences) {
         // todo PAIN!!!
         override var alignment: TextAlignment
             get() = TODO("Not yet implemented")
-            set(value) {}
+            set(value) { TODO() }
     }
 }

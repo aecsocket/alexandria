@@ -8,7 +8,7 @@ import io.github.aecsocket.glossa.InvalidMessageProvider
 import io.github.aecsocket.glossa.configurate.fromConfigLoader
 import io.github.aecsocket.glossa.glossaStandard
 import io.github.oshai.kotlinlogging.KLogger
-import me.lucko.configurate.toml.TOMLConfigurationLoader
+
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.Component.text
 import net.kyori.adventure.text.format.TextColor
@@ -80,9 +80,6 @@ abstract class AlexandriaHook<S : AlexandriaHook.Settings>(
     fun yamlConfigLoader(): YamlConfigurationLoader.Builder = YamlConfigurationLoader.builder()
         .defaultOptions(configOptions)
 
-    fun tomlConfigLoader(): TOMLConfigurationLoader.Builder = TOMLConfigurationLoader.builder()
-        .defaultOptions(configOptions)
-
     fun asChat(comp: Component) = text()
         .append(chatPrefix)
         .append(sanitizeText(comp))
@@ -102,7 +99,7 @@ abstract class AlexandriaHook<S : AlexandriaHook.Settings>(
     }
 
     private fun loadInternal() {
-        val settingsLoader = tomlConfigLoader()
+        val settingsLoader = yamlConfigLoader()
             .file(settingsFile)
             .build()
         val settings = try {

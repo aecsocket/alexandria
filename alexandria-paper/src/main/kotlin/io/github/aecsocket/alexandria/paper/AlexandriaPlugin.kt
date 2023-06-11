@@ -14,7 +14,7 @@ import org.bukkit.plugin.java.JavaPlugin
 import org.spongepowered.configurate.ConfigurationNode
 import org.spongepowered.configurate.ConfigurationOptions
 
-private const val SETTINGS_PATH = "settings.toml"
+private const val SETTINGS_PATH = "settings.yml"
 private const val LANG_PATH = "lang"
 
 abstract class AlexandriaPlugin<S : AlexandriaHook.Settings>(
@@ -104,8 +104,6 @@ abstract class AlexandriaPlugin<S : AlexandriaHook.Settings>(
     }
 
     fun yamlConfigLoader() = ax.yamlConfigLoader()
-
-    fun tomlConfigLoader() = ax.tomlConfigLoader()
 
     fun asChat(comp: Component) = ax.asChat(comp)
 }

@@ -31,7 +31,7 @@ abstract class AlexandriaMod<S : AlexandriaHook.Settings>(
     protected val ax = object : AlexandriaHook<S>(
         manifest = manifest,
         log = log,
-        settingsFile = FabricLoader.getInstance().configDir.resolve("$modId.toml").toFile(),
+        settingsFile = FabricLoader.getInstance().configDir.resolve("$modId.yml").toFile(),
         configOptions = configOptions,
     ) {
         override val meta: Meta
@@ -80,8 +80,6 @@ abstract class AlexandriaMod<S : AlexandriaHook.Settings>(
     }
 
     fun yamlConfigLoader() = ax.yamlConfigLoader()
-
-    fun tomlConfigLoader() = ax.tomlConfigLoader()
 
     fun asChat(comp: Component) = ax.asChat(comp)
 }

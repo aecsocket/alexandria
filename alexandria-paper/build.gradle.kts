@@ -16,7 +16,6 @@ dependencies {
     paperweight.paperDevBundle("$minecraft-R0.1-SNAPSHOT")
     api(projects.alexandriaCommon)
 
-    api(libs.configurate.toml)
     api(libs.cloud.paper)
     api(libs.packetevents.spigot)
 }
