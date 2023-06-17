@@ -1,5 +1,6 @@
 package io.github.aecsocket.alexandria.sync
 
+import java.util.concurrent.TimeUnit
 import java.util.function.Consumer
 
 // roughly analogous to the Rust pattern of Mutex<T>
@@ -9,6 +10,8 @@ interface Sync<T> {
     fun lock(): T
 
     fun tryLock(): T?
+
+    fun tryLock(time: Long, unit: TimeUnit): T?
 
     fun unlock()
 

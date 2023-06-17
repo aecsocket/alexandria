@@ -1,5 +1,6 @@
 package io.github.aecsocket.alexandria.sync
 
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
 
@@ -16,6 +17,10 @@ class Locked<T>(
 
     override fun tryLock(): T? {
         return if (lock.tryLock()) value else null
+    }
+
+    override fun tryLock(time: Long, unit: TimeUnit): T? {
+        return if (lock.tryLock(time, unit)) value else null
     }
 
     override fun unlock() {
