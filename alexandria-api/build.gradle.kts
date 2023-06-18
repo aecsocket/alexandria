@@ -18,4 +18,6 @@ dependencies {
     api(libs.glossa.configurate)
     api(libs.cloud.core)
     api(libs.cloud.minecraft.extras)
+
+    testImplementation(libs.configurate.yaml)
 }

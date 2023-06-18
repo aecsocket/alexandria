@@ -1,9 +1,9 @@
 package io.github.aecsocket.alexandria.paper.extension
 
-import io.github.aecsocket.alexandria.extension.apiSerializers
 import io.github.aecsocket.alexandria.extension.register
 import io.github.aecsocket.alexandria.extension.registerExact
 import io.github.aecsocket.alexandria.paper.seralizer.*
+import io.github.aecsocket.alexandria.serializer.apiSerializers
 import org.bukkit.Keyed
 import org.bukkit.Registry
 import org.spongepowered.configurate.serialize.TypeSerializerCollection

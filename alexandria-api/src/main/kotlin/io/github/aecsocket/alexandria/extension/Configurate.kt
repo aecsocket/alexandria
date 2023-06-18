@@ -30,9 +30,5 @@ inline fun <reified T> TypeSerializerCollection.Builder.register(serializer: Typ
 inline fun <reified T> TypeSerializerCollection.Builder.registerExact(serializer: TypeSerializer<T>) =
     registerExact(T::class.java, serializer)
 
-val apiSerializers: TypeSerializerCollection = TypeSerializerCollection.defaults().childBuilder()
-    .registerAll(klamSerializers)
-    .registerAll(ConfigurateComponentSerializer.configurate().serializers())
-    .registerExact(LocaleSerializer)
-    .build()
+
 
