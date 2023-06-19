@@ -15,13 +15,6 @@ class HierarchySerializer<T : Any>(
 ) : TypeSerializer<T> {
     private val subTypeToKey = subTypes.map { (a, b) -> b to a }.associate { it }
 
-    init {
-        subTypes.forEach { (_, subType) ->
-            if (!baseType.isAssignableFrom(subType))
-                throw IllegalArgumentException("$subType is not a subtype of $baseType")
-        }
-    }
-
     override fun serialize(type: Type, obj: T?, node: ConfigurationNode) {
         if (obj == null) node.set(null)
         else {
@@ -37,7 +30,7 @@ class HierarchySerializer<T : Any>(
         val typeName = node.node(typeKey).force<String>()
         val targetType = subTypes[typeName]
             ?: throw SerializationException(node, type, "Invalid type name '$typeName'")
-        // SAFETY: we've checked at construction time that all `targetType`s are subtypes of `T`
+        // SAFETY: targetType: Class<out T>
         @Suppress("UNCHECKED_CAST")
         return node.force(targetType) as T
     }

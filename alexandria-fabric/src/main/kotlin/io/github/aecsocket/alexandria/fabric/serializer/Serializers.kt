@@ -1,9 +1,7 @@
-package io.github.aecsocket.alexandria.fabric.extension
+package io.github.aecsocket.alexandria.fabric.serializer
 
 import io.github.aecsocket.alexandria.extension.register
 import io.github.aecsocket.alexandria.extension.registerExact
-import io.github.aecsocket.alexandria.fabric.serializer.RawItemTypeSerializer
-import io.github.aecsocket.alexandria.fabric.serializer.RegisteredSerializer
 import io.github.aecsocket.alexandria.serializer.apiSerializers
 import net.minecraft.core.Registry
 import net.minecraft.core.registries.BuiltInRegistries
