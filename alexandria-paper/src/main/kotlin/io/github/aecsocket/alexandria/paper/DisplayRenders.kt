@@ -176,8 +176,6 @@ object DisplayRenders {
                 entity.interpolationDuration = value
             }
 
-        // Spigot is stupid and deprecated this for no reason
-        @Suppress("DEPRECATION")
         override var glowColor: TextColor?
             get() = entity.glowColorOverride?.toTextColor()
             set(value) {

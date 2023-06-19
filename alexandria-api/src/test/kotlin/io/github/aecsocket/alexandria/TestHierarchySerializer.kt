@@ -4,14 +4,18 @@ import io.github.aecsocket.alexandria.serializer.HierarchySerializer
 import io.github.aecsocket.alexandria.serializer.subType
 import io.github.aecsocket.klam.configurate.registerExact
 import org.junit.jupiter.api.assertThrows
+import org.spongepowered.configurate.BasicConfigurationNode
 import org.spongepowered.configurate.ConfigurationNode
 import org.spongepowered.configurate.ConfigurationOptions
 import org.spongepowered.configurate.kotlin.dataClassFieldDiscoverer
 import org.spongepowered.configurate.kotlin.extensions.get
+import org.spongepowered.configurate.kotlin.extensions.set
+import org.spongepowered.configurate.kotlin.extensions.typedSet
 import org.spongepowered.configurate.objectmapping.ConfigSerializable
 import org.spongepowered.configurate.objectmapping.ObjectMapper
 import org.spongepowered.configurate.objectmapping.meta.Required
 import org.spongepowered.configurate.serialize.SerializationException
+import org.spongepowered.configurate.yaml.NodeStyle
 import org.spongepowered.configurate.yaml.YamlConfigurationLoader
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -42,11 +46,31 @@ class TestHierarchySerializer {
             )
         }
 
-    private fun loadNode(text: String): ConfigurationNode{
+    private fun saveNode(node: ConfigurationNode): String {
+        return YamlConfigurationLoader
+            .builder()
+            .defaultOptions(configOptions)
+            .nodeStyle(NodeStyle.BLOCK)
+            .buildAndSaveString(node)
+    }
+
+    private fun loadNode(text: String): ConfigurationNode {
         return YamlConfigurationLoader
             .builder()
             .defaultOptions(configOptions)
             .buildAndLoadString(text)
+    }
+
+    @Test
+    fun testSerializeAlpha() {
+        val node = BasicConfigurationNode.root(configOptions)
+
+        node.typedSet<MyValue>(MyValue.Alpha(a = 3))
+        assertEquals("""
+            a: 3
+            type: alpha
+            
+        """.trimIndent(), saveNode(node))
     }
 
     @Test
@@ -61,10 +85,23 @@ class TestHierarchySerializer {
     }
 
     @Test
+    fun testSerializeBeta() {
+        val node = BasicConfigurationNode.root(configOptions)
+
+        node.typedSet<MyValue>(MyValue.Beta(b = 5))
+        assertEquals("""
+            b: 5
+            type: beta
+            
+        """.trimIndent(), saveNode(node))
+    }
+
+    @Test
     fun testDeserializeBeta() {
         val node = loadNode("""
             type: "beta"
             b: 5
+            
         """.trimIndent())
         val value = node.get<MyValue>()
 
