@@ -27,8 +27,8 @@ value class ArenaKey(val key: Long) {
 /**
  * A generational arena implementation, where elements are indexed by an index + generation pair.
  *
- * This is effectively a port of Rapier's Rust implementation of Arena -
- * see [arena.rs](https://github.com/dimforge/rapier/blob/master/src/data/arena.rs).
+ * This is effectively a port of the Rust
+ * [`generational_arena` crate](https://docs.rs/generational-arena/latest/generational_arena/).
  */
 interface GenArena<out E> : Iterable<GenArena.Entry<out E>> {
     data class Entry<E>(
@@ -197,4 +197,8 @@ class GenArenaImpl<E> internal constructor(capacity: Int) : MutableGenArena<E> {
             }
         }
     }
+
+    override fun toString() = items
+        .mapNotNull { it as? Item.Occupied }
+        .joinToString(prefix = "[", postfix = "]#$gen") { "(${it.value})#${it.gen}" }
 }

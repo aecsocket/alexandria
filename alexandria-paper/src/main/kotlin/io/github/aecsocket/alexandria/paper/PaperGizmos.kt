@@ -1,6 +1,6 @@
 package io.github.aecsocket.alexandria.paper
 
-import io.github.aecsocket.alexandria.GizmoSettings
+import io.github.aecsocket.alexandria.GizmoDraw
 import io.github.aecsocket.alexandria.Gizmos
 import io.github.aecsocket.alexandria.ItemRenderDesc
 import io.github.aecsocket.klam.*
@@ -13,7 +13,7 @@ private val lineItem = ItemStack(Material.STONE)
 class PaperGizmos(
     private val plugin: AlexandriaPlugin<*>,
 ) : Gizmos<World> {
-    override fun line(settings: GizmoSettings, world: World, from: DVec3, to: DVec3) {
+    override fun line(settings: GizmoDraw, world: World, from: DVec3, to: DVec3) {
         val delta = to - from
         val render = DisplayRenders.createItem(
             world = world,
