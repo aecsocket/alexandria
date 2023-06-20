@@ -4,7 +4,10 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
 
-class Locked<T>(
+/**
+ * Implementation of [Sync] using a [ReentrantLock].
+ */
+class Locked<T : Any>(
     private val value: T,
     private val lock: Lock = ReentrantLock(),
 ): Sync<T> {
@@ -28,12 +31,11 @@ class Locked<T>(
     }
 
     override fun <R> withLock(block: (T) -> R): R {
-        lock()
-        val res = try {
-            block(value)
+        val t = lock()
+        try {
+            return block(t)
         } finally {
             unlock()
         }
-        return res
     }
 }

@@ -28,7 +28,7 @@ interface EventDispatch<E> {
     }
 }
 
-class EventDispatchImpl<E> internal constructor() : EventDispatch.Own<E> {
+internal class EventDispatchImpl<E> internal constructor() : EventDispatch.Own<E> {
     private class Listener<E>(
         val priority: Int,
         val fn: Consumer<E>,
