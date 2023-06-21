@@ -9,6 +9,7 @@ import io.github.aecsocket.alexandria.fabric.mixin.TextDisplayAccess
 import io.github.aecsocket.klam.*
 import net.kyori.adventure.platform.fabric.FabricAudiences
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextColor
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.entity.Display
@@ -120,79 +121,36 @@ var TextDisplay.mIsSeeThrough: Boolean
 
 sealed interface DisplayRender : Render {
     val entity: Display
-
-    var billboard: Billboard
-    var viewRange: Float
-    var interpolationDelay: Int
-    var interpolationDuration: Int
-    var glowColor: TextColor?
-
-    fun remove()
 }
 
-interface ItemRender : DisplayRender {
+interface ItemDisplayRender : DisplayRender, ItemRender {
     override val entity: ItemDisplay
-
     var item: ItemStack
 }
 
-interface TextRender : DisplayRender {
+interface TextDisplayRender : DisplayRender, TextRender {
     override val entity: TextDisplay
-
-    var text: Component
-    var lineWidth: Int
-    var backgroundColor: ARGB
-    var hasShadow: Boolean
-    var isSeeThrough: Boolean
-    var alignment: TextAlignment
 }
 
 class DisplayRenders(private val audiences: FabricAudiences) {
-    private fun setUp(desc: DisplayRenderDesc, target: ByDisplay) {
-        // todo make non persistent
-        target.billboard = desc.billboard
-        target.viewRange = desc.viewRange
-        target.interpolationDelay = desc.interpolationDelay
-        target.interpolationDuration = desc.interpolationDuration
-    }
-
     fun createItem(
         world: ServerLevel,
         position: DVec3,
-        transform: FAffine3,
-        item: ItemStack,
-        desc: ItemRenderDesc,
-    ): ItemRender {
+    ): ItemDisplayRender {
         val entity = ItemDisplay(EntityType.ITEM_DISPLAY, world)
         entity.moveTo(position.toVec3())
         world.addFreshEntity(entity)
-        return OfItem(entity).also {
-            it.transform = transform
-            it.item = item
-            setUp(desc, it)
-        }
+        return OfItem(entity)
     }
 
     fun createText(
         world: ServerLevel,
         position: DVec3,
-        transform: FAffine3,
-        text: Component,
-        desc: TextRenderDesc,
     ): TextRender {
         val entity = TextDisplay(EntityType.TEXT_DISPLAY, world)
         entity.moveTo(position.toVec3())
         world.addFreshEntity(entity)
-        return OfText(entity).also {
-            it.transform = transform
-            it.text = text
-            setUp(desc, it)
-            it.lineWidth = desc.lineWidth
-            it.backgroundColor = desc.backgroundColor
-            it.hasShadow = desc.hasShadow
-            it.isSeeThrough = desc.isSeeThrough
-            it.alignment = desc.alignment
-        }
+        return OfText(entity)
     }
 
     private open inner class ByDisplay(
@@ -234,8 +192,14 @@ class DisplayRenders(private val audiences: FabricAudiences) {
                 entity.mInterpolationDuration = value
             }
 
-        override var glowColor: TextColor?
-            get() = entity.mGlowColor
+        override var glowing: Boolean
+            get() = entity.isCurrentlyGlowing
+            set(value) {
+                entity.setGlowingTag(value)
+            }
+
+        override var glowColor: TextColor
+            get() = entity.mGlowColor ?: NamedTextColor.WHITE
             set(value) {
                 entity.mGlowColor = value
             }
@@ -245,7 +209,7 @@ class DisplayRenders(private val audiences: FabricAudiences) {
         }
     }
 
-    private inner class OfItem(override val entity: ItemDisplay) : ByDisplay(entity), ItemRender {
+    private inner class OfItem(override val entity: ItemDisplay) : ByDisplay(entity), ItemDisplayRender {
         override var item: ItemStack
             get() = entity.mItem
             set(value) {

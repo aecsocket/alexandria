@@ -76,8 +76,6 @@ abstract class AlexandriaPlugin<S : AlexandriaHook.Settings>(
     private lateinit var axMeta: AlexandriaHook.Meta
     lateinit var scheduling: Scheduling
         private set
-    lateinit var gizmos: PaperGizmos
-        private set
 
     final override fun onLoad() {
         @Suppress("UnstableApiUsage")
@@ -87,7 +85,6 @@ abstract class AlexandriaPlugin<S : AlexandriaHook.Settings>(
             authors = pluginMeta.authors,
         )
         scheduling = if (isFolia) FoliaScheduling(this) else PaperScheduling(this)
-        gizmos = PaperGizmos(this)
 
         if (!dataFolder.exists()) {
             savedResources.forEach { path ->

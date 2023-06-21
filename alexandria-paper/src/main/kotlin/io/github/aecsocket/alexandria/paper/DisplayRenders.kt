@@ -6,6 +6,7 @@ import io.github.aecsocket.alexandria.paper.extension.position
 import io.github.aecsocket.alexandria.paper.extension.spawn
 import io.github.aecsocket.klam.*
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextColor
 import org.bukkit.Color
 import org.bukkit.Material
@@ -20,118 +21,75 @@ import org.joml.Vector3f
 
 sealed interface DisplayRender : Render {
     val entity: Display
-
-    var billboard: Billboard
-    var viewRange: Float
-    var interpolationDelay: Int
-    var interpolationDuration: Int
-    var glowColor: TextColor?
-
-    fun remove()
 }
 
-interface ItemRender : DisplayRender {
+interface ItemDisplayRender : DisplayRender, ItemRender {
     override val entity: ItemDisplay
-
     var item: ItemStack
 }
 
-interface TextRender : DisplayRender {
+interface TextDisplayRender : DisplayRender, TextRender {
     override val entity: TextDisplay
-
-    var text: Component
-    var lineWidth: Int
-    var backgroundColor: ARGB
-    var hasShadow: Boolean
-    var isSeeThrough: Boolean
-    var alignment: TextAlignment
 }
 
 object DisplayRenders {
-    private fun FAffine3.convert() = Transformation(
+    private fun FAffine3.toBukkit() = Transformation(
         translation.run { Vector3f(x, y, z) },
         rotation.run { Quaternionf(x, y, z, w) },
         scale.run { Vector3f(x, y, z) },
         Quaternionf(0.0f, 0.0f, 0.0f, 1.0f),
     )
 
-    private fun Transformation.convert() = FAffine3(
+    private fun Transformation.toAx() = FAffine3(
         translation.run { FVec3(x, y, z) },
         leftRotation.run { FQuat(x, y, z, w) },
         scale.run { FVec3(x, y, z) },
     )
 
-    private fun Billboard.convert() = when (this) {
+    private fun Billboard.toBukkit() = when (this) {
         Billboard.NONE       -> Display.Billboard.FIXED
         Billboard.HORIZONTAL -> Display.Billboard.HORIZONTAL
         Billboard.VERTICAL   -> Display.Billboard.VERTICAL
         Billboard.ALL        -> Display.Billboard.CENTER
     }
 
-    private fun Display.Billboard.convert() = when (this) {
+    private fun Display.Billboard.toAx() = when (this) {
         Display.Billboard.FIXED      -> Billboard.NONE
         Display.Billboard.HORIZONTAL -> Billboard.HORIZONTAL
         Display.Billboard.VERTICAL   -> Billboard.VERTICAL
         Display.Billboard.CENTER     -> Billboard.ALL
     }
 
-    private fun TextAlignment.convert() = when (this) {
+    private fun TextAlignment.toBukkit() = when (this) {
         TextAlignment.CENTER -> TextDisplay.TextAlignment.CENTER
         TextAlignment.LEFT   -> TextDisplay.TextAlignment.LEFT
         TextAlignment.RIGHT  -> TextDisplay.TextAlignment.RIGHT
     }
 
-    private fun TextDisplay.TextAlignment.convert() = when (this) {
+    private fun TextDisplay.TextAlignment.toAx() = when (this) {
         TextDisplay.TextAlignment.CENTER -> TextAlignment.CENTER
         TextDisplay.TextAlignment.LEFT   -> TextAlignment.LEFT
         TextDisplay.TextAlignment.RIGHT  -> TextAlignment.RIGHT
     }
 
-    private fun ARGB.convert() = Color.fromARGB(a, r, g, b)
-    private fun TextColor.convert() = Color.fromRGB(red(), green(), blue())
+    private fun ARGB.toBukkit() = Color.fromARGB(a, r, g, b)
+    private fun TextColor.toBukkit() = Color.fromRGB(red(), green(), blue())
 
     private fun Color.toARGB() = ARGB(alpha, red, green, blue)
     private fun Color.toTextColor() = TextColor.color(red, green, blue)
 
-    private fun setUp(desc: DisplayRenderDesc, target: ByDisplay) {
-        target.entity.isPersistent = false
-        target.billboard = desc.billboard
-        target.viewRange = desc.viewRange
-        target.interpolationDelay = desc.interpolationDelay
-        target.interpolationDuration = desc.interpolationDuration
-    }
-
     fun createItem(
         world: World,
         position: DVec3,
-        transform: FAffine3,
-        item: ItemStack,
-        desc: ItemRenderDesc,
-    ): ItemRender {
-        return OfItem(world.spawn<ItemDisplay>(position)).also {
-            it.transform = transform
-            it.item = item
-            setUp(desc, it)
-        }
+    ): ItemDisplayRender {
+        return OfItem(world.spawn<ItemDisplay>(position))
     }
 
     fun createText(
         world: World,
         position: DVec3,
-        transform: FAffine3,
-        text: Component,
-        desc: TextRenderDesc,
-    ): TextRender {
-        return OfText(world.spawn<TextDisplay>(position)).also {
-            it.transform = transform
-            it.text = text
-            setUp(desc, it)
-            it.lineWidth = desc.lineWidth
-            it.backgroundColor = desc.backgroundColor
-            it.hasShadow = desc.hasShadow
-            it.isSeeThrough = desc.isSeeThrough
-            it.alignment = desc.alignment
-        }
+    ): TextDisplayRender {
+        return OfText(world.spawn<TextDisplay>(position))
     }
 
     private open class ByDisplay(
@@ -144,15 +102,15 @@ object DisplayRenders {
             }
 
         override var transform: FAffine3
-            get() = entity.transformation.convert()
+            get() = entity.transformation.toAx()
             set(value) {
-                entity.transformation = value.convert()
+                entity.transformation = value.toBukkit()
             }
 
         override var billboard: Billboard
-            get() = entity.billboard.convert()
+            get() = entity.billboard.toAx()
             set(value) {
-                entity.billboard = value.convert()
+                entity.billboard = value.toBukkit()
             }
 
         override var viewRange: Float
@@ -176,10 +134,16 @@ object DisplayRenders {
                 entity.interpolationDuration = value
             }
 
-        override var glowColor: TextColor?
-            get() = entity.glowColorOverride?.toTextColor()
+        override var glowing: Boolean
+            get() = entity.isGlowing
             set(value) {
-                entity.glowColorOverride = value?.convert()
+                entity.isGlowing = value
+            }
+
+        override var glowColor: TextColor
+            get() = entity.glowColorOverride?.toTextColor() ?: NamedTextColor.WHITE
+            set(value) {
+                entity.glowColorOverride = value.toBukkit()
             }
 
         override fun remove() {
@@ -187,7 +151,7 @@ object DisplayRenders {
         }
     }
 
-    private class OfItem(override val entity: ItemDisplay) : ByDisplay(entity), ItemRender {
+    private class OfItem(override val entity: ItemDisplay) : ByDisplay(entity), ItemDisplayRender {
         override var item: ItemStack
             get() = entity.itemStack ?: ItemStack(Material.AIR)
             set(value) {
@@ -195,7 +159,7 @@ object DisplayRenders {
             }
     }
 
-    private class OfText(override val entity: TextDisplay) : ByDisplay(entity), TextRender {
+    private class OfText(override val entity: TextDisplay) : ByDisplay(entity), TextDisplayRender {
         override var text: Component
             get() = entity.text()
             set(value) {
@@ -214,7 +178,7 @@ object DisplayRenders {
         override var backgroundColor: ARGB
             get() = entity.backgroundColor?.toARGB() ?: ARGB(0)
             set(value) {
-                entity.backgroundColor = value.convert()
+                entity.backgroundColor = value.toBukkit()
             }
 
         override var hasShadow: Boolean
@@ -230,9 +194,9 @@ object DisplayRenders {
             }
 
         override var alignment: TextAlignment
-            get() = entity.alignment.convert()
+            get() = entity.alignment.toAx()
             set(value) {
-                entity.alignment = value.convert()
+                entity.alignment = value.toBukkit()
             }
     }
 }
