@@ -3,8 +3,11 @@ package io.github.aecsocket.alexandria
 import io.github.aecsocket.klam.ARGB
 import io.github.aecsocket.klam.DVec3
 import io.github.aecsocket.klam.FAffine3
+import io.github.aecsocket.klam.FVec2
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextColor
+import org.spongepowered.configurate.objectmapping.ConfigSerializable
 
 enum class Billboard {
     NONE,
@@ -20,59 +23,62 @@ enum class TextAlignment {
     RIGHT,
 }
 
-interface Render {
-    var position: DVec3
-    var transform: FAffine3
-
-    var billboard: Billboard
-    var viewRange: Float
-    var interpolationDelay: Int
-    var interpolationDuration: Int
-    var glowing: Boolean
-    var glowColor: TextColor
-
-    fun remove()
+@ConfigSerializable
+data class RenderInterpolation(
+    val delay: Int = 0,
+    val duration: Int = 0,
+) {
+    init {
+        require(delay >= 0) { "requires delay >= 0" }
+        require(duration >= 0) { "requires duration >= 0" }
+    }
 }
 
-interface ItemRender : Render
+// applies to 0 or more clients, not to all tracking clients
+interface Render {
+    fun position(value: DVec3): Render
+    fun transform(value: FAffine3): Render
+
+    fun interpolation(value: RenderInterpolation): Render
+    fun billboard(value: Billboard): Render
+    fun viewRange(value: Float): Render
+    fun cullBox(value: FVec2): Render
+    fun glowing(value: Boolean): Render
+    fun glowColor(value: TextColor): Render
+}
+
+interface ItemRender : Render {
+    override fun position(value: DVec3): ItemRender
+    override fun transform(value: FAffine3): ItemRender
+    override fun interpolation(value: RenderInterpolation): ItemRender
+    override fun billboard(value: Billboard): ItemRender
+    override fun viewRange(value: Float): ItemRender
+    override fun cullBox(value: FVec2): ItemRender
+    override fun glowing(value: Boolean): ItemRender
+    override fun glowColor(value: TextColor): ItemRender
+}
+
+data class TextFlags(
+    val hasShadow: Boolean,
+    val isSeeThrough: Boolean,
+    val defaultBackgroundColor: Boolean,
+    val alignment: TextAlignment,
+)
 
 interface TextRender : Render {
-    var text: Component
+    override fun position(value: DVec3): TextRender
+    override fun transform(value: FAffine3): TextRender
+    override fun interpolation(value: RenderInterpolation): TextRender
+    override fun billboard(value: Billboard): TextRender
+    override fun viewRange(value: Float): TextRender
+    override fun cullBox(value: FVec2): TextRender
+    override fun glowing(value: Boolean): TextRender
+    override fun glowColor(value: TextColor): TextRender
 
-    val lineWidth: Int
-    val backgroundColor: ARGB
-    val hasShadow: Boolean
-    val isSeeThrough: Boolean
-    val alignment: TextAlignment
+    fun text(value: Component): TextRender
+
+    fun lineWidth(value: Int): TextRender
+    fun backgroundColor(value: ARGB): TextRender
+    fun textOpacity(value: Byte): TextRender
+    fun textFlags(value: TextFlags): TextRender
 }
-
-//@ConfigSerializable
-//data class ItemRenderDesc(
-//    override val billboard: Billboard = Billboard.NONE,
-//    override val viewRange: Float = 1.0f,
-//    override val interpolationDelay: Int = 0,
-//    override val interpolationDuration: Int = 0,
-//    override val glowColor: TextColor? = null,
-//) : DisplayRenderDesc {
-//    init {
-//        require(viewRange >= 0.0) { "requires viewRange >= 0.0" }
-//        require(interpolationDelay >= 0) { "requires interpolationDelay >= 0" }
-//        require(interpolationDuration >= 0) { "requires interpolationDuration >= 0" }
-//    }
-//}
-//
-//@ConfigSerializable
-//data class TextRenderDesc(
-//    override val billboard: Billboard = Billboard.ALL,
-//    override val viewRange: Float = 1.0f,
-//    override val interpolationDelay: Int = 0,
-//    override val interpolationDuration: Int = 0,
-//    override val glowColor: TextColor? = null,
-//) : DisplayRenderDesc {
-//    init {
-//        require(viewRange >= 0.0) { "requires viewRange >= 0.0" }
-//        require(interpolationDelay >= 0) { "requires interpolationDelay >= 0" }
-//        require(interpolationDuration >= 0) { "requires interpolationDuration >= 0" }
-//        require(lineWidth > 0) { "requires lineWidth > 0" }
-//    }
-//}

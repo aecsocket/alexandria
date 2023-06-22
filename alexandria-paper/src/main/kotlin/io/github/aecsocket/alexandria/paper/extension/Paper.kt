@@ -1,11 +1,14 @@
 package io.github.aecsocket.alexandria.paper.extension
 
+import com.github.retrooper.packetevents.PacketEvents
+import com.github.retrooper.packetevents.wrapper.PacketWrapper
 import io.github.aecsocket.klam.DVec3
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.NamespacedKey
 import org.bukkit.World
 import org.bukkit.entity.Entity
+import org.bukkit.entity.Player
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason
 import org.bukkit.inventory.ItemStack
@@ -48,3 +51,7 @@ inline fun <reified E : Entity> World.spawn(
     reason: SpawnReason = SpawnReason.CUSTOM,
     crossinline beforeSpawn: (E) -> Unit = {},
 ) = spawn(position.location(this), reason, beforeSpawn)
+
+fun Player.sendPacket(packet: PacketWrapper<*>) {
+    PacketEvents.getAPI().playerManager.sendPacket(this, packet)
+}

@@ -1,5 +1,6 @@
 package io.github.aecsocket.alexandria.paper
 
+import com.github.retrooper.packetevents.PacketEvents
 import io.github.aecsocket.alexandria.hook.AlexandriaHook
 import io.github.aecsocket.alexandria.paper.extension.isFolia
 import io.github.aecsocket.alexandria.paper.scheduling.FoliaScheduling
@@ -9,6 +10,7 @@ import io.github.aecsocket.glossa.Glossa
 import io.github.aecsocket.glossa.GlossaStandard
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.github.oshai.kotlinlogging.slf4j.logger
+import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder
 import net.kyori.adventure.text.Component
 import org.bukkit.plugin.java.JavaPlugin
 import org.spongepowered.configurate.ConfigurationNode
@@ -86,6 +88,11 @@ abstract class AlexandriaPlugin<S : AlexandriaHook.Settings>(
         )
         scheduling = if (isFolia) FoliaScheduling(this) else PaperScheduling(this)
 
+        val packets = SpigotPacketEventsBuilder.build(this)
+        packets.settings.checkForUpdates(false)
+        packets.load()
+        PacketEvents.setAPI(packets)
+
         if (!dataFolder.exists()) {
             savedResources.forEach { path ->
                 saveResource(path, false)
@@ -93,6 +100,10 @@ abstract class AlexandriaPlugin<S : AlexandriaHook.Settings>(
         }
 
         ax.init()
+    }
+
+    override fun onEnable() {
+        PacketEvents.getAPI().init()
     }
 
     final override fun onDisable() {
