@@ -8,6 +8,7 @@ import com.github.retrooper.packetevents.util.Quaternion4f
 import com.github.retrooper.packetevents.util.Vector3d
 import com.github.retrooper.packetevents.util.Vector3f
 import com.github.retrooper.packetevents.wrapper.PacketWrapper
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerDestroyEntities
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityMetadata
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityTeleport
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSpawnEntity
@@ -19,6 +20,7 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.TextColor
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer
 import org.bukkit.entity.Entity
+import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import java.util.*
 
@@ -50,27 +52,15 @@ fun Entity.playerReceivers() = PacketReceiver { packet ->
     trackedPlayers.forEach { it.sendPacket(packet) }
 }
 
+fun Player.packetReceiver() = PacketReceiver { sendPacket(it) }
+
 sealed class DisplayRender(
     val eid: Int,
     val receiver: PacketReceiver,
 ) : Render {
     protected abstract val entityType: EntityType
 
-    protected abstract fun withReceiver(receiver: PacketReceiver): DisplayRender
-
-    fun spawn(position: DVec3) = this.also {
-        receiver.send(WrapperPlayServerSpawnEntity(
-            eid,
-            Optional.of(UUID.randomUUID()),
-            entityType,
-            position.run { Vector3d(x, y, z) },
-            0.0f,
-            0.0f,
-            0.0f,
-            0,
-            Optional.of(Vector3d(0.0, 0.0, 0.0)),
-        ))
-    }
+    abstract fun withReceiver(receiver: PacketReceiver): DisplayRender
 
     override fun position(value: DVec3) = this.also {
         receiver.send(WrapperPlayServerEntityTeleport(
@@ -93,12 +83,22 @@ sealed class DisplayRender(
         ))
     }
 
-    override fun interpolation(value: RenderInterpolation) = this.also {
+    override fun interpolationDelay(value: Int) = this.also {
+        require(value >= 0) { "requires value >= 0" }
         receiver.send(WrapperPlayServerEntityMetadata(
             eid,
             listOf(
-                EntityData(INTERPOLATION_DELAY, EntityDataTypes.INT, value.delay),
-                EntityData(INTERPOLATION_DURATION, EntityDataTypes.INT, value.duration),
+                EntityData(INTERPOLATION_DELAY, EntityDataTypes.INT, value),
+            )
+        ))
+    }
+
+    override fun interpolationDuration(value: Int) = this.also {
+        require(value >= 0) { "requires value >= 0" }
+        receiver.send(WrapperPlayServerEntityMetadata(
+            eid,
+            listOf(
+                EntityData(INTERPOLATION_DURATION, EntityDataTypes.INT, value),
             )
         ))
     }
@@ -156,6 +156,24 @@ sealed class DisplayRender(
             )
         ))
     }
+
+    override fun spawn(position: DVec3) = this.also {
+        receiver.send(WrapperPlayServerSpawnEntity(
+            eid,
+            Optional.of(UUID.randomUUID()),
+            entityType,
+            position.run { Vector3d(x, y, z) },
+            0.0f,
+            0.0f,
+            0.0f,
+            0,
+            Optional.of(Vector3d(0.0, 0.0, 0.0)),
+        ))
+    }
+
+    override fun despawn() = this.also {
+        receiver.send(WrapperPlayServerDestroyEntities(eid))
+    }
 }
 
 class ItemDisplayRender(
@@ -163,6 +181,18 @@ class ItemDisplayRender(
     receiver: PacketReceiver,
 ) : DisplayRender(eid, receiver), ItemRender {
     override val entityType: EntityType get() = EntityTypes.ITEM_DISPLAY
+
+    override fun position(value: DVec3) = this.also { super.position(value) }
+    override fun transform(value: FAffine3) = this.also { super.transform(value) }
+    override fun interpolationDelay(value: Int) = this.also { super.interpolationDelay(value) }
+    override fun interpolationDuration(value: Int) = this.also { super.interpolationDuration(value) }
+    override fun billboard(value: Billboard) = this.also { super.billboard(value) }
+    override fun viewRange(value: Float) = this.also { super.viewRange(value) }
+    override fun cullBox(value: FVec2) = this.also { super.cullBox(value) }
+    override fun glowing(value: Boolean) = this.also { super.glowing(value) }
+    override fun glowColor(value: TextColor) = this.also { super.glowColor(value) }
+    override fun spawn(position: DVec3) = this.also { super.spawn(position) }
+    override fun despawn() = this.also { super.despawn() }
 
     override fun withReceiver(receiver: PacketReceiver) = ItemDisplayRender(eid, receiver)
 
@@ -182,9 +212,21 @@ class TextDisplayRender(
 ) : DisplayRender(eid, receiver), TextRender {
     override val entityType: EntityType get() = EntityTypes.TEXT_DISPLAY
 
+    override fun position(value: DVec3) = this.also { super.position(value) }
+    override fun transform(value: FAffine3) = this.also { super.transform(value) }
+    override fun interpolationDelay(value: Int) = this.also { super.interpolationDelay(value) }
+    override fun interpolationDuration(value: Int) = this.also { super.interpolationDuration(value) }
+    override fun billboard(value: Billboard) = this.also { super.billboard(value) }
+    override fun viewRange(value: Float) = this.also { super.viewRange(value) }
+    override fun cullBox(value: FVec2) = this.also { super.cullBox(value) }
+    override fun glowing(value: Boolean) = this.also { super.glowing(value) }
+    override fun glowColor(value: TextColor) = this.also { super.glowColor(value) }
+    override fun spawn(position: DVec3) = this.also { super.spawn(position) }
+    override fun despawn() = this.also { super.despawn() }
+
     override fun withReceiver(receiver: PacketReceiver) = TextDisplayRender(eid, receiver)
 
-    override fun text(value: Component) = this.also {
+    override fun text(value: Component) {
         receiver.send(WrapperPlayServerEntityMetadata(
             eid,
             listOf(
@@ -193,7 +235,7 @@ class TextDisplayRender(
         ))
     }
 
-    override fun lineWidth(value: Int) = this.also {
+    override fun lineWidth(value: Int) {
         require(value > 0) { "requires value > 0" }
         receiver.send(WrapperPlayServerEntityMetadata(
             eid,
@@ -203,7 +245,7 @@ class TextDisplayRender(
         ))
     }
 
-    override fun backgroundColor(value: ARGB) = this.also {
+    override fun backgroundColor(value: ARGB) {
         receiver.send(WrapperPlayServerEntityMetadata(
             eid,
             listOf(
@@ -212,7 +254,7 @@ class TextDisplayRender(
         ))
     }
 
-    override fun textOpacity(value: Byte) = this.also {
+    override fun textOpacity(value: Byte) {
         receiver.send(WrapperPlayServerEntityMetadata(
             eid,
             listOf(
@@ -221,7 +263,7 @@ class TextDisplayRender(
         ))
     }
 
-    override fun textFlags(value: TextFlags) = this.also {
+    override fun textFlags(value: TextFlags) {
         receiver.send(WrapperPlayServerEntityMetadata(
             eid,
             listOf(
