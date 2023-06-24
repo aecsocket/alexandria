@@ -2,6 +2,7 @@ package io.github.aecsocket.alexandria.paper.seralizer
 
 import io.github.aecsocket.alexandria.desc.ParticleType
 import io.github.aecsocket.alexandria.extension.force
+import io.github.aecsocket.alexandria.paper.PaperItemType
 import io.github.aecsocket.alexandria.paper.PaperParticleType
 import io.github.aecsocket.alexandria.paper.extension.toResourceLocation
 import net.kyori.adventure.key.Key
@@ -42,17 +43,14 @@ object ParticleSerializer : TypeSerializer<Particle> {
 private const val TYPE = "type"
 private const val DATA = "data"
 
-object RawParticleSerializer : TypeSerializer<ParticleType> {
+object ParticleTypeSerializer : TypeSerializer<ParticleType> {
     override fun serialize(type: Type, obj: ParticleType?, node: ConfigurationNode) {
-        if (obj == null) node.set(null)
-        else {
-            obj as PaperParticleType?
-            if (obj.type.dataType == Unit::class.java) {
-                node.set(obj.type)
-            } else {
-                node.node(TYPE).set(obj.type)
-                node.node(DATA).set(obj.data)
-            }
+        if (obj !is PaperParticleType) return
+        if (obj.type.dataType == Unit::class.java) {
+            node.set(obj.type)
+        } else {
+            node.node(TYPE).set(obj.type)
+            node.node(DATA).set(obj.data)
         }
     }
 

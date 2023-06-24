@@ -81,5 +81,5 @@ val fabricSerializers: TypeSerializerCollection = TypeSerializerCollection.build
     .registerRegistry(BuiltInRegistries.BANNER_PATTERN)
     .registerRegistry(BuiltInRegistries.INSTRUMENT)
     .registerRegistry(BuiltInRegistries.DECORATED_POT_PATTERNS)
-    .register(RawItemTypeSerializer)
+    .register(ItemTypeSerializer)
     .build()

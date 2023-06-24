@@ -42,7 +42,7 @@ val paperSerializers: TypeSerializerCollection = TypeSerializerCollection.builde
     .registerExact(ParticleSerializer)
     .registerExact(BlockDataSerializer)
     .registerExact(DustOptionsSerializer)
-    .register(RawParticleSerializer)
-    .register(RawItemTypeSerializer)
+    .register(ParticleTypeSerializer)
+    .register(ItemTypeSerializer)
     .build()
 

@@ -34,10 +34,10 @@ class RegisteredSerializer<T : Keyed>(
 inline fun <reified T : Keyed> RegisteredSerializer(registry: Registry<T>) =
     RegisteredSerializer(registry, T::class.simpleName!!)
 
-object RawItemTypeSerializer : TypeSerializer<ItemType> {
+object ItemTypeSerializer : TypeSerializer<ItemType> {
     override fun serialize(type: Type, obj: ItemType?, node: ConfigurationNode) {
-        obj as PaperItemType?
-        node.set(obj?.handle)
+        if (obj !is PaperItemType) return
+        node.set(obj.handle)
     }
 
     override fun deserialize(type: Type, node: ConfigurationNode): ItemType {

@@ -32,6 +32,8 @@ abstract class AlexandriaPlugin<S : AlexandriaHook.Settings>(
 
     protected open fun onInit() {}
 
+    protected open fun onPostEnable() {}
+
     protected open fun onLoadData() {}
 
     protected open fun onReloadData() {}
@@ -102,8 +104,10 @@ abstract class AlexandriaPlugin<S : AlexandriaHook.Settings>(
         ax.init()
     }
 
-    override fun onEnable() {
+    final override fun onEnable() {
         PacketEvents.getAPI().init()
+        ChunkTracking.init(this)
+        onPostEnable()
     }
 
     final override fun onDisable() {
