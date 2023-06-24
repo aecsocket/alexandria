@@ -88,10 +88,10 @@ abstract class AlexandriaPlugin<S : AlexandriaHook.Settings>(
         )
         scheduling = if (isFolia) FoliaScheduling(this) else PaperScheduling(this)
 
-        val packets = SpigotPacketEventsBuilder.build(this)
-        packets.settings.checkForUpdates(false)
-        packets.load()
-        PacketEvents.setAPI(packets)
+        PacketEvents.setAPI(SpigotPacketEventsBuilder.build(this).apply {
+            settings.checkForUpdates(false)
+        })
+        PacketEvents.getAPI().load()
 
         if (!dataFolder.exists()) {
             savedResources.forEach { path ->

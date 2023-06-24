@@ -56,7 +56,7 @@ fun Player.packetReceiver() = PacketReceiver { sendPacket(it) }
 
 sealed class DisplayRender(
     val eid: Int,
-    val receiver: PacketReceiver,
+    var receiver: PacketReceiver,
 ) : Render {
     protected abstract val entityType: EntityType
 

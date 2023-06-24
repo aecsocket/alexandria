@@ -6,6 +6,9 @@ import org.bukkit.entity.Entity
 import org.bukkit.plugin.Plugin
 import org.bukkit.scheduler.BukkitTask
 
+/**
+ * Default [Scheduling] implementation for the base Paper platform.
+ */
 class PaperScheduling(val plugin: Plugin) : Scheduling {
     private val scheduler = plugin.server.scheduler
 
@@ -16,11 +19,6 @@ class PaperScheduling(val plugin: Plugin) : Scheduling {
     }
 
     override fun onServer() = object : SchedulingContext {
-        override fun launch(block: () -> Unit) {
-            if (!plugin.isEnabled) return
-            scheduler.runTask(plugin, block)
-        }
-
         override fun runLater(delay: Long, block: () -> Unit) {
             if (!plugin.isEnabled) return
             scheduler.runTaskLater(plugin, Runnable(block), delay)
@@ -32,16 +30,12 @@ class PaperScheduling(val plugin: Plugin) : Scheduling {
         }
     }
 
-    override fun onEntity(entity: Entity) = object : SchedulingContext {
-        override fun launch(block: () -> Unit) {
-            if (!plugin.isEnabled) return
-            scheduler.runTask(plugin, block)
-        }
-
+    override fun onEntity(entity: Entity, onRetire: () -> Unit) = object : SchedulingContext {
         override fun runLater(delay: Long, block: () -> Unit) {
             if (!plugin.isEnabled) return
             scheduler.runTaskLater(plugin, Runnable {
                 if (entity.isValid) block()
+                else onRetire()
             }, delay)
         }
 
@@ -49,7 +43,10 @@ class PaperScheduling(val plugin: Plugin) : Scheduling {
             if (!plugin.isEnabled) return
             scheduler.runTaskTimer(plugin, { task ->
                 if (entity.isValid) block(wrap(task))
-                else task.cancel()
+                else {
+                    onRetire()
+                    task.cancel()
+                }
             }, delay, period)
         }
     }

@@ -5,12 +5,15 @@ import org.bukkit.entity.Entity
 import org.bukkit.plugin.Plugin
 
 // TODO Folia
+/**
+ * Default [Scheduling] implementation for the Folia platform, featuring region multithreading.
+ */
 class FoliaScheduling(val plugin: Plugin) : Scheduling {
     override fun onServer(): SchedulingContext {
         TODO("Not yet implemented")
     }
 
-    override fun onEntity(entity: Entity): SchedulingContext {
+    override fun onEntity(entity: Entity, onRetire: () -> Unit): SchedulingContext {
         TODO("Not yet implemented")
     }
 
