@@ -1,6 +1,7 @@
 package io.github.aecsocket.alexandria.paper.extension
 
 import io.github.aecsocket.klam.*
+import org.bukkit.Chunk
 import org.bukkit.Location
 import org.bukkit.World
 import org.bukkit.block.Block
@@ -24,3 +25,5 @@ fun DIso3.location(world: World): Location {
 }
 
 fun Block.position() = IVec3(x, y, z)
+
+fun Chunk.position() = IVec2(x, z)

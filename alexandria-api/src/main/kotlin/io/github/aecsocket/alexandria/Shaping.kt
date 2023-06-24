@@ -1,6 +1,6 @@
 package io.github.aecsocket.alexandria
 
-import io.github.aecsocket.klam.DVec3
+import io.github.aecsocket.klam.*
 
 data class Segment(
     val from: DVec3,
@@ -18,6 +18,14 @@ data class Segment(
 }
 
 object Shaping {
+    fun lineTransform(delta: FVec3, width: Float): FAffine3 {
+        return FAffine3(
+            translation = delta / 2.0f,
+            rotation = FQuat.fromTo(FVec3(0.0f, 1.0f, 0.0f), normalize(delta)),
+            scale = FVec3(width, length(delta), width),
+        )
+    }
+
     fun box(halfExtent: DVec3): List<Segment> {
         val min = -halfExtent
         val max = halfExtent
