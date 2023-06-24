@@ -1,6 +1,6 @@
 package io.github.aecsocket.alexandria.fabric.serializer
 
-import io.github.aecsocket.alexandria.desc.RawItemType
+import io.github.aecsocket.alexandria.desc.ItemType
 import io.github.aecsocket.alexandria.extension.force
 import io.github.aecsocket.alexandria.fabric.FabricItemType
 import net.kyori.adventure.key.Key
@@ -33,13 +33,13 @@ class RegisteredSerializer<T>(
 inline fun <reified T> RegisteredSerializer(registry: Registry<T>) =
     RegisteredSerializer(registry, T::class.simpleName!!)
 
-object RawItemTypeSerializer : TypeSerializer<RawItemType> {
-    override fun serialize(type: Type, obj: RawItemType?, node: ConfigurationNode) {
+object RawItemTypeSerializer : TypeSerializer<ItemType> {
+    override fun serialize(type: Type, obj: ItemType?, node: ConfigurationNode) {
         obj as FabricItemType?
         node.set(obj?.handle)
     }
 
-    override fun deserialize(type: Type, node: ConfigurationNode): RawItemType {
+    override fun deserialize(type: Type, node: ConfigurationNode): ItemType {
         val handle = node.force<Item>()
         return FabricItemType(handle)
     }
