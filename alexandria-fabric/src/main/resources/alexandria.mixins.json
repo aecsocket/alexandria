@@ -5,6 +5,8 @@
   "compatibilityLevel": "JAVA_17",
   "mixins": [
     "BroadcastAccess",
+    ,
+    "EntityCounterAccess"
   ],
   "injectors": {
     "defaultRequire": 1
