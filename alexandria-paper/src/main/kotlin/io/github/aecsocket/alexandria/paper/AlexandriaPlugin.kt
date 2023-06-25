@@ -107,6 +107,7 @@ abstract class AlexandriaPlugin<S : AlexandriaHook.Settings>(
     final override fun onEnable() {
         PacketEvents.getAPI().init()
         ChunkTracking.init(this)
+        EntityTracking.init(this)
         onPostEnable()
     }
 

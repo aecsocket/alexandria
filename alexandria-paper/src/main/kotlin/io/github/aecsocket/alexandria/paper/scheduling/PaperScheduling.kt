@@ -20,19 +20,16 @@ class PaperScheduling(val plugin: Plugin) : Scheduling {
 
     override fun onServer() = object : SchedulingContext {
         override fun runLater(delay: Long, block: () -> Unit) {
-            if (!plugin.isEnabled) return
             scheduler.runTaskLater(plugin, Runnable(block), delay)
         }
 
         override fun runRepeating(period: Long, delay: Long, block: (TaskContext) -> Unit) {
-            if (!plugin.isEnabled) return
             scheduler.runTaskTimer(plugin, { task -> block(wrap(task)) }, delay, period)
         }
     }
 
     override fun onEntity(entity: Entity, onRetire: () -> Unit) = object : SchedulingContext {
         override fun runLater(delay: Long, block: () -> Unit) {
-            if (!plugin.isEnabled) return
             scheduler.runTaskLater(plugin, Runnable {
                 if (entity.isValid) block()
                 else onRetire()
@@ -40,7 +37,6 @@ class PaperScheduling(val plugin: Plugin) : Scheduling {
         }
 
         override fun runRepeating(period: Long, delay: Long, block: (TaskContext) -> Unit) {
-            if (!plugin.isEnabled) return
             scheduler.runTaskTimer(plugin, { task ->
                 if (entity.isValid) block(wrap(task))
                 else {

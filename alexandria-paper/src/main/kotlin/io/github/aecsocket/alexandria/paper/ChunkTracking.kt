@@ -5,26 +5,41 @@ import io.github.aecsocket.alexandria.paper.extension.registerEvents
 import io.github.aecsocket.klam.IVec2
 import io.papermc.paper.event.packet.PlayerChunkLoadEvent
 import io.papermc.paper.event.packet.PlayerChunkUnloadEvent
+import org.bukkit.Bukkit
 import org.bukkit.Chunk
 import org.bukkit.World
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
+import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.event.world.ChunkLoadEvent
 import org.bukkit.event.world.ChunkUnloadEvent
 import org.bukkit.event.world.WorldLoadEvent
 import org.bukkit.event.world.WorldUnloadEvent
 import org.bukkit.plugin.Plugin
+import java.util.UUID
 
 object ChunkTracking {
-    private lateinit var plugin: Plugin
-    private val chunkToPlayers: MutableMap<World, MutableMap<IVec2, MutableSet<Player>>> = HashMap()
+    private lateinit var plugin: AlexandriaPlugin<*>
+    private val chunkToPlayers: MutableMap<World, MutableMap<IVec2, MutableSet<UUID>>> = HashMap()
+    private val playerToChunks: MutableMap<UUID, MutableSet<IVec2>> = HashMap()
 
-    internal fun init(plugin: Plugin) {
+    internal fun init(plugin: AlexandriaPlugin<*>) {
         // we only care about the first plugin to initialize us
         if (this::plugin.isInitialized) return
         this.plugin = plugin
+
         plugin.registerEvents(object : Listener {
+            @EventHandler
+            fun on(event: PlayerQuitEvent) {
+                val player = event.player
+                val chunksPos = playerToChunks.remove(player.uniqueId) ?: return
+                val forWorld = chunkToPlayers[player.world] ?: return
+                chunksPos.forEach { chunkPos ->
+                    forWorld[chunkPos]?.remove(player.uniqueId)
+                }
+            }
+
             @EventHandler
             fun on(event: WorldLoadEvent) {
                 chunkToPlayers.putIfAbsent(event.world, HashMap())
@@ -54,19 +69,31 @@ object ChunkTracking {
                 chunkToPlayers
                     .computeIfAbsent(event.world) { HashMap() }
                     .computeIfAbsent(event.chunk.position()) { HashSet() }
-                    .add(event.player)
+                    .add(event.player.uniqueId)
+                playerToChunks
+                    .computeIfAbsent(event.player.uniqueId) { HashSet() }
+                    .add(event.chunk.position())
             }
 
             @EventHandler
             fun on(event: PlayerChunkUnloadEvent) {
-                chunkToPlayers[event.world]?.get(event.chunk.position())?.remove(event.player)
+                chunkToPlayers[event.world]?.get(event.chunk.position())?.remove(event.player.uniqueId)
+                playerToChunks[event.player.uniqueId]?.remove(event.chunk.position())
             }
         })
     }
 
-    fun trackedPlayers(world: World, chunkPos: IVec2): Set<Player> {
-        return chunkToPlayers[world]?.get(chunkPos) ?: emptySet()
+    fun trackedPlayers(world: World, chunkPos: IVec2): Collection<Player> {
+        return (chunkToPlayers[world]?.get(chunkPos) ?: emptySet())
+            .mapNotNull { Bukkit.getPlayer(it) }
     }
 
     fun trackedPlayers(chunk: Chunk) = trackedPlayers(chunk.world, chunk.position())
+
+    fun trackedChunkPos(player: Player): Collection<IVec2> {
+        return playerToChunks[player.uniqueId] ?: emptySet()
+    }
+
+    fun trackedChunks(player: Player) = trackedChunkPos(player)
+        .map { (x, z) -> player.world.getChunkAt(x, z) }
 }

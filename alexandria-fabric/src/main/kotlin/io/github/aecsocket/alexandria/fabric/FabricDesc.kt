@@ -29,7 +29,7 @@ fun ParticleDesc.spawn(player: ServerPlayer, position: DVec3, force: Boolean = f
         }
         is ParticleType.Raw -> (type as FabricParticleType).handle
     }
-    player.getLevel().sendParticles(
+    player.serverLevel().sendParticles(
         player,
         type,
         force,

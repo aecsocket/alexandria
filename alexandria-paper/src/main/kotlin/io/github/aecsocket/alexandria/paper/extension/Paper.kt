@@ -8,6 +8,7 @@ import org.bukkit.Location
 import org.bukkit.NamespacedKey
 import org.bukkit.World
 import org.bukkit.entity.Entity
+import org.bukkit.entity.ItemDisplay
 import org.bukkit.entity.Player
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason
@@ -51,6 +52,13 @@ inline fun <reified E : Entity> World.spawn(
     reason: SpawnReason = SpawnReason.CUSTOM,
     crossinline beforeSpawn: (E) -> Unit = {},
 ) = spawn(position.location(this), reason, beforeSpawn)
+
+fun World.spawnTracker(position: DVec3, beforeSpawn: (Entity) -> Unit = {}): Entity =
+    // Markers are not tracked by clients; use a different entity
+    spawn<ItemDisplay>(position) { entity ->
+        entity.isPersistent = false
+        beforeSpawn(entity)
+    }
 
 fun Player.sendPacket(packet: PacketWrapper<*>) {
     PacketEvents.getAPI().playerManager.sendPacket(this, packet)

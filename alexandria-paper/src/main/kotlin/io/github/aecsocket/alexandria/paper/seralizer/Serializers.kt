@@ -14,7 +14,6 @@ private inline fun <reified T : Keyed> TypeSerializerCollection.Builder.register
     return this
 }
 
-@Suppress("UnstableApiUsage")
 val paperSerializers: TypeSerializerCollection = TypeSerializerCollection.builder()
     .registerAll(apiSerializers)
     .registerRegistry(Registry.ADVANCEMENT)
@@ -30,8 +29,6 @@ val paperSerializers: TypeSerializerCollection = TypeSerializerCollection.builde
     .registerRegistry(Registry.STRUCTURE)
     .registerRegistry(Registry.STRUCTURE_TYPE)
     .registerRegistry(Registry.SOUNDS)
-    .registerRegistry(Registry.TRIM_MATERIAL)
-    .registerRegistry(Registry.TRIM_PATTERN)
     .registerRegistry(Registry.VILLAGER_PROFESSION)
     .registerRegistry(Registry.VILLAGER_TYPE)
     .registerRegistry(Registry.MEMORY_MODULE_TYPE)

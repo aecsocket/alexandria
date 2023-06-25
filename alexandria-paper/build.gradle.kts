@@ -6,14 +6,14 @@ plugins {
     alias(libs.plugins.run.paper)
 }
 
-val minecraft: String = libs.versions.minecraft.get()
+val minecraft = "1.19.4"
 
 repositories {
     maven("https://repo.codemc.io/repository/maven-snapshots/") // PacketEvents
 }
 
 dependencies {
-    paperweight.paperDevBundle("$minecraft-R0.1-SNAPSHOT")
+    paperweight.foliaDevBundle("$minecraft-R0.1-SNAPSHOT")
     api(projects.alexandriaCommon)
 
     api(libs.cloud.paper)
