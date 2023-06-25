@@ -23,6 +23,10 @@ enum class TextAlignment {
 
 // applies to 0 or more clients, not to all tracking clients
 interface Render {
+    fun spawn(position: DVec3): Render
+
+    fun despawn(): Render
+
     fun position(value: DVec3): Render
 
     fun transform(value: FAffine3): Render
@@ -40,13 +44,13 @@ interface Render {
     fun glowing(value: Boolean): Render
 
     fun glowColor(value: TextColor): Render
-
-    fun spawn(position: DVec3): Render
-
-    fun despawn(): Render
 }
 
 interface ItemRender : Render {
+    override fun spawn(position: DVec3): ItemRender
+
+    override fun despawn(): ItemRender
+
     override fun position(value: DVec3): ItemRender
 
     override fun transform(value: FAffine3): ItemRender
@@ -64,10 +68,6 @@ interface ItemRender : Render {
     override fun glowing(value: Boolean): ItemRender
 
     override fun glowColor(value: TextColor): ItemRender
-
-    override fun spawn(position: DVec3): ItemRender
-
-    override fun despawn(): ItemRender
 }
 
 data class TextFlags(
@@ -78,6 +78,10 @@ data class TextFlags(
 )
 
 interface TextRender : Render {
+    override fun spawn(position: DVec3): TextRender
+
+    override fun despawn(): TextRender
+
     override fun position(value: DVec3): TextRender
 
     override fun transform(value: FAffine3): TextRender
@@ -96,17 +100,13 @@ interface TextRender : Render {
 
     override fun glowColor(value: TextColor): TextRender
 
-    override fun spawn(position: DVec3): TextRender
+    fun text(value: Component): TextRender
 
-    override fun despawn(): TextRender
+    fun lineWidth(value: Int): TextRender
 
-    fun text(value: Component)
+    fun backgroundColor(value: ARGB): TextRender
 
-    fun lineWidth(value: Int)
+    fun textOpacity(value: Byte): TextRender
 
-    fun backgroundColor(value: ARGB)
-
-    fun textOpacity(value: Byte)
-
-    fun textFlags(value: TextFlags)
+    fun textFlags(value: TextFlags): TextRender
 }

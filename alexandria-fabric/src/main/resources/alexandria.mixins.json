@@ -4,9 +4,7 @@
   "package": "io.github.aecsocket.alexandria.fabric.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
-    "BillboardConstraintsAccess",
-    "DisplayAccess",
-    "TextDisplayAccess"
+    "BroadcastAccess",
   ],
   "injectors": {
     "defaultRequire": 1
