@@ -6,7 +6,8 @@
   "mixins": [
     "BroadcastAccess",
     ,
-    "EntityCounterAccess"
+    "EntityCounterAccess",
+    "EntityMixin"
   ],
   "injectors": {
     "defaultRequire": 1

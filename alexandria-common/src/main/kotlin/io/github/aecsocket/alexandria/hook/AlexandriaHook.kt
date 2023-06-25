@@ -128,7 +128,7 @@ abstract class AlexandriaHook<S : AlexandriaHook.Settings>(
 
             onGlossaBuild(this)
         }
-        log.info { "Loaded ${glossa.countSubstitutions()} substitutions, ${glossa.countStyles()} styles, ${glossa.countMessages()} messages, ${glossa.countLocales()} locales" }
+        log.debug { "Loaded ${glossa.countSubstitutions()} substitutions, ${glossa.countStyles()} styles, ${glossa.countMessages()} messages, ${glossa.countLocales()} locales" }
         this.glossa = glossa
     }
 

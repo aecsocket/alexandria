@@ -6,7 +6,7 @@ plugins {
     alias(libs.plugins.run.paper)
 }
 
-val minecraft = "1.19.4"
+val minecraft = libs.versions.paper.get()
 
 repositories {
     maven("https://repo.codemc.io/repository/maven-snapshots/") // PacketEvents

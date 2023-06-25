@@ -6,6 +6,9 @@ import io.github.aecsocket.alexandria.fabric.FabricItemType
 import net.kyori.adventure.key.Key
 import net.kyori.adventure.platform.fabric.FabricAudiences
 import net.minecraft.core.Registry
+import net.minecraft.core.registries.BuiltInRegistries
+import net.minecraft.resources.ResourceKey
+import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.item.Item
 import org.spongepowered.configurate.ConfigurationNode
 import org.spongepowered.configurate.serialize.SerializationException
