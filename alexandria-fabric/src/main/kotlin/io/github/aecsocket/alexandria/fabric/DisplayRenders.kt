@@ -61,7 +61,7 @@ private fun teleportEntityPacket(
     y: Double,
     z: Double,
 ): Packet<*> {
-    val bytes = FriendlyByteBuf(Unpooled.buffer())
+    val bytes = FriendlyByteBuf(Unpooled.buffer(256))
     bytes.writeVarInt(eid)
     bytes.writeDouble(x)
     bytes.writeDouble(y)
@@ -69,7 +69,6 @@ private fun teleportEntityPacket(
     bytes.writeByte(0)
     bytes.writeByte(0)
     bytes.writeBoolean(false)
-    println("bytes size = ${bytes.capacity()}")
     return ClientboundTeleportEntityPacket(bytes)
 }
 
