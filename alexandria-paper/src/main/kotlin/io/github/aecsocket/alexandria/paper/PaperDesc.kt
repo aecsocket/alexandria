@@ -20,7 +20,16 @@ import org.bukkit.inventory.meta.ItemMeta
 data class PaperParticleType(
     val type: Particle,
     val data: Any?,
-) : ParticleType.Raw
+) : ParticleType.Raw {
+    init {
+        if (type.dataType != Unit::class.java) {
+            val data = data
+                ?: throw IllegalArgumentException("Particle $type requires data of type ${type.dataType}")
+            if (type.dataType != data::class.java)
+                throw IllegalArgumentException("Particle $type requires data of type ${type.dataType}")
+        }
+    }
+}
 
 fun ParticleDesc.spawn(player: Player, position: DVec3) {
     val (type, data) = when (val type = type) {

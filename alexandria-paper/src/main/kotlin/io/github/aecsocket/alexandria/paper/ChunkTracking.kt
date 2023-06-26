@@ -2,7 +2,9 @@ package io.github.aecsocket.alexandria.paper
 
 import io.github.aecsocket.alexandria.paper.extension.position
 import io.github.aecsocket.alexandria.paper.extension.registerEvents
+import io.github.aecsocket.klam.DVec3
 import io.github.aecsocket.klam.IVec2
+import io.github.aecsocket.klam.xz
 import io.papermc.paper.event.packet.PlayerChunkLoadEvent
 import io.papermc.paper.event.packet.PlayerChunkUnloadEvent
 import org.bukkit.Bukkit
@@ -84,16 +86,21 @@ object ChunkTracking {
     }
 
     fun trackedPlayers(world: World, chunkPos: IVec2): Collection<Player> {
-        return (chunkToPlayers[world]?.get(chunkPos) ?: emptySet())
+        return (chunkToPlayers[world]?.get(chunkPos)?.toSet() ?: emptySet())
             .mapNotNull { Bukkit.getPlayer(it) }
     }
 
-    fun trackedPlayers(chunk: Chunk) = trackedPlayers(chunk.world, chunk.position())
+    fun trackedPlayers(world: World, worldPos: DVec3) =
+        trackedPlayers(world, worldPos.xz.toInt().map { it shr 4 })
+
+    fun trackedPlayers(chunk: Chunk) =
+        trackedPlayers(chunk.world, chunk.position())
 
     fun trackedChunkPos(player: Player): Collection<IVec2> {
-        return playerToChunks[player.uniqueId] ?: emptySet()
+        return playerToChunks[player.uniqueId]?.toSet() ?: emptySet()
     }
 
-    fun trackedChunks(player: Player) = trackedChunkPos(player)
-        .map { (x, z) -> player.world.getChunkAt(x, z) }
+    fun trackedChunks(player: Player) =
+        trackedChunkPos(player)
+            .map { (x, z) -> player.world.getChunkAt(x, z) }
 }
