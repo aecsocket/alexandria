@@ -1,15 +1,14 @@
 package io.github.aecsocket.alexandria
 
+import io.github.aecsocket.alexandria.extension.registerExact
 import io.github.aecsocket.alexandria.serializer.HierarchySerializer
 import io.github.aecsocket.alexandria.serializer.subType
-import io.github.aecsocket.klam.configurate.registerExact
 import org.junit.jupiter.api.assertThrows
 import org.spongepowered.configurate.BasicConfigurationNode
 import org.spongepowered.configurate.ConfigurationNode
 import org.spongepowered.configurate.ConfigurationOptions
 import org.spongepowered.configurate.kotlin.dataClassFieldDiscoverer
 import org.spongepowered.configurate.kotlin.extensions.get
-import org.spongepowered.configurate.kotlin.extensions.set
 import org.spongepowered.configurate.kotlin.extensions.typedSet
 import org.spongepowered.configurate.objectmapping.ConfigSerializable
 import org.spongepowered.configurate.objectmapping.ObjectMapper

@@ -32,7 +32,7 @@ abstract class AlexandriaHook<S : AlexandriaHook.Settings>(
     private val configOptions: ConfigurationOptions,
 ) {
     companion object {
-        val FallbackLocale: Locale = Locale.forLanguageTag("en-US")
+        val fallbackLocale: Locale = Locale.forLanguageTag("en-US")
     }
 
     data class Manifest(
