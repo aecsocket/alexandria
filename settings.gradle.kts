@@ -13,7 +13,7 @@ plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version("0.4.0")
 }
 
-rootProject.name = "alexandria"
+rootProject.name = "alexandria-parent"
 
 include("alexandria-api")
 include("alexandria-common")

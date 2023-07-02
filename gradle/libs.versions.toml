@@ -1,6 +1,7 @@
 [versions]
 indra = "3.1.1"
 kotlin = "1.8.22"
+dokka = "1.8.20"
 kotlinx-coroutines = "1.6.4"
 slf4j = "2.0.7"
 kotlin-logging = "4.0.0-beta-29"
@@ -8,7 +9,7 @@ adventure = "4.13.0"
 adventure-fabric = "5.8.0"
 klam = "0.3.0"
 configurate = "4.1.2"
-glossa = "1.1.0"
+glossa = "1.2.0-SNAPSHOT"
 cloud = "1.8.3"
 
 paper = "1.19.4"
@@ -24,6 +25,7 @@ indra-common = { group = "net.kyori", name = "indra-common", version.ref = "indr
 indra-publishing-sonatype = { group = "net.kyori", name = "indra-publishing-sonatype", version.ref = "indra" }
 kotlin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
 kotlin-reflect = { group = "org.jetbrains.kotlin", name = "kotlin-reflect", version.ref = "kotlin" }
+dokka = { group = "org.jetbrains.dokka", name = "dokka-gradle-plugin", version.ref = "dokka" }
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
 slf4j-api = { group = "org.slf4j", name = "slf4j-api", version.ref = "slf4j" }
 kotlin-logging-jvm = { group = "io.github.oshai", name = "kotlin-logging-jvm", version.ref = "kotlin-logging" }
