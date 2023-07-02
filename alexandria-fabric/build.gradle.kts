@@ -4,7 +4,7 @@ plugins {
     alias(libs.plugins.fabric.loom)
 }
 
-val minecraft = libs.versions.fabric.asProvider().get()
+val minecraft: String = libs.versions.fabric.asProvider().get()
 
 repositories {
     sonatype.ossSnapshots()
