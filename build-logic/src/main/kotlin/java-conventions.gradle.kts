@@ -15,3 +15,9 @@ repositories {
   if (!ci.get()) mavenLocal()
   mavenCentral()
 }
+
+spotless {
+  java {
+    googleJavaFormat()
+  }
+}
