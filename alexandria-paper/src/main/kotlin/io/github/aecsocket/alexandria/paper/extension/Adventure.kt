@@ -7,8 +7,9 @@ import org.bukkit.Color
 import org.bukkit.NamespacedKey
 
 fun Key.toNamespaced() = NamespacedKey(namespace(), value())
+
 fun Key.toResourceLocation() = ResourceLocation(namespace(), value())
 
 fun Color.toTextColor() = TextColor.color(asRGB())
-fun TextColor.toColor() = Color.fromRGB(value())
 
+fun TextColor.toColor() = Color.fromRGB(value())

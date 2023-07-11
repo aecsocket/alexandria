@@ -19,21 +19,25 @@ fun <T : Any> CommandContext<*>.flag(key: String): T? = flags().get(key)
 fun <C> Command.Builder<C>.argumentFVec3(
     name: String,
     description: ArgumentDescription = ArgumentDescription.empty()
-) = argumentTriplet(name,
-    typeToken<FVec3>(),
-    Triplet.of("x", "y", "z"),
-    Triplet.of(Float::class.java, Float::class.java, Float::class.java),
-    { _, t -> FVec3(t.first, t.second, t.third) },
-    description,
-)
+) =
+    argumentTriplet(
+        name,
+        typeToken<FVec3>(),
+        Triplet.of("x", "y", "z"),
+        Triplet.of(Float::class.java, Float::class.java, Float::class.java),
+        { _, t -> FVec3(t.first, t.second, t.third) },
+        description,
+    )
 
 fun <C> Command.Builder<C>.argumentDVec3(
     name: String,
     description: ArgumentDescription = ArgumentDescription.empty()
-) = argumentTriplet(name,
-    typeToken<DVec3>(),
-    Triplet.of("x", "y", "z"),
-    Triplet.of(Double::class.java, Double::class.java, Double::class.java),
-    { _, t -> DVec3(t.first, t.second, t.third) },
-    description,
-)
+) =
+    argumentTriplet(
+        name,
+        typeToken<DVec3>(),
+        Triplet.of("x", "y", "z"),
+        Triplet.of(Double::class.java, Double::class.java, Double::class.java),
+        { _, t -> DVec3(t.first, t.second, t.third) },
+        description,
+    )

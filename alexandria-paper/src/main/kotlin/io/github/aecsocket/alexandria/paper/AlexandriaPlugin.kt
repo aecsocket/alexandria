@@ -24,102 +24,98 @@ abstract class AlexandriaPlugin<S : AlexandriaHook.Settings>(
     configOptions: ConfigurationOptions,
     private val savedResources: List<String>,
 ) : JavaPlugin() {
-    val log = KotlinLogging.logger(slF4JLogger)
+  val log = KotlinLogging.logger(slF4JLogger)
 
-    protected abstract fun loadSettings(node: ConfigurationNode): S
+  protected abstract fun loadSettings(node: ConfigurationNode): S
 
-    protected open fun onPreInit() {}
+  protected open fun onPreInit() {}
 
-    protected open fun onInit() {}
+  protected open fun onInit() {}
 
-    protected open fun onPostEnable() {}
+  protected open fun onPostEnable() {}
 
-    protected open fun onLoadData() {}
+  protected open fun onLoadData() {}
 
-    protected open fun onReloadData() {}
+  protected open fun onReloadData() {}
 
-    protected open fun onDestroy() {}
+  protected open fun onDestroy() {}
 
-    protected val ax = object : AlexandriaHook<S>(
-        manifest = manifest,
-        log = log,
-        settingsFile = dataFolder.resolve(SETTINGS_PATH),
-        configOptions = configOptions,
-    ) {
+  protected val ax =
+      object :
+          AlexandriaHook<S>(
+              manifest = manifest,
+              log = log,
+              settingsFile = dataFolder.resolve(SETTINGS_PATH),
+              configOptions = configOptions,
+          ) {
         val langFile = dataFolder.resolve(LANG_PATH)
 
         override val meta: Meta
-            get() = this@AlexandriaPlugin.axMeta
+          get() = this@AlexandriaPlugin.axMeta
 
         override fun loadSettings(node: ConfigurationNode) =
             this@AlexandriaPlugin.loadSettings(node)
 
         override fun onGlossaBuild(model: GlossaStandard.Model) {
-            model.fromFiles(langFile)
+          model.fromFiles(langFile)
         }
 
-        override fun onPreInit() =
-            this@AlexandriaPlugin.onPreInit()
+        override fun onPreInit() = this@AlexandriaPlugin.onPreInit()
 
-        override fun onInit() =
-            this@AlexandriaPlugin.onInit()
+        override fun onInit() = this@AlexandriaPlugin.onInit()
 
-        override fun onLoad() =
-            this@AlexandriaPlugin.onLoadData()
+        override fun onLoad() = this@AlexandriaPlugin.onLoadData()
 
-        override fun onReload() =
-            this@AlexandriaPlugin.onReloadData()
-    }
+        override fun onReload() = this@AlexandriaPlugin.onReloadData()
+      }
 
-    val settings: S
-        get() = ax.settings
+  val settings: S
+    get() = ax.settings
 
-    val glossa: Glossa
-        get() = ax.glossa
+  val glossa: Glossa
+    get() = ax.glossa
 
-    private lateinit var axMeta: AlexandriaHook.Meta
-    lateinit var scheduling: Scheduling
-        private set
+  private lateinit var axMeta: AlexandriaHook.Meta
+  lateinit var scheduling: Scheduling
+    private set
 
-    final override fun onLoad() {
-        @Suppress("UnstableApiUsage")
-        axMeta = AlexandriaHook.Meta(
+  final override fun onLoad() {
+    @Suppress("UnstableApiUsage")
+    axMeta =
+        AlexandriaHook.Meta(
             name = pluginMeta.name,
             version = pluginMeta.version,
             authors = pluginMeta.authors,
         )
-        scheduling = if (isFolia) FoliaScheduling(this) else PaperScheduling(this)
+    scheduling = if (isFolia) FoliaScheduling(this) else PaperScheduling(this)
 
-        PacketEvents.setAPI(SpigotPacketEventsBuilder.build(this).apply {
-            settings.checkForUpdates(false)
-        })
-        PacketEvents.getAPI().load()
+    PacketEvents.setAPI(
+        SpigotPacketEventsBuilder.build(this).apply { settings.checkForUpdates(false) })
+    PacketEvents.getAPI().load()
 
-        if (!dataFolder.exists()) {
-            savedResources.forEach { path ->
-                saveResource(path, false)
-            }
-        }
-
-        ax.init()
+    if (!dataFolder.exists()) {
+      savedResources.forEach { path -> saveResource(path, false) }
     }
 
-    final override fun onEnable() {
-        PacketEvents.getAPI().init()
-        ChunkTracking.init(this)
-        EntityTracking.init(this)
-        onPostEnable()
-    }
+    ax.init()
+  }
 
-    final override fun onDisable() {
-        onDestroy()
-    }
+  final override fun onEnable() {
+    PacketEvents.getAPI().init()
+    ChunkTracking.init(this)
+    EntityTracking.init(this)
+    onPostEnable()
+  }
 
-    fun reload() {
-        ax.reload()
-    }
+  final override fun onDisable() {
+    onDestroy()
+  }
 
-    fun yamlConfigLoader() = ax.yamlConfigLoader()
+  fun reload() {
+    ax.reload()
+  }
 
-    fun asChat(comp: Component) = ax.asChat(comp)
+  fun yamlConfigLoader() = ax.yamlConfigLoader()
+
+  fun asChat(comp: Component) = ax.asChat(comp)
 }

@@ -1,9 +1,9 @@
 plugins {
-    id("kotlin-conventions")
-    id("publishing-conventions")
+  id("kotlin-conventions")
+  id("publishing-conventions")
 }
 
 dependencies {
-    api(projects.alexandriaApi)
-    api(libs.configurate.yaml)
+  api(projects.alexandriaApi)
+  api(libs.configurate.yaml)
 }

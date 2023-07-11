@@ -7,7 +7,9 @@ import net.minecraft.commands.CommandSourceStack
 
 typealias Context = CommandContext<CommandSourceStack>
 
-fun commandManager() = FabricServerCommandManager(
-    CommandExecutionCoordinator.simpleCoordinator(),
-    { it }, { it },
-)
+fun commandManager() =
+    FabricServerCommandManager(
+        CommandExecutionCoordinator.simpleCoordinator(),
+        { it },
+        { it },
+    )

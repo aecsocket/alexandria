@@ -16,15 +16,15 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.plugin.Plugin
 
-val isFolia = try {
-    Class.forName("io.papermc.paper.threadedregions.RegionizedServer")
-    true
-} catch (ex: ClassNotFoundException) {
-    false
-}
+val isFolia =
+    try {
+      Class.forName("io.papermc.paper.threadedregions.RegionizedServer")
+      true
+    } catch (ex: ClassNotFoundException) {
+      false
+    }
 
-@Suppress("DEPRECATION")
-fun nextEntityId() = Bukkit.getUnsafe().nextEntityId()
+@Suppress("DEPRECATION") fun nextEntityId() = Bukkit.getUnsafe().nextEntityId()
 
 fun Plugin.key(value: String) = NamespacedKey(this, value)
 
@@ -32,11 +32,8 @@ fun Plugin.registerEvents(listener: Listener) =
     Bukkit.getPluginManager().registerEvents(listener, this)
 
 fun <M : ItemMeta> ItemStack.withMeta(block: (M) -> Unit): ItemStack {
-    editMeta { meta ->
-        @Suppress("UNCHECKED_CAST")
-        block(meta as M)
-    }
-    return this
+  editMeta { meta -> @Suppress("UNCHECKED_CAST") block(meta as M) }
+  return this
 }
 
 fun <V> Map<String, V>.forWorld(world: World) = get(world.name) ?: get("default")
@@ -56,10 +53,10 @@ inline fun <reified E : Entity> World.spawn(
 fun World.spawnTracker(position: DVec3, beforeSpawn: (Entity) -> Unit = {}): Entity =
     // Markers are not tracked by clients; use a different entity
     spawn<ItemDisplay>(position) { entity ->
-        entity.isPersistent = false
-        beforeSpawn(entity)
+      entity.isPersistent = false
+      beforeSpawn(entity)
     }
 
 fun Player.sendPacket(packet: PacketWrapper<*>) {
-    PacketEvents.getAPI().playerManager.sendPacket(this, packet)
+  PacketEvents.getAPI().playerManager.sendPacket(this, packet)
 }

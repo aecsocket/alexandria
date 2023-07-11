@@ -6,8 +6,10 @@ import io.github.aecsocket.klam.configurate.klamSerializers
 import net.kyori.adventure.serializer.configurate4.ConfigurateComponentSerializer
 import org.spongepowered.configurate.serialize.TypeSerializerCollection
 
-val apiSerializers: TypeSerializerCollection = TypeSerializerCollection.defaults().childBuilder()
-    .registerAll(klamSerializers)
-    .registerAll(ConfigurateComponentSerializer.configurate().serializers())
-    .registerExact(LocaleSerializer)
-    .build()
+val apiSerializers: TypeSerializerCollection =
+    TypeSerializerCollection.defaults()
+        .childBuilder()
+        .registerAll(klamSerializers)
+        .registerAll(ConfigurateComponentSerializer.configurate().serializers())
+        .registerExact(LocaleSerializer)
+        .build()

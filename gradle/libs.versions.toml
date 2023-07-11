@@ -1,6 +1,7 @@
 [versions]
 indra = "3.1.1"
 kotlin = "1.8.22"
+spotless = "6.19.0"
 dokka = "1.8.20"
 kotlinx-coroutines = "1.6.4"
 slf4j = "2.0.7"
@@ -8,6 +9,7 @@ kotlin-logging = "4.0.0-beta-29"
 adventure = "4.14.0"
 adventure-fabric = "5.8.0"
 klam = "0.4.0"
+kbeam = "0.1.1"
 configurate = "4.1.2"
 glossa = "1.2.0"
 cloud = "1.8.3"
@@ -25,6 +27,7 @@ indra-common = { group = "net.kyori", name = "indra-common", version.ref = "indr
 indra-publishing-sonatype = { group = "net.kyori", name = "indra-publishing-sonatype", version.ref = "indra" }
 kotlin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
 kotlin-reflect = { group = "org.jetbrains.kotlin", name = "kotlin-reflect", version.ref = "kotlin" }
+spotless = { group = "com.diffplug.spotless", name = "spotless-plugin-gradle", version.ref = "spotless" }
 dokka = { group = "org.jetbrains.dokka", name = "dokka-gradle-plugin", version.ref = "dokka" }
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
 slf4j-api = { group = "org.slf4j", name = "slf4j-api", version.ref = "slf4j" }
@@ -34,6 +37,7 @@ adventure-serializer-configurate4 = { group = "net.kyori", name = "adventure-ser
 adventure-platform-fabric = { group = "net.kyori", name = "adventure-platform-fabric", version.ref = "adventure-fabric" }
 klam = { group = "io.github.aecsocket", name = "klam", version.ref = "klam" }
 klam-configurate = { group = "io.github.aecsocket", name = "klam-configurate", version.ref = "klam" }
+kbeam = { group = "io.github.aecsocket", name = "kbeam", version.ref = "kbeam" }
 configurate-core = { group = "org.spongepowered", name = "configurate-core", version.ref = "configurate" }
 configurate-extra-kotlin = { group = "org.spongepowered", name = "configurate-extra-kotlin", version.ref = "configurate" }
 configurate-yaml = { group = "org.spongepowered", name = "configurate-yaml", version.ref = "configurate" }

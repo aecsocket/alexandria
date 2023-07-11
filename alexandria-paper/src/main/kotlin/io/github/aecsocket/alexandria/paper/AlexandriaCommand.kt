@@ -8,11 +8,11 @@ import org.bukkit.command.CommandSender
 
 typealias Context = CommandContext<CommandSender>
 
-fun commandManager(hook: AlexandriaPlugin<*>) = PaperCommandManager(
-    hook,
-    CommandExecutionCoordinator.simpleCoordinator(),
-    { it }, { it },
-).apply {
-    if (hasCapability(CloudBukkitCapabilities.BRIGADIER))
-        registerBrigadier()
-}
+fun commandManager(hook: AlexandriaPlugin<*>) =
+    PaperCommandManager(
+            hook,
+            CommandExecutionCoordinator.simpleCoordinator(),
+            { it },
+            { it },
+        )
+        .apply { if (hasCapability(CloudBukkitCapabilities.BRIGADIER)) registerBrigadier() }

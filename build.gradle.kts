@@ -1,5 +1,5 @@
 plugins {
-    id("parent-conventions")
+  id("parent-conventions")
 }
 
 group = "io.github.aecsocket"

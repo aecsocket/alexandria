@@ -6,46 +6,49 @@ import org.bukkit.entity.Entity
 import org.bukkit.plugin.Plugin
 import org.bukkit.scheduler.BukkitTask
 
-/**
- * Default [Scheduling] implementation for the base Paper platform.
- */
+/** Default [Scheduling] implementation for the base Paper platform. */
 class PaperScheduling(val plugin: Plugin) : Scheduling {
-    private val scheduler = plugin.server.scheduler
+  private val scheduler = plugin.server.scheduler
 
-    private fun wrap(task: BukkitTask) = object : TaskContext {
+  private fun wrap(task: BukkitTask) =
+      object : TaskContext {
         override fun cancel() {
-            task.cancel()
+          task.cancel()
         }
-    }
+      }
 
-    override fun onServer() = object : SchedulingContext {
+  override fun onServer() =
+      object : SchedulingContext {
         override fun runLater(delay: Long, block: () -> Unit) {
-            scheduler.runTaskLater(plugin, Runnable(block), delay)
+          scheduler.runTaskLater(plugin, Runnable(block), delay)
         }
 
         override fun runRepeating(period: Long, delay: Long, block: (TaskContext) -> Unit) {
-            scheduler.runTaskTimer(plugin, { task -> block(wrap(task)) }, delay, period)
+          scheduler.runTaskTimer(plugin, { task -> block(wrap(task)) }, delay, period)
         }
-    }
+      }
 
-    override fun onEntity(entity: Entity, onRetire: () -> Unit) = object : SchedulingContext {
+  override fun onEntity(entity: Entity, onRetire: () -> Unit) =
+      object : SchedulingContext {
         override fun runLater(delay: Long, block: () -> Unit) {
-            scheduler.runTaskLater(plugin, Runnable {
-                if (entity.isValid) block()
-                else onRetire()
-            }, delay)
+          scheduler.runTaskLater(
+              plugin, Runnable { if (entity.isValid) block() else onRetire() }, delay)
         }
 
         override fun runRepeating(period: Long, delay: Long, block: (TaskContext) -> Unit) {
-            scheduler.runTaskTimer(plugin, { task ->
+          scheduler.runTaskTimer(
+              plugin,
+              { task ->
                 if (entity.isValid) block(wrap(task))
                 else {
-                    onRetire()
-                    task.cancel()
+                  onRetire()
+                  task.cancel()
                 }
-            }, delay, period)
+              },
+              delay,
+              period)
         }
-    }
+      }
 
-    override fun onChunk(world: World, chunkX: Int, chunkZ: Int) = onServer()
+  override fun onChunk(world: World, chunkX: Int, chunkZ: Int) = onServer()
 }
