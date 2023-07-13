@@ -16,6 +16,7 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.plugin.Plugin
 
+/** Gets if the server is currently running on a Folia or a Paper build. */
 val isFolia =
     try {
       Class.forName("io.papermc.paper.threadedregions.RegionizedServer")
@@ -24,6 +25,7 @@ val isFolia =
       false
     }
 
+/** Increments and gets the internal entity ID counter. */
 @Suppress("DEPRECATION") fun nextEntityId() = Bukkit.getUnsafe().nextEntityId()
 
 fun Plugin.key(value: String) = NamespacedKey(this, value)
@@ -50,13 +52,15 @@ inline fun <reified E : Entity> World.spawn(
     crossinline beforeSpawn: (E) -> Unit = {},
 ) = spawn(position.location(this), reason, beforeSpawn)
 
-fun World.spawnTracker(position: DVec3, beforeSpawn: (Entity) -> Unit = {}): Entity =
-    // Markers are not tracked by clients; use a different entity
-    spawn<ItemDisplay>(position) { entity ->
-      entity.isPersistent = false
-      beforeSpawn(entity)
-    }
+fun World.spawnTracker(position: DVec3, beforeSpawn: (Entity) -> Unit = {}): Entity {
+  // Markers are not tracked by clients; use a different entity
+  return spawn<ItemDisplay>(position) { entity ->
+    entity.isPersistent = false
+    beforeSpawn(entity)
+  }
+}
 
+/** Sends a packet to a player using the global [PacketEvents.getAPI] instance. */
 fun Player.sendPacket(packet: PacketWrapper<*>) {
   PacketEvents.getAPI().playerManager.sendPacket(this, packet)
 }

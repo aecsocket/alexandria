@@ -15,6 +15,12 @@ import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 
+/**
+ * Global bookkeeper for storing which players are tracking some specific entities.
+ *
+ * Entities must be manually registered and unregistered in order to provide tracking information on
+ * them. Call [register] before an entity is spawned, and call [unregister]
+ */
 object EntityTracking {
   private class Tracked {
     var players: Collection<UUID> = emptySet()
@@ -49,6 +55,12 @@ object EntityTracking {
     }
   }
 
+  /**
+   * The entity provided will be tracked by this object, allowing you to access API on this entity.
+   * **You must manually [unregister] this entity when it is no longer valid!**
+   *
+   * Registering the same entity twice will have no effect.
+   */
   fun register(entity: Entity) {
     if (entities.contains(entity.uniqueId)) return
     val tracked = Tracked()
@@ -96,28 +108,48 @@ object EntityTracking {
     }
   }
 
+  /**
+   * The entity with the ID provided will no longer be tracked by this object, cleaning up memory
+   * and preventing using the API on this entity. This must be manually run after [register].
+   *
+   * Unregistering the same entity twice will have no effect.
+   */
   fun unregister(entityId: UUID) {
     val tracked = entities.remove(entityId) ?: return
     tracked.removed.set(true)
   }
 
+  /**
+   * The entity provided will no longer be tracked by this object, cleaning up memory and preventing
+   * using the API on this entity. This must be manually run after [register].
+   *
+   * Unregistering the same entity twice will have no effect.
+   */
   fun unregister(entity: Entity) = unregister(entity.uniqueId)
 
   private fun get(entityId: UUID) =
       entities[entityId] ?: throw IllegalStateException("Entity $entityId is not registered")
 
+  /** Gets the players tracked by an entity with the specified ID. */
   fun trackedPlayers(entityId: UUID): Collection<Player> {
     // we don't clone `players` because we fully replace the players field when it updates,
     // so this object will never be mutated by us
     return get(entityId).players.mapNotNull { Bukkit.getPlayer(it) }
   }
 
+  /** Gets the players tracked by the specified entity. */
   fun trackedPlayers(entity: Entity) = trackedPlayers(entity.uniqueId)
 
+  /**
+   * Gets the event dispatcher that runs when the specified entity starts being tracked by a player.
+   */
   fun onTrack(entity: Entity): EventDispatch<Player> {
     return get(entity.uniqueId).onTrack
   }
 
+  /**
+   * Gets the event dispatcher that runs when the specified entity stops being tracked by a player.
+   */
   fun onUntrack(entity: Entity): EventDispatch<Player> {
     return get(entity.uniqueId).onUntrack
   }

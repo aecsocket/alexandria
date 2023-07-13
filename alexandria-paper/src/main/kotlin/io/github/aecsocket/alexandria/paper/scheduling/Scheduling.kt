@@ -8,6 +8,7 @@ import org.bukkit.Location
 import org.bukkit.World
 import org.bukkit.entity.Entity
 
+/** Provides access to modifying a task's state, created by a [Scheduling] object. */
 interface TaskContext {
   fun cancel()
 }
@@ -33,7 +34,7 @@ interface SchedulingContext {
 }
 
 /**
- * Allows scheduling tasks to run in the future, automatically handling platform-specific task
+ * Allows scheduling tasks to be run in the future, automatically handling platform-specific task
  * registration.
  */
 interface Scheduling {

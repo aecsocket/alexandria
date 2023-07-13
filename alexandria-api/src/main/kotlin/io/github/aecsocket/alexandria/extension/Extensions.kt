@@ -6,7 +6,7 @@ import java.io.InputStream
 /**
  * Opens a resource in the class loader of the receiver.
  *
- * @throws RuntimeException If there was an error reading the resource.
+ * @throws RuntimeException if there was an error reading the resource.
  */
 fun Any.resource(path: String): InputStream {
   val url =

@@ -7,8 +7,33 @@
 
 Multiplatform utilities for Minecraft projects
 
-### [GitHub](https://github.com/aecsocket/alexandria) · [Docs](https://aecsocket.github.io/alexandria) · [Dokka](https://aecsocket.github.io/alexandria/dokka)
+### [GitHub](https://github.com/aecsocket/alexandria) · [Dokka](https://aecsocket.github.io/alexandria/dokka)
 
 </div>
 
-Generic utilities for use in my other projects. Not much documentation yet.
+A generic set of utilities for other projects, designed to be multiplatform but also have certain
+platform-specific utilities.
+
+There is no user documentation; see the Dokka page to get API docs.
+
+## Usage
+
+See the version badges for the latest release and snapshot builds.
+
+Modules:
+- `alexandria-api` - platform-independent API
+- `alexandria-common` - common library for implementing the API onto a platform
+- `alexandria-paper` - [Paper](https://papermc.io/) implementation
+- `alexandria-fabric` - [Fabric](https://fabricmc.net/) implementation
+
+```kotlin
+repositories {
+  mavenCentral()
+  // for snapshot builds
+  // maven("https://s01.oss.sonatype.org/content/repositories/snapshots/")
+}
+
+dependencies {
+  implementation("io.github.aecsocket", "alexandria-MODULE", "VERSION")
+}
+```

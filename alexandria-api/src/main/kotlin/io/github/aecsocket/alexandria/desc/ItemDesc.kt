@@ -16,10 +16,10 @@ sealed interface ItemType {
 /**
  * Descriptor for an item stack.
  *
- * @param type The base type of item.
- * @param modelData The custom model data.
- * @param damage The damage value of the item, if it can be damaged.
- * @param isUnbreakable If the item has a visible damage bar and can be broken.
+ * @param type the base type of item.
+ * @param modelData the custom model data.
+ * @param damage the damage value of the item, if it can be damaged.
+ * @param isUnbreakable if the item has a visible damage bar and can be broken.
  */
 @ConfigSerializable
 data class ItemDesc(

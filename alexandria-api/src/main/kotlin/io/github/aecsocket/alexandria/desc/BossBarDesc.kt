@@ -7,8 +7,8 @@ import org.spongepowered.configurate.objectmapping.ConfigSerializable
 /**
  * Descriptor from which a [BossBar] can be created.
  *
- * @param progress Progress of the bar.
- * @param color The bar color.
+ * @param progress progress of the bar.
+ * @param color the bar color.
  * @param overlay The segment overlay of the bar.
  */
 @ConfigSerializable
@@ -18,5 +18,7 @@ data class BossBarDesc(
     val overlay: BossBar.Overlay = BossBar.Overlay.PROGRESS,
 ) {
   /** Creates a boss bar with the given descriptor and name. */
-  fun create(name: Component) = BossBar.bossBar(name, progress, color, overlay)
+  fun create(name: Component): BossBar {
+    return BossBar.bossBar(name, progress, color, overlay)
+  }
 }

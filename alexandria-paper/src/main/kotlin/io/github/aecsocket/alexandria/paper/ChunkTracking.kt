@@ -8,6 +8,7 @@ import io.github.aecsocket.klam.xz
 import io.papermc.paper.event.packet.PlayerChunkLoadEvent
 import io.papermc.paper.event.packet.PlayerChunkUnloadEvent
 import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
 import org.bukkit.Bukkit
 import org.bukkit.Chunk
 import org.bukkit.World
@@ -20,10 +21,19 @@ import org.bukkit.event.world.ChunkUnloadEvent
 import org.bukkit.event.world.WorldLoadEvent
 import org.bukkit.event.world.WorldUnloadEvent
 
+/**
+ * Global bookkeeper for storing:
+ * - which chunks is a specific player tracking?
+ * - which players are tracked by a specific chunk?
+ *
+ * Tracking will happen automatically; simply call the relevant methods to access the data. The API
+ * is thread-safe, returning copies of the data rather than live views.
+ */
 object ChunkTracking {
   private lateinit var plugin: AlexandriaPlugin<*>
-  private val chunkToPlayers: MutableMap<World, MutableMap<IVec2, MutableSet<UUID>>> = HashMap()
-  private val playerToChunks: MutableMap<UUID, MutableSet<IVec2>> = HashMap()
+  private val chunkToPlayers: MutableMap<World, MutableMap<IVec2, MutableSet<UUID>>> =
+      ConcurrentHashMap()
+  private val playerToChunks: MutableMap<UUID, MutableSet<IVec2>> = ConcurrentHashMap()
 
   internal fun init(plugin: AlexandriaPlugin<*>) {
     // we only care about the first plugin to initialize us
@@ -42,7 +52,7 @@ object ChunkTracking {
 
           @EventHandler
           fun on(event: WorldLoadEvent) {
-            chunkToPlayers.putIfAbsent(event.world, HashMap())
+            chunkToPlayers.putIfAbsent(event.world, ConcurrentHashMap())
           }
 
           @EventHandler
@@ -81,21 +91,26 @@ object ChunkTracking {
         })
   }
 
+  /** Gets all players tracked by a chunk at a specified chunk position. */
   fun trackedPlayers(world: World, chunkPos: IVec2): Collection<Player> {
     return (chunkToPlayers[world]?.get(chunkPos)?.toSet() ?: emptySet()).mapNotNull {
       Bukkit.getPlayer(it)
     }
   }
 
+  /** Gets all players tracked by a chunk at a specified world position. */
   fun trackedPlayers(world: World, worldPos: DVec3) =
       trackedPlayers(world, worldPos.xz.toInt().map { it shr 4 })
 
+  /** Gets all players tracked by a chunk. */
   fun trackedPlayers(chunk: Chunk) = trackedPlayers(chunk.world, chunk.position())
 
+  /** Gets all chunk positions tracked by a player. */
   fun trackedChunkPos(player: Player): Collection<IVec2> {
     return playerToChunks[player.uniqueId]?.toSet() ?: emptySet()
   }
 
+  /** Gets all chunks tracked by a player. */
   fun trackedChunks(player: Player) =
       trackedChunkPos(player).map { (x, z) -> player.world.getChunkAt(x, z) }
 }

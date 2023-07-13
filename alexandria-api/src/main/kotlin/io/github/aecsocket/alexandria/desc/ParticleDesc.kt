@@ -17,10 +17,10 @@ sealed interface ParticleType {
 /**
  * Descriptor for a spawnable particle.
  *
- * @param type The base type of particle.
- * @param count The number of particles spawned.
- * @param size The space in which particles are spawned, or direction of particle if `count` is 0.
- * @param speed The speed that particles travel at, or extra miscellaneous data.
+ * @param type the base type of particle.
+ * @param count the number of particles spawned.
+ * @param size the space in which particles are spawned, or direction of particle if `count` is 0.
+ * @param speed the speed that particles travel at, or extra miscellaneous data.
  */
 @ConfigSerializable
 data class ParticleDesc(

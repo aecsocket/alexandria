@@ -24,4 +24,5 @@ fun createTrackerEntity(world: Level, position: DVec3): Entity {
   return entity
 }
 
+/** Increments and gets the internal entity ID counter. */
 fun nextEntityId() = EntityCounterAccess.getEntityCounter().incrementAndGet()

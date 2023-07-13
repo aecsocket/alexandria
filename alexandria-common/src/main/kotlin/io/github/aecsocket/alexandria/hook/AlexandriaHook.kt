@@ -25,6 +25,24 @@ private val defaultLangResources =
     )
 private val keyPattern = Regex("([a-z0-9-])+")
 
+/**
+ * Base implementation for hooks which interface with the game environment. This provides mostly
+ * platform-independent hooks for loading, initialization, reloading and unloading, as well as
+ * default implementations of resource loading like locale files.
+ *
+ * The hook mechanism is a highly opinionated system, mainly so that the experience of using
+ * Alexandria-based hooks is consistent across both platforms and plugins/mods.
+ *
+ * A hook like this is intended to be contained inside an actual platform-specific hook, such as a
+ * Paper plugin or Fabric mod initializer. The platform hook will then expose certain properties of
+ * this Alexandria hook through public properties and methods.
+ *
+ * @param S the type of settings object.
+ * @param manifest the metadata for this hook.
+ * @param log the logger used by this hook.
+ * @param settingsFile the file location from which to load the [S].
+ * @param configOptions the serializer options used when deserializing resources.
+ */
 abstract class AlexandriaHook<S : AlexandriaHook.Settings>(
     val manifest: Manifest,
     private val log: KLogger,
@@ -32,9 +50,17 @@ abstract class AlexandriaHook<S : AlexandriaHook.Settings>(
     private val configOptions: ConfigurationOptions,
 ) {
   companion object {
+    /** The default locale, if no hook-wide default locale was specified, */
     val fallbackLocale: Locale = Locale.forLanguageTag("en-US")
   }
 
+  /**
+   * Metadata for an [AlexandriaHook].
+   *
+   * @param id the unique identifier for this hook. Must match [keyPattern].
+   * @param accentColor a color that can be used to give this hook its own theme.
+   * @param langResources a list of paths in the JAR at which language resources are loaded from.
+   */
   data class Manifest(
       val id: String,
       val accentColor: TextColor,

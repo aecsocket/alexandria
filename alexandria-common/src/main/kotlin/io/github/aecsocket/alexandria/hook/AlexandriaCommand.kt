@@ -16,6 +16,12 @@ import net.kyori.adventure.text.Component.text
 
 private const val QUERY = "query"
 
+/**
+ * Base implementation for an [AlexandriaHook]'s command, used to control aspects of the hook.
+ *
+ * This uses the Cloud command framework, and defines certain inbuilt commands which are common
+ * across all Alexandria hooks. Some utility methods for working with audiences are also provided.
+ */
 abstract class AlexandriaCommand<C : Audience>(
     private val hook: AlexandriaHook<*>,
     val manager: CommandManager<C>,
