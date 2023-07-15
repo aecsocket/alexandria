@@ -23,8 +23,8 @@ See the version badges for the latest release and snapshot builds.
 Modules:
 - `alexandria-api` - platform-independent API
 - `alexandria-common` - common library for implementing the API onto a platform
-- `alexandria-paper` - [Paper](https://papermc.io/) implementation
-- `alexandria-fabric` - [Fabric](https://fabricmc.net/) implementation
+- `alexandria-paper` - [Paper](https://papermc.io) implementation
+- `alexandria-fabric` - [Fabric](https://fabricmc.net) implementation
 
 ```kotlin
 repositories {

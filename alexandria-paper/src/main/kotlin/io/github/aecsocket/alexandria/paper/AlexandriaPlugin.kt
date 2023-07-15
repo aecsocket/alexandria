@@ -69,6 +69,8 @@ abstract class AlexandriaPlugin<S : AlexandriaHook.Settings>(
         override fun onReload() = this@AlexandriaPlugin.onReloadData()
       }
 
+  private var loaded = true
+
   val settings: S
     get() = ax.settings
 
@@ -80,27 +82,33 @@ abstract class AlexandriaPlugin<S : AlexandriaHook.Settings>(
     private set
 
   final override fun onLoad() {
-    @Suppress("UnstableApiUsage")
-    axMeta =
-        AlexandriaHook.Meta(
-            name = pluginMeta.name,
-            version = pluginMeta.version,
-            authors = pluginMeta.authors,
-        )
-    scheduling = if (isFolia) FoliaScheduling(this) else PaperScheduling(this)
+    try {
+      @Suppress("UnstableApiUsage")
+      axMeta =
+          AlexandriaHook.Meta(
+              name = pluginMeta.name,
+              version = pluginMeta.version,
+              authors = pluginMeta.authors,
+          )
+      scheduling = if (isFolia) FoliaScheduling(this) else PaperScheduling(this)
 
-    PacketEvents.setAPI(
-        SpigotPacketEventsBuilder.build(this).apply { settings.checkForUpdates(false) })
-    PacketEvents.getAPI().load()
+      PacketEvents.setAPI(
+          SpigotPacketEventsBuilder.build(this).apply { settings.checkForUpdates(false) })
+      PacketEvents.getAPI().load()
 
-    if (!dataFolder.exists()) {
-      savedResources.forEach { path -> saveResource(path, false) }
+      if (!dataFolder.exists()) {
+        savedResources.forEach { path -> saveResource(path, false) }
+      }
+
+      ax.init()
+    } catch (ex: Throwable) {
+      loaded = false
+      throw ex
     }
-
-    ax.init()
   }
 
   final override fun onEnable() {
+    if (!loaded) return
     PacketEvents.getAPI().init()
     ChunkTracking.init(this)
     EntityTracking.init(this)
@@ -108,10 +116,12 @@ abstract class AlexandriaPlugin<S : AlexandriaHook.Settings>(
   }
 
   final override fun onDisable() {
+    if (!loaded) return
     onDestroy()
   }
 
   fun reload() {
+    if (!loaded) return
     ax.reload()
   }
 
